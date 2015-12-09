@@ -27,7 +27,7 @@ parameters=c(f_N=0.16, #Instantaneous snail mortality rate
              phi_N= (1-1/(80*0.16))/10000, #~Inverse of snail carrying capacity
              z=0.5, #Fraction of exposed snails that reproduce
              mu_N=1/80, #Snail mortality rate; assumed lifespan=12 weeks
-             alpha=0.003, #per capita prawn attack rate on humans
+             alpha=0.003, #per capita prawn attack rate on snails
              P=p, #Number of prawns in the system
              Th=0.1, #Prawn predation max
              beta=0.000004, #Snail infection probability
@@ -109,7 +109,7 @@ r0<-function(f_N=0.16, #Instantaneous snail mortality rate
              phi_N= (1-1/(80*0.16))/10000, #~Inverse of snail carrying capacity
              z=0.5, #Fraction of exposed snails that reproduce
              mu_N=1/80, #Snail mortality rate; assumed lifespan=12 weeks
-             alpha=0.003, #per capita prawn attack rate on humans
+             alpha=0.003, #per capita prawn attack rate on snails
              P=p, #Number of prawns in the system
              Th=0.1, #Prawn predation max
              beta=0.000004, #Snail infection probability
@@ -139,7 +139,7 @@ d_all<-function(f_N=0.16, #Instantaneous snail mortality rate
                 phi_N= (1-1/(80*0.16))/10000, #~Inverse of snail carrying capacity
                 z=0.5, #Fraction of exposed snails that reproduce
                 mu_N=1/80, #Snail mortality rate; assumed lifespan=12 weeks
-                alpha=0.003, #per capita prawn attack rate on humans
+                alpha=0.003, #per capita prawn attack rate on snails
                 P=p, #Number of prawns in the system
                 Th=0.1, #Prawn predation max
                 beta=0.000004, #Snail infection probability
@@ -180,7 +180,7 @@ p_range<-seq(from=1, to=100, by=1)
                  phi_N= (1-1/(80*0.16))/10000, #~Inverse of snail carrying capacity
                  z=0.5, #Fraction of exposed snails that reproduce
                  mu_N=1/80, #Snail mortality rate; assumed lifespan=12 weeks
-                 alpha=0.003, #per capita prawn attack rate on humans
+                 alpha=0.003, #per capita prawn attack rate on snails
                  P=p, #Number of prawns in the system
                  Th=0.1, #Prawn predation max
                  beta=0.000004, #Snail infection probability
