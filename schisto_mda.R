@@ -195,7 +195,7 @@ par(mai=c(0.2, 1.1, 0.7,0.4))
   plot(mda_output[,1], mda_output[,5], type='l', xlab="", lwd=3,
       ylab="",ylim=c(0,max(mda_output[,5])), col="blue", xaxt='n',
       main="MDA @ years 1-5")
-    mtext("Mean Worm Burden (M)", side=2, line=2.5, cex=1.3)
+    mtext("Mean worm burden (W)", side=2, line=2.5, cex=1.3)
     lines(mda_output[,1], mda_output[,6], type='l', col="blue", lty=2, lwd=2)
     lines(mda_output[,1], (0.2*mda_output[,6]+ 0.8*mda_output[,5]), type='l', 
           col="blue", lty=3, lwd=2)
