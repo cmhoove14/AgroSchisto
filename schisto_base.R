@@ -20,6 +20,9 @@ schisto=function(t, n, parameters) {
 
 
 #Parameters from Sokolow et al ########################################
+yrs=30
+time=seq(0,365*yrs,1)
+p=0
 parameters=c(f_N=0.16, #Instantaneous snail mortality rate
              phi_N= (1-1/(80*0.16))/10000, #~Inverse of snail carrying capacity
              z=0.5, #Fraction of exposed snails that reproduce
@@ -39,15 +42,13 @@ parameters=c(f_N=0.16, #Instantaneous snail mortality rate
 #Parameters we might consider changing based on other sources
     #beta = 0.000001-0.0005 from Liang et al 2002
     #f = 0.5/7 = 0.07/day snail recruitment rate from Woolhouse, 1990 fig4 @ 21 C
-yrs=30
-time=seq(0,365*yrs,1)
-p=0
+
 # Various starting values ########################
-nstart=c(S=5500,E=1500,I=1000, W=50) #VALUES USED HERE ARE Randomly contrived
+#nstart=c(S=5500,E=1500,I=1000, W=50) #VALUES USED HERE ARE Randomly contrived
 
 nstart=c(S=2435,E=4444,I=1422, W=59) #VALUES USED HERE ARE PRAWN-FREE EQUILIBRIUM
 
-nstart=c(S=6097,E=346,I=45, W=26) #VALUES USED HERE ARE PRAWN=33 EQBM
+#nstart=c(S=6097,E=346,I=45, W=26) #VALUES USED HERE ARE PRAWN=33 EQBM
 
 #Run the model and print ~eqbm values #######################
 output=as.data.frame(ode(nstart,time,schisto,parameters))
@@ -100,8 +101,7 @@ prev<-function(W,k=0.25){
 }
 prev2<-function(x){
   1-(1+(x/0.25))^(-0.25)
-}
-
+} #Same function, just with k already set to value cited in sokolow et al 2015
 prev(W=eqbm[,5])
 
 #Function to calculate R-0 of system give parameter values ################
@@ -211,7 +211,7 @@ p_range<-seq(from=1, to=100, by=1)
   
 #Plot N & I over P for document#####################
 
-par(mfrow=c(2,1), cex.lab=1.8, cex.axis=1.5)
+par(mfrow=c(2,1), cex.lab=1.5, cex.axis=1.4)
 #Plot total number of snails (N) across different values of P
 par(mai=c(0.2, 1.1, 0.1,0.4))
 plot(p_range, (op+op2+op3), type='l', lwd=3, xlab="",ylab="",
@@ -220,7 +220,7 @@ plot(p_range, (op+op2+op3), type='l', lwd=3, xlab="",ylab="",
 
 #Plot total number of infected snails (I) across different values of P
   par(mai=c(1.2, 1.1, 0.1,0.4))
-  plot(p_range, (op3), type='l', lwd=3, xlab="#Predators",ylab="", 
+  plot(p_range, (op3), type='l', lwd=3, xlab="Predator abundance",ylab="", 
      col="blue", xlim=c(0,100), ylim=c(0,1500))
   mtext(expression(italic(I)), side=2, cex=2, las=2, line=2.6, col="blue")
 
@@ -228,12 +228,12 @@ plot(p_range, (op+op2+op3), type='l', lwd=3, xlab="",ylab="",
 par(mfrow=c(2,1), cex.lab=1.4, cex.axis=1.3)
   #W plot
   par(mai=c(0.2, 1.1, 0.1,0.4))
-  plot(p_range, op4, type="l", xlab="#Predators",ylab="", col="brown", 
+  plot(p_range, op4, type="l", ylab="", col="brown", 
        lwd=2, ylim=c(0,60), xaxt='n')
-  mtext("Mean Worm Burden (W)", col="brown", line=2.5, cex=1.4, side=2)
+  mtext("Mean worm burden (W)", col="brown", line=2.5, cex=1.4, side=2)
   #Prev Plot
   par(mai=c(1.2, 1.1, 0.1,0.4))
-  plot(p_range, prev(W=op4), type="l", xlab="#Predators",ylab="", 
+  plot(p_range, prev(W=op4), type="l", xlab="Predator abundance",ylab="", 
        col="red", lwd=2, ylim=c(0,0.80))
     mtext("Prevalence", col="red", line=2.5, cex=1.5, side=2)
 #########################################  
