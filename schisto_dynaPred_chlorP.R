@@ -1,5 +1,12 @@
 # code to compute effect of a fixed concentration of agrochemical at eqbm. Get 3 d plot of concentration vs N and P.
 
+#This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License#########
+#<http://creativecommons.org/licenses/by-nc/4.0/> by Christopher Hoover, Arathi Arakala, Manoj Gambhir 
+#and Justin Remais. This work was supported in part by the National Institutes of Health/National Science 
+#Foundation Ecology of Infectious Disease program funded by the Fogarty International Center 
+#(grant R01TW010286), the National Institute of Allergy and Infectious Diseases (grant K01AI091864), 
+#and the National Science Foundation Water Sustainability and Climate Program (grant 1360330).
+
 require(deSolve)
 require(aod)
 require(ggplot2)
@@ -38,7 +45,7 @@ plot(response_prawn$dose, response_prawn$mortality, type='l',
 prawn_alpha<-data.frame(dose=c(0, 10,50,100), a_red=c(0, 0.16,0.31,0.44))
   plot(prawn_alpha$dose, prawn_alpha$a_red, ylim=c(0,1), xlim=c(0,500), pch=18, col="red")
     x=c(1:500)
-    lines(x, 0.1*log(x), type='l')
+    lines(x, 0.1*log(x), type='l') #Rough log function appears to fit pretty well
 #Test a linear regression to data  
 alpha<-lm(a_red ~ dose +0, data=prawn_alpha)
   summary(alpha)
@@ -61,7 +68,7 @@ plot(prawn_alpha$dose, 1-prawn_alpha$a_red, ylim=c(0,1), xlim=c(0,500), col="red
      pch=18, cex=1.4, ylab="alpha_red", xlab=expression(paste("Chlorpyrifos (", mu, "g/L)")))
   lines(res_prawn_a$dose, 1-res_prawn_a$a_red)
     lines(res_prawn_a$dose, 1-res_prawn_a$a_red_lwr, lty=3)
-    lines(res_prawn_a$dose, 1-res_prawn_a$a_red_upper, lty=3)
+    lines(res_prawn_a$dose, 1-res_prawn_a$a_red_upr, lty=3)
   lines(res_prawn_a$dose, 1-res_prawn_a$a_red2, col="blue")
   legend("topright", legend=c("linear model", "log model"), col=c(1,4), lwd=1)
 
@@ -307,7 +314,7 @@ chlor_effects<-data.frame(chlor=agroChem_data[c(1:501),1],
 #Plot preds across concentrations
 plot(chlor_effects$chlor, chlor_effects$N_preds, type='l', xlab="chlor_conc", ylab="preds")
 
-#Save files for later use ########################################
+#Save files for later use ################
 #Linear models used
 write.csv(chlor_effects, 
           "E:/Remais_Work_7_14_15/Senegal_Schisto/AgroData/Data/chlor_tox.csv", 
@@ -318,13 +325,21 @@ write.csv(chlor_effects,
           "E:/Remais_Work_7_14_15/Senegal_Schisto/AgroData/Data/chlor_tox_log.csv", 
           row.names = FALSE)
 
+#Call saved data to use in comparisons ########################
 chlor_data<-read.csv("E:/Remais_Work_7_14_15/Senegal_Schisto/AgroData/Data/chlor_tox.csv")
+chlor_data2<-read.csv("E:/Remais_Work_7_14_15/Senegal_Schisto/AgroData/Data/chlor_tox_log.csv")
 
-plot(chlor_data$chlor, chlor_data$N_preds, type = 'l', col= "red",
-     xlab = "Chlorpyrifos (ppb)", ylab = "Predators")
+#Plot to compare results of using liog vs linear response functions for alpha_red and f_n_red #################
+plot(chlor_data$chlor, chlor_data$N_snails, type = 'l', col= "green", lwd=2,
+     xlab = "Chlorpyrifos (ppb)", ylab = "State variables eqbm values")
+  lines(chlor_data$chlor, chlor_data$I_snails, col= "blue", lwd=2)
+  lines(chlor_data$chlor, chlor_data$E_snails, col= "red", lwd=2)
+  lines(chlor_data$chlor, chlor_data2$I_snails, col= "blue", lwd=2,lty=2)
+  lines(chlor_data$chlor, chlor_data2$E_snails, col= "red", lwd=2,lty=2)
+  lines(chlor_data$chlor, chlor_data2$N_snails, col= "green", lwd=2,lty=2)
+  legend("topright", legend=c("linear models", "log models"), lty=c(1,2))
+  legend(x=437, y=7118, legend=c("N", "E", "I"), col=c("green", "red", "blue"), lwd=1.2)
 
-plot(chlor_data$chlor, chlor_data$N_snails, type = 'l', col= "blue",
-     xlab = "Chlorpyrifos (ppb)", ylab = "Snails")
 
 #Plot both snail population and predator population across chlor concentration ###########################
 par(mar=c(5, 4, 4, 6) + 0.1)
