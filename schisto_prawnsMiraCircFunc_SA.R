@@ -410,6 +410,8 @@ response_prawn<-data.frame(dose=seq(from=0, to=500, by=1))
 response_prawn[, c("mortality", "se")]<-predict(tox_prawn, response_prawn, 
                                                 type = "response", se.fit=TRUE)
 
+quartz()
+par(mfrow=c(2,2))
 #Plot to visualize fir to data
 plot(response_prawn$dose, response_prawn$mortality, type='l') #mu_Pq
 points(chlor$dose, chlor$mortality, pch=18, col=2)
