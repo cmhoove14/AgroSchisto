@@ -461,6 +461,7 @@ mu_chem<- (-0.25*log(1-agroChem_data[,2]) )#mu_Pq
 
 
 ##########################################################
+######## Effect of agrochemicals on model optputs ############
 CC_P_range<-1:60
 phi_P_range<-1/CC_P_range
 
@@ -487,6 +488,23 @@ for(i in 1:dim(agroChem_data)[1]){
     eqbm<-output[365*yrs,]
     eqbm
     r<-as.numeric(get_Ro(agro_parameters, eqbm))
+    #plot################
+    quartz()
+    par(mfrow=c(1,1))
+    plot(output[,1], output[,2], type='l', xlab="time",ylab="System Variables",
+         main=paste("Chlor =",agroData[1], "microgram/L; N=", output[365*yrs,2]+output[365*yrs,3]+output[365*yrs,4], "R_o =", r, sep=" "), sub = paste("1/CC_P = ", parameters["phi_P"], sep=""),
+         ylim=c(0,max( output[,2]+output[,3]+output[,4] )), col=1, lty=1, lwd=2)
+    lines(output[,1],output[,3],col=2, lty=2, lwd=2)
+    lines(output[,1],output[,4],col=3, lty=3, lwd=2)
+    lines(output[,1],output[,2]+output[,3]+output[,4],col=4, lty=4, lwd=2)
+    lines(output[,1],output[,5],col=5, lty=5)
+    lines(output[,1],output[,6],col=6, lty=6, lwd=2)
+    
+    text(x=365*yrs, y=eqbm[2:6], labels=as.character(round(eqbm[2:6],2)), cex=0.5 )
+    legend("topright",c("S","E","I","N", "W", "P"),col=c(1:6),lty=1:6,cex=0.7, lwd=2)
+    
+    
+    #####################
     Ro_matrix[i,j]<-r
     #Ro_range<-c(Ro_range,r)
   }#end of phi_P range
