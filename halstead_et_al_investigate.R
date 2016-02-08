@@ -22,18 +22,32 @@ st.er <- function(x) {
 
 dat<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/R_use.csv")
 
+#Add some variables ##########################
 for(i in 1:nrow(dat)){
   dat[i,43]=paste(dat[i,2], dat[i,3], dat[i,4], sep="_")
 } #Add unique treatment code to data frame
   treats<-unique(dat[,43])
+  
+for(i in 1:nrow(dat)){
+    dat[i,44]=100*(dat[i,30]/dat[i,29])
+} #Calculate final prevalence of B. glabrata
+  colnames(dat)[44]<-"bg_prev"
+  dat$bg_prev[is.na(dat$bg_prev)]<-0
+  
+for(i in 1:nrow(dat)){
+    dat[i,45]=100*(dat[i,33]/dat[i,32])
+} #Calculate final prevalence of B. truncatus
+  colnames(dat)[45]<-"bt_prev"
+  dat$bt_prev[is.na(dat$bt_prev)]<-0
+    
 varbs<-colnames(dat) #retrieve variable names
 
 #Reshape to long format and merge data set to prepare for plotting #########################
-dat2<-reshape(dat, varying = varbs[13:42],
+dat2<-reshape(dat, varying = varbs[c(13:42,44,45)],
               v.names="measure",
               timevar="variable",
-              times=varbs[13:42],
-              new.row.names=1:1800,
+              times=varbs[c(13:42,44,45)],
+              new.row.names=1:1920,
               direction="long")
 
 dat2<-dat2[,-c(1:12,16)] #Get rid of needless variables
@@ -128,9 +142,57 @@ snail.inf_fin<-subset(aggdata,
                       ymax=mean+st.err),
                   width=.2, position=position_dodge(.7)) +
     ggtitle("Snails infected at end")
+#End snail infection prevalence (infections/100 snails) ####################
+snail.inf_prev<-subset(aggdata, 
+                        variable=="bg_prev" |  variable=="bt_prev")
+  
+  ggplot(snail.inf_prev, aes(x=variable, y=mean, fill=atra_chlor_fert)) +
+    theme_bw()+
+    scale_fill_manual(values=cbPalette) +
+    geom_bar(position=position_dodge(), stat="identity", width=.7) +
+    geom_errorbar(aes(ymin=mean-st.err,
+                      ymax=mean+st.err),
+                  width=.2, position=position_dodge(.7)) +
+    ggtitle("Snail infection prev (inf/100 snails)")
+#End total snails (alive and dead) ########################
+snail.tot_fin<-subset(aggdata, 
+                        variable=="total_bg_fin" |  variable=="total_bt_fin")
+  
+  ggplot(snail.tot_fin, aes(x=variable, y=mean, fill=atra_chlor_fert)) +
+    theme_bw()+
+    scale_fill_manual(values=cbPalette) +
+    geom_bar(position=position_dodge(), stat="identity", width=.7) +
+    geom_errorbar(aes(ymin=mean-st.err,
+                      ymax=mean+st.err),
+                  width=.2, position=position_dodge(.7)) +
+    ggtitle("Total snails at end")
+#Periphyton levels measured across time ########################
+peri_time<-subset(aggdata, 
+                      variable=="peri0" |  variable=="peri1" |  variable=="peri2"
+                  |  variable=="peri4" |  variable=="peri8")
 
-  
-  
+ggplot(peri_time, aes(x=variable, y=mean, fill=atra_chlor_fert)) +
+  theme_bw()+
+  scale_fill_manual(values=cbPalette) +
+  geom_bar(position=position_dodge(), stat="identity", width=.7) +
+  geom_errorbar(aes(ymin=mean-st.err,
+                    ymax=mean+st.err),
+                width=.2, position=position_dodge(.7)) +
+  ggtitle("Periphyton chlorophyl a over time")  
+#Phytoplankton levels measured across time ########################
+phyto_time<-subset(aggdata, 
+                  variable=="phyto0" |  variable=="phyto1" |  variable=="phyto2"
+                  |  variable=="phyto4" |  variable=="phyto8")
+
+ggplot(phyto_time, aes(x=variable, y=mean, fill=atra_chlor_fert)) +
+  theme_bw()+
+  scale_fill_manual(values=cbPalette) +
+  geom_bar(position=position_dodge(), stat="identity", width=.7) +
+  geom_errorbar(aes(ymin=mean-st.err,
+                    ymax=mean+st.err),
+                width=.2, position=position_dodge(.7)) +
+  ggtitle("Phytoplankton chlorophyl a over time")
+
 #Create subset data frames for each treatment ############################
 control<-subset(dat, atra==0 & chlor==0 & fert==0)
 
@@ -151,6 +213,8 @@ acf<-subset(dat, atra==1 & chlor==1 & fert==1)
 treatments<-list(c("control", "atrazine_only", "chlorpyrifos_only", "fertilizer_only",
                    "atrazine_chlorpyrifos", "atrazine_fertilizer", "chlorpyrifos_fertilizer",
                    "all_three"), c("mean", "st.error"))
+
+
 
 ###################
 pred_surv<-matrix(ncol=2, nrow=8, dimnames=treatments)
