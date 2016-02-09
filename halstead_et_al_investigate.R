@@ -193,6 +193,41 @@ ggplot(phyto_time, aes(x=variable, y=mean, fill=atra_chlor_fert)) +
                 width=.2, position=position_dodge(.7)) +
   ggtitle("Phytoplankton chlorophyl a over time")
 
+#Does number of snails predict number of infected snails? ########################
+plot(x=dat$bg_liv_fin, y=dat$bg_inf_fin, cex=0.3, 
+     xlab = "Number snails", ylab ="Infected snails")
+
+mod_bg<-lm(dat$bg_inf_fin ~ dat$bg_liv_fin)
+summary(mod_bg) #Linear regression for all data points
+
+mod_bg2<-lm(dat$bg_inf_fin[dat$bg_liv_fin >0] ~ dat$bg_liv_fin[dat$bg_liv_fin >0])
+summary(mod_bg2) #Linear regression for replicates without snail pop crash
+
+  abline(a=mod_bg$coefficients[1], b=mod_bg$coefficients[2], col="red")
+  abline(a=mod_bg2$coefficients[1], b=mod_bg2$coefficients[2], col="blue")
+  points(x=dat$bg_liv_fin[dat$atra==1], y=dat$bg_inf_fin[dat$atra==1],
+       pch=17, cex=1.5, col="darkgray")
+  points(x=dat$bg_liv_fin[dat$chlor==1], y=dat$bg_inf_fin[dat$chlor==1],
+       pch=16, col="red")
+  points(x=dat$bg_liv_fin[dat$fert==1], y=dat$bg_inf_fin[dat$fert==1],
+         pch=4, cex=1.1, col="green")
+  legend("bottomright",legend=c("atrazine present", "chlorpyrifos present", "fertilizer present"),
+         pch=c(17,16,4), col=c("darkgray", "red", "green"))
+
+plot(x=dat$bt_liv_fin, y=dat$bt_inf_fin, cex=0.3,
+     xlab = "Number snails", ylab ="Infected snails")
+mod_bt<-lm(dat$bt_inf_fin ~ dat$bt_liv_fin)
+summary(mod_bt)
+  abline(a=mod_bt$coefficients[1], b=mod_bt$coefficients[2], col="red")
+  points(x=dat$bt_liv_fin[dat$atra==1], y=dat$bt_inf_fin[dat$atra==1],
+       pch=17, cex=1.5, col="darkgray")
+  points(x=dat$bt_liv_fin[dat$chlor==1], y=dat$bt_inf_fin[dat$chlor==1],
+       pch=16, col="red")
+  points(x=dat$bt_liv_fin[dat$fert==1], y=dat$bt_inf_fin[dat$fert==1],
+       pch=4, cex=1.1, col="green")
+  legend("bottomright",legend=c("atrazine present", "chlorpyrifos present", "fertilizer present"),
+       pch=c(17,16,4), col=c("darkgray", "red", "green"))
+
 #Create subset data frames for each treatment ############################
 control<-subset(dat, atra==0 & chlor==0 & fert==0)
 
@@ -213,56 +248,3 @@ acf<-subset(dat, atra==1 & chlor==1 & fert==1)
 treatments<-list(c("control", "atrazine_only", "chlorpyrifos_only", "fertilizer_only",
                    "atrazine_chlorpyrifos", "atrazine_fertilizer", "chlorpyrifos_fertilizer",
                    "all_three"), c("mean", "st.error"))
-
-
-
-###################
-pred_surv<-matrix(ncol=2, nrow=8, dimnames=treatments)
-  pred_surv[1,1]=mean(control$all.pred_fin)
-  pred_surv[1,2]=st.er(control$all.pred_fin)
-  
-  pred_surv[2,1]=mean(atra$all.pred_fin)
-  pred_surv[2,2]=st.er(atra$all.pred_fin)
-  
-  pred_surv[3,1]=mean(chlor$all.pred_fin)
-  pred_surv[3,2]=st.er(chlor$all.pred_fin)
-  
-  pred_surv[4,1]=mean(fert$all.pred_fin)
-  pred_surv[4,2]=st.er(fert$all.pred_fin)
-  
-  pred_surv[5,1]=mean(atra_chlor$all.pred_fin)
-  pred_surv[5,2]=st.er(atra_chlor$all.pred_fin)
-  
-  pred_surv[6,1]=mean(atra_fert$all.pred_fin)
-  pred_surv[6,2]=st.er(atra_fert$all.pred_fin)
-  
-  pred_surv[7,1]=mean(chlor_fert$all.pred_fin)
-  pred_surv[7,2]=st.er(chlor_fert$all.pred_fin)
-  
-  pred_surv[8,1]=mean(acf$all.pred_fin)
-  pred_surv[8,2]=st.er(acf$all.pred_fin)
-  
-tot_snails<-matrix(ncol=2, nrow=8, dimnames=treatments)  
-  tot_snails[1,1]=mean(control$total_all_fin)
-  tot_snails[1,2]=st.er(control$total_all_fin)
-  
-  tot_snails[2,1]=mean(atra$total_all_fin)
-  tot_snails[2,2]=st.er(atra$total_all_fin)
-  
-  tot_snails[3,1]=mean(chlor$total_all_fin)
-  tot_snails[3,2]=st.er(chlor$total_all_fin)
-  
-  tot_snails[4,1]=mean(fert$total_all_fin)
-  tot_snails[4,2]=st.er(fert$total_all_fin)
-  
-  tot_snails[5,1]=mean(atra_chlor$total_all_fin)
-  tot_snails[5,2]=st.er(atra_chlor$total_all_fin)
-  
-  tot_snails[6,1]=mean(atra_fert$total_all_fin)
-  tot_snails[6,2]=st.er(atra_fert$total_all_fin)
-  
-  tot_snails[7,1]=mean(chlor_fert$total_all_fin)
-  tot_snails[7,2]=st.er(chlor_fert$total_all_fin)
-  
-  tot_snails[8,1]=mean(acf$total_all_fin)
-  tot_snails[8,2]=st.er(acf$total_all_fin)
