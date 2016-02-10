@@ -154,18 +154,6 @@ snail.inf_prev<-subset(aggdata,
                       ymax=mean+st.err),
                   width=.2, position=position_dodge(.7)) +
     ggtitle("Snail infection prev (inf/100 snails)")
-#End total snails (alive and dead) ########################
-snail.tot_fin<-subset(aggdata, 
-                        variable=="total_bg_fin" |  variable=="total_bt_fin")
-  
-  ggplot(snail.tot_fin, aes(x=variable, y=mean, fill=atra_chlor_fert)) +
-    theme_bw()+
-    scale_fill_manual(values=cbPalette) +
-    geom_bar(position=position_dodge(), stat="identity", width=.7) +
-    geom_errorbar(aes(ymin=mean-st.err,
-                      ymax=mean+st.err),
-                  width=.2, position=position_dodge(.7)) +
-    ggtitle("Total snails at end")
 #Periphyton levels measured across time ########################
 peri_time<-subset(aggdata, 
                       variable=="peri0" |  variable=="peri1" |  variable=="peri2"
@@ -195,7 +183,8 @@ ggplot(phyto_time, aes(x=variable, y=mean, fill=atra_chlor_fert)) +
 
 #Does number of snails predict number of infected snails? ########################
 plot(x=dat$bg_liv_fin, y=dat$bg_inf_fin, cex=0.3, 
-     xlab = "Number snails", ylab ="Infected snails")
+     xlab = "Number snails", ylab ="Infected snails",
+     main="Biomphalaria glabrata")
 
 mod_bg<-lm(dat$bg_inf_fin ~ dat$bg_liv_fin)
 summary(mod_bg) #Linear regression for all data points
@@ -204,7 +193,6 @@ mod_bg2<-lm(dat$bg_inf_fin[dat$bg_liv_fin >0] ~ dat$bg_liv_fin[dat$bg_liv_fin >0
 summary(mod_bg2) #Linear regression for replicates without snail pop crash
 
   abline(a=mod_bg$coefficients[1], b=mod_bg$coefficients[2], col="red")
-  abline(a=mod_bg2$coefficients[1], b=mod_bg2$coefficients[2], col="blue")
   points(x=dat$bg_liv_fin[dat$atra==1], y=dat$bg_inf_fin[dat$atra==1],
        pch=17, cex=1.5, col="darkgray")
   points(x=dat$bg_liv_fin[dat$chlor==1], y=dat$bg_inf_fin[dat$chlor==1],
