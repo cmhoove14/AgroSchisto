@@ -99,13 +99,14 @@ preds.fin<-subset(aggdata,
 
   preds.fin$variable[preds.fin$variable=="p.all_fin"]<-"P. alleni"
   preds.fin$variable[preds.fin$variable=="b.flu_fin"]<-"B. flumineum"
-
+  colnames(preds.fin)[2]<-"Species"
+  
   preds.fin$Treatment<- factor(preds.fin$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                            "Fertilizer","Atrazine_ChlorP",
                                                            "Atrazine_Fertilizer",
                                                            "ChlorP_Fertilizer","All_Three"))
 
-  ggplot(preds.fin, aes(x=variable, y=mean, fill=Treatment)) +
+  ggplot(preds.fin, aes(x=Species, y=mean, fill=Treatment)) +
     theme_bw()+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width = .7) +
@@ -120,13 +121,14 @@ preds.24<-subset(aggdata,
 
   preds.24$variable[preds.24$variable=="p.all_24"]<-"P. alleni"
   preds.24$variable[preds.24$variable=="b.flu_24"]<-"B. flumineum"
-
+  colnames(preds.24)[2]<-"Species"
+  
   preds.24$Treatment<- factor(preds.24$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                              "Fertilizer","Atrazine_ChlorP",
                                                              "Atrazine_Fertilizer",
                                                              "ChlorP_Fertilizer","All_Three"))
   
-  ggplot(preds.24, aes(x=variable, y=mean, fill=Treatment)) +
+  ggplot(preds.24, aes(x=Species, y=mean, fill=Treatment)) +
     theme_bw()+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width=.7) +
@@ -142,13 +144,14 @@ snail.repro<-subset(aggdata,
   snail.repro$variable[snail.repro$variable=="bg_hatch"]<-"B. glabrata hatchlings"
   snail.repro$variable[snail.repro$variable=="bt_eggs"]<-"B. truncatus eggs"
   snail.repro$variable[snail.repro$variable=="bt_hatch"]<-"B. truncatus hatchlings"
+  colnames(snail.repro)[2]<-"Species"
   
   snail.repro$Treatment<- factor(snail.repro$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                            "Fertilizer","Atrazine_ChlorP",
                                                            "Atrazine_Fertilizer",
                                                            "ChlorP_Fertilizer","All_Three"))
   
-  ggplot(snail.repro, aes(x=variable, y=mean, fill=Treatment)) +
+  ggplot(snail.repro, aes(x=Species, y=mean, fill=Treatment)) +
     theme_bw()+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width=.7) +
@@ -163,14 +166,15 @@ snail.live_fin<-subset(aggdata,
 
   snail.live_fin$variable[snail.live_fin$variable=="bg_liv_fin"]<-"B. glabrata"
   snail.live_fin$variable[snail.live_fin$variable=="bt_liv_fin"]<-"B. truncatus"
-
+  colnames(snail.live_fin)[2]<-"Species"
+  
   snail.live_fin$Treatment<- factor(snail.live_fin$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                                  "Fertilizer","Atrazine_ChlorP",
                                                                  "Atrazine_Fertilizer",
                                                                  "ChlorP_Fertilizer","All_Three"))
   
   
-  ggplot(snail.live_fin, aes(x=variable, y=mean, fill=Treatment)) +
+  ggplot(snail.live_fin, aes(x=Species, y=mean, fill=Treatment)) +
     theme_bw()+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width=.7) +
@@ -184,33 +188,35 @@ snail.tot_fin<-subset(aggdata,
   
   snail.tot_fin$variable[snail.tot_fin$variable=="total_bg_fin"]<-"B. glabrata"
   snail.tot_fin$variable[snail.tot_fin$variable=="total_bt_fin"]<-"B. truncatus"
+  colnames(snail.tot_fin)[2]<-"Species"
   
   snail.tot_fin$Treatment<- factor(snail.tot_fin$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                                        "Fertilizer","Atrazine_ChlorP",
                                                                        "Atrazine_Fertilizer",
                                                                        "ChlorP_Fertilizer","All_Three"))
   
-  ggplot(snail.tot_fin, aes(x=variable, y=mean, fill=Treatment)) +
+  ggplot(snail.tot_fin, aes(x=Species, y=mean, fill=Treatment)) +
     theme_bw()+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width=.7) +
     geom_errorbar(aes(ymin=mean-st.err,
                       ymax=mean+st.err),
                   width=.2, position=position_dodge(.7)) +
-    ggtitle("Total snails (alive/dead) at end")  
+    ggtitle("Total snails (alive+dead) at end")  
 #End snails infected between two species ###################### 
 snail.inf_fin<-subset(aggdata, 
                          variable=="bg_inf_fin" |  variable=="bt_inf_fin")
   
   snail.inf_fin$variable[snail.inf_fin$variable=="bg_inf_fin"]<-"B. glabrata"
   snail.inf_fin$variable[snail.inf_fin$variable=="bt_inf_fin"]<-"B. truncatus"
+  colnames(snail.inf_fin)[2]<-"Species"
   
   snail.inf_fin$Treatment<- factor(snail.inf_fin$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                                      "Fertilizer","Atrazine_ChlorP",
                                                                      "Atrazine_Fertilizer",
                                                                      "ChlorP_Fertilizer","All_Three"))
   
-  ggplot(snail.inf_fin, aes(x=variable, y=mean, fill=Treatment)) +
+  ggplot(snail.inf_fin, aes(x=Species, y=mean, fill=Treatment)) +
     theme_bw()+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width=.7) +
@@ -224,13 +230,14 @@ snail.inf_prev<-subset(aggdata,
  
   snail.inf_prev$variable[snail.inf_prev$variable=="bg_prev"]<-"B. glabrata"
   snail.inf_prev$variable[snail.inf_prev$variable=="bt_prev"]<-"B. truncatus"
+  colnames(snail.inf_prev)[2]<-"Species"
   
   snail.inf_prev$Treatment<- factor(snail.inf_prev$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                                      "Fertilizer","Atrazine_ChlorP",
                                                                      "Atrazine_Fertilizer",
                                                                      "ChlorP_Fertilizer","All_Three"))
   
-  ggplot(snail.inf_prev, aes(x=variable, y=mean, fill=Treatment)) +
+  ggplot(snail.inf_prev, aes(x=Species, y=mean, fill=Treatment)) +
     theme_bw()+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width=.7) +
@@ -248,13 +255,14 @@ peri_time<-subset(aggdata,
   peri_time$variable[peri_time$variable=="peri2"]<-"Week 2"
   peri_time$variable[peri_time$variable=="peri4"]<-"Week 4"
   peri_time$variable[peri_time$variable=="peri8"]<-"Week 8"
+  colnames(peri_time)[2]<-"Time"
   
   peri_time$Treatment<- factor(peri_time$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                                        "Fertilizer","Atrazine_ChlorP",
                                                                        "Atrazine_Fertilizer",
                                                                        "ChlorP_Fertilizer","All_Three"))
   
-ggplot(peri_time, aes(x=variable, y=mean, group=Treatment, color=Treatment)) +
+ggplot(peri_time, aes(x=Time, y=mean, group=Treatment, color=Treatment)) +
   theme_bw()+
   scale_color_manual(values=cbPalette) +
   geom_line(position=position_dodge(.25), size=1) +
@@ -268,26 +276,27 @@ phyto_time<-subset(aggdata,
                   variable=="phyto0" |  variable=="phyto1" |  variable=="phyto2"
                   |  variable=="phyto4" |  variable=="phyto8")
 
-phyto_time$variable[phyto_time$variable=="phyto0"]<-"Week 0"
-phyto_time$variable[phyto_time$variable=="phyto1"]<-"Week 1"
-phyto_time$variable[phyto_time$variable=="phyto2"]<-"Week 2"
-phyto_time$variable[phyto_time$variable=="phyto4"]<-"Week 4"
-phyto_time$variable[phyto_time$variable=="phyto8"]<-"Week 8"
-
-phyto_time$Treatment<- factor(phyto_time$Treatment, levels=c("Control","Atrazine","ChlorP",
-                                                           "Fertilizer","Atrazine_ChlorP",
-                                                           "Atrazine_Fertilizer",
-                                                           "ChlorP_Fertilizer","All_Three"))
-
-ggplot(phyto_time, aes(x=variable, y=mean, group=Treatment, color=Treatment)) +
-  theme_bw()+
-  scale_color_manual(values=cbPalette) +
-  geom_line(position=position_dodge(.25), size=1) +
-  geom_point(position=position_dodge(.25), size=3.5) +
-  geom_errorbar(aes(ymin=mean-st.err,
-                    ymax=mean+st.err),
-                width=.2, position=position_dodge(.25)) +
-  ggtitle("Phytoplankton chlorophyl a over time")  
+  phyto_time$variable[phyto_time$variable=="phyto0"]<-"Week 0"
+  phyto_time$variable[phyto_time$variable=="phyto1"]<-"Week 1"
+  phyto_time$variable[phyto_time$variable=="phyto2"]<-"Week 2"
+  phyto_time$variable[phyto_time$variable=="phyto4"]<-"Week 4"
+  phyto_time$variable[phyto_time$variable=="phyto8"]<-"Week 8"
+  colnames(phyto_time)[2]<-"Time"
+  
+  phyto_time$Treatment<- factor(phyto_time$Treatment, levels=c("Control","Atrazine","ChlorP",
+                                                             "Fertilizer","Atrazine_ChlorP",
+                                                             "Atrazine_Fertilizer",
+                                                             "ChlorP_Fertilizer","All_Three"))
+  
+  ggplot(phyto_time, aes(x=Time, y=mean, group=Treatment, color=Treatment)) +
+    theme_bw()+
+    scale_color_manual(values=cbPalette) +
+    geom_line(position=position_dodge(.25), size=1) +
+    geom_point(position=position_dodge(.25), size=3.5) +
+    geom_errorbar(aes(ymin=mean-st.err,
+                      ymax=mean+st.err),
+                  width=.2, position=position_dodge(.25)) +
+    ggtitle("Phytoplankton chlorophyl a over time")  
 
 #Does number of snails predict number of infected snails? ########################
 plot(x=dat$bg_liv_fin, y=dat$bg_inf_fin, cex=0.3, 

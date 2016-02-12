@@ -76,13 +76,14 @@ bg.eggs<-subset(aggdata,
   bg.eggs$variable[bg.eggs$variable=="TBgegg3"]<-"Week 3"
   bg.eggs$variable[bg.eggs$variable=="TBgegg4"]<-"Week 4"
   bg.eggs$variable[bg.eggs$variable=="TBgegg8"]<-"Week 8"
+  colnames(bg.eggs)[2]<-"Time"
   
   bg.eggs$Treatment<- factor(bg.eggs$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                                  "Fertilizer","Atrazine_ChlorP",
                                                                  "Atrazine_Fertilizer",
                                                                  "ChlorP_Fertilizer","All_Three"))
 
-  ggplot(bg.eggs, aes(x=variable, y=mean, group=Treatment, color=Treatment)) +
+  ggplot(bg.eggs, aes(x=Time, y=mean, group=Treatment, color=Treatment)) +
     theme_bw()+
     scale_color_manual(values=cbPalette) +
     geom_line(position=position_dodge(.25), size=1) +
@@ -101,13 +102,14 @@ bg.hatch<-subset(aggdata,
   bg.hatch$variable[bg.hatch$variable=="TBghatch3"]<-"Week 3"
   bg.hatch$variable[bg.hatch$variable=="TBghatch4"]<-"Week 4"
   bg.hatch$variable[bg.hatch$variable=="TBghatch8"]<-"Week 8"
+  colnames(bg.hatch)[2]<-"Time"
   
   bg.hatch$Treatment<- factor(bg.hatch$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                          "Fertilizer","Atrazine_ChlorP",
                                                          "Atrazine_Fertilizer",
                                                          "ChlorP_Fertilizer","All_Three"))
   
-  ggplot(bg.hatch, aes(x=variable, y=mean, group=Treatment, color=Treatment)) +
+  ggplot(bg.hatch, aes(x=Time, y=mean, group=Treatment, color=Treatment)) +
     theme_bw()+
     scale_color_manual(values=cbPalette) +
     geom_line(position=position_dodge(.25), size=1) +
@@ -126,13 +128,14 @@ bg.adult<-subset(aggdata,
   bg.adult$variable[bg.adult$variable=="TBgadult3"]<-"Week 3"
   bg.adult$variable[bg.adult$variable=="TBgadult4"]<-"Week 4"
   bg.adult$variable[bg.adult$variable=="TBgadult8"]<-"Week 8"
+  colnames(bg.adult)[2]<-"Time"
   
   bg.adult$Treatment<- factor(bg.adult$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                            "Fertilizer","Atrazine_ChlorP",
                                                            "Atrazine_Fertilizer",
                                                            "ChlorP_Fertilizer","All_Three"))
   
-  ggplot(bg.adult, aes(x=variable, y=mean, group=Treatment, color=Treatment)) +
+  ggplot(bg.adult, aes(x=Time, y=mean, group=Treatment, color=Treatment)) +
     theme_bw()+
     scale_color_manual(values=cbPalette) +
     geom_line(position=position_dodge(.25), size=1) +
@@ -151,13 +154,14 @@ bt.eggs<-subset(aggdata,
   bt.eggs$variable[bt.eggs$variable=="TBtegg3"]<-"Week 3"
   bt.eggs$variable[bt.eggs$variable=="TBtegg4"]<-"Week 4"
   bt.eggs$variable[bt.eggs$variable=="TBtegg8"]<-"Week 8"
+  colnames(bt.eggs)[2]<-"Time"
   
   bt.eggs$Treatment<- factor(bt.eggs$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                          "Fertilizer","Atrazine_ChlorP",
                                                          "Atrazine_Fertilizer",
                                                          "ChlorP_Fertilizer","All_Three"))
   
-  ggplot(bt.eggs, aes(x=variable, y=mean, group=Treatment, color=Treatment)) +
+  ggplot(bt.eggs, aes(x=Time, y=mean, group=Treatment, color=Treatment)) +
     theme_bw()+
     scale_color_manual(values=cbPalette) +
     geom_line(position=position_dodge(.25), size=1) +
@@ -176,13 +180,14 @@ bt.hatch<-subset(aggdata,
   bt.hatch$variable[bt.hatch$variable=="TBthatch3"]<-"Week 3"
   bt.hatch$variable[bt.hatch$variable=="TBthatch4"]<-"Week 4"
   bt.hatch$variable[bt.hatch$variable=="TBthatch8"]<-"Week 8"
+  colnames(bt.hatch)[2]<-"Time"
   
   bt.hatch$Treatment<- factor(bt.hatch$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                            "Fertilizer","Atrazine_ChlorP",
                                                            "Atrazine_Fertilizer",
                                                            "ChlorP_Fertilizer","All_Three"))
   
-  ggplot(bt.hatch, aes(x=variable, y=mean, group=Treatment, color=Treatment)) +
+  ggplot(bt.hatch, aes(x=Time, y=mean, group=Treatment, color=Treatment)) +
     theme_bw()+
     scale_color_manual(values=cbPalette) +
     geom_line(position=position_dodge(.25), size=1) +
@@ -201,13 +206,15 @@ bt.adult<-subset(aggdata,
   bt.adult$variable[bt.adult$variable=="TBtadult3"]<-"Week 3"
   bt.adult$variable[bt.adult$variable=="TBtadult4"]<-"Week 4"
   bt.adult$variable[bt.adult$variable=="TBtadult8"]<-"Week 8"
+  colnames(bt.adult)[2]<-"Time"
+  
   
   bt.adult$Treatment<- factor(bt.adult$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                            "Fertilizer","Atrazine_ChlorP",
                                                            "Atrazine_Fertilizer",
                                                            "ChlorP_Fertilizer","All_Three"))
   
-  ggplot(bt.adult, aes(x=variable, y=mean, group=Treatment, color=Treatment)) +
+  ggplot(bt.adult, aes(x=Time, y=mean, group=Treatment, color=Treatment)) +
     theme_bw()+
     scale_color_manual(values=cbPalette) +
     geom_line(position=position_dodge(.25), size=1) +
