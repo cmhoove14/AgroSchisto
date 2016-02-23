@@ -20,7 +20,7 @@ st.er <- function(x) {
   sd(x)/sqrt(length(x))
 } #Function to calculate standard error of the mean
 
-dat<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/R_use.csv")
+dat<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Halstead_etal/R_use.csv")
 
 #Add some variables ##########################
 for(i in 1:nrow(dat)){
@@ -39,15 +39,74 @@ for(i in 1:nrow(dat)){
 } #Calculate final prevalence of B. truncatus
   colnames(dat)[45]<-"bt_prev"
   dat$bt_prev[is.na(dat$bt_prev)]<-0
-    
+  
+for(i in 1:nrow(dat)){
+    dat[i,46]=dat[i,31]-dat[i,29]
+} #Calculate number of dead B. glabrata
+  colnames(dat)[46]<-"bg_dead"
+
+for(i in 1:nrow(dat)){
+    dat[i,47]=dat[i,34]-dat[i,32]
+} #Calculate number of dead B. truncatus
+  colnames(dat)[47]<-"bt_dead"
+  
+for(i in 1:nrow(dat)){
+    dat[i,48]=(log((dat[i,29]+1)/27)/84)
+} #Calculate intrinsic reproduction rate (r) of B. glabrata based on 12 week increase in population
+  colnames(dat)[48]<-"bg_r"
+  dat$bg_r[dat$bg_r <= 0]<-0 #relabel negative population growth as 0
+  
+for(i in 1:nrow(dat)){
+    dat[i,49]=(log((dat[i,32]+1)/11)/84)
+} #Calculate intrinsic reproduction rate (r) of B. glabrata based on 12 week increase in population
+  colnames(dat)[49]<-"bt_r"
+  dat$bt_r[dat$bt_r <= 0]<-0#relabel negative population growth as 0
+
+for(i in 1:nrow(dat)){
+  dat[i,50]=mean(dat[i,18],dat[i,19],dat[i,20],dat[i,21],dat[i,22])
+}  #Calculate average periphyton chlorophyl-a over time period
+  colnames(dat)[50]<-"peri_ave"
+  
 varbs<-colnames(dat) #retrieve variable names
 
+#Create subset data frames for each treatment ############################
+control<-subset(dat, atra==0 & chlor==0 & fert==0)
+
+atra<-subset(dat, atra==1 & chlor==0 & fert==0)
+
+chlor<-subset(dat, atra==0 & chlor==1 & fert==0)
+
+fert<-subset(dat, atra==0 & chlor==0 & fert==1)
+
+atra_fert<-subset(dat, atra==1 & chlor==0 & fert==1)
+
+atra_chlor<-subset(dat, atra==1 & chlor==1 & fert==0)
+
+chlor_fert<-subset(dat, atra==0 & chlor==1 & fert==1)
+
+acf<-subset(dat, atra==1 & chlor==1 & fert==1)
+
+treatments<-list(c("control", "atrazine_only", "chlorpyrifos_only", "fertilizer_only",
+                   "atrazine_chlorpyrifos", "atrazine_fertilizer", "chlorpyrifos_fertilizer",
+                   "all_three"), c("mean", "st.error"))
+
+#Check out frequency of predators surviving insecticide treatments #################
+chlor.all<-subset(dat, chlor==1)
+  chlor.all$tank[chlor.all$all.pred_fin >=1] #Tanks 36, 39, & 55 had preds despite 
+#Do periphyton levels predict final snail density (absent predation influence)? ########################
+  chlorP<-subset(dat, chlor==1)
+    plot(x=chlorP$peri_ave, y=chlorP$bt_liv_fin, 
+         pch=16, col="blue",
+         xlab="Mean Periphyton chlorophyl-a", ylab="B. truncatus alive at end") 
+    points(x=chlorP$peri_ave, y=chlorP$bg_liv_fin,
+           pch=16, col="red")
+
 #Reshape to long format and merge data set to prepare for plotting #########################
-dat2<-reshape(dat, varying = varbs[c(13:42,44,45)],
+dat2<-reshape(dat, varying = varbs[c(13:42,44:49)],
               v.names="measure",
               timevar="variable",
-              times=varbs[c(13:42,44,45)],
-              new.row.names=1:1920,
+              times=varbs[c(13:42,44:49)],
+              new.row.names=1:2160,
               direction="long")
 
 dat2<-dat2[,-c(1:12,16)] #Get rid of needless variables
@@ -160,6 +219,28 @@ snail.repro<-subset(aggdata,
                 width=.2, position=position_dodge(.7)) +
     ggtitle("Snail reproduction at end")
   
+#"Global" estimate of reproduction rate (r) based on final number of live snails ##########
+rep_r<-subset(aggdata, 
+                         variable=="bt_r" |  variable=="bg_r")
+  
+  rep_r$variable[rep_r$variable=="bg_r"]<-"B. glabrata"
+  rep_r$variable[rep_r$variable=="bt_r"]<-"B. truncatus"
+  colnames(rep_r)[2]<-"Species"
+  
+  rep_r$Treatment<- factor(rep_r$Treatment, levels=c("Control","Atrazine","ChlorP",
+                                                                       "Fertilizer","Atrazine_ChlorP",
+                                                                       "Atrazine_Fertilizer",
+                                                                       "ChlorP_Fertilizer","All_Three"))
+  
+  
+  ggplot(rep_r, aes(x=Species, y=mean, fill=Treatment)) +
+    theme_bw()+
+    scale_fill_manual(values=cbPalette) +
+    geom_bar(position=position_dodge(), stat="identity", width=.7) +
+    geom_errorbar(aes(ymin=mean-st.err,
+                      ymax=mean+st.err),
+                  width=.2, position=position_dodge(.7)) +
+    ggtitle("Approximate daily reproduction rate over 12 week period")
 #End snails alive between two species ########################
 snail.live_fin<-subset(aggdata, 
                   variable=="bg_liv_fin" |  variable=="bt_liv_fin")
@@ -203,6 +284,27 @@ snail.tot_fin<-subset(aggdata,
                       ymax=mean+st.err),
                   width=.2, position=position_dodge(.7)) +
     ggtitle("Total snails (alive+dead) at end")  
+#End snails dead between two species ########################
+snail.dead_fin<-subset(aggdata, 
+                        variable=="bg_dead" |  variable=="bt_dead")
+  
+  snail.dead_fin$variable[snail.dead_fin$variable=="bg_dead"]<-"B. glabrata"
+  snail.dead_fin$variable[snail.dead_fin$variable=="bt_dead"]<-"B. truncatus"
+  colnames(snail.dead_fin)[2]<-"Species"
+  
+  snail.dead_fin$Treatment<- factor(snail.dead_fin$Treatment, levels=c("Control","Atrazine","ChlorP",
+                                                                     "Fertilizer","Atrazine_ChlorP",
+                                                                     "Atrazine_Fertilizer",
+                                                                     "ChlorP_Fertilizer","All_Three"))
+  
+  ggplot(snail.dead_fin, aes(x=Species, y=mean, fill=Treatment)) +
+    theme_bw()+
+    scale_fill_manual(values=cbPalette) +
+    geom_bar(position=position_dodge(), stat="identity", width=.7) +
+    geom_errorbar(aes(ymin=mean-st.err,
+                      ymax=mean+st.err),
+                  width=.2, position=position_dodge(.7)) +
+    ggtitle("Dead snails at end")  
 #End snails infected between two species ###################### 
 snail.inf_fin<-subset(aggdata, 
                          variable=="bg_inf_fin" |  variable=="bt_inf_fin")
