@@ -20,7 +20,7 @@ st.er <- function(x) {
   sd(x)/sqrt(length(x))
 } #Function to calculate standard error of the mean
 
-derp<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/snail_repro.csv")
+derp<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Halstead_etal/snail_repro.csv")
 
 for(i in 1:nrow(derp)){
   derp[i,50]=paste(derp[i,2], derp[i,3], derp[i,4], sep="_")
@@ -223,3 +223,98 @@ bt.adult<-subset(aggdata,
                       ymax=mean+st.err),
                   width=.2, position=position_dodge(.25)) +
     ggtitle("Longitudinal sampling of B. truncatus adults")  
+  
+  
+#Investigate more specific questions #####################  
+#Investigate/plot reproduction only in tanks containing chlorpyrifos ################
+cbPalette2 <- c("red", "purple","orange", "pink", "blue")
+  
+d8a<-subset(derp, Treatment == "0_1_0" |
+              Treatment == "0_1_1" |
+              Treatment == "1_1_0" |
+              Treatment == "1_1_1")
+  
+  d8a$Treatment<-as.character(d8a$Treatment)
+  
+  d8a$Treatment[d8a$Treatment=="0_1_0"]<- "ChlorP"
+  d8a$Treatment[d8a$Treatment=="1_1_0"]<- "Atrazine_ChlorP"
+  d8a$Treatment[d8a$Treatment=="0_1_1"]<- "ChlorP_Fertilizer"
+  d8a$Treatment[d8a$Treatment=="1_1_1"]<- "All_Three"
+  d8a$Treatment[d8a$tank==11]<- "ChlorP2x"
+  d8a$Treatment[d8a$tank==21]<- "ChlorP2x"
+  d8a$Treatment[d8a$tank==36]<- "ChlorP2x"
+  d8a$Treatment[d8a$tank==47]<- "ChlorP2x"
+  d8a$Treatment[d8a$tank==55]<- "ChlorP2x"
+  
+  d8a$Treatment<-as.factor(d8a$Treatment)
+#Are there direct effects of chlorpyrifos on snail reproduction? ########### 
+  
+  #B. truncatus hatchling reproduction
+    bt.rp<-d8a[,c(1,50,9,18,27,36,45)]
+      colnames(bt.rp)[c(3:7)]<-c("Week1","Week2","Week3","Week4","Week8")
+      
+    bt.rp<-reshape(bt.rp, varying = colnames(bt.rp[3:7]),
+                     v.names="Hatchlings",
+                     timevar="Time",
+                     times=colnames(bt.rp[3:7]),
+                     new.row.names=1:300,
+                     direction="long")
+    
+    bt.rp$Treatment<- factor(bt.rp$Treatment, levels=c("ChlorP", "ChlorP2x", "Atrazine_ChlorP",
+                                                       "ChlorP_Fertilizer","All_Three"))  
+    
+    bt.rp.agg1<-aggregate.data.frame(bt.rp, by=list(bt.rp[,2], bt.rp[,3]), FUN=mean) #calculate means of treatment groups
+    bt.rp.agg1<-bt.rp.agg1[,-c(3:5,7)] #remove unneeded variables 
+    colnames(bt.rp.agg1)<-c("Treatment", "Time", "mean")
+    
+    bt.rp.agg2<-aggregate.data.frame(bt.rp, by=list(bt.rp[,2], bt.rp[,3]), FUN=st.er) #calculate st.error of treatment groups
+    bt.rp.agg2<-bt.rp.agg2[,-c(3:5,7)] #remove unneeded variables 
+    colnames(bt.rp.agg2)<-c("Treatment", "Time", "st.err")  
+    
+    bt.rp.agg<-merge(bt.rp.agg1, bt.rp.agg2, by=c("Treatment", "Time"))
+    
+    ggplot(bt.rp.agg, aes(x=Time, y=mean, group=Treatment, color=Treatment)) +
+        theme_bw()+
+        scale_color_manual(values=cbPalette2) +
+        geom_line(position=position_dodge(.25), size=1) +
+        geom_point(position=position_dodge(.25), size=3.5) +
+        geom_errorbar(aes(ymin=mean-st.err,
+                        ymax=mean+st.err),
+                    width=.2, position=position_dodge(.25)) +
+        ggtitle("B. truncatus hatchlings sampled over time")
+    
+  #B. glabrata hatchling reproduction
+    bg.rp<-d8a[,c(1,50,6,15,24,33,42)]
+    colnames(bg.rp)[c(3:7)]<-c("Week1","Week2","Week3","Week4","Week8")
+    
+    bg.rp<-reshape(bg.rp, varying = colnames(bg.rp[3:7]),
+                   v.names="Hatchlings",
+                   timevar="Time",
+                   times=colnames(bg.rp[3:7]),
+                   new.row.names=1:300,
+                   direction="long")
+    
+    bg.rp$Treatment<- factor(bg.rp$Treatment, levels=c("ChlorP", "ChlorP2x", "Atrazine_ChlorP",
+                                                       "ChlorP_Fertilizer","All_Three"))  
+    
+    bg.rp.agg1<-aggregate.data.frame(bg.rp, by=list(bg.rp[,2], bg.rp[,3]), FUN=mean) #calculate means of treatment groups
+    bg.rp.agg1<-bg.rp.agg1[,-c(3:5,7)] #remove unneeded variables 
+    colnames(bg.rp.agg1)<-c("Treatment", "Time", "mean")
+    
+    bg.rp.agg2<-aggregate.data.frame(bg.rp, by=list(bg.rp[,2], bg.rp[,3]), FUN=st.er) #calculate st.error of treatment groups
+    bg.rp.agg2<-bg.rp.agg2[,-c(3:5,7)] #remove unneeded variables 
+    colnames(bg.rp.agg2)<-c("Treatment", "Time", "st.err")  
+    
+    bg.rp.agg<-merge(bg.rp.agg1, bg.rp.agg2, by=c("Treatment", "Time"))
+    
+    ggplot(bg.rp.agg, aes(x=Time, y=mean, group=Treatment, color=Treatment)) +
+      theme_bw()+
+      scale_color_manual(values=cbPalette2) +
+      geom_line(position=position_dodge(.25), size=1) +
+      geom_point(position=position_dodge(.25), size=3.5) +
+      geom_errorbar(aes(ymin=mean-st.err,
+                        ymax=mean+st.err),
+                    width=.2, position=position_dodge(.25)) +
+      ggtitle("B. glabrata hatchlings sampled over time")
+#Does not appear to be any significant effect of 2x chlorpyrifos dose on generation of hatchlings, implying
+# no effect of chlorpyrifos on reproduction as was found in Ibrahim 1992 where reproduction declined with increasing dose 
