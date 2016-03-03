@@ -88,7 +88,46 @@ cols2<-c("red", "blue", "darkgreen", "orange", "purple")
 
 ggplot(burd2, aes(x=Date, y=Mean_Worm_Burden, group=Site, color=Site)) +
   theme_bw()+
-  scale_color_grey() +
+  #scale_color_manual(cols2) +
   geom_line(position=position_dodge(.25), size=1) +
   geom_point(position=position_dodge(.25), size=3.5) +
   ggtitle("Longitudinal mean worm burden") 
+
+#All Epi data put together, with "Rainy" seasons included ############################
+
+inf<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Halstead_etal/human_infection_R.csv")
+  inf$date<-as.Date(inf$date, format="%m/%d/%Y")
+  inf$Site<-as.factor(inf$Site)
+  inf.0<-subset(inf, wrm_burd ==0)
+  inf.pos<-subset(inf, wrm_burd !=0)
+  
+plot(inf.0$wrm_burd ~ inf.0$date, xlim=c(as.Date("2011-06-01"),as.Date("2013-9-1")), ylim=c(0,175),
+     xlab="Date", ylab="Mean Worm Burden (W)", main="Known epi data",
+     col="black", pch=16, cex=2)
+  rect(xleft=as.Date("2011-06-01"), xright=as.Date("2011-10-31"), #2011 rainy season
+       ybottom=0, ytop=200, col="blue", density=20)  
+  rect(xleft=as.Date("2012-06-01"), xright=as.Date("2012-10-31"), #2012 rainy season
+       ybottom=0, ytop=200, col="blue", density=20)  
+  rect(xleft=as.Date("2013-06-01"), xright=as.Date("2013-10-31"), #2013 rainy season
+       ybottom=0, ytop=200, col="blue", density=20)
+  points(inf.pos$date[inf.pos$Site=="Lampsar2"], inf.pos$wrm_burd[inf.pos$Site=="Lampsar2"],
+         pch=17, col="red", cex=2) #Add Lampsar2 measured worm burdens
+  points(inf.pos$date[inf.pos$Site=="Mbarigo1"], inf.pos$wrm_burd[inf.pos$Site=="Mbarigo1"],
+         pch=17, col="blue", cex=2) #Add Mbarigo1 measured worm burdens
+  points(inf.pos$date[inf.pos$Site=="Mbarigo2"], inf.pos$wrm_burd[inf.pos$Site=="Mbarigo2"],
+         pch=17, col="darkgreen", cex=2) #Add Mbarigo2 measured worm burdens
+  points(inf.pos$date[inf.pos$Site=="Ndiol_Maure"], inf.pos$wrm_burd[inf.pos$Site=="Ndiol_Maure"],
+         pch=17, col="orange", cex=2) #Add Ndiol_Maure measured worm burdens
+  segments(x0=as.Date("2012-2-7"), y0=0,
+           x1=as.Date("2012-6-22"), y1=8,
+           lty=2, lwd=2, col="red") #Transmission from Feb '12 to July '12
+  segments(x0=as.Date("2012-7-5"), y0=0,
+           x1=as.Date("2013-2-7"), y1=161,
+           lty=2, lwd=2, col="red") #Lampsar2 transmission from July '12 to Feb '13
+  segments(x0=as.Date("2013-2-7"), y0=0,
+           x1=as.Date("2013-8-25"), y1=17.5,
+           lty=2, lwd=2, col="red") #Lampsar2 transmission from July '12 to Feb '13
+  legend(x=as.Date("2011-11-21"), y=130, legend=c("PZQ", "Lampsar2", "Mbarigo1", "Mbarigo2", "Ndiol_Maure"),
+         pch=c(16,17,17,17,17), col=c("black", "red", "blue", "darkgreen", "orange"))
+  legend(x=as.Date("2012-11-20"), y=80, legend=c("transmission"), lty=2, lwd=2, col="red")
+  

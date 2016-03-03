@@ -20,13 +20,14 @@ require(graphics)
 
 #Chlorpyrifos toxicity/functional responses 
 #Probit analysis of toxicity data to prawns from Halstead et al 2015 ######################
-chlor<-data.frame(dose=c(0,0.64,3.176863,6.331487,29.814438,58.029675), 
-                  mortality=c(0,0,0,0,0.81, 1.00))
+chlor<-data.frame(dose=c(0,0.64,3.2,6.4,32,64), 
+                  mortality=c(0,0,0,0,0.8, 1.00))
 
 chlor$mu_P<- -0.25*log(1-chlor[,2])
 chlor[6,3]=9.0109
 
-#Probit analysis of data (probit analysis most often used for toxicological data investigating mortality responses to toxic exposures)
+#Probit analysis of data (probit analysis most often used for toxicological 
+#data investigating mortality responses to toxic exposures)
 tox_prawn<-glm(mortality ~ dose, family=binomial(link="probit"),data=chlor)
 summary(tox_prawn)
 

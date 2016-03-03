@@ -67,6 +67,13 @@ for(i in 1:nrow(dat)){
 }  #Calculate average periphyton chlorophyl-a over time period
   colnames(dat)[50]<-"peri_ave"
   
+for(i in 1:nrow(dat)){
+    dat[i,51]=dat[i,25]/dat[i,32]
+}  #Calculate estimate of eggs/snail produced through whole experiment to account for higher number of snails in Chlor treatments
+  colnames(dat)[51]<-"bt_egg_perCap"
+    dat$bt_egg_perCap[dat$bt_egg_perCap==Inf]<-NA
+    dat$bt_egg_perCap[is.na(dat$bt_egg_perCap)==TRUE]<-0
+  
 varbs<-colnames(dat) #retrieve variable names
 
 #Create subset data frames for each treatment ############################
@@ -92,7 +99,8 @@ treatments<-list(c("control", "atrazine_only", "chlorpyrifos_only", "fertilizer_
 
 #Check out frequency of predators surviving insecticide treatments #################
 chlor.all<-subset(dat, chlor==1)
-  chlor.all$tank[chlor.all$all.pred_fin >=1] #Tanks 36, 39, & 55 had preds despite 
+  chlor.all$tank[chlor.all$all.pred_fin >=1] #Tanks 36, 39, & 55 had preds despite ChlorP presence
+
 #Do periphyton levels predict final snail density (absent predation influence)? ########################
   chlorP<-subset(dat, chlor==1)
     plot(x=chlorP$peri_ave, y=chlorP$bt_liv_fin, 
@@ -102,14 +110,14 @@ chlor.all<-subset(dat, chlor==1)
            pch=16, col="red")
 
 #Reshape to long format and merge data set to prepare for plotting #########################
-dat2<-reshape(dat, varying = varbs[c(13:42,44:49)],
+dat2<-reshape(dat, varying = varbs[c(13:42,44:49,51)],
               v.names="measure",
               timevar="variable",
-              times=varbs[c(13:42,44:49)],
-              new.row.names=1:2160,
+              times=varbs[c(13:42,44:49,51)],
+              new.row.names=1:2220,
               direction="long")
 
-dat2<-dat2[,-c(1:12,16)] #Get rid of needless variables
+dat2<-dat2[,-c(1:12,14,17)] #Get rid of needless variables
 
 aggdata1<-aggregate.data.frame(dat2, by=list(dat2[,1], dat2[,2]), FUN=mean) #calculate means of treatment groups
   aggdata1<-aggdata1[,-c(3,4)] #remove unneeded variables 
@@ -399,6 +407,22 @@ phyto_time<-subset(aggdata,
                       ymax=mean+st.err),
                   width=.2, position=position_dodge(.25)) +
     ggtitle("Phytoplankton chlorophyl a over time")  
+#B. truncatus per capita eggs ##################
+  bt_eggs_per_cap<-subset(aggdata,variable=='bt_egg_perCap')
+  
+  bt_eggs_per_cap$Treatment<- factor(bt_eggs_per_cap$Treatment, levels=c("Control","Atrazine","ChlorP",
+                                                               "Fertilizer","Atrazine_ChlorP",
+                                                               "Atrazine_Fertilizer",
+                                                               "ChlorP_Fertilizer","All_Three"))
+  
+  ggplot(bt_eggs_per_cap, aes(x=variable, y=mean, fill=Treatment)) +
+    theme_bw()+
+    scale_fill_manual(values=cbPalette) +
+    geom_bar(position=position_dodge(), stat="identity", width=.7) +
+    geom_errorbar(aes(ymin=mean-st.err,
+                      ymax=mean+st.err),
+                  width=.2, position=position_dodge(.7)) +
+    ggtitle("Bt eggs per cap at end")
 
 #Does number of snails predict number of infected snails? ########################
 plot(x=dat$bg_liv_fin, y=dat$bg_inf_fin, cex=0.3, 

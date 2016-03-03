@@ -30,7 +30,7 @@ colnames(derp)[50]<-"Treatment"
 
 varbs<-colnames(derp)
 
-#Reshape to long format and merge data set to prepare for plotting #########################
+#Reshape to long format #########################
 derp2<-reshape(derp, varying = varbs[c(5:49)],
               v.names="measure",
               timevar="variable",
@@ -40,6 +40,39 @@ derp2<-reshape(derp, varying = varbs[c(5:49)],
 
 derp2<-derp2[,-c(1:4,8)] #Get rid of needless variables
 
+
+#Function to check out distribution of certain variable measures within a treatment ##############
+  dist<-function(data=derp2, varb, treat){
+    hist(data$measure[data$variable == varb & data$Treatment==treat], breaks=10, main=varb)
+  }
+  dist(varb='TBthatch1', treat='1_1_1')
+  dist(varb='TBthatch2', treat='1_1_1')
+  dist(varb='TBthatch3', treat='1_1_1')
+  dist(varb='TBthatch4', treat='1_1_1')
+  dist(varb='TBthatch8', treat='1_1_1')
+    
+#Before merging, check out snail hatchling numbers between groups to inform scalar of snail repro #######
+  derp3<-subset(derp, Treatment == "0_1_0" | Treatment == "1_1_0"
+                | Treatment == "1_1_1" | Treatment == "0_1_1")
+
+  derp3<-reshape(derp3, varying = varbs[c(5:49)],
+               v.names="measure",
+               timevar="variable",
+               times=varbs[c(5:49)],
+               new.row.names=1:1125,
+               direction="long")
+    derp3<-derp3[,-c(2:4,8)]
+      chlor_tanks<-unique(derp3$tank)
+    derp3$tank<-rep(seq(from=1, to=25, by=1), times=45)
+    
+    snail.scale<-data.frame('tank'=chlor_tanks, 
+                            "treat"= derp3[c(1:25),2], 
+                            "bt_hatch", 
+                            "bt_eggs", 
+                            "bg_hatch", 
+                            "bg_eggs")
+
+#merge data set to prepare for plotting ##########################
 aggdata1<-aggregate.data.frame(derp2, by=list(derp2[,1], derp2[,2]), FUN=mean) #calculate means of treatment groups
 aggdata1<-aggdata1[,-c(3,4)] #remove unneeded variables 
 colnames(aggdata1)<-c("Treatment", "variable", "mean")
@@ -62,7 +95,6 @@ aggdata<-merge(aggdata1, aggdata2, by=c("Treatment", "variable"))
   aggdata$Treatment[aggdata$Treatment=="1_1_1"]<- "All_Three"
   
   aggdata$Treatment<-as.factor(aggdata$Treatment)
-
 #Plot to visualize differences between treatment groups #######################
   cbPalette <- c("#999999", "yellow", "red", "green", "orange", "darkgreen", "pink", "blue")
   
@@ -225,7 +257,6 @@ bt.adult<-subset(aggdata,
     ggtitle("Longitudinal sampling of B. truncatus adults")  
   
   
-#Investigate more specific questions #####################  
 #Investigate/plot reproduction only in tanks containing chlorpyrifos ################
 cbPalette2 <- c("red", "purple","orange", "pink", "blue")
   
@@ -262,7 +293,20 @@ d8a<-subset(derp, Treatment == "0_1_0" |
     
     bt.rp$Treatment<- factor(bt.rp$Treatment, levels=c("ChlorP", "ChlorP2x", "Atrazine_ChlorP",
                                                        "ChlorP_Fertilizer","All_Three"))  
+   
+      
     
+#Tanks 36, 39, and 55 had predators survive ChlorP treatments. Did this affect hatchlings sampled?  ####
+ bt.rp$pred.surv<-'no'
+      bt.rp$pred.surv[bt.rp$tank==36]<-'yes'
+      bt.rp$pred.surv[bt.rp$tank==39]<-'yes'
+      bt.rp$pred.surv[bt.rp$tank==55]<-'yes'
+      
+    ggplot(bt.rp, aes(x=Time, y=Hatchlings, group=tank, color=pred.surv))+
+      theme_bw()+
+      geom_point(size=1.5)+
+      geom_line()
+#Aggregate data and plot #####################    
     bt.rp.agg1<-aggregate.data.frame(bt.rp, by=list(bt.rp[,2], bt.rp[,3]), FUN=mean) #calculate means of treatment groups
     bt.rp.agg1<-bt.rp.agg1[,-c(3:5,7)] #remove unneeded variables 
     colnames(bt.rp.agg1)<-c("Treatment", "Time", "mean")
@@ -318,3 +362,62 @@ d8a<-subset(derp, Treatment == "0_1_0" |
       ggtitle("B. glabrata hatchlings sampled over time")
 #Does not appear to be any significant effect of 2x chlorpyrifos dose on generation of hatchlings, implying
 # no effect of chlorpyrifos on reproduction as was found in Ibrahim 1992 where reproduction declined with increasing dose 
+#Plot individual tank results before aggregating ###############################
+  #B. truncatus egg prpoduction
+    bt.egg<-derp[,c(1,50,8,17,26,35,44)]
+    colnames(bt.egg)[c(3:7)]<-c("Week1","Week2","Week3","Week4","Week8")
+    
+    bt.egg<-reshape(bt.egg, varying = colnames(bt.egg[3:7]),
+                   v.names="Eggs",
+                   timevar="Time",
+                   times=colnames(bt.egg[3:7]),
+                   new.row.names=1:300,
+                   direction="long")
+    
+    bt.egg$Treatment[bt.egg$Treatment=="0_0_0"]<- "Control"
+    bt.egg$Treatment[bt.egg$Treatment=="1_0_0"]<- "Atrazine"
+    bt.egg$Treatment[bt.egg$Treatment=="0_1_0"]<- "ChlorP"
+    bt.egg$Treatment[bt.egg$Treatment=="0_0_1"]<- "Fertilizer"
+    bt.egg$Treatment[bt.egg$Treatment=="1_1_0"]<- "Atrazine_ChlorP"
+    bt.egg$Treatment[bt.egg$Treatment=="1_0_1"]<- "Atrazine_Fertilizer"
+    bt.egg$Treatment[bt.egg$Treatment=="0_1_1"]<- "ChlorP_Fertilizer"
+    bt.egg$Treatment[bt.egg$Treatment=="1_1_1"]<- "All_Three"
+    
+    bt.egg$Treatment<- factor(bt.egg$Treatment, levels=c("Control","Atrazine","ChlorP",
+                                                         "Fertilizer","Atrazine_ChlorP",
+                                                         "Atrazine_Fertilizer",
+                                                         "ChlorP_Fertilizer","All_Three"))
+    
+    ggplot(bt.egg, aes(x=Time, y=Eggs, group=tank, colour=Treatment))+
+      theme_bw()+
+      scale_color_manual(values=cbPalette) +
+      geom_line(position=position_dodge(.25), size=1) +
+      geom_point(position=position_dodge(.25), size=3.5) +
+      ggtitle("B. truncatus egg samplers")  
+    
+  control<-subset(bt.egg, Treatment=='Control')  
+    ggplot(control, aes(x=Time, y=Eggs, group=tank, color=tank))+
+      theme_bw()+
+      geom_line(position=position_dodge(.25), size=1) +
+      geom_point(position=position_dodge(.25), size=3.5)
+  atraz<-subset(bt.egg, Treatment=='Atrazine')
+    ggplot(atraz, aes(x=Time, y=Eggs, group=tank, color=tank))+
+      theme_bw()+
+      geom_line(position=position_dodge(.25), size=1) +
+      geom_point(position=position_dodge(.25), size=3.5)
+  chlorpyr<-subset(bt.egg, Treatment=='ChlorP')
+    ggplot(chlorpyr, aes(x=Time, y=Eggs, group=tank, color=tank))+
+      theme_bw()+
+      geom_line(position=position_dodge(.25), size=1) +
+      geom_point(position=position_dodge(.25), size=3.5)
+  fertiliz<-subset(bt.egg, Treatment=='Fertilizer')
+    ggplot(fertiliz, aes(x=Time, y=Eggs, group=tank, color=tank))+
+      theme_bw()+
+      geom_line(position=position_dodge(.25), size=1) +
+      geom_point(position=position_dodge(.25), size=3.5)
+  atra_chlorP<-subset(bt.egg, Treatment=='Atrazine_ChlorP')
+    ggplot(atra_chlorP, aes(x=Time, y=Eggs, group=tank, color=tank))+
+      theme_bw()+
+      geom_line(position=position_dodge(.25), size=1) +
+      geom_point(position=position_dodge(.25), size=3.5)
+    
