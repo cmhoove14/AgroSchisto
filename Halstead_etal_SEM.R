@@ -1,8 +1,24 @@
+#This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License#########
+#<http://creativecommons.org/licenses/by-nc/4.0/> by Christopher Hoover, Arathi Arakala, Manoj Gambhir 
+#and Justin Remais. This work was supported in part by the National Institutes of Health/National Science 
+#Foundation Ecology of Infectious Disease program funded by the Fogarty International Center 
+#(grant R01TW010286), the National Institute of Allergy and Infectious Diseases (grant K01AI091864), 
+#and the National Science Foundation Water Sustainability and Climate Program (grant 1360330).
+
+#Per the terms of this license, if you are making derivative use of this work, you must identify that 
+#your work is a derivative work, give credit to the original work, provide a link to the license, 
+#and indicate changes that were made.###############
+
 ###Load Libraries
 library(lavaan)
 library(AICcmodavg)
 source("lavaan.modavg.R")
 library(semPlot)
+library(ggplot2)
+st.er <- function(x) {
+  sd(x)/sqrt(length(x))
+}
+
 
 setwd('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Halstead_etal')
 ind <- read.csv("SEM_data.csv") # individually-transformed variables
@@ -26,7 +42,7 @@ summary(alg5.2.fit, rsq=T, standardized=T, modindices=F)
 # Extract latent variables
 algae <- predict(alg5.2.fit)
 ind <- cbind(ind, algae)
-write.csv(ind, file="indSchistoFinal2010.csv")
+#write.csv(ind, file="indSchistoFinal2010.csv")
 
 # Full structural equation model
 mod2.2 <- '
@@ -105,8 +121,9 @@ plot(ind$Pred.2, ind$Snail2.2, bty="l", xlab="Predator mortality", ylab="Snail d
 # Snails as a function of algae
 # Use residuals of relationship with predators
 Sn2.2resid <- resid(lm(ind$Snail2.2~ind$PredSurv))
-  
+
 #Chris' addition ##################
+  plot(x=ind$PredSurv, y=ind$Snail2.2, pch=19)
 ind$Sn2.2resid<-resid(lm(ind$Snail2.2~ind$PredSurv))
 #End Chris' addition ####################
   
@@ -133,7 +150,7 @@ plot(ind$Alg2.2, ind$Sn2.2resid, pch=19, bty="l", xlab="Algal production",
     #Line to just Fertilizer fit
       resid.fit.Fe <- lm(ind$Sn2.2resid[ind$Fe==1]~ind$Alg2.2[ind$Fe==1]+I(ind$Alg2.2[ind$Fe==1]^2))
       lines(sort(ind$Alg2.2[ind$Fe==1]), fitted(resid.fit.Fe)[order(ind$Alg2.2[ind$Fe==1])], col='green', lwd=2)
-    legend("topleft", legend=c('None (Control)', 'Atrazine','Chlorpyrifos', 'Atrazine'),
+    legend("topleft", legend=c('None (Control)', 'Atrazine','Chlorpyrifos', 'Fertilizer'),
            pch=c(20,17,15,16), col=c('black', 'yellow','red','green'), title="AgroCs Present")
 
 #Add unique treatment variable    
@@ -163,10 +180,50 @@ for(i in 1:length(ind$Tank)){
     
 #Get rid of negative residuals to calculate means and standard errors    
   ind$Sn2.2resid<-ind$Sn2.2resid-min(ind$Sn2.2resid)
-#Calculate means and standard errors of   
+#Anova to see if there are significant differences in resid snail density between treatments   
   anv<-aov(Sn2.2resid~Treats, data=ind)
     summary(anv)
   boxplot(Sn2.2resid~Treats, data=ind, ylab="Residual Snail Density", xlab="Treatments", cex.lab=1.5, cex.axis=1.2)
+#calc means/st. dev for treatment presence/absence
+  atra.1<-mean(ind$Sn2.2resid[ind$At==1])
+    atra.1.se<-st.er(ind$Sn2.2resid[ind$At==1])
+  atra.0<-mean(ind$Sn2.2resid[ind$At==0])
+    atra.0.se<-st.er(ind$Sn2.2resid[ind$At==0])
+  fert.1<-mean(ind$Sn2.2resid[ind$Fe==1])
+    fert.1.se<-st.er(ind$Sn2.2resid[ind$Fe==1])
+  fert.0<-mean(ind$Sn2.2resid[ind$Fe==0])
+    fert.0.se<-st.er(ind$Sn2.2resid[ind$Fe==0])
+  atra.fert.1<-mean(ind$Sn2.2resid[ind$Fe==1 & ind$At==1])
+    atra.fert.1.se<-st.er(ind$Sn2.2resid[ind$Fe==1 & ind$At==1])
+    
+t.test(y=ind$Sn2.2resid[ind$At==0], x=ind$Sn2.2resid[ind$At==1], alternative = 'greater')    
+t.test(y=ind$Sn2.2resid[ind$Fe==0], x=ind$Sn2.2resid[ind$Fe==1], alternative = 'greater')   
+t.test(y=ind$Sn2.2resid[ind$At==0], x=ind$Sn2.2resid[ind$Fe==1])
+t.test(y=ind$Sn2.2resid[ind$At==0], x=ind$Sn2.2resid[ind$Fe==0])    
+t.test(y=ind$Sn2.2resid[ind$Fe==1 & ind$At==1], x=ind$Sn2.2resid[ind$At==1], alternative = 'greater')    
+
+    
+bar.dat<-data.frame('Treatment'=c('Fert_Absent', 'Atra_Absent', 'Fert_Present', 'Atra_Present', 'Both_Present'),
+                      'mean'=c(atra.0,fert.0,atra.1,fert.1,atra.fert.1),
+                      'st.err'=c(atra.0.se,fert.0.se,atra.1.se,fert.1.se, atra.fert.1.se)) 
+  bar.dat$Treatment<-factor(bar.dat$Treatment, levels=c('Fert_Absent', 'Atra_Absent', 'Fert_Present', 
+                                                        'Atra_Present', 'Both_Present'))
+
+  bar.cols<-c('gray75', 'gray75', 'green2', 'gold2',  'darkolivegreen')
+  
+ggplot(bar.dat, aes(x=Treatment, y=mean, fill=Treatment)) +
+  theme_bw()+
+  theme(axis.title.x=element_text(size=20),
+        axis.title.y=element_text(size=20),
+        axis.text=element_text(size=15)) +
+  ylab('Residual Snail Density Means +/- St.err') +
+  scale_fill_manual(values=bar.cols) +
+  geom_bar(position=position_dodge(), stat="identity", width=.7) +
+  geom_errorbar(aes(ymin=mean-st.err,
+                    ymax=mean+st.err),
+                width=.2, position=position_dodge(.7))
+
+    
 #End Chris' addition ####################
 
 # Snails as a function of algae
