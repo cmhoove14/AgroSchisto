@@ -151,6 +151,12 @@ ind$Pred.2 <- ind$Pred+0.08067405
       lines(density(rbeta(5000, 17.5, 91.61)), col='red')
       legend('topleft', legend=c('normal', 'beta'), lty=1, 
              col=c('red', 'blue'), title='Distribution')
+  #Differences in algal production because of atrazine concentration?    
+    ap1.mean.2<-mean(ind1$Alg2.2[ind1$At==1 & ind1$Fe==0 & ind1$Treat1=='A 2x'])
+    ap1.mean.1<-mean(ind1$Alg2.2[ind1$At==1 & ind1$Fe==0 & ind1$Treat1=='A 1x'])
+    
+      t.test(ind1$Alg2.2[ind1$At==1 & ind1$Fe==0 & ind1$Treat1=='A 2x'], 
+            ind1$Alg2.2[ind1$At==1 & ind1$Fe==0 & ind1$Treat1=='A 1x'])
     #Beta and normal appear pretty similar    
       
   ap2.mean<-mean(ind1$Alg2.2[ind1$At==0 & ind1$Fe==1])
@@ -186,6 +192,24 @@ ind$Pred.2 <- ind$Pred+0.08067405
   #Try a 3d plot of bt_fin response to alg production and pred mortality
     cloud(bt_liv_fin ~ Alg2.2+Pred.2, data=ind1)  
       
+    
+#View relative changes in snail density across different treatment groups ###################
+  sn.dens.control<-mean(ind1$Snail2.2[ind1$At==0 & ind1$Ch==0 & ind1$Fe==0])
+  sn.dens.atra<-mean(ind1$Snail2.2[ind1$At==1 & ind1$Ch==0 & ind1$Fe==0])  
+  sn.dens.chlor<-mean(ind1$Snail2.2[ind1$At==0 & ind1$Ch==1 & ind1$Fe==0])
+  sn.dens.fert<-mean(ind1$Snail2.2[ind1$At==0 & ind1$Ch==0 & ind1$Fe==1])
+  sn.dens.atch<-mean(ind1$Snail2.2[ind1$At==1 & ind1$Ch==1 & ind1$Fe==0])
+  sn.dens.atfe<-mean(ind1$Snail2.2[ind1$At==1 & ind1$Ch==0 & ind1$Fe==1])
+  sn.dens.chfe<-mean(ind1$Snail2.2[ind1$At==0 & ind1$Ch==1 & ind1$Fe==1])
+  sn.dens.tre<-mean(ind1$Snail2.2[ind1$At==1 & ind1$Ch==1 & ind1$Fe==1])
+  
+  #Could be used as ~estimates of carrying capacity scalar
+    sn.dens.atch/sn.dens.chlor #1.182833
+    sn.dens.chfe/sn.dens.chlor #1.158195
+    sn.dens.tre/sn.dens.chlor #1.180074
+    
+  
+    
 #Now lets generate the regression equation to be used in predicting snail densities ##########################
  #(exploration of regression equations done in 'Halstead et al SEM snail dens decompose' script)    
 
@@ -194,6 +218,7 @@ ind$Pred.2 <- ind$Pred+0.08067405
     confint((lm.bt.end1))
     
   
+    
 #Now generate some data, informed by mesocosm data, to determine relative effect of algal production ########
  #on final B. truncatus counts
   bt.fin<-data.frame('Pred.2'=rnorm(10000, pm.mean, pm.sd), #Pred mortality for Chlorpyrifos studies to eliminate predation effect on snail numbers
@@ -266,6 +291,7 @@ ind$Pred.2 <- ind$Pred+0.08067405
     scale_fill_manual(values=c('purple', 'green2', 'gold2', 'orange'))  +
     geom_density(aes(group=Treatment, colour=Treatment, fill=Treatment, 
                      border='black'), alpha=0.5)
+  
   
 #Get relative increases in carrying capacity for each treatment########
   phi.n.ref<-rep(0,10000)
@@ -344,6 +370,7 @@ ind$Pred.2 <- ind$Pred+0.08067405
                   width=.2, position=position_dodge(.7))
     
     
+  
 #Aggregate and merge for bar plot ###################     
   bt.fin.agg1<-aggregate(bt.fin, by=list(bt.fin[,7]), FUN = mean)
 
@@ -374,6 +401,7 @@ ind$Pred.2 <- ind$Pred+0.08067405
     geom_errorbar(aes(ymin=Mean-st.err,
                       ymax=Mean+st.err),
                   width=.2, position=position_dodge(.7))
+  
 #Compare to observed data and estimate parameters########################
   bt.obs<-data.frame('Treatment'=
                        c('ChlorP','ChlorP+Fert',
@@ -492,6 +520,7 @@ ind$Pred.2 <- ind$Pred+0.08067405
     descdist(log(dat$bt_liv_fin[dat$chlor==1 & dat$atra==1 & dat$fert==1]))
     #Let's try an exponential distribution
     
+    
 #3/11/2016: Decided to estimate scalar of carrying capacity from mean values in observed data###################
   bt.obs$Scalar<-c((obs1.mean/obs1.mean),
                    (obs2.mean/obs1.mean),
@@ -523,6 +552,7 @@ ind$Pred.2 <- ind$Pred+0.08067405
     geom_errorbar(aes(ymin=Scalar_min,
                       ymax=Scalar_max),
                   width=.2, position=position_dodge(.7))
+  
   
   
 #Estimate scalar of carrying capacity based on distribution of observed data ###############
@@ -579,6 +609,7 @@ ind$Pred.2 <- ind$Pred+0.08067405
       geom_errorbar(aes(ymin=mean-st.d,
                         ymax=mean+st.d),
                     width=.2, position=position_dodge(.7))  
+    
     
 #Compare to regression prediction as opposed to generated data prediction ##########
   bt.reg<-data.frame('Tank'=ind1$Tank,

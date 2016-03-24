@@ -15,10 +15,12 @@
 
 require(ggplot2)
 require(reshape2)
+require(reshape)
 
 st.er <- function(x) {
   sd(x)/sqrt(length(x))
 } #Function to calculate standard error of the mean
+cbPalette <- c("#999999", "yellow", "red", "green", "orange", "darkgreen", "pink", "blue")
 
 dat<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Halstead_etal/R_use.csv")
 
@@ -101,6 +103,12 @@ treatments<-list(c("control", "atrazine_only", "chlorpyrifos_only", "fertilizer_
 chlor.all<-subset(dat, chlor==1)
   chlor.all$tank[chlor.all$all.pred_fin >=1] #Tanks 36, 39, & 55 had preds despite ChlorP presence
 
+#24 hour mortality of prawns in treatment groups
+  ggplot(dat, aes(x=V43, y=p.all_24, fill=V43, group=V43))+
+    theme_bw()+
+    scale_fill_manual(values=cbPalette) +
+    geom_bar(position=position_dodge(), stat="identity", width = .7)
+
 #Do periphyton levels predict final snail density (absent predation influence)? ########################
   chlorP<-subset(dat, chlor==1)
     plot(x=chlorP$peri_ave, y=chlorP$bt_liv_fin, 
@@ -158,7 +166,6 @@ aggdata4<-aggregate.data.frame(dat, by=list(dat[,43]), FUN=st.er) #calculate st.
 aggdata5<-merge(aggdata3, aggdata4, by.x="Group.1",by.y="Group.1") 
 
 #Plot to visualize differences between treatment groups #######################
-cbPalette <- c("#999999", "yellow", "red", "green", "orange", "darkgreen", "pink", "blue")
 
 #Predators alive at end #################
 preds.fin<-subset(aggdata, 
@@ -203,6 +210,65 @@ preds.24<-subset(aggdata,
                     ymax=mean+st.err),
                 width=.2, position=position_dodge(.7)) +
     ggtitle("Predators alive at 24 hrs")
+#What is the observed daily prawn mortality rate in chlorP-free tanks over the full 12 weeks?
+  p.0<-3*length(dat$tank[dat$chlor==0])
+  p.12<-sum(dat$p.all_fin[dat$chlor==0])
+    #daily mortality rate assuming constant death throughout 12 weeks =ln(Nt/N0)/-t with t=12 weeks *7 days=84 days
+      p.r<-log(p.12/p.0)/-84 #=0.006862177
+  
+#Check out proportion of P. alleni surviving after 24 hours in ChlorP presence/absence ####################
+  
+  prawn.tox<-data.frame('chlorP'=dat$chlor,
+                        'chlorP2'=dat$treat,
+                        'prawn.0'=rep(3,length(dat$chlor)),
+                        'prawn.24'=dat$p.all_24)
+  
+  prawn.tox$chlorP[prawn.tox$chlorP2=="C 2x"]<-2
+  
+  prawn.tox<-prawn.tox[,-2]
+  
+  prawn.tox2<-untable(prawn.tox[,c(1,3)], num=prawn.tox[,2])
+  
+  prawn.tox2$dose[prawn.tox2$chlorP==2]<-128
+  prawn.tox2$dose[prawn.tox2$chlorP==1]<-64
+  prawn.tox2$dose[prawn.tox2$chlorP==0]<-0
+  
+  prawn.tox2$outcome<-rep(0, length(prawn.tox2$chlorP))
+  
+  prawn.tox2$outcome[prawn.tox2$prawn.24==0]<-rep(c(1,1,1), length(prawn.tox2$prawn.24[prawn.tox2$prawn.24==0])/3)
+  prawn.tox2$outcome[prawn.tox2$prawn.24==1]<-rep(c(1,1,0), length(prawn.tox2$prawn.24[prawn.tox2$prawn.24==1])/3)
+  prawn.tox2$outcome[prawn.tox2$prawn.24==2]<-rep(c(1,0,0), length(prawn.tox2$prawn.24[prawn.tox2$prawn.24==2])/3)
+  prawn.tox2$outcome[prawn.tox2$prawn.24==3]<-rep(c(0,0,0), length(prawn.tox2$prawn.24[prawn.tox2$prawn.24==3])/3)
+
+#~*~*~*~DAILY MORTALITY RATES FOR PRAWN SPECIES~*~*~*~*~
+  sum(prawn.tox2$outcome[prawn.tox2$chlorP==2])/length(prawn.tox2$outcome[prawn.tox2$chlorP==2]) #60% mortality when chlorP present
+  -log(1-0.6) #Observed daily mortality rate = 0.9162907 when ChlorP @128 ug/L is present
+  
+  sum(prawn.tox2$outcome[prawn.tox2$chlorP==1])/length(prawn.tox2$outcome[prawn.tox2$chlorP==1]) #73.3% mortality when chlorP present
+    -log(1-0.766667) #Observed daily mortality rate = 1.455289 when ChlorP @64 ug/L is present
+  
+  sum(prawn.tox2$outcome[prawn.tox2$chlorP!=0])/length(prawn.tox2$outcome[prawn.tox2$chlorP!=0]) #73.3% mortality when chlorP present
+  -log(1-0.7333333) #Observed daily mortality rate = 1.321756 when ChlorP is present
+  
+  sum(prawn.tox2$outcome[prawn.tox2$chlorP==0])/length(prawn.tox2$outcome[prawn.tox2$chlorP==0]) #3.8% mortality when chlorP absent
+    -log(1-0.03809524) #Observed daily mortality rate = 0.03883984 when ChlorP is absent
+
+#Probit model with three tested doses
+  pr<-glm(outcome ~ dose, family=binomial(link="probit"),data=prawn.tox2)
+    summary(pr)
+    
+  tox.predict<-data.frame('dose'=seq(1,150,1),
+                          'mort'=rep(0,150),
+                          'st.er'=rep(0,150))
+  
+  tox.predict$mort<-predict(pr, tox.predict, type = "response", se.fit=TRUE)$fit
+  tox.predict$st.er<-predict(pr, tox.predict, type = "response", se.fit=TRUE)$se.fit
+  
+  plot(tox.predict$dose, tox.predict$mort, type='l', lwd=1.5,
+       xlab='Dose', ylab = '% mortality')
+    lines(tox.predict$dose, tox.predict$mort+tox.predict$st.er, col='red', lwd=0.8, lty=2)
+    lines(tox.predict$dose, tox.predict$mort-tox.predict$st.er, col='red', lwd=0.8, lty=2)
+    
 #Total snail reproduction ######################
 snail.repro<-subset(aggdata, 
                  variable=="bg_eggs" | variable=="bg_hatch" | variable=="bt_eggs" | variable=="bt_hatch")
