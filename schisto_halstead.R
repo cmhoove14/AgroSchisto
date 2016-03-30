@@ -158,7 +158,7 @@ parameters=c(
   ecotox$mu_P<- -0.25*log(1-ecotox[,2])
   ecotox[6,3]= -0.25*log(1-0.95) #Assume 95% mortality instead of full mortality for conservative estimate
   
-  #Probit analysis of contrived data (same pattern as in observed, but highest dose group has 95% mortality instead of 100% and used 100 in each dosage group instead of 5)
+  #Probit analysis of contrived data (same pattern as in observed, but highest dose group has 99% mortality instead of 100% and used 100 in each dosage group instead of 5)
     ecotox_mod1<-data.frame('dose'=c(rep(0,100), rep(0.64,100), rep(3.2,100), rep(6.4,100), rep(32,100), rep(64,100)),
                           'response'=c(rep(0,100), rep(0,100), rep(0,100), rep(0,100), rep(0,20), rep(1,179), rep(0,1)))
       ecotox1<-glm(response ~ dose, family=binomial(link="probit"),data=ecotox_mod1)
@@ -755,7 +755,7 @@ gg1<-ggplot(r0s.3, aes(x=Treatment, y=r0_0))+
     theme_bw()+
     theme(axis.title=element_text(size=14),
           axis.text=element_text(size=10))+
-    scale_y_continuous(breaks=c(0, 0.44, 0.5, 1.0, 1.07, 1.5, 2.0), limits=c(0,2))+
+    scale_y_continuous(breaks=c(0, 0.44, 0.5, 1.0, 1.07, 1.5), limits=c(0,2))+
     xlab("")+
     ylab(expression('R'[0]))+
   #Village R0 lines
@@ -833,7 +833,7 @@ gg1<-ggplot(r0s.3, aes(x=Treatment, y=r0_0))+
   gg2<-ggplot(p.ecotox, aes(x=dose, y=R0))+
     theme_bw()+
     theme(axis.text=element_text(size=10), axis.title=element_text(size=14))+
-    scale_y_continuous(breaks=c(0, 0.44, 0.5,1.0,1.07,1.5,2.0), limits=c(0,2))+
+    scale_y_continuous(breaks=c(0, 0.44, 0.5,1.0,1.07,1.5), limits=c(0,2))+
     scale_x_continuous(breaks=c(0,20,40,60,64), limits=c(0,70))+
     ylab(expression('R'[0]))+
     xlab(expression(paste('Chlorpyrifos concentration (', mu, 'g/L)', sep = '')))+
@@ -912,7 +912,7 @@ plot(p.ecotox$dose, p.ecotox$R0, type='l', bty='l', ylim=c(0,1.2), xlim=c(0,64),
     geom_tile(color='white', size=0.1)+
     scale_fill_continuous(low='grey90', high='black')+
     coord_equal()+
-    labs(x=expression(paste('Chloryrifos concentration (', mu, 'g/L)', sep = '')), 
+    labs(x=expression(paste('Chlorpyrifos concentration (', mu, 'g/L)', sep = '')), 
     #(x=expression(paste('Predator mortality rate (', mu[P][,][q], ')', sep = '')), axis label for predator mortality rate
          y=expression(paste('% increase in snail carrying capacity (', phi[N][,][q], ')', sep='')))+
     theme(axis.ticks=element_blank(), axis.text=element_text(size=10), axis.title=element_text(size=14),
