@@ -187,6 +187,24 @@ parameters=c(
     lines(x=p.ecotox2$dose, y=p.ecotox2$mortality+p.ecotox2$st.er, lty=2, col='red', cex=0.8)
     lines(x=p.ecotox2$dose, y=p.ecotox2$mortality-p.ecotox2$st.er, lty=2, col='red', cex=0.8)
       points(ecotox$dose, ecotox$mu_P, pch=16)
+      
+  #Observed 10-day mortality endpoints 
+    ecotox_mod3<-data.frame('dose'=c(rep(0,5), rep(0.64,5), rep(3.2,5), rep(6.4,5), rep(32,5), rep(64,5)),
+                              'response'=c(rep(0,5), rep(0,5), rep(0,5), rep(0,2), rep(1,13)))
+    ecotox3<-glm(response ~ dose, family=binomial(link="probit"),data=ecotox_mod3)
+      summary(ecotox3)
+      
+      #Extrapolate response to constant gradient of Chlorpyrifos concentration
+      p.ecotox3<-data.frame(dose=seq(from=0, to=150, by=1))
+      p.ecotox3[, c('mortality', 'st.er')]<-predict(ecotox3, p.ecotox3, 
+                                                    type = "response", se.fit=TRUE)
+    
+      plot(x=c(0,0.32,0.64,3.2,6.4,32,64), 
+           y=c(0,0,   0   ,0  ,3/5,5/5,5/5), xlab = "ChlorP Concentration", ylab = "%Mortality")
+      lines(x=p.ecotox3$dose, y=p.ecotox3$mortality, col='red')
+      lines(x=p.ecotox3$dose, y=p.ecotox3$mortality+p.ecotox3$st.er, lty=2, col='red', cex=0.8)
+      lines(x=p.ecotox3$dose, y=p.ecotox3$mortality-p.ecotox3$st.er, lty=2, col='red', cex=0.8)
+
   
   #Convert %mortality to mortality rate
   muPq1<-data.frame('mu_agro_p1' = -0.25*log(1-p.ecotox[,2]),
@@ -206,7 +224,7 @@ parameters=c(
       p.0<-3*length(dat$tank[dat$chlor==0]) #Total starting number of prawns in chloP-free tanks (3 in each)
       p.12<-sum(dat$p.all_fin[dat$chlor==0]) #Total surviving prawns in chlorP tanks at end of 12-week experiment
     #daily mortality rate assuming constant death throughout 12 weeks =ln(Nt/N0)/-t with t=12 weeks *7 days=84 days
-      p.r<-log(p.12/p.0)/-84 #=0.006862177
+      p.r<- log((p.0*120 - p.0*p.12) / (p.12*120 - p.0*p.12))/-84 #=0.006862177
       
   #What about using the 24 hour endpoints?  
     mesotox<-data.frame('chlorP'=dat$chlor,
@@ -337,11 +355,18 @@ get_Ro<-function(muPq, phi_Nq)
   H<-parameters["H"]
   mu_H<-parameters["mu_H"]
   
-  N_eq<-(1-(mu_N/f_N))/(phi_N*(1/phi_Nq)) #Equilibrium estimate of N given snail parameters
   P_eq<-(1-((muPq+mu_P)/f_P))/phi_P #Equilibrium estimate of P given prawn predator parameters
-    if(P_eq<0){
-      P_eq=0
-    }
+  if(P_eq<0){
+    P_eq=0
+  }
+  #Equilibrium estimate of N given snail parameters
+  #Shorthand values to use in N_eq expression
+  a=(alpha*Th)*(-f_N*phi_N*phi_Nq)
+  b=(-f_N*phi_N*phi_Nq) + (f_N - mu_N)*(alpha*Th)
+  c=(f_N - mu_N)-alpha*P_eq
+  
+  N_eq <- (-b - sqrt(b^2-4*a*c)) / (2*a) #Function to solve quadratic expression
+  
   pred<-(alpha*P_eq)/(1+(alpha*N_eq*Th))#death rate of snails due to predators given equilibrium estimates of P and N
   
   T1<-0.5*beta*m*H*N_eq
@@ -669,11 +694,23 @@ r0s.box2<-data.frame('At'=R0_atra2,
         H<-parameters["H"]
         mu_H<-parameters["mu_H"]
         
-        N_eq<-(1-(mu_N/f_N))/(phi_N*(1/phi_Nq)) #Equilibrium estimate of N given snail parameters
         P_eq<-(1-((muPq+mu_P)/f_P))/phi_P #Equilibrium estimate of P given prawn predator parameters
         if(P_eq<0){
           P_eq=0
         }
+        #Equilibrium estimate of N given snail parameters
+        #Shorthand values to use in N_eq expression
+        a= -(alpha*Th*f_N*phi_N*phi_Nq^-1)
+        b= f_N*alpha*Th - mu_N*alpha*Th - f_N*phi_N*phi_Nq^-1
+        c= f_N - mu_N - alpha*P_eq
+        
+        if((b^2-4*a*c)<0){ #If prawn population sufficient to eliminate snails, N_eq=0
+          N_eq=0
+        } else {
+          N_eq <- (-b - sqrt(b^2-4*a*c)) / (2*a) #Function to solve quadratic expression for N_eq
+        }
+        
+        
         pred<-(alpha*P_eq)/(1+(alpha*N_eq*Th))#death rate of snails due to predators given equilibrium estimates of P and N
         
         T1<-0.5*beta*m*H*N_eq
@@ -691,7 +728,7 @@ r0s.box2<-data.frame('At'=R0_atra2,
     parameters["phi_P"]<-1/(40*3)    
     beta_0=1.1128e-6
     beta_up=1.5484e-06
-    beta_lo=4e-07#beta value corresponding to R0 of 1.01; previous value was 4e-7
+    beta_lo=4e-07
 
 #village R0        
   R0_vil=1.068942 #1.068942
@@ -748,7 +785,7 @@ r0s.3<-data.frame("Treatment"=c('At', 'Ch', 'Fe',
 
 r0s.3$Treatment<-factor(r0s.3$Treatment, levels = c('Fe', 'At', 'At:Fe', #Bottom up effects only
                                                     'Ch', #Top-down effects only
-                                                    'At:Ch',  'Ch:Fe',  'At:Ch:Fe')) #Both top-down and bottom-up effects
+                                                    'Ch:Fe', 'At:Ch',   'At:Ch:Fe')) #Both top-down and bottom-up effects
 
 gg1<-ggplot(r0s.3, aes(x=Treatment, y=r0_0))+
   #Theme formatting
@@ -790,10 +827,10 @@ gg1<-ggplot(r0s.3, aes(x=Treatment, y=r0_0))+
 
 #Check out estimates of mean worm burden (W) given these paremeters ####################
   #Starting values
-    p=3*39
+    p=1
     nstart=c(S=10000,E=0,I=0, W=6, P=p)
     parameters["mu_P"]<-0.03883984
-    parameters["muPq"]<-mesorate.chlorPres
+    parameters["muPq"]<-0
     parameters["phi_P"]<-1/(3*40)
     parameters["beta"]<-1.1128e-06
   #Run
@@ -802,15 +839,32 @@ gg1<-ggplot(r0s.3, aes(x=Treatment, y=r0_0))+
   eqbm.0<-output.0[365*yrs,]
   eqbm.0
   
-  mu_P=parameters["mu_P"]
+  #Eliminate predator population
+    parameters["muPq"]=parameters["f_P"]-parameters["mu_P"]
+    
+  #Run
+  output.p0=as.data.frame(ode(nstart,time,schisto_halstead,parameters)) 
+    
+    eqbm.p0<-output.p0[365*yrs,]
+    eqbm.p0
+    
+  #Now add in bottom-up effects
+    parameters["phi_Nq"]=1.614304
+    
+  #Run
+    output.p0b=as.data.frame(ode(nstart,time,schisto_halstead,parameters)) 
+    
+    eqbm.p0b<-output.p0b[365*yrs,]
+    eqbm.p0b  
+    
   
-  parameters["muPq"]<-1.321756-parameters["mu_P"]
-  
+
   
   
 #Plot R0 response across chlorP doses #####################
+  parameters["phi_Nq"]=1
   parameters["muPq"]=0
-  parameters["muP"]=0 #let's just make all mortality due to mortality observed in ecotox study
+  parameters["mu_P"]=0 #let's just make all mortality due to mortality observed in ecotox study
   p.ecotox$rate0<- -log(1-p.ecotox$mort)
     p.ecotox$rate.up<- -log(1-(p.ecotox$mort+(1.96*p.ecotox$st.er)))
       p.ecotox$rate.up[is.na(p.ecotox$rate.up)]<-max(p.ecotox$rate.up[p.ecotox$rate.up!=Inf], na.rm=T)
@@ -854,9 +908,9 @@ plot(p.ecotox$dose, p.ecotox$R0, type='l', bty='l', ylim=c(0,1.2), xlim=c(0,64),
   
 #Create a heat map of R0 values across different chlorP doses and snail carrying capacity values ################
   chlorP.doses<-c(0, 0.32, 0.64, 3.2, 6.4, 32, 64)#doses used in ecotox Halstead paper
-    rat.doses<-predict(ecotox1, data.frame('dose'=chlorP.doses), 
+    rat.doses<-predict(ecotox10, data.frame('dose'=chlorP.doses), 
                         type = "response", se.fit=TRUE)$fit
-    rate.doses<- -log(1-rat.doses)
+    rate.doses<- rat.doses/10
   phiNq.doses<-seq(1,1.6,by=.1)
   phiNq.doses.percent<-seq(0,60, by=10)
   
@@ -888,15 +942,14 @@ plot(p.ecotox$dose, p.ecotox$R0, type='l', bty='l', ylim=c(0,1.2), xlim=c(0,64),
                                      rep(chlorP.doses[6],7),
                                      rep(chlorP.doses[7],7)))
   
-  r0.doses.df$mort<-predict(ecotox1, r0.doses.df, type = "response", se.fit=TRUE)$fit
-  r0.doses.df$rate<- round(-log(1-r0.doses.df$mort), digits=4)
-    r0.doses.df$rate<-factor(r0.doses.df$rate, levels=c(r0.doses.df$rate[1],
-                                                        r0.doses.df$rate[8],
-                                                        r0.doses.df$rate[15],
-                                                        r0.doses.df$rate[22],
-                                                        r0.doses.df$rate[29],
-                                                        r0.doses.df$rate[36],
-                                                        r0.doses.df$rate[43]))
+  r0.doses.df$mort<-predict(ecotox10, r0.doses.df, type = "response", se.fit=TRUE)$fit/10
+    r0.doses.df$mort<-factor(r0.doses.df$mort, levels=c(r0.doses.df$mort[1],
+                                                        r0.doses.df$mort[8],
+                                                        r0.doses.df$mort[15],
+                                                        r0.doses.df$mort[22],
+                                                        r0.doses.df$mort[29],
+                                                        r0.doses.df$mort[36],
+                                                        r0.doses.df$mort[43]))
     
     r0.doses.df$dose<-factor(r0.doses.df$dose, levels=c(r0.doses.df$dose[1],
                                                         r0.doses.df$dose[8],
@@ -910,7 +963,7 @@ plot(p.ecotox$dose, p.ecotox$R0, type='l', bty='l', ylim=c(0,1.2), xlim=c(0,64),
   gg3<-ggplot(r0.doses.df, aes(x=dose, y=PhiNq, fill=R0))+
     theme_bw()+
     geom_tile(color='white', size=0.1)+
-    scale_fill_continuous(low='grey90', high='black')+
+    scale_fill_continuous(low='green', high='red')+
     coord_equal()+
     labs(x=expression(paste('Chlorpyrifos concentration (', mu, 'g/L)', sep = '')), 
     #(x=expression(paste('Predator mortality rate (', mu[P][,][q], ')', sep = '')), axis label for predator mortality rate
@@ -918,6 +971,97 @@ plot(p.ecotox$dose, p.ecotox$R0, type='l', bty='l', ylim=c(0,1.2), xlim=c(0,64),
     theme(axis.ticks=element_blank(), axis.text=element_text(size=10), axis.title=element_text(size=14),
           legend.title=element_text(size=15), legend.text=element_text(size=12))+
     geom_text(label='C', x=0.75, y=7.25, size=10, alpha=.50)
+  
+#Replace snail carrying capacity scalar with atrazine dose-response that Jason sent (extracted from Baxter paper) ####################
+  r0.atra.chlor<-data.frame("Atra" = rep(c(0,1,10,100), 7),
+                            "dose" = rep(chlorP.doses, each=4),
+                            "f_N" = rep(c(1, 1.289, 1.653, 2.32)*0.16, 7),
+                            "phi_Nq" = rep(seq(from = 1, to = 1.614304, by = 0.614304/3), 7),
+                            "mort" = rep(0,28),
+                            "rate" = rep(0,28),
+                            "R0" = rep(0,28))
+  r0.atra.chlor$mort<-predict(ecotox1, r0.atra.chlor, 
+                              type = "response", se.fit=TRUE)$fit #fill mortality rate data from model
+  
+  r0.atra.chlor$rate = -log(1-r0.atra.chlor$mort)
+  
+  #custom get r0 function to include variable snail birth rate as well as carrying capacity
+  get_Ro<-function(muPq, phi_Nq, beta, f_N) #added beta to the call list so easier to change
+  {   #HAVE TO SET muPq and phi_Nq in function call
+    phi_N<-parameters["phi_N"]
+    z<-parameters["z"]
+    mu_N<-parameters["mu_N"]
+    sigma<-parameters["sigma"]
+    mu_I<-parameters["mu_I"]
+    alpha<-parameters["alpha"]
+    Th<-parameters["Th"]
+    f_P<-parameters["f_P"]
+    phi_P<-parameters["phi_P"]
+    mu_P<-parameters["mu_P"]
+    lamda<-parameters["lamda"]
+    mu_W<-parameters["mu_W"]
+    m<-parameters["m"]
+    H<-parameters["H"]
+    mu_H<-parameters["mu_H"]
+    
+    P_eq<-(1-((muPq+mu_P)/f_P))/phi_P #Equilibrium estimate of P given prawn predator parameters
+    if(P_eq<0){
+      P_eq=0
+    }
+    #Equilibrium estimate of N given snail parameters
+    #Shorthand values to use in N_eq expression
+    a= -(alpha*Th*f_N*phi_N*phi_Nq^-1)
+    b= f_N*alpha*Th - mu_N*alpha*Th - f_N*phi_N*phi_Nq^-1
+    c= f_N - mu_N - alpha*P_eq
+    
+    if((b^2-4*a*c)<0){ #If prawn population sufficient to eliminate snails, N_eq=0
+      N_eq=0
+    } else {
+      N_eq <- (-b - sqrt(b^2-4*a*c)) / (2*a) #Function to solve quadratic expression for N_eq
+    }
+    
+    
+    pred<-(alpha*P_eq)/(1+(alpha*N_eq*Th))#death rate of snails due to predators given equilibrium estimates of P and N
+    
+    T1<-0.5*beta*m*H*N_eq
+    T2<-lamda*sigma
+    T3<- (mu_W+mu_H)*(mu_N+pred+sigma)*(mu_N+pred+mu_I)
+    
+    Ro_est <- sqrt((T1*T2)/T3)
+    
+    print(N_eq)
+    print(P_eq)
+    Ro_est 
+    
+  }
+  #make sure parameters are ready for model runs
+  parameters["mu_P"]=0
+  parameters["phi_P"]=1/(3*40)
+  
+  for(i in 1:nrow(r0.atra.chlor)){
+    r0.atra.chlor[i,7] = get_Ro(muPq = r0.atra.chlor[i,6],
+                           phi_Nq = r0.atra.chlor[i,4],
+                           beta = beta_0,
+                           f_N = r0.atra.chlor[i,3])
+  }
+  
+  r0.atra.chlor$Atra<-factor(r0.atra.chlor$Atra, levels=c(0, 1, 10, 100))
+  r0.atra.chlor$dose<-factor(r0.atra.chlor$dose, levels=c(0, 0.32, 0.64, 3.2, 6.4, 32, 64))
+  
+  
+  #plot the heat map
+  ggplot(r0.atra.chlor, aes(x=dose, y=Atra, fill=R0))+
+    theme_bw()+
+    geom_tile(color='white', size=0.1)+
+    scale_fill_continuous(low='green', high='red')+
+    coord_equal()+
+    labs(x=expression(paste('Chlorpyrifos concentration (', mu, 'g/L)', sep = '')), 
+         #(x=expression(paste('Predator mortality rate (', mu[P][,][q], ')', sep = '')), axis label for predator mortality rate
+         y=expression(paste('Atrazine concentration (', mu, 'g/L)', sep = '')))+
+    theme(axis.ticks=element_blank(), axis.text=element_text(size=10), axis.title=element_text(size=14),
+          legend.title=element_text(size=15), legend.text=element_text(size=12))+
+    geom_text(label='C', x=0.75, y=7.25, size=10, alpha=.50)
+  
     
   
   
