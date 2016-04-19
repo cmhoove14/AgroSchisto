@@ -19,23 +19,25 @@ require(reshape2)
 st.er <- function(x) {
   sd(x)/sqrt(length(x))
 } #Function to calculate standard error of the mean
+cbPalette <- c("#999999", "yellow", "red", "green", "orange", "darkgreen", "pink", "blue")
+
 
 derp<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Halstead_etal/snail_repro.csv")
 
 for(i in 1:nrow(derp)){
-  derp[i,50]=paste(derp[i,2], derp[i,3], derp[i,4], sep="_")
+  derp[i,5]=paste(derp[i,2], derp[i,3], derp[i,4], sep="_")
 } #Add unique treatment code to data frame
-treats<-unique(derp[,50])
-colnames(derp)[50]<-"Treatment"
+treats<-unique(derp[,5])
+colnames(derp)[5]<-"Treatment"
 
 varbs<-colnames(derp)
 
 #Reshape to long format #########################
-derp2<-reshape(derp, varying = varbs[c(5:49)],
+derp2<-reshape(derp, varying = varbs[c(6:65)],
               v.names="measure",
               timevar="variable",
-              times=varbs[c(5:49)],
-              new.row.names=1:2700,
+              times=varbs[c(6:65)],
+              new.row.names=1:3600,
               direction="long")
 
 derp2<-derp2[,-c(1:4,8)] #Get rid of needless variables
@@ -55,15 +57,15 @@ derp2<-derp2[,-c(1:4,8)] #Get rid of needless variables
   derp3<-subset(derp, Treatment == "0_1_0" | Treatment == "1_1_0"
                 | Treatment == "1_1_1" | Treatment == "0_1_1")
 
-  derp3<-reshape(derp3, varying = varbs[c(5:49)],
+  derp3<-reshape(derp3, varying = varbs[c(6:65)],
                v.names="measure",
                timevar="variable",
-               times=varbs[c(5:49)],
-               new.row.names=1:1125,
+               times=varbs[c(6:65)],
+               new.row.names=1:1500,
                direction="long")
     derp3<-derp3[,-c(2:4,8)]
       chlor_tanks<-unique(derp3$tank)
-    derp3$tank<-rep(seq(from=1, to=25, by=1), times=45)
+    derp3$tank<-rep(seq(from=1, to=25, by=1), times=60)
     
     snail.scale<-data.frame('tank'=chlor_tanks, 
                             "treat"= derp3[c(1:25),2], 
@@ -96,8 +98,6 @@ aggdata<-merge(aggdata1, aggdata2, by=c("Treatment", "variable"))
   
   aggdata$Treatment<-as.factor(aggdata$Treatment)
 #Plot to visualize differences between treatment groups #######################
-  cbPalette <- c("#999999", "yellow", "red", "green", "orange", "darkgreen", "pink", "blue")
-  
 #Biomphalaria glabrata egg masses #################
 bg.eggs<-subset(aggdata, 
                   variable=="TBgegg1" | variable=="TBgegg2" | variable=="TBgegg3" | 
@@ -195,6 +195,8 @@ bt.eggs<-subset(aggdata,
   
   ggplot(bt.eggs, aes(x=Time, y=mean, group=Treatment, color=Treatment)) +
     theme_bw()+
+    theme(axis.title=element_text(size=14),
+          axis.text=element_text(size=15))+
     scale_color_manual(values=cbPalette) +
     geom_line(position=position_dodge(.25), size=1) +
     geom_point(position=position_dodge(.25), size=3.5) +
@@ -221,6 +223,8 @@ bt.hatch<-subset(aggdata,
   
   ggplot(bt.hatch, aes(x=Time, y=mean, group=Treatment, color=Treatment)) +
     theme_bw()+
+    theme(axis.title=element_text(size=14),
+          axis.text=element_text(size=15))+
     scale_color_manual(values=cbPalette) +
     geom_line(position=position_dodge(.25), size=1) +
     geom_point(position=position_dodge(.25), size=3.5) +
@@ -228,6 +232,21 @@ bt.hatch<-subset(aggdata,
                       ymax=mean+st.err),
                   width=.2, position=position_dodge(.25)) +
     ggtitle("B. truncatus hatchlings sampled over time")  
+  
+  bt.hatch$log_mean= log(bt.hatch$mean+1)
+  
+  lm.ch<-lm(bt.hatch$log_mean[bt.hatch$Treatment=="ChlorP"][c(1:4)] ~ c(0,7,14,21))
+    summary(lm.ch) #slope = 0.10395
+    
+  lm.ch.at<-lm(bt.hatch$log_mean[bt.hatch$Treatment=="Atrazine_ChlorP"][c(1:4)] ~ c(0,7,14,21))
+    summary(lm.ch.at) #slope = 0.13433
+    
+  lm.ch.fe<-lm(bt.hatch$log_mean[bt.hatch$Treatment=="ChlorP_Fertilizer"][c(1:4)] ~ c(0,7,14,21))
+    summary(lm.ch.fe) #slope = 0.14115
+    
+  lm.ch.atfe<-lm(bt.hatch$log_mean[bt.hatch$Treatment=="All_Three"][c(1:3)] ~ c(0,7,14))
+    summary(lm.ch.atfe) #slope = 0.1895
+    
 #Bulinus truncatus adults #################
 bt.adult<-subset(aggdata, 
                    variable=="TBtadult1" | variable=="TBtadult2" | variable=="TBtadult3" | 
