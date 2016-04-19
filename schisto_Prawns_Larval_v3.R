@@ -143,7 +143,6 @@ eqbm<-output[365*yrs,]
 eqbm
 
 #Plot changes over time period #############################################
-quartz()
 par(mfrow=c(1,1))
 plot(output[,1], output[,2], type='l', xlab="time",ylab="System Variables",
      main=paste("Prawns start=",p, "N=", output[365*yrs,2]+output[365*yrs,3]+output[365*yrs,4], sep=" "), sub = paste("inv of prawn carrying cap = ", parameters["phi_P"], sep=""),
