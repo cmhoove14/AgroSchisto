@@ -29,6 +29,7 @@ for(i in 1:nrow(dat)){
   dat[i,43]=paste(dat[i,2], dat[i,3], dat[i,4], sep="_")
 } #Add unique treatment code to data frame
   treats<-unique(dat[,43])
+  colnames(dat)[43]<-"agroCs"
   
 for(i in 1:nrow(dat)){
     dat[i,44]=100*(dat[i,30]/dat[i,29])
@@ -75,9 +76,71 @@ for(i in 1:nrow(dat)){
   colnames(dat)[51]<-"bt_egg_perCap"
     dat$bt_egg_perCap[dat$bt_egg_perCap==Inf]<-NA
     dat$bt_egg_perCap[is.na(dat$bt_egg_perCap)==TRUE]<-0
+    
+for(i in 1:nrow(dat)){
+      dat[i,52]=dat[i,29] + dat[i,32] + dat[i,35]
+}  #Calculate total live snail density at the end of the mesocosm
+    colnames(dat)[52]<-"total_live"
+    
+for(i in 1:nrow(dat)){
+      dat[i,53]=dat[i,31] + dat[i,34] + dat[i,36]
+}  #Calculate total snails at the end of the mesocosm
+    colnames(dat)[53]<-"total_snail"
+    
+for(i in 1:nrow(dat)){
+      dat[i,54]=dat[i,23] + dat[i,25] + dat[i,27]
+}  #Calculate total snail egg production through entire mesocosm
+    colnames(dat)[54]<-"total_eggs"
+    
+for(i in 1:nrow(dat)){
+      dat[i,55]=dat[i,24] + dat[i,26] + dat[i,28]
+}  #Calculate total snail egg production through entire mesocosm
+    colnames(dat)[55]<-"total_hatch"
+    
+for(i in 1:nrow(dat)){
+      dat[i,56]=dat[i,54] / (dat[i,55]+1)
+}  #Estimate per-capita reproduction by dividing egg masses sampled by hatchlings sampled
+    #Assumption is that hatchlings sampled approximates number of additional reproducing snails in the population
+    colnames(dat)[56]<-"per_cap_eggs"
+   
+for(i in 1:nrow(dat)){
+      dat[i,57]=dat[i,32] - 11
+}  #Change in B. truncatus population (started with 11 adults)
+    colnames(dat)[57]<-"bt_change"  
+    
+for(i in 1:nrow(dat)){
+      dat[i,58]=dat[i,29] - 27
+}  #Change in B. glabrata population (started with 27 adults)
+    colnames(dat)[58]<-"bg_change" 
+    
+for(i in 1:nrow(dat)){
+      dat[i,59]=dat[i,35] - 30
+}  #Change in H. cubensis population (started with 30 adults)
+    colnames(dat)[59]<-"hs_change" 
   
 varbs<-colnames(dat) #retrieve variable names
 
+#Final snail numbers in different treatments ##############
+  sum(dat$bt_liv_fin[dat$chlor==1],dat$bg_liv_fin[dat$chlor==1],dat$hs_liv_fin[dat$chlor==1])
+  sum(dat$bt_liv_fin[dat$chlor==0],dat$bg_liv_fin[dat$chlor==0],dat$hs_liv_fin[dat$chlor==0])
+  
+  fin_num.o<-data.frame(dat$treat[dat$chlor==0], 
+                      dat$bt_liv_fin[dat$chlor==0],
+                      dat$bg_liv_fin[dat$chlor==0],
+                      dat$hs_liv_fin[dat$chlor==0])
+  
+  sum(fin_num.o$dat.bt_liv_fin.dat.chlor....0.)
+  
+  fin_num.c<-data.frame(dat$treat[dat$chlor==1], 
+                        dat$bt_liv_fin[dat$chlor==1],
+                        dat$bg_liv_fin[dat$chlor==1],
+                        dat$hs_liv_fin[dat$chlor==1])
+  
+  sum(fin_num.c$dat.bt_liv_fin.dat.chlor....1.)
+  sum(fin_num.c$dat.bt_liv_fin.dat.chlor....1.[fin_num.c$dat.treat.dat.chlor....1.=="C 2x"])
+  sum(fin_num.c$dat.bt_liv_fin.dat.chlor....1.[fin_num.c$dat.treat.dat.chlor....1.=="C 1x"])
+  
+    
 #Create subset data frames for each treatment ############################
 control<-subset(dat, atra==0 & chlor==0 & fert==0)
 
@@ -104,12 +167,12 @@ chlor.all<-subset(dat, chlor==1)
   chlor.all$tank[chlor.all$all.pred_fin >=1] #Tanks 36, 39, & 55 had preds despite ChlorP presence
 
 #24 hour mortality of prawns in treatment groups
-  ggplot(dat, aes(x=V43, y=p.all_24, fill=V43, group=V43))+
+  ggplot(dat, aes(x=agroCs, y=p.all_24, fill=agroCs, group=agroCs))+
     theme_bw()+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width = .7)
 
-#Do periphyton levels predict final snail density (absent predation influence)? ########################
+#Do periphyton levels predict final snail density (absent predation influence, i.e. chlorP present)? ########################
   chlorP<-subset(dat, chlor==1)
     plot(x=chlorP$peri_ave, y=chlorP$bt_liv_fin, 
          pch=16, col="blue",
@@ -118,14 +181,15 @@ chlor.all<-subset(dat, chlor==1)
            pch=16, col="red")
 
 #Reshape to long format and merge data set to prepare for plotting #########################
-dat2<-reshape(dat, varying = varbs[c(13:42,44:49,51)],
+dat2<-reshape(dat, varying = varbs[c(13:42,44:49,51:59)],
               v.names="measure",
               timevar="variable",
-              times=varbs[c(13:42,44:49,51)],
-              new.row.names=1:2220,
+              times=varbs[c(13:42,44:49,51:59)],
+              drop = varbs[c(1:12, 50)],
+              new.row.names=1:3000,
               direction="long")
 
-dat2<-dat2[,-c(1:12,14,17)] #Get rid of needless variables
+dat2<-dat2[,-4] #Get rid of needless variables
 
 aggdata1<-aggregate.data.frame(dat2, by=list(dat2[,1], dat2[,2]), FUN=mean) #calculate means of treatment groups
   aggdata1<-aggdata1[,-c(3,4)] #remove unneeded variables 
@@ -182,12 +246,14 @@ preds.fin<-subset(aggdata,
 
   ggplot(preds.fin, aes(x=Species, y=mean, fill=Treatment)) +
     theme_bw()+
+    theme(axis.title=element_text(size=14),
+          axis.text=element_text(size=15))+
+    ylim(c(0,3))+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width = .7) +
     geom_errorbar(aes(ymin=mean-st.err,
                       ymax=mean+st.err),
-                  width=.2, position=position_dodge(.7)) +
-    ggtitle("Predators alive at end")
+                  width=.2, position=position_dodge(.7))
   
 #Predators alive at 24 hours ########################
 preds.24<-subset(aggdata, 
@@ -204,17 +270,15 @@ preds.24<-subset(aggdata,
   
   ggplot(preds.24, aes(x=Species, y=mean, fill=Treatment)) +
     theme_bw()+
+    theme(axis.title=element_text(size=14),
+          axis.text=element_text(size=15))+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width=.7) +
     geom_errorbar(aes(ymin=mean-st.err,
                     ymax=mean+st.err),
                 width=.2, position=position_dodge(.7)) +
-    ggtitle("Predators alive at 24 hrs")
-#What is the observed daily prawn mortality rate in chlorP-free tanks over the full 12 weeks?
-  p.0<-3*length(dat$tank[dat$chlor==0])
-  p.12<-sum(dat$p.all_fin[dat$chlor==0])
-    #daily mortality rate assuming constant death throughout 12 weeks =ln(Nt/N0)/-t with t=12 weeks *7 days=84 days
-      p.r<-log(p.12/p.0)/-84 #=0.006862177
+    ylab("Predators alive at 24 hrs")
+  
   
 #Check out proportion of P. alleni surviving after 24 hours in ChlorP presence/absence ####################
   
@@ -269,29 +333,51 @@ preds.24<-subset(aggdata,
     lines(tox.predict$dose, tox.predict$mort+tox.predict$st.er, col='red', lwd=0.8, lty=2)
     lines(tox.predict$dose, tox.predict$mort-tox.predict$st.er, col='red', lwd=0.8, lty=2)
     
-#Total snail reproduction ######################
-snail.repro<-subset(aggdata, 
-                 variable=="bg_eggs" | variable=="bg_hatch" | variable=="bt_eggs" | variable=="bt_hatch")
+#Total snail egg production ######################
+snail.eggs<-subset(aggdata, 
+                 variable=="bg_eggs" | variable=="bt_eggs" | variable=="hs_eggs")
 
-  snail.repro$variable[snail.repro$variable=="bg_eggs"]<-"B. glabrata eggs"
-  snail.repro$variable[snail.repro$variable=="bg_hatch"]<-"B. glabrata hatchlings"
-  snail.repro$variable[snail.repro$variable=="bt_eggs"]<-"B. truncatus eggs"
-  snail.repro$variable[snail.repro$variable=="bt_hatch"]<-"B. truncatus hatchlings"
-  colnames(snail.repro)[2]<-"Species"
+  snail.eggs$variable[snail.eggs$variable=="bg_eggs"]<-"B. glabrata eggs"
+  snail.eggs$variable[snail.eggs$variable=="bt_eggs"]<-"B. truncatus eggs"
+  snail.eggs$variable[snail.eggs$variable=="hs_eggs"]<-"H. cubensis eggs"
+  colnames(snail.eggs)[2]<-"Species"
   
-  snail.repro$Treatment<- factor(snail.repro$Treatment, levels=c("Control","Atrazine","ChlorP",
+  snail.eggs$Treatment<- factor(snail.eggs$Treatment, levels=c("Control","Atrazine","ChlorP",
                                                            "Fertilizer","Atrazine_ChlorP",
                                                            "Atrazine_Fertilizer",
                                                            "ChlorP_Fertilizer","All_Three"))
   
-  ggplot(snail.repro, aes(x=Species, y=mean, fill=Treatment)) +
+  ggplot(snail.eggs, aes(x=Species, y=mean, fill=Treatment)) +
     theme_bw()+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width=.7) +
     geom_errorbar(aes(ymin=mean-st.err,
                     ymax=mean+st.err),
                 width=.2, position=position_dodge(.7)) +
-    ggtitle("Snail reproduction at end")
+    ggtitle("Total snail egg masses sampled")
+  
+#Total snail hatchling production ######################
+  snail.hatch<-subset(aggdata, 
+                     variable=="bg_hatch" | variable=="bt_hatch" | variable=="hs_hatch")
+  
+  snail.hatch$variable[snail.hatch$variable=="bg_eggs"]<-"B. glabrata hatchlings"
+  snail.hatch$variable[snail.hatch$variable=="bt_eggs"]<-"B. truncatus hatchlings"
+  snail.hatch$variable[snail.hatch$variable=="hs_eggs"]<-"H. cubensis hatchlings"
+  colnames(snail.hatch)[2]<-"Species"
+  
+  snail.hatch$Treatment<- factor(snail.hatch$Treatment, levels=c("Control","Atrazine","ChlorP",
+                                                               "Fertilizer","Atrazine_ChlorP",
+                                                               "Atrazine_Fertilizer",
+                                                               "ChlorP_Fertilizer","All_Three"))
+  
+  ggplot(snail.hatch, aes(x=Species, y=mean, fill=Treatment)) +
+    theme_bw()+
+    scale_fill_manual(values=cbPalette) +
+    geom_bar(position=position_dodge(), stat="identity", width=.7) +
+    geom_errorbar(aes(ymin=mean-st.err,
+                      ymax=mean+st.err),
+                  width=.2, position=position_dodge(.7)) +
+    ggtitle("Total snail hatchlings sampled")
   
 #"Global" estimate of reproduction rate (r) based on final number of live snails ##########
 rep_r<-subset(aggdata, 
@@ -315,12 +401,13 @@ rep_r<-subset(aggdata,
                       ymax=mean+st.err),
                   width=.2, position=position_dodge(.7)) +
     ggtitle("Approximate daily reproduction rate over 12 week period")
-#End snails alive between two species ########################
+#End snails alive between three species ########################
 snail.live_fin<-subset(aggdata, 
-                  variable=="bg_liv_fin" |  variable=="bt_liv_fin")
+                  variable=="bg_liv_fin" |  variable=="bt_liv_fin" | variable=="hs_liv_fin")
 
   snail.live_fin$variable[snail.live_fin$variable=="bg_liv_fin"]<-"B. glabrata"
   snail.live_fin$variable[snail.live_fin$variable=="bt_liv_fin"]<-"B. truncatus"
+  snail.live_fin$variable[snail.live_fin$variable=="hs_liv_fin"]<-"H. cubensis"
   colnames(snail.live_fin)[2]<-"Species"
   
   snail.live_fin$Treatment<- factor(snail.live_fin$Treatment, levels=c("Control","Atrazine","ChlorP",
@@ -331,18 +418,21 @@ snail.live_fin<-subset(aggdata,
   
   ggplot(snail.live_fin, aes(x=Species, y=mean, fill=Treatment)) +
     theme_bw()+
+    theme(axis.title=element_text(size=14),
+          axis.text=element_text(size=15))+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width=.7) +
     geom_errorbar(aes(ymin=mean-st.err,
                     ymax=mean+st.err),
                 width=.2, position=position_dodge(.7)) +
     ggtitle("Snails alive at end")
-#End snails total between two species ########################
+#End snails total between three species ########################
 snail.tot_fin<-subset(aggdata, 
-                         variable=="total_bg_fin" |  variable=="total_bt_fin")
+                         variable=="total_bg_fin" |  variable=="total_bt_fin" | variable=="hs_all_fin")
   
   snail.tot_fin$variable[snail.tot_fin$variable=="total_bg_fin"]<-"B. glabrata"
   snail.tot_fin$variable[snail.tot_fin$variable=="total_bt_fin"]<-"B. truncatus"
+  snail.tot_fin$variable[snail.tot_fin$variable=="hs_all_fin"]<-"H. cubensis"
   colnames(snail.tot_fin)[2]<-"Species"
   
   snail.tot_fin$Treatment<- factor(snail.tot_fin$Treatment, levels=c("Control","Atrazine","ChlorP",
@@ -352,12 +442,115 @@ snail.tot_fin<-subset(aggdata,
   
   ggplot(snail.tot_fin, aes(x=Species, y=mean, fill=Treatment)) +
     theme_bw()+
+    theme(axis.title=element_text(size=14),
+          axis.text=element_text(size=15))+
     scale_fill_manual(values=cbPalette) +
     geom_bar(position=position_dodge(), stat="identity", width=.7) +
     geom_errorbar(aes(ymin=mean-st.err,
                       ymax=mean+st.err),
                   width=.2, position=position_dodge(.7)) +
     ggtitle("Total snails (alive+dead) at end")  
+#Change in snail numbers between three species ########################
+  snail.change<-subset(aggdata, 
+                        variable=="bt_change" |  variable=="bg_change" | variable=="hs_change")
+  
+  snail.change$variable[snail.change$variable=="bg_change"]<-"B. glabrata"
+  snail.change$variable[snail.change$variable=="bt_change"]<-"B. truncatus"
+  snail.change$variable[snail.change$variable=="hs_change"]<-"H. cubensis"
+  colnames(snail.change)[2]<-"Species"
+  
+  snail.change$Treatment<- factor(snail.change$Treatment, levels=c("Control","Atrazine","ChlorP",
+                                                                     "Fertilizer","Atrazine_ChlorP",
+                                                                     "Atrazine_Fertilizer",
+                                                                     "ChlorP_Fertilizer","All_Three"))
+  
+  ggplot(snail.change, aes(x=Species, y=mean, fill=Treatment)) +
+    theme_bw()+
+    theme(axis.title=element_text(size=14),
+          axis.text=element_text(size=10))+
+    scale_fill_manual(values=cbPalette) +
+    geom_bar(position=position_dodge(), stat="identity", width=.7) +
+    geom_errorbar(aes(ymin=mean-st.err,
+                      ymax=mean+st.err),
+                  width=.2, position=position_dodge(.7)) +
+    ggtitle("Change in snail population over time")  
+#End snails total ########################
+  snail.all<-subset(aggdata, variable=="total_live")
+  
+  snail.all$variable[snail.all$variable=="total_live"]<-"Live Snails"
+
+  colnames(snail.all)[2]<-"Species"
+  
+  snail.all$Treatment<- factor(snail.all$Treatment, levels=c("Control","Atrazine","ChlorP",
+                                                                     "Fertilizer","Atrazine_ChlorP",
+                                                                     "Atrazine_Fertilizer",
+                                                                     "ChlorP_Fertilizer","All_Three"))
+  
+  ggplot(snail.all, aes(x=Species, y=mean, fill=Treatment)) +
+    theme_bw()+
+    scale_fill_manual(values=cbPalette) +
+    geom_bar(position=position_dodge(), stat="identity", width=.7) +
+    geom_errorbar(aes(ymin=mean-st.err,
+                      ymax=mean+st.err),
+                  width=.2, position=position_dodge(.7)) +
+    ggtitle("All live snails at end")  
+#End snail eggs sampled total ########################
+  snail.all.eggs<-subset(aggdata, variable=="total_eggs")
+  
+  snail.all.eggs$variable[snail.all.eggs$variable=="total_eggs"]<-"Snail egg masses"
+  
+  colnames(snail.all.eggs)[2]<-"Species"
+  
+  snail.all.eggs$Treatment<- factor(snail.all.eggs$Treatment, levels=c("Control","Atrazine","ChlorP",
+                                                             "Fertilizer","Atrazine_ChlorP",
+                                                             "Atrazine_Fertilizer",
+                                                             "ChlorP_Fertilizer","All_Three"))
+  
+  ggplot(snail.all.eggs, aes(x=Species, y=mean, fill=Treatment)) +
+    theme_bw()+
+    scale_fill_manual(values=cbPalette) +
+    geom_bar(position=position_dodge(), stat="identity", width=.7) +
+    geom_errorbar(aes(ymin=mean-st.err,
+                      ymax=mean+st.err),
+                  width=.2, position=position_dodge(.7)) +
+    ggtitle("All egg masses sampled")  
+#End snail hatchlings sampled total ########################
+  snail.all.hatch<-subset(aggdata, variable=="total_hatch")
+  
+  snail.all.hatch$variable[snail.all.hatch$variable=="total_hatch"]<-"Snail hatchlings sampled"
+  
+  colnames(snail.all.hatch)[2]<-"All"
+  
+  snail.all.hatch$Treatment<- factor(snail.all.hatch$Treatment, levels=c("Control","Atrazine","ChlorP",
+                                                             "Fertilizer","Atrazine_ChlorP",
+                                                             "Atrazine_Fertilizer",
+                                                             "ChlorP_Fertilizer","All_Three"))
+  
+  ggplot(snail.all.hatch, aes(x=All, y=mean, fill=Treatment)) +
+    theme_bw()+
+    scale_fill_manual(values=cbPalette) +
+    geom_bar(position=position_dodge(), stat="identity", width=.7) +
+    geom_errorbar(aes(ymin=mean-st.err,
+                      ymax=mean+st.err),
+                  width=.2, position=position_dodge(.7)) +
+    ggtitle("All hatchlings sampled") 
+  
+#Per capita snail repro estimate from eggs/hatchlings transformation (see above in "Add variables" section) ##################
+  eggs_per_cap<-subset(aggdata,variable=='per_cap_eggs')
+  
+  eggs_per_cap$Treatment<- factor(eggs_per_cap$Treatment, levels=c("Control","Atrazine","ChlorP",
+                                                                         "Fertilizer","Atrazine_ChlorP",
+                                                                         "Atrazine_Fertilizer",
+                                                                         "ChlorP_Fertilizer","All_Three"))
+  
+  ggplot(eggs_per_cap, aes(x=variable, y=mean, fill=Treatment)) +
+    theme_bw()+
+    scale_fill_manual(values=cbPalette) +
+    geom_bar(position=position_dodge(), stat="identity", width=.7) +
+    geom_errorbar(aes(ymin=mean-st.err,
+                      ymax=mean+st.err),
+                  width=.2, position=position_dodge(.7)) +
+    ggtitle("Eggs per cap estimate")  
 #End snails dead between two species ########################
 snail.dead_fin<-subset(aggdata, 
                         variable=="bg_dead" |  variable=="bt_dead")
@@ -379,7 +572,7 @@ snail.dead_fin<-subset(aggdata,
                       ymax=mean+st.err),
                   width=.2, position=position_dodge(.7)) +
     ggtitle("Dead snails at end")  
-#End snails infected between two species ###################### 
+#End snails infected between two host species ###################### 
 snail.inf_fin<-subset(aggdata, 
                          variable=="bg_inf_fin" |  variable=="bt_inf_fin")
   
