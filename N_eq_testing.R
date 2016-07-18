@@ -3,24 +3,24 @@ require(ggplot2)
 #Parameter values ########################
 parameters=c( #Excluding beta, Phi_Nq, f_Nq, and muPq which will be read into the R0 function
   ##standard snail parameters 
-  f_N=0.16, # recruitment rate (from sokolow et al)
-  phi_N=(1-1/(80*0.16))/10000, # carrying capacity from sokolow et al
+  f_N=0.10, # recruitment rate (from sokolow et al)
+  phi_N=10000, # carrying capacity from sokolow et al
   z=0.5, #Proportion of exposed snails that reproduce from sokolow et al
-  mu_N=1/80, #Mortality rate from Sokolow et al
-  sigma=1/50, #Transition rate from exposed to infected from sokolow et al
-  mu_I=1/20, #additional snail death due to infection from sokolow et al
+  mu_N=1/60, #Mortality rate from Sokolow et al
+  sigma=1/40, #Transition rate from exposed to infected from sokolow et al
+  mu_I=1/10, #additional snail death due to infection from sokolow et al
   
   #prawn parameters
   alpha=0.003, #attack rate
-  Th=0.1,#~Prawn predation limit
+  Th=0.067,#~Prawn predation limit
   f_P=0.234/2, #prawn birth rate from Cervantes-Santiago Aquaculture 2010 paper (/2 for 1:1 female-male ratio)
-  phi_P=1/(40*3),  #prawn carrying capacity
+  phi_P=120,  #prawn carrying capacity
   mu_P= 0.03809524, #observed daily 24 hr prawn mortality rate in chlorP-free tanks of mesocosm#0.00137, previous rate
   
   #Adult Worm, Miracidia and Circariae Parameters
-  lamda=0.00004, #probability of snail shedding a cercariae that infects a human host and survives to reproduction
-  mu_W=1/(3*365), # death rate of adult worms
-  m=0.5, #miracidial shedding rate per reproductive female divided by miracidial mortality; from sokolow et al
+  lamda=1.5e-5, #probability of snail shedding a cercariae that infects a human host and survives to reproduction
+  mu_W=1/(3.3*365), # death rate of adult worms
+  #m=0.5, #miracidial shedding rate per reproductive female divided by miracidial mortality; from sokolow et al
   
   #Human parameters
   H=300, #number of humans
@@ -52,26 +52,41 @@ get_Ro<-function(muPq = 0, phi_Nq = 1, beta, f_Nq = 1) #variable parameters to b
   H<-parameters["H"]
   mu_H<-parameters["mu_H"]
   
-  P_eq<-(1-((muPq+mu_P)/f_P))/phi_P #Equilibrium estimate of P given prawn predator parameters
+  P_eq<-(1-((muPq+mu_P)/f_P))*phi_P #Equilibrium estimate of P given prawn predator parameters
   if(P_eq<0){
     P_eq=0
   }
   #Equilibrium estimate of N given snail parameters
   #Shorthand values to use in N_eq expression
-  a= -(alpha*Th*f_N*f_Nq*phi_N*phi_Nq^-1)
-  b= f_N*f_Nq*alpha*Th - mu_N*alpha*Th - f_N*f_Nq*phi_N*phi_Nq^-1
-  c= f_N*f_Nq - mu_N - alpha*P_eq
+  #a= -(alpha*Th*f_N*f_Nq*phi_N*phi_Nq^-1)
+  a = -(alpha*Th*f_N*f_Nq)/(phi_N*phi_Nq)
+  #b= f_N*f_Nq*alpha*Th - mu_N*alpha*Th - f_N*f_Nq*phi_N*phi_Nq^-1
+  b = (f_N*f_Nq)/(phi_N*phi_Nq) + alpha*Th*f_N*f_Nq - alpha*Th*mu_N
+  #c= f_N*f_Nq - mu_N - alpha*P_eq
+  c = f_N*f_Nq - alpha*P_eq - mu_N
   
   if((b^2-4*a*c)<0){ #If prawn population sufficient to eliminate snails, N_eq=0
-    N_eq=0
+    N_eq1=0
   } else {
-    N_eq <- (-b - sqrt(b^2-4*a*c)) / (2*a) #Function to solve quadratic expression for N_eq
+    N_eq1 <- (-b + sqrt(b^2-4*a*c)) / (2*a) #Function to solve quadratic expression for N_eq
+  }
+  
+  if((b^2-4*a*c)<0){ #If prawn population sufficient to eliminate snails, N_eq=0
+    N_eq2=0
+  } else {
+    N_eq2 <- (-b - sqrt(b^2-4*a*c)) / (2*a) #Function to solve quadratic expression for N_eq
+  }
+  
+  if(N_eq1 > N_eq2){ #If prawn population sufficient to eliminate snails, N_eq=0
+    N_eq=N_eq1
+  } else {
+    N_eq = N_eq2 #Function to solve quadratic expression for N_eq
   }
   
   
   pred<-(alpha*P_eq)/(1+(alpha*N_eq*Th))#death rate of snails due to predators given equilibrium estimates of P and N
   
-  T1<-0.5*beta*m*H*N_eq
+  T1<-0.5*beta*H*N_eq
   T2<-lamda*sigma
   T3<- (mu_W+mu_H)*(mu_N+pred+sigma)*(mu_N+pred+mu_I)
   
@@ -145,17 +160,19 @@ get_N.eq<-function(muPq = 0, f_Nq = 1, phi_Nq = 1)
   H<-parameters["H"]
   mu_H<-parameters["mu_H"]
   
-  P_eq<-(1-((muPq+mu_P)/f_P))/phi_P #Equilibrium estimate of P given prawn predator parameters
+  P_eq<-(1-((muPq+mu_P)/f_P))*phi_P #Equilibrium estimate of P given prawn predator parameters
   if(P_eq<0){
     P_eq=0
   }
   #Equilibrium estimate of N given snail parameters
   #Shorthand values to use in N_eq expression
-  a= -(alpha*Th*f_N*f_Nq*phi_N*phi_Nq^-1)
-  b= f_N*f_Nq*alpha*Th - mu_N*alpha*Th - f_N*f_Nq*phi_N*phi_Nq^-1
-  c= f_N*f_Nq - mu_N - alpha*P_eq
+  #a= -(alpha*Th*f_N*f_Nq*phi_N*phi_Nq^-1)
+  a = -(alpha*Th*f_N*f_Nq)/(phi_N*phi_Nq)
+  #b= f_N*f_Nq*alpha*Th - mu_N*alpha*Th - f_N*f_Nq*phi_N*phi_Nq^-1
+  b = (f_N*f_Nq)/(phi_N*phi_Nq) + alpha*Th*f_N*f_Nq - alpha*Th*mu_N
+  #c= f_N*f_Nq - mu_N - alpha*P_eq
+  c = f_N*f_Nq - alpha*P_eq - mu_N
   
-
     if((b^2-4*a*c)<0){ #If prawn population sufficient to eliminate snails, N_eq=0
       N_eq1=0
     } else {
@@ -171,6 +188,7 @@ get_N.eq<-function(muPq = 0, f_Nq = 1, phi_Nq = 1)
   print(c(P_eq,N_eq1, N_eq2))
   
 }
+    
 get_N.eq(muPq = 0.06, phi_Nq =1.61)
 get_N.eq(muPq = 0.73)
 
@@ -360,7 +378,7 @@ get_Ro.eq<-function(N_eq, P_eq)
 
 get_Ro.eq(N_eq = 10000, P_eq = 5)
     
-#Get 10-day chlorP data to incoporate #################
+#Get 10-day chlorP data to incorporate #################
 ecotox_10.<-data.frame('chem'=rep("Chlorpyrifos", 30),
                       'dose'=c(rep(0,5), rep(0.64,5), rep(3.2,5), 
                                rep(6.4,5), rep(32,5), rep(64,5)),
@@ -408,7 +426,7 @@ ecotox_10.<-data.frame('chem'=rep("Chlorpyrifos", 30),
   legend('bottomright', legend = c('Ref', 'Fe', 'At', 'At:Fe'), lwd=2, 
          col=c('red', 'pink', 'orange', 'blue'))
   
-#Get 4-day chlorP data to incoporate #############
+#Get 4-day chlorP data to incorporate #############
 ecotox_4.<-data.frame('chem'=rep("Chlorpyrifos", 30),
                          'dose'=c(rep(0,5), rep(0.64,5), rep(3.2,5), 
                                   rep(6.4,5), rep(32,5), rep(64,5)),
