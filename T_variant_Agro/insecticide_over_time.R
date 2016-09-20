@@ -9,6 +9,7 @@
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
 require(drc)
+require(rootSolve)
 #Model to observe expected insecticide concentrations over time in hypothetical application scenario
 decay<-data.frame(time = c(1:365),
                   mal = 0,
