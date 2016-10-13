@@ -81,7 +81,7 @@ colnames(constantparams)<-names(parameters)
   senstart['Q1'] = 0 #Assessing model sensitivities without agrochemicals
   time = seq(0, 365*25, 1)
   
-  for(j in 10:length(vars)){
+  for(j in 12:length(vars)){
     for(i in 1:sims){
       print(c(j, i))
       
@@ -100,20 +100,30 @@ colnames(constantparams)<-names(parameters)
       outputfill3[i,j] = outputest$W[dim(outputest)[1]]
       
     }
+    
+    mypath <- file.path("C:","Users","chris_hoover","Documents","RemaisWork","Schisto","R Codes",
+                        "ag_schist","Review_models","Sensitivity_Plots",
+                        paste("sensitivity", vars[j], ".jpg", sep = ""))
+    
+    jpeg(file=mypath, width = 750, height = 625, units = "px")
+    
     par(mfrow = c(3,1), mar = c(4,3.75,1,0.4)+0.1)
     
     plot(x = parametersuse[,dim(parametersuse)[2]], y = outputfill1[,j], 
-         xlab = vars[j], ylab = 'snail pop',
+         xlab = vars[j], ylab = 'snail pop', type = 'l', lwd=2,
          pch = 16, cex = 0.75, col = 'blue', 
          ylim = c(0,75))
     
     plot(x = parametersuse[,dim(parametersuse)[2]], y = outputfill2[,j], 
-         xlab = vars[j], ylab = 'infecteds',
+         xlab = vars[j], ylab = 'infecteds', type = 'l', lwd=2,
          pch = 16, cex = 0.75, col = 'red', 
-         ylim = c(0,20))
+         ylim = c(0,6))
     
     plot(x = parametersuse[,dim(parametersuse)[2]], y = outputfill3[,j], 
-         xlab = vars[j], ylab = 'mean worm burden',
-         pch = 16, cex = 0.75, col = 'purple', 
+         xlab = vars[j], ylab = 'mean worm burden', type = 'l', lwd=2,
+         pch = 16, cex = 0.75, col = 'purple',  
          ylim = c(0,300))
+    
+    dev.off()
+    
   }

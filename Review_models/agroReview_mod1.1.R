@@ -17,6 +17,13 @@
 
 require(deSolve)
 
+#Agrochemical response functions ###############
+  f_phi_Nq = function(Q1){
+    phi_Nq = phi_N + phi_N * (atra.slope*log(Q1))
+    return(phi_Nq)
+  }
+
+#Model structure and equations #############
 mod1 = function(t, n, parameters) {
   with(as.list(parameters),{
     
@@ -41,9 +48,9 @@ mod1 = function(t, n, parameters) {
       pred= (alpha*P)/(1+(alpha*((N/A)^nn)*Th))   
       
     #Agrochem parameters
-      phi_Nq = phi_N #* f1(Q1)
+      phi_Nq = f_phi_Nq(Q1)
       mu_Nq = mu_N #* f2(Q1)
-      mu_Pq = mu_P + exp(-3.074e+02*exp(-Q1))/10
+      mu_Pq = mu_P #+ exp(-3.074e+02*exp(-Q1))/10
       v_q = v #* f4(Q1)
       theta_q = theta #* f5(Q1)
       pi_Mq = pi_M #* f6(Q1)
