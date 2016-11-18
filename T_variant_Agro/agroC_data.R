@@ -183,7 +183,7 @@ agro_time = function(t, n, parameters) {
     }) 
   }
   
-#Initial values, parameters, and runs to get quilibrium and prawn harvest time values#####################
+#Initial values, parameters, and runs to get equilibrium and prawn harvest time values#####################
   area=200
   nstart1 = c(S=15*area, 
               E=10*area, 

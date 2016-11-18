@@ -17,7 +17,7 @@
   plot(snail.repro$dose, snail.repro$f_red, ylim = c(0,1), pch = 16, 
        ylab = 'reduction in snail recruitment rate', xlab = 'ChlorP ppb')
   
-  mod1<-nls(f_red ~ exp(-b*(dose+0.1)), data=snail.repro, start = list(b=0.1))
+  mod1<-nls(f_red ~ exp(-b*(dose+1e-6)), data=snail.repro, start = list(b=0.1))
     summary(mod1)
     
   dose = c(0:500)

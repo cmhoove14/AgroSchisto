@@ -17,22 +17,27 @@
 
 require(deSolve)
 
-#Agrochemical response functions ###############
-  f_phi_Nq = function(Q1){
-    phi_Nq = phi_N + phi_N * (atra.slope*log(Q1))
-    return(phi_Nq)
-  }
-
+#Agrochemical info ###############
+  In_fx<-function(In){ 
+    return(c(parameters['mu_P'], 1))
+  } #Filler function, returns null values
+  
+  He_k = 1
+  Fe_k = 1
+  In_k = 1
+ 
 #Model structure and equations #############
 mod1 = function(t, n, parameters) {
   with(as.list(parameters),{
     
-    S=n[1]
-    E=n[2]
-    I=n[3]
-    W=n[4]
-    P=n[5]
-    Q1=n[6]
+    S=n[1]  #Susceptible snails
+    E=n[2]  #Exposed snails
+    I=n[3]  #Infected snails
+    W=n[4]  #Mean worm burden
+    P=n[5]  #Predator population
+    He=n[6] #Herbicide concentration
+    Fe=n[7] #Fertilizer concentration
+    In=n[8] #Insecticide concentration
     
     
 #Dynamic variables ####################
@@ -44,18 +49,19 @@ mod1 = function(t, n, parameters) {
       }
       gamma = 1 - ((1-(W/(W+k)))^(1+k)/2*pi)*(integrate(fx, 0, 2*pi)$value)       
     
-    #per capita predation of predators on snails with variable functional response based on parameter nn  
-      pred= (alpha*P)/(1+(alpha*((N/A)^nn)*Th))   
-      
-    #Agrochem parameters
-      phi_Nq = f_phi_Nq(Q1)
-      mu_Nq = mu_N #* f2(Q1)
-      mu_Pq = mu_P #+ exp(-3.074e+02*exp(-Q1))/10
+    #Agrochem parameters (set to null values for now)
+      phi_Nq = phi_N #* (He_fx(He) + Fe_fx(Fe))
+      mu_Nq = mu_N # 
+      mu_Pq = In_fx(In)[1]
       v_q = v #* f4(Q1)
       theta_q = theta #* f5(Q1)
       pi_Mq = pi_M #* f6(Q1)
       pi_Cq = pi_C #* f7(Q1)
-    
+      pred_red = In_fx(In)[2]
+      
+    #per capita predation of predators on snails with variable functional response based on parameter nn  
+      pred= ((alpha*P)/(1+(alpha*((N/A)^nn)*Th)))*pred_red   
+      
     #Schistosome larval concentration equations
     Wf = 0.5*W*H*gamma
     
@@ -81,10 +87,13 @@ mod1 = function(t, n, parameters) {
     
     dPdt= f_P*(1-P/(phi_P*A))*P - mu_Pq*P                                    #prawn population (number individuals)
     
-    dQ1dt= -k_Q1*Q1                                                    #Agrochemical concentration
+    dHedt= -k_He*He                                                    #Herbicide concentration
  
+    dFedt= -k_Fe*Fe                                                    #Fertilizer concentration
+
+    dIndt= -k_In*In                                                    #Insecticide concentration
     
-    return(list(c(dSdt, dEdt, dIdt, dWdt, dPdt, dQ1dt)))
+    return(list(c(dSdt, dEdt, dIdt, dWdt, dPdt, dHedt, dFedt, dIndt)))
   }) 
 }
 
@@ -95,8 +104,10 @@ nstart1 = c(S=5*area,
            I=0, 
            W=5, 
            P=0, 
-           Q1=0)
-yrs=30
+           He=0,
+           Fe=0,
+           In=0)
+yrs=100
 time = seq(0,365*yrs,1)
 
 parameters=c(
@@ -141,7 +152,10 @@ parameters=c(
   k=0.2,             # Clumping parameter of negative binomial distribution of worms in humans
   
   #Agrochemical parameters
-  k_Q1 = 0.0126,     # half-life of agrochemical (Chlorpyrifos here) in water according to Cornell database
+  k_He = He_k,     # half-life of agrochemical (Herbicide) in water according to Cornell database
+  k_Fe = Fe_k,     # half-life of agrochemical (Herbicide) in water according to Cornell database
+  k_In = In_k,     # half-life of agrochemical (Herbicide) in water according to Cornell database
+  
   
   # Schisto mortality parameters
   mu_W = 1/(3.3*365), # Natural mortality rate of adult worms in humans, assuming average lifespan of 3.3 years, from Sokolow et al. 2015
@@ -161,14 +175,18 @@ plot(x = output1$time, y = output1$N, lwd=2, xlab = 'time', ylab = 'snail dynami
 plot(output1$time, output1$W, lwd=2, col = 'purple', type = 'l', 
      xlab = 'time', ylab = 'mean worm burden', ylim = c(0,max(output1$W)))  
 
+p.free.eqbm = output1[dim(output1)[1],]
+
 #Model run adding in predators ##################
-nstart2 = c(S=output1[max(output1$time),c(2)], 
-              E=output1[max(output1$time),c(3)], 
-              I=output1[max(output1$time),c(4)], 
-              W=output1[max(output1$time),c(5)], 
-              P=0.2*area, 
-              Q1=0)
-yrs=20
+nstart2 = c(S=as.numeric(p.free.eqbm[2]), 
+            E=as.numeric(p.free.eqbm[3]), 
+            I=as.numeric(p.free.eqbm[4]), 
+            W=as.numeric(p.free.eqbm[5])-40, #Help W on its way to equilibrium 
+            P=0.2*area, 
+            He=0,
+            Fe=0,
+            In=0)
+yrs=100
 time = seq(0,365*yrs,1)
   
 output2 = as.data.frame(ode(nstart2, time, mod1, parameters))
@@ -186,13 +204,19 @@ plot(output2$time, output2$P, lwd=2, type = 'l', col = 'green',
 plot(output2$time, output2$W, lwd=2, col = 'purple', type = 'l', xlab = 'time', 
      ylab = 'mean worm burden', ylim = c(0,max(output2$W)))  
   
-#Model run adding in example agrochemical, chlorpyrifos (Q1) ##################
+p.eqbm = output2[dim(output1)[1],]
+
+#Model run adding in example agrochemical, atrazine (He) @20ppb with half life of 200 days##################
 nstart3 = c(S=output2[max(output2$time),c(2)], 
             E=output2[max(output2$time),c(3)], 
             I=output2[max(output2$time),c(4)], 
             W=output2[max(output2$time),c(5)], 
             P=output2[max(output2$time),c(6)], 
-            Q1=20)
+            He=20,
+            Fe=0,
+            In=0)
+parameters['k_He']<- -log(0.5)/200
+
 yrs=2
 time = seq(0,365*yrs,1)
   
@@ -207,8 +231,39 @@ output3 = as.data.frame(ode(nstart3, time, mod1, parameters))
   
 plot(output3$time, output3$P, lwd=2, type = 'l', col = 'green', 
        xlab = 'time', ylab = 'preds', ylim = c(0, max(output3$P)))
-  lines(output3$time, output3$Q1, lwd=2, col = 'red', lty = 2)
-  legend('topleft', cex = 0.75, lty = 2, col = 'red', lwd = 2, legend = 'log(Q1)')
+
+plot(output3$time, output3$He, lwd=2, type = 'l', col = 'gold', 
+     xlab = 'time', ylab = 'Atra (ppb)', ylim = c(0, max(output3$He)))
 
 plot(output3$time, output3$W, lwd=2, col = 'purple', type = 'l', xlab = 'time', 
      ylab = 'mean worm burden', ylim = c(0,max(output3$W)))  
+
+#Last one to see influence of atrazine without predators##################
+nstart4 = c(S=output2[max(output2$time),c(2)], 
+            E=output2[max(output2$time),c(3)], 
+            I=output2[max(output2$time),c(4)], 
+            W=output1[max(output1$time),c(5)], 
+            P=0, 
+            He=20,
+            Fe=0,
+            In=0)
+yrs=10
+time = seq(0,365*yrs,1)
+
+output4 = as.data.frame(ode(nstart4, time, mod1, parameters))
+output4$N = output4$S + output4$E + output4$I
+
+plot(x = output4$time, y = output4$N, lwd=2, xlab = 'time', ylab = 'snail dynamics', 
+     type = 'l', ylim = c(0, max(output4$N)))
+  lines(output4$time, output4$S, lwd=2, col = 'blue')
+  lines(output4$time, output4$E, lwd=2, col = 'orange')
+  lines(output4$time, output4$I, lwd=2, col = 'red')
+
+plot(output4$time, output4$P, lwd=2, type = 'l', col = 'green', 
+     xlab = 'time', ylab = 'preds', ylim = c(0, max(output4$P)))
+
+plot(output4$time, output4$He, lwd=2, type = 'l', col = 'gold', 
+     xlab = 'time', ylab = 'Atra (ppb)', ylim = c(0, max(output4$He)))
+
+plot(output4$time, output4$W, lwd=2, col = 'purple', type = 'l', xlab = 'time', 
+     ylab = 'mean worm burden', ylim = c(0,max(output4$W)))  

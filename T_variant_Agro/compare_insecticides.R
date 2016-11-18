@@ -12,11 +12,33 @@
 #Model to compare influence of different insecticides on R0
 
 #Get data, provided by Neal; load packages####################
-data<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Halstead_etal/Cray.10d.LC50.2012.act2.csv')
+data10<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Halstead_etal/Cray.10d.LC50.2012.act2.csv')
+data4<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Halstead_etal/Cray.LC50.2012.csv')
 require(drc)
 
+data10ag<-aggregate(data10$Dead, by = list(Chem = data10$Chem,
+                                           Conc = data10$Conc), FUN = sum)
+
+data4ag<-aggregate(data4$Dead, by = list(Chem = data4$Chem,
+                                         Conc = data4$Conc), FUN = sum)
+
+data4ag$total = 5
+  colnames(data4ag)[3] = 'dead'
+data10ag$total = 5
+  colnames(data10ag)[3] = 'dead'
+
+mod4d <- drm(dead/total~Conc, Chem, weights=total, data=data4ag, fct=LL.2(), 
+              type="binomial")
+
+fx<-function(df1, ins){
+  dfname = paste(ins, 'df', sep = '')
+  dfname = subset(df1, Chem == ins)
+  dfname
+}
+
+
 #Malathion ###########################
-mal<-subset(data, Chem == 'Mal')
+mal<-subset(data10, Chem == 'Mal')
   mal.c<-unique(mal$Conc)
   mal.d<-as.numeric()
     for(i in 1:length(mal.c)){
@@ -44,7 +66,7 @@ plot(x=mal.c, y = mal.d/10, pch = 16,
         y=mal.df$mortality/10-1.96*mal.df$st.er/10, 
         lty=2, col='red', cex=0.8)  
 #Chlorpyrifos #####################  
-chlor<-subset(data, Chem == 'Chlor')
+chlor<-subset(data10, Chem == 'Chlor')
   chlor.c<-unique(chlor$Conc)
   chlor.d<-as.numeric()
   for(i in 1:length(chlor.c)){
@@ -79,7 +101,7 @@ plot(x=chlor.c, y=chlor.d/10, pch = 16,
         lty=2, col='red', cex=0.8)
   
 #Terbufos #####################  
-terb<-subset(data, Chem == 'Terb')
+terb<-subset(data10, Chem == 'Terb')
   terb.c<-unique(terb$Conc)
   terb.d<-as.numeric()
   for(i in 1:length(terb.c)){
@@ -107,7 +129,7 @@ plot(x=terb.c, y=terb.d/10, pch = 16,
         y=terb.df$mortality/10-1.96*terb.df$st.er/10, 
         lty=2, col='red', cex=0.8)  
 #Lambda-cyhalothrin #####################  
-lamcy<-subset(data, Chem == 'Lambda')
+lamcy<-subset(data10, Chem == 'Lambda')
   lamcy.c<-unique(lamcy$Conc)
   lamcy.d<-as.numeric()
   for(i in 1:length(lamcy.c)){
@@ -135,7 +157,7 @@ plot(x=lamcy.c, y=lamcy.d/10, pch = 16,
         y=lamcy.df$mortality/10-1.96*lamcy.df$st.er/10, 
         lty=2, col='red', cex=0.8)  
 #esfenvalerate #####################  
-esfen<-subset(data, Chem == 'Esfen')
+esfen<-subset(data10, Chem == 'Esfen')
   esfen.c<-unique(esfen$Conc)
   esfen.d<-as.numeric()
   for(i in 1:length(esfen.c)){
@@ -164,7 +186,7 @@ plot(x=esfen.c, y=esfen.d/10, pch = 16,
         lty=2, col='red', cex=0.8)  
   
 #Permethrin #####################  
-perm<-subset(data, Chem == 'Perm')
+perm<-subset(data10, Chem == 'Perm')
   perm.c<-unique(perm$Conc)
   perm.d<-as.numeric()
   for(i in 1:length(perm.c)){

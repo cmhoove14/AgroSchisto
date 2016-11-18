@@ -16,7 +16,7 @@
     #How to include transport from agrochemical application site to water contact site? ###################
 
 require(deSolve)
-source('agroC_data.R')
+source('T_variant_Agro/agroC_data.R')
 
 #Model structure to dynamically vary agrochemical application and prawn introduction ####################
 agroc_prawn<-function(chem, chem.days, chem.k, chem.med, 

@@ -106,7 +106,7 @@ snstart2 = c(S=soutput[max(soutput$time),c(2)],
              I=soutput[max(soutput$time),c(4)], 
              W=soutput[max(soutput$time),c(5)])  
   
-#Halt reproduction and assess snail pop
+#Halt reproduction and assess snail pop #############
   sparms['f_N'] = 0
   time2 = seq(0,365,1)
   
@@ -119,7 +119,7 @@ soutput2 = as.data.frame(ode(snstart2, time2, snails, sparms))
     lines(soutput2$time, soutput2$E, lwd=2, col = 'orange')
     lines(soutput2$time, soutput2$I, lwd=2, col = 'red')
     
-# Calculate PDF f(t) = -dS(t)/dt (i.e. numerically approximate derivative of survival curve)
+# Calculate PDF f(t) = -dS(t)/dt (i.e. numerically approximate derivative of survival curve) ###########
     vect = soutput2$N
     deriv = numeric(length(vect)-1)
     for (i in 1:(length(vect)-1)) {

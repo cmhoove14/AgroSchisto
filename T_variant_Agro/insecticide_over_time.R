@@ -10,6 +10,8 @@
 #and indicate changes that were made.###############
 require(drc)
 require(rootSolve)
+require(deSolve)
+source('T_variant_Agro/agroC_data.R')
 #Model to observe expected insecticide concentrations over time in hypothetical application scenario
 decay<-data.frame(time = c(1:365),
                   mal = 0,
@@ -42,7 +44,7 @@ decay<-data.frame(time = c(1:365),
   decay$esfen[1] = med.esfen
   decay$perm[1] = med.perm
   
-#fill chemical concentration over the year based on application reccomendations in Halstead table S1
+#fill chemical concentration over the year based on application recommendations in Halstead table S1
   for(i in 2:nrow(decay)){
     if(i == 5){
       decay[i,2] = decay[(i-1),2] - decay[(i-1),2]*mal.k

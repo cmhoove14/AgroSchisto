@@ -264,7 +264,7 @@ require(rootSolve)
             
 #Transmission parameters from max likelihood estimation################# 
   #Obtained using optim function fit to three follow-up epi points; see code 'fit_fin.R'
-  fin<-read.csv('shortlist_transParams.csv') 
+  fin<-read.csv('Gen1/shortlist_transParams.csv') 
             
   beta.use<- fin$beta[fin$negLL == min(fin$negLL)] #Best fit value of beta
   
