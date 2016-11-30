@@ -146,9 +146,9 @@ parameters=c(
   pi_C = 1,          # cercarial infectivity parameter
 
   # transmission parameters
-  beta = 1e-5,       # Human-to-snail infection probability in reference area (infected snails/miracidia/snail/day)
+  beta = 2e-4,       # Human-to-snail infection probability in reference area (infected snails/miracidia/snail/day)
   sigma = 1/40,      # Latent period for exposed snails (infectious snails/exposed snail/day))
-  lamda = 2.8e-4,      # Snail-to-human infection probability per cercaria
+  lamda = 2e-4,      # Snail-to-human infection probability per cercaria
   k=0.2,             # Clumping parameter of negative binomial distribution of worms in humans
   
   #Agrochemical parameters
@@ -181,7 +181,7 @@ p.free.eqbm = output1[dim(output1)[1],]
 nstart2 = c(S=as.numeric(p.free.eqbm[2]), 
             E=as.numeric(p.free.eqbm[3]), 
             I=as.numeric(p.free.eqbm[4]), 
-            W=as.numeric(p.free.eqbm[5])-40, #Help W on its way to equilibrium 
+            W=as.numeric(p.free.eqbm[5])-60, #Help W on its way to equilibrium 
             P=0.2*area, 
             He=0,
             Fe=0,

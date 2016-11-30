@@ -4,59 +4,47 @@ require(drc)
 #24-hr mortality functions for predator (macrobrachium) populations from Satapornvanit et al chemosphere paper ########
   sap.mort<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Predator Mortality/satapornvanit2009_m.rosenbergii_mort.csv")
     
-    z.mod.mupq<-drm(sap.mort$mort[sap.mort$chem == 'zinc']/100 ~ sap.mort$conc[sap.mort$chem == 'zinc'],
-                    data = sap.mort, type = 'binomial', fct = LL.4(fixed = c(NA, NA, 1, NA)))
+  #Zinc
+  z.mod.mupq<-drm(sap.mort$mort[sap.mort$chem == 'zinc']/100 ~ sap.mort$conc[sap.mort$chem == 'zinc'],
+                  data = sap.mort, type = 'binomial', fct = LL.2())
     
-    f_muPq_z_Satapornvanit<-function(In){
-      muplus = predict(z.mod.mupq, newdata = data.frame(conc = In), type = 'response')
-      muuse = parameters['mu_P'] + muplus
-      if(muuse > 1){
-        muuse = 1
-      }
-      return(muuse)
-    }
+    muPq_zinc_satapornvanit09<-function(In){
+      
+      1/(1+exp(z.mod.mupq$coefficients[1]*(log(In)-log(z.mod.mupq$coefficients[2]))))
+      
+    }  
+  #Chlorpyrifos  
+  ch.mod.mupq<-drm(sap.mort$mort[sap.mort$chem == 'chlorpyrifos']/100 ~ sap.mort$conc[sap.mort$chem == 'chlorpyrifos'],
+                    data = sap.mort, type = 'binomial', fct = LL.2())
     
-    ch.mod.mupq<-drm(sap.mort$mort[sap.mort$chem == 'chlorpyrifos']/100 ~ sap.mort$conc[sap.mort$chem == 'chlorpyrifos'],
-                     data = sap.mort, type = 'binomial', fct = LL.2())
+    muPq_chlor_satapornvanit09<-function(In){
+      
+      1/(1+exp(ch.mod.mupq$coefficients[1]*(log(In)-log(ch.mod.mupq$coefficients[2]))))
+      
+    }  
+  #Dimethoate
+  dim.mod.mupq<-drm(sap.mort$mort[sap.mort$chem == 'dimethoate']/100 ~ sap.mort$conc[sap.mort$chem == 'dimethoate'],
+                    data = sap.mort, type = 'binomial', fct = LL.2())
     
-    f_muPq_ch_Satapornvanit<-function(In){
-      muplus = predict(ch.mod.mupq, newdata = data.frame(conc = In), type = 'response')
-      muuse = parameters['mu_P'] + muplus
-      if(muuse > 1){
-        muuse = 1
-      }
-      return(muuse)
-    }
+    muPq_dim_satapornvanit09<-function(In){
+      
+      1/(1+exp(dim.mod.mupq$coefficients[1]*(log(In)-log(dim.mod.mupq$coefficients[2]))))
+      
+    }  
+  #profenofos
+  pr.mod.mupq<-drm(sap.mort$mort[sap.mort$chem == 'profenofos']/100 ~ sap.mort$conc[sap.mort$chem == 'profenofos'],
+                   data = sap.mort, type = 'binomial', fct = LL.2())
+  
+    muPq_pr_satapornvanit09<-function(In){
+      
+      1/(1+exp(pr.mod.mupq$coefficients[1]*(log(In)-log(pr.mod.mupq$coefficients[2]))))
+      
+    }  
     
-    dim.mod.mupq<-drm(sap.mort$mort[sap.mort$chem == 'dimethoate']/100 ~ sap.mort$conc[sap.mort$chem == 'dimethoate'],
-                      data = sap.mort, type = 'binomial', fct = LL.2())
     
-    f_muPq_dim_Satapornvanit<-function(In){
-      muplus = predict(dim.mod.mupq, newdata = data.frame(conc = In), type = 'response')
-      muuse = parameters['mu_P'] + muplus
-      if(muuse > 1){
-        muuse = 1
-      }
-      return(muuse)
-    }
-    
-    pr.mod.mupq<-drm(sap.mort$mort[sap.mort$chem == 'profenofos']/100 ~ sap.mort$conc[sap.mort$chem == 'profenofos'],
-                     data = sap.mort, type = 'binomial', fct = LL.2())
-    
-    f_muPq_pr_Satapornvanit<-function(In){
-      muplus = predict(pr.mod.mupq, newdata = data.frame(conc = In), type = 'response')
-      muuse = parameters['mu_P'] + muplus
-      if(muuse > 1){
-        muuse = 1
-      }
-      return(muuse)
-    }
-    
-    #NOTE: carbendazim not modeled because it has no effect on toxicity, but will be included as such in simulations
-    f_muPq_carb_Satapornvanit<-function(In){
-      muplus = 0
-      muuse = parameters['mu_P'] + muplus
-      return(muuse)
+  #NOTE: carbendazim not modeled because it has no effect on toxicity, but will be included as such in simulations
+    muPq_carb_satapornvanit09<-function(In){
+      In*0
     }
 #Reduced feeding rate from zinc and Chlorpyrifos from Satapornvanit et al chemosphere paper ########
 sap.fr<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Predator Mortality/satapornvanit2009_m.rosenbergii_feed_rate.csv")
@@ -67,16 +55,14 @@ sap.fr<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroDa
     z.mod.fr<-lm(log(per_control) ~ conc + 0, data = fr.z) 
     
       pred_q_z<-function(In){
-        pred_red = exp(predict(z.mod.fr, newdata = data.frame(conc = In), type = 'response'))
-        return(pred_red)
+        exp(z.mod.fr$coefficients[1]*In)
       }
       #*Note: checked that this produced the desired relationship on predator feeding rate and it does
     
     ch.mod.fr<-lm(log(per_control) ~ conc + 0, data = fr.ch) 
 
     pred_q_ch<-function(In){
-      pred_red = exp(predict(ch.mod.fr, newdata = data.frame(conc = In), type = 'response'))
-      return(pred_red)
+      exp(ch.mod.fr$coefficients[1]*In)
     }
     #*Note: checked that this produced the desired relationship on predator feeding rate and it does
 #Combine predator mortality and feeding rate reduction from Satapornvanit into single function ##############
