@@ -38,67 +38,50 @@ prawn_alpha<-data.frame(dose=c(0, 10,50,100), a_red= 1 - c(0, 0.16,0.31,0.44))
 
 parameters['phi_P'] = 0.1*area  
   
-r0.conc.mal = matrix(ncol = 101, nrow = 12)
+r0.conc.mal = matrix(ncol = 1001, nrow = 8)
 
-for(i in 1:100){
-  r0.conc[1,i] = r0.q(conc = (i-1))[3]                       #Baseline r0 with no agrochemical effects included
-  r0.conc[2,i] = r0.q(conc = (i-1),
-                       f.f_Nq = f_Nq_chlor_ibrahim92)[3]      #Toxic effects on snail reproduction
-  r0.conc[3,i] = r0.q(conc = (i-1),
-                       f.mu_Pq = muPq_mal_Halstead)[3]            #Mortality effects on predator population from Sat'09
-  r0.conc[4,i] = r0.q(conc = (i-1),
-                       f.alpha_q = alpha_q_mal_yuan04)[3]       #Feeding reduction effects on predator population
-  r0.conc[5,i] = r0.q(conc = (i-1),
-                       f.mu_Nq = muNq_chlor_ibrahim92)[3]     #Mortality effects on snail population
-  r0.conc[6,i] = r0.q(conc = (i-1),
-                       f.mu_Nq = muNq_chlor_ibrahim92,
-                       f.f_Nq = f_Nq_chlor_ibrahim92)[3]      #Both repro and mortality effects in snails
-  r0.conc[9,i] = r0.q(conc = (i-1),
-                       f.pi_Mq = pi_Mq_ch_has11)[3]           #Mortality effects on miracidia from Hasheesh11
-  r0.conc[10,i] = r0.q(conc = (i-1),
-                       f.pi_Cq = pi_C_mal_tch92)[3]           #Mortality effects on cercariae from Hasheesh11
-  r0.conc[11,i] = r0.q(conc = (i-1),
-                        f.pi_Mq = pi_Mq_ch_has11,
-                        f.pi_Cq = pi_C_mal_tch92)[3]          #Mortality effects on miracidia & cercariae from Hasheesh11
-  r0.conc[12,i] = r0.q(conc = (i-1),
-                        f.f_Nq = f_Nq_chlor_ibrahim92,
-                        f.mu_Pq = muPq_ch_Halstead,
-                        f.mu_Nq = muNq_chlor_ibrahim92,
-                        f.pi_Mq = pi_Mq_ch_has11,
-                        f.pi_Cq = pi_Cq_ch_has11)[3]          #Combined effects
+for(i in 1:1000){
+  r0.conc.mal[1,i] = r0.q(conc = (i-1))[3]                       #Baseline r0 with no agrochemical effects included
+  r0.conc.mal[2,i] = r0.q(conc = (i-1),
+                      f.mu_Pq = muPq_mal_Halstead)[3]      #Mortality effects on predator population from Sat'09
+  r0.conc.mal[3,i] = r0.q(conc = (i-1),
+                      f.alpha_q = alpha_q_mal_yuan04)[3]   #Feeding reduction effects on predator population
+  r0.conc.mal[4,i] = r0.q(conc = (i-1),
+                      f.pi_Cq = pi_C_mal_tch92)[3]         #Mortality effects on cercariae from Hasheesh11
+  r0.conc.mal[5,i] = r0.q(conc = (i-1),
+                      f.pi_Mq = pi_M_mal_tch92)[3]             #Miracidial mortality effects
+  r0.conc.mal[6,i] = r0.q(conc = (i-1),
+                      f.pi_Mq = pi_M_mal_tch92,
+                      f.pi_Cq = pi_C_mal_tch92)[3]          #Combined larval effects
+  r0.conc.mal[7,i] = r0.q(conc = (i-1),
+                          f.mu_Pq = muPq_mal_Halstead,
+                          f.alpha_q = alpha_q_mal_yuan04)[3]  #Combined mortality and pred feeding reduction
+  r0.conc.mal[8,i] = r0.q(conc = (i-1),
+                          f.mu_Pq = muPq_mal_Halstead,
+                          f.alpha_q = alpha_q_mal_yuan04,
+                          f.pi_Mq = pi_M_mal_tch92,
+                          f.pi_Cq = pi_C_mal_tch92)[3]  #All effects
+  
 }
 
-  plot(x=c(0:100), y=r0.conc[1,], type = 'l', lwd = 3, ylim = c(0,6), col = 'grey40',
-       ylab = expression('R'[0]), xlab = 'Chlorpyrifos Concentration (ppb)',
-       main = expression(paste('R'[0],'(q) simulations with Chlorpyrifos', sep='')))
+  plot(x=c(0:1000), y=r0.conc.mal[1,], type = 'l', lwd = 3, ylim = c(0,6), col = 'grey40',
+       ylab = expression('R'[0]), xlab = 'Malathion Concentration (ppb)',
+       main = expression(paste('R'[0],'(q) simulations with Malathion', sep='')))
     legend('bottomleft', legend = expression('baseline R'[0]), lwd=3, col = 'grey40', cex=0.75)
- #Snail effects
-  lines(x=c(0:100), y=r0.conc[2,], lwd=2, col='lightblue')
-  lines(x=c(0:100), y=r0.conc[5,], lwd=2, col='navy')
-  lines(x=c(0:100), y=r0.conc[6,], lwd=2, col='blue', lty=2)
+ #Predator effects 
+  lines(x=c(0:1000), y=r0.conc.mal[2,], lwd=2, col='olivedrab1')
+  lines(x=c(0:1000), y=r0.conc.mal[3,], lwd=2, col='olivedrab4')
+  lines(x=c(0:1000), y=r0.conc.mal[7,], lwd=2, col='green', lty=2)
     legend('bottomleft', legend = c(expression('baseline R'[0]),
-                                    expression(paste('f'[N],'(q)', sep='')),
-                                    expression(paste(mu[N],'(q)', sep='')),
+                                    expression(paste(mu[P],'(q) Halstead15', sep='')),
+                                    expression(paste(alpha,'(q) Yuan04', sep='')),
                                     'combined'), 
            lwd=c(3,2,2,2), lty = c(1,1,1,2), 
-           col = c('grey40', 'lightblue', 'navy', 'blue'), cex=0.75)
-  
- #Predator effects 
-  lines(x=c(0:100), y=r0.conc[3,], lwd=2, col='olivedrab1')
-  lines(x=c(0:100), y=r0.conc[4,], lwd=2, col='olivedrab4')
-  lines(x=c(0:100), y=r0.conc[7,], lwd=2, col='palegreen', lty=2)
-  lines(x=c(0:100), y=r0.conc[8,], lwd=2, col='green')
-    legend('bottomleft', legend = c(expression('baseline R'[0]),
-                                    expression(paste(mu[P],'(q) Halstead', sep='')),
-                                    expression(paste(alpha,'(q) Sat.', sep='')),
-                                    expression(paste(mu[P],'(q) Sat.', sep='')),
-                                    'combined'), 
-           lwd=c(3,2,2,2,2), lty = c(1,1,1,1,2), 
-           col = c('grey40', 'green', 'olivedrab4', 'olivedrab1', 'palegreen'), cex=0.75)
+           col = c('grey40','olivedrab4', 'olivedrab1', 'green'), cex=0.75)
  #Larval effects
-  lines(x=c(0:100), y=r0.conc[9,], lwd=2, col='indianred4')
-  lines(x=c(0:100), y=r0.conc[10,], lwd=2, col='lightcoral')
-  lines(x=c(0:100), y=r0.conc[11,], lwd=2, col='red', lty=2)
+  lines(x=c(0:1000), y=r0.conc.mal[4,], lwd=2, col='indianred4')
+  lines(x=c(0:1000), y=r0.conc.mal[5,], lwd=2, col='lightcoral')
+  lines(x=c(0:1000), y=r0.conc.mal[6,], lwd=2, col='red', lty=2)
     legend('bottomleft', legend = c(expression('baseline R'[0]),
                                     expression(paste(pi[M],'(q)', sep='')),
                                     expression(paste(pi[C],'(q)', sep='')),
@@ -106,7 +89,66 @@ for(i in 1:100){
            lwd=c(3,2,2,2), lty = c(1,1,1,2), 
            col = c('grey40', 'indianred4', 'lightcoral', 'red'), cex=0.75)
  #All effects combined
-  lines(x=c(0:100), y=r0.conc[12,], lwd=3, col='black', lty=3)
+  lines(x=c(0:1000), y=r0.conc.mal[8,], lwd=3, col='black', lty=3)
+    legend('bottomleft', legend = c(expression('baseline R'[0]),
+                                    expression(paste('R'[0],'(q)', sep=''))), 
+           lwd=c(3,3), lty = c(1,3), col = c('grey40', 'black'), cex=0.75)
+    
+    
+#Switch to ppm ################
+  r0.conc.mal.ppm = matrix(ncol = 1001, nrow = 8)
+    
+  mal.ppm = seq(0,100000, length.out = 1001)
+    
+    for(i in 1:length(mal.ppm)){
+      r0.conc.mal.ppm[1,i] = r0.q(conc = (mal.ppm[i]))[3]                       #Baseline r0 with no agrochemical effects included
+      r0.conc.mal.ppm[2,i] = r0.q(conc = (mal.ppm[i]),
+                              f.mu_Pq = muPq_mal_Halstead)[3]      #Mortality effects on predator population from Sat'09
+      r0.conc.mal.ppm[3,i] = r0.q(conc = (mal.ppm[i]),
+                              f.alpha_q = alpha_q_mal_yuan04)[3]   #Feeding reduction effects on predator population
+      r0.conc.mal.ppm[4,i] = r0.q(conc = (mal.ppm[i]),
+                              f.pi_Cq = pi_C_mal_tch92)[3]         #Mortality effects on cercariae from Hasheesh11
+      r0.conc.mal.ppm[5,i] = r0.q(conc = (mal.ppm[i]),
+                              f.pi_Mq = pi_M_mal_tch92)[3]             #Miracidial mortality effects
+      r0.conc.mal.ppm[6,i] = r0.q(conc = (mal.ppm[i]),
+                              f.pi_Mq = pi_M_mal_tch92,
+                              f.pi_Cq = pi_C_mal_tch92)[3]          #Combined larval effects
+      r0.conc.mal.ppm[7,i] = r0.q(conc = (mal.ppm[i]),
+                              f.mu_Pq = muPq_mal_Halstead,
+                              f.alpha_q = alpha_q_mal_yuan04)[3]  #Combined mortality and pred feeding reduction
+      r0.conc.mal.ppm[8,i] = r0.q(conc = (mal.ppm[i]),
+                              f.mu_Pq = muPq_mal_Halstead,
+                              f.alpha_q = alpha_q_mal_yuan04,
+                              f.pi_Mq = pi_M_mal_tch92,
+                              f.pi_Cq = pi_C_mal_tch92)[3]  #All effects
+      
+    }
+    
+  plot(x=c(0:1000)/10, y=r0.conc.mal.ppm[1,], type = 'l', lwd = 3, ylim = c(0,6), col = 'grey40',
+         ylab = expression('R'[0]), xlab = 'Malathion Concentration (ppm)',
+         main = expression(paste('R'[0],'(q) simulations with Malathion', sep='')))
+    #Predator effects 
+    lines(x=c(0:1000)/10, y=r0.conc.mal.ppm[2,], lwd=2, col='olivedrab1')
+    lines(x=c(0:1000)/10, y=r0.conc.mal.ppm[3,], lwd=2, col='olivedrab4')
+    lines(x=c(0:1000)/10, y=r0.conc.mal.ppm[7,], lwd=2, col='green', lty=2)
+    legend('bottomleft', legend = c(expression('baseline R'[0]),
+                                    expression(paste(mu[P],'(q) Halstead15', sep='')),
+                                    expression(paste(alpha,'(q) Yuan04', sep='')),
+                                    'combined'), 
+           lwd=c(3,2,2,2), lty = c(1,1,1,2), 
+           col = c('grey40','olivedrab4', 'olivedrab1', 'green'), cex=0.75)
+    #Larval effects
+    lines(x=c(0:1000)/10, y=r0.conc.mal.ppm[4,], lwd=2, col='indianred4')
+    lines(x=c(0:1000)/10, y=r0.conc.mal.ppm[5,], lwd=2, col='lightcoral')
+    lines(x=c(0:1000)/10, y=r0.conc.mal.ppm[6,], lwd=2, col='red', lty=2)
+    legend('bottomleft', legend = c(expression('baseline R'[0]),
+                                    expression(paste(pi[M],'(q)', sep='')),
+                                    expression(paste(pi[C],'(q)', sep='')),
+                                    'combined'), 
+           lwd=c(3,2,2,2), lty = c(1,1,1,2), 
+           col = c('grey40', 'indianred4', 'lightcoral', 'red'), cex=0.6)
+    #All effects combined
+    lines(x=c(0:1000)/10, y=r0.conc.mal.ppm[8,], lwd=3, col='black', lty=3)
     legend('bottomleft', legend = c(expression('baseline R'[0]),
                                     expression(paste('R'[0],'(q)', sep=''))), 
            lwd=c(3,3), lty = c(1,3), col = c('grey40', 'black'), cex=0.75)

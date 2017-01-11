@@ -31,6 +31,8 @@ plot(cerc.t$time_hrs[cerc.t$conc==0], cerc.t$surv[cerc.t$conc==0]/100, pch=17, x
            cerc.t$surv[cerc.t$conc==unique(cerc.t$conc[cerc.t$chem == 'malathion'])[i]]/100, pch=16,
            col = 1+i)
   }
+legend('topright', title = 'Mal(ppm)', legend = c(0,50,100,150,200,250), pch = c(17,rep(16,4)),
+       col = c(1:6), cex=0.7)
 #Fit to tchounwou control ########
 #Malathion experiment control points
   cerc.mal.ctrl = drm(cerc.t$mort[cerc.t$id == '5_7']/100 ~ 
@@ -133,8 +135,6 @@ plot(cerc.t$time_hrs[cerc.t$conc==0], cerc.t$surv[cerc.t$conc==0]/100, pch=17, x
   auc.tch.mal250.7hr = integrate(f = tch.cerc.mal250.surv, lower=0, upper=7)[1]$value
   
 #Derive functional response of pi_C to malathion concentration #############
-  lines(x=time, y=rohr.cerc.ctrl.surv(time), lty=3)
-
 #Check relative decrease in AUC across malathion concentration
   rel.mal.auc = c(auc.tch.mal0, auc.tch.mal50, auc.tch.mal100, auc.tch.mal150,
                   auc.tch.mal200, auc.tch.mal250)/auc.tch.mal0

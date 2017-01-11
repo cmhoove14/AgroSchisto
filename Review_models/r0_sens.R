@@ -11,8 +11,6 @@
 require(rootSolve)
 require(deSolve)
 
-#R0(q) code to investigate influence of chlorpyrifos
-
 #Model parameters ##############
 area = 1
 parameters=c(
@@ -61,7 +59,6 @@ parameters=c(
   mu_H = 1/(60*365)   # Natural mortality of humans (contributing to worm mortality), assuming average lifespan of 60 years, from Sokolow et al. 2015
 )
 
-require(deSolve)
 require(sensitivity)
 
 #Get parameter sets to sample from #######################
@@ -220,21 +217,21 @@ for(j in 1:length(vars)){
   
   mypath <- file.path("C:","Users","chris_hoover","Documents","RemaisWork","Schisto","R Codes",
                       "ag_schist","Review_models","Sensitivity_Plots", "r0",
-                      paste("r0_sens_", vars[j], ".jpg", sep = ""))
+                      paste("r0_only-sens_", vars[j], ".jpg", sep = ""))
   
   jpeg(file=mypath, width = 750, height = 625, units = "px")
   
-  par(mfrow = c(2,1), mar = c(4,3.75,1,0.4)+0.1)
+  par(mfrow = c(1,1), mar = c(4,3.75,1,0.4)+0.1)
   
   plot(x = parametersuse[,dim(parametersuse)[2]], y = outputfillr0[,j], 
        xlab = vars[j], ylab = 'r0', type = 'l', lwd=2,
        pch = 16, cex = 0.75, col = 'navy', 
        ylim = c(0,5))
   
-  plot(x = parametersuse[,dim(parametersuse)[2]], y = outputfillN.eq[,j], 
-       xlab = vars[j], ylab = 'N.eq', type = 'l', lwd=2,
-       pch = 16, cex = 0.75, col = 'olivedrab', 
-       ylim = c(0,60))
+  #plot(x = parametersuse[,dim(parametersuse)[2]], y = outputfillN.eq[,j], 
+   #    xlab = vars[j], ylab = 'N.eq', type = 'l', lwd=2,
+    #   pch = 16, cex = 0.75, col = 'olivedrab', 
+     #  ylim = c(0,60))
   
   dev.off()
   

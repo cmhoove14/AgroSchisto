@@ -10,7 +10,7 @@
 #and indicate changes that were made.###############
 
 require(deSolve)
-source('agroC_data.R')
+source('T_variant_Agro/agroC_data.R')
 
 #Model structure to dynamically vary agrochemical application, prawn introduction, and MDA ####################
 agroc_prawn_mda<-function(chem, chem.days, chem.k, chem.med, 

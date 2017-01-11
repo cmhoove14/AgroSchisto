@@ -961,7 +961,7 @@ gg2.2<-ggplot(p.ecotox_mod10, aes(x=dose, y=N_eq))+
     
     abline(a = atra_mod$coefficients[1], b = atra_mod$coefficients[2], lty=2, col='red')
     
-    #Extrapolate response to constant gradient of Chlorpyrifos concentration
+    #Extrapolate response to constant gradient of Atrazine concentration
     atra.predict<-data.frame('atra' = seq(from=0, to=100, by=0.1),
                              'logatra' = log(seq(from=0, to=100, by=0.1)+1))
     atra.predict[, c('phiNq', 'st.er')]<-predict(atra_mod, atra.predict, 
