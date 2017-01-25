@@ -7,13 +7,16 @@ mir = read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData
   time = seq(0,25,0.1)
 
 #Tchounwou Data plotted ############
-plot(mir.mal$time[mir.mal$conc_ppm==0], mir.mal$prop_surv[mir.mal$conc_ppm==0], pch=17, xlab = 'time(hrs',
+plot(mir.mal$time[mir.mal$conc_ppm==0], mir.mal$prop_surv[mir.mal$conc_ppm==0], pch=17, xlab = 'time(hrs)',
      ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
   for(i in 2:length(unique(mir.mal$conc_ppm))){
     points(mir.mal$time[mir.mal$conc==unique(mir.mal$conc_ppm)[i]], 
            mir.mal$prop_surv[mir.mal$conc==unique(mir.mal$conc_ppm)[i]], pch=16,
            col = 1+i)
   }
+  legend('topright', legend = c(0, 30, 60, 90, 120, 150), title = 'Malathion (ppm)',
+         pch = c(17,rep(16,5)), col = c(1,3:7), cex = 0.8)
+  
 #Fit to tchounwou control ########
 #Malathion experiment control points
   mir.mal.ctrl = drm(mir.mal$mort[mir.mal$conc_ppm==0] ~ 
@@ -111,14 +114,14 @@ plot(mir.mal$time[mir.mal$conc_ppm==0], mir.mal$prop_surv[mir.mal$conc_ppm==0], 
   
   mal.piM.predict = lm(auc24 ~ conc + 0, data = mal.df)
   
-  mal.piM.predict = nls(auc24 ~ -m*(conc)+1, data = mal.df,
+  mal.piM.predict = nls(auc24 ~ 1 - m*(conc), data = mal.df,
                         start = list(m=0.1))
     summary(mal.piM.predict)
 
   dose = c(0:150)*1000
   
-  pi_M_mal_tch92 = function(q){
-    -summary(mal.piM.predict)$parameters[1]*(q/1000)+1 
+  pi_M_mal_tch92 = function(In){
+    -summary(mal.piM.predict)$parameters[1]*(In/1000)+1 
   } #Model derived in ppm; convert concentration to ppb for response
   
   lines(dose/1000, pi_M_mal_tch92(dose), lty=2, col='red')

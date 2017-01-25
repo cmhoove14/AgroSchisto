@@ -70,8 +70,8 @@ plot(x = cerc.g$time_hrs[cerc.g$chem == 'control'],
   
   atr.g.con = c(0:201)
   
-  pi_C_atr_grg08 = function(q){
-    exp(-summary(atr.piC.g.predict)$parameters[1]*(q)) 
+  pi_C_atr_grg08 = function(He){
+    exp(-summary(atr.piC.g.predict)$parameters[1]*(He)) 
   } #Model derived in ppm; convert concentration to ppb for response
   
   lines(atr.g.con, pi_C_atr_grg08(atr.g.con), lty=2, col='red')

@@ -35,14 +35,14 @@ require(drc)
     for(i in 1:length(mal.c)){
       mal.d[i] = sum(mal$Dead[mal$Conc == mal.c[i]])/5
     }
-      mal.mod<-drm(mal.d ~ mal.c, type = 'binomial', fct = LL2.2())
+      mal.mod<-drm(mal.d ~ mal.c, type = 'binomial', fct = LL.2())
       
       muPq_mal_Halstead<-function(In){
-        1/(1+exp(mal.mod$coefficients[1]*(log(In)-mal.mod$coefficients[2])))
+        1/(1+exp(mal.mod$coefficients[1]*(log(In)-log(mal.mod$coefficients[2]))))
       }  
       
       dose.m = seq(min(mal.c), max(mal.c), 1)
-      plot(mal.c, mal.d, pch = 16, xlab = 'Concentration', ylab = 'mortality')
+      plot(mal.c, mal.d, pch = 16, xlab = 'Malathion Concentration (ppb)', ylab = 'prop dead', ylim = c(0,1))
         lines(dose.m, muPq_mal_Halstead(dose.m), lty=2, col='red')
         
 
@@ -53,14 +53,14 @@ require(drc)
     for(i in 1:length(chlor.c)){
       chlor.d[i] = sum(chlor$Dead[chlor$Conc == chlor.c[i]])/5
     }
-      chlor.mod<-drm(chlor.d ~ chlor.c, type = 'binomial', fct = LL2.2())
+      chlor.mod<-drm(chlor.d ~ chlor.c, type = 'binomial', fct = LL.2())
   
       muPq_ch_Halstead<-function(In){
-        1/(1+exp(chlor.mod$coefficients[1]*(log(In)-chlor.mod$coefficients[2])))
+        1/(1+exp(chlor.mod$coefficients[1]*(log(In)-log(chlor.mod$coefficients[2]))))
       }
       
       dose.ch = seq(min(chlor.c), max(chlor.c), 1)
-      plot(chlor.c, chlor.d, pch = 16, xlab = 'Concentration', ylab = 'mortality')
+      plot(chlor.c, chlor.d, pch = 16, xlab = 'Chlorpyrifos Concentration (ppb)', ylab = 'prop dead')
         lines(dose.ch, muPq_ch_Halstead(dose.ch), lty=2, col='red')
       
   #Terbufos   
@@ -70,14 +70,14 @@ require(drc)
     for(i in 1:length(terb.c)){
       terb.d[i] = sum(terb$Dead[terb$Conc == terb.c[i]])/5
     }
-      terb.mod<-drm(terb.d ~ terb.c, type = 'binomial', fct = LL2.2())
+      terb.mod<-drm(terb.d ~ terb.c, type = 'binomial', fct = LL.2())
   
       muPq_terb_Halstead<-function(In){
-        1/(1+exp(terb.mod$coefficients[1]*(log(In)-terb.mod$coefficients[2])))
+        1/(1+exp(terb.mod$coefficients[1]*(log(In)-log(terb.mod$coefficients[2]))))
       }
       
       dose.tb = seq(min(terb.c), max(terb.c), 1)
-      plot(terb.c, terb.d, pch = 16, xlab = 'Concentration', ylab = 'mortality')
+      plot(terb.c, terb.d, pch = 16, xlab = 'Terbufos Concentration (ppb)', ylab = 'prop dead')
         lines(dose.tb, muPq_terb_Halstead(dose.tb), lty=2, col='red')
       
   
@@ -88,14 +88,14 @@ require(drc)
     for(i in 1:length(lamcy.c)){
       lamcy.d[i] = sum(lamcy$Dead[lamcy$Conc == lamcy.c[i]])/5
     }
-      lamcy.mod<-drm(lamcy.d ~ lamcy.c, type = 'binomial', fct = LL2.2())
+      lamcy.mod<-drm(lamcy.d ~ lamcy.c, type = 'binomial', fct = LL.2())
   
       muPq_lamcy_Halstead<-function(In){
-        1/(1+exp(lamcy.mod$coefficients[1]*(log(In)-lamcy.mod$coefficients[2])))
+        1/(1+exp(lamcy.mod$coefficients[1]*(log(In)-log(lamcy.mod$coefficients[2]))))
       }
       
       dose.lamcy= seq(min(lamcy.c), max(lamcy.c), 0.01)
-      plot(lamcy.c, lamcy.d, pch = 16, xlab = 'Concentration', ylab = 'mortality')
+      plot(lamcy.c, lamcy.d, pch = 16, xlab = 'Lamda-Cyhalothrin Concentration', ylab = 'prop dead')
         lines(dose.lamcy, muPq_lamcy_Halstead(dose.lamcy), lty=2, col='red')
       
   #esfenvalerate  
@@ -105,14 +105,14 @@ require(drc)
     for(i in 1:length(esfen.c)){
       esfen.d[i] = sum(esfen$Dead[esfen$Conc == esfen.c[i]])/5
     }
-      esfen.mod<-drm(esfen.d ~ esfen.c, type = 'binomial', fct = LL2.2())
+      esfen.mod<-drm(esfen.d ~ esfen.c, type = 'binomial', fct = LL.2())
   
       muPq_esfen_Halstead<-function(In){
-        1/(1+exp(esfen.mod$coefficients[1]*(log(In)-esfen.mod$coefficients[2])))
+        1/(1+exp(esfen.mod$coefficients[1]*(log(In)-log(esfen.mod$coefficients[2]))))
       }
       
       dose.esfen= seq(min(esfen.c), max(esfen.c), 0.01)
-      plot(esfen.c, esfen.d, pch = 16, xlab = 'Concentration', ylab = 'mortality')
+      plot(esfen.c, esfen.d, pch = 16, xlab = 'Esfenvalerate Concentration (ppb)', ylab = 'prop dead')
         lines(dose.esfen, muPq_esfen_Halstead(dose.esfen), lty=2, col='red')
       
   #Permethrin
@@ -122,14 +122,14 @@ require(drc)
     for(i in 1:length(perm.c)){
       perm.d[i] = sum(perm$Dead[perm$Conc == perm.c[i]])/5
     }
-      perm.mod<-drm(perm.d ~ perm.c, type = 'binomial', fct = LL2.2())
+      perm.mod<-drm(perm.d ~ perm.c, type = 'binomial', fct = LL.2())
       
       muPq_perm_Halstead<-function(In){
-        1/(1+exp(perm.mod$coefficients[1]*(log(In)-perm.mod$coefficients[2])))
+        1/(1+exp(perm.mod$coefficients[1]*(log(In)-log(perm.mod$coefficients[2]))))
       }
       
       dose.perm= seq(min(perm.c), max(perm.c), 0.01)
-      plot(perm.c, perm.d, pch = 16, xlab = 'Concentration', ylab = 'mortality')
+      plot(perm.c, perm.d, pch = 16, xlab = 'Permethrin concentration (ppb)', ylab = 'prop dead')
         lines(dose.perm, muPq_perm_Halstead(dose.perm), lty=2, col='red')
       
 #Insecticide toxicity to crustaceans from Halstead et al; 10-day mortality endpoints ################

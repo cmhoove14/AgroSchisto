@@ -155,8 +155,8 @@ legend('topright', title = 'Mal(ppm)', legend = c(0,50,100,150,200,250), pch = c
 
   dose = c(0:250)*1000
   
-  pi_C_mal_tch92 = function(q){
-    exp(-summary(mal.piC.predict)$parameters[1]*(q/1000)) 
+  pi_C_mal_tch92 = function(In){
+    exp(-summary(mal.piC.predict)$parameters[1]*(In/1000)) 
   } #Model derived in ppm; convert concentration to ppb for response
   
   lines(dose/1000, pi_C_mal_tch92(dose), lty=2, col='red')

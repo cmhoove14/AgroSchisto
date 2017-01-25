@@ -1,7 +1,7 @@
 source('Response_Fxs/griggs08_piC.R')
 source('Response_Fxs/Baxter_Rohr_Atrazine2011.R')
-require(deSolve)
 source('Review_models/agroReview_mod1.1.R')
+require(deSolve)
 
 mod.mda = function(t, n, parameters) {
   with(as.list(parameters),{

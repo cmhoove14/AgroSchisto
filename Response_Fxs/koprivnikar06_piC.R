@@ -71,8 +71,8 @@ atr.piC.k.predict = nls(auc24 ~ exp(-b*(conc+1e-6)), data = kop.df,
 
 atr.k.con = c(0:201)
 
-pi_C_atr_kop06 = function(q){
-  exp(-summary(atr.piC.k.predict)$parameters[1]*(q)) 
+pi_C_atr_kop06 = function(He){
+  exp(-summary(atr.piC.k.predict)$parameters[1]*(He)) 
 } #Model derived in ppm; convert concentration to ppb for response
 
 lines(atr.k.con, pi_C_atr_kop06(atr.k.con), lty=2, col='red')
