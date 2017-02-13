@@ -33,7 +33,7 @@ parameters=c(
   
   # Predator pop dynamic parameters (from pred tweaking code)
   f_P = 0.02,          #Predator intrinsic recruitment rate
-  phi_P = 0.3*area,         #Predator carrying capacity (0.5/m^2)
+  phi_P = 0.1*area,    #Predator carrying capacity (0.1/m^2)
   mu_P = 0.0026,       #Predator mortality rate
   
   # Predation parameters
@@ -69,8 +69,8 @@ parameters=c(
     return(0)
   }
 
-#R0(q) function ###############
-r0.q = function(conc = 0, 
+#R0(q) functions ###############
+r0.In = function(In = 0,
                 f.f_Nq = nil1, 
                 f.mu_Pq = nil0,
                 f.phi_Nq = nil1, 
@@ -80,9 +80,8 @@ r0.q = function(conc = 0,
                 f.pi_Mq = nil1, 
                 f.pi_Cq = nil1, 
                 f.v_q = nil1)
-{q = conc
   
-  area = parameters['A']
+{ area = parameters['A']
   sigma = parameters['sigma']
   lamda = parameters['lamda']
   omega = parameters['Om']
@@ -105,15 +104,15 @@ r0.q = function(conc = 0,
   f_N = parameters['f_N']
   phi_N = parameters['phi_N']
   
-  f_Nq = f_N * f.f_Nq(q)
-  muPq = mu_P + f.mu_Pq(q)
-  phi_Nq = phi_N * f.phi_Nq(q)
-  mu_Nq = mu_N + f.mu_Nq(q)
-  alpha_q = alpha * f.alpha_q(q)
-  theta_q = theta * f.theta_q(q)
-  pi_Mq = f.pi_Mq(q)
-  pi_Cq = f.pi_Cq(q)
-  v_q = v * f.v_q(q)
+  f_Nq = f_N * f.f_Nq(In)
+  muPq = mu_P + f.mu_Pq(In)
+  phi_Nq = phi_N * f.phi_Nq(In)
+  mu_Nq = mu_N + f.mu_Nq(In)
+  alpha_q = alpha * f.alpha_q(In)
+  theta_q = theta * f.theta_q(In)
+  pi_Mq = f.pi_Mq(In)
+  pi_Cq = f.pi_Cq(In)
+  v_q = v * f.v_q(In)
 
   #Equilibrium estimate of P given prawn predator parameters and q
   P.eq = phi_P*(1 - muPq/f_P)         
@@ -121,20 +120,160 @@ r0.q = function(conc = 0,
   if(P.eq<0){P.eq = 0}
   
   #Equilibrium estimate of N given snail parameters
-  N.eq = max(uniroot.all(f = function(y){
-    (f_Nq)*(1 - (y)/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*(y))
-    }, c(0, as.numeric(phi_Nq))))
+  N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
+                         c(0, as.numeric(phi_Nq))))
   
   if(N.eq<0){N.eq = 0}
   
   #Equilibrium predation rate estimate
-  psi.eq = alpha_q/(1+alpha*Th*N.eq)
+  psi.eq = alpha_q/(1+alpha*Th*(N.eq/area))
   
   #R_0 of q estimate
-  r0 <- sqrt((sigma*lamda*omega^2*theta_q*pi_Cq*beta*N.eq*H*m*v_q*pi_Mq) / 
-              (2*(mu_Nq + P.eq*psi.eq + sigma)*(mu_Nq + P.eq*psi.eq + mu_I)*(mu_H + mu_W)))
+  e.hat = (theta_q*H*lamda*pi_Cq*omega) / (mu_Nq + mu_I + P.eq*psi.eq)
+  i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
+  w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
+  
+  r0 = sqrt(e.hat * i.hat * w.hat)
   
   return(c(N.eq, P.eq, r0))
+
+}
+
+r0.He = function(He = 0,
+                 f.f_Nq = nil1, 
+                 f.mu_Pq = nil0,
+                 f.phi_Nq = nil1, 
+                 f.mu_Nq = nil0, 
+                 f.alpha_q = nil1,
+                 f.theta_q = nil1, 
+                 f.pi_Mq = nil1, 
+                 f.pi_Cq = nil1, 
+                 f.v_q = nil1)
+  
+{ area = parameters['A']
+  sigma = parameters['sigma']
+  lamda = parameters['lamda']
+  omega = parameters['Om']
+  theta = parameters['theta']
+  pi_C = parameters['pi_C']
+  beta = parameters['beta']
+  H = parameters['H']
+  m = parameters['m']
+  v = parameters['v']
+  pi_M = parameters['pi_M']
+  mu_N = parameters['mu_N']
+  mu_I = parameters['mu_I']
+  mu_H = parameters['mu_H']
+  mu_W = parameters['mu_W']
+  mu_P = parameters['mu_P']
+  f_P = parameters['f_P']
+  phi_P = parameters['phi_P']
+  alpha = parameters['alpha']
+  Th = parameters['Th']
+  f_N = parameters['f_N']
+  phi_N = parameters['phi_N']
+  
+  f_Nq = f_N * f.f_Nq(He)
+  muPq = mu_P + f.mu_Pq(He)
+  phi_Nq = phi_N * f.phi_Nq(He)
+  mu_Nq = mu_N + f.mu_Nq(He)
+  alpha_q = alpha * f.alpha_q(He)
+  theta_q = theta * f.theta_q(He)
+  pi_Mq = f.pi_Mq(He)
+  pi_Cq = f.pi_Cq(He)
+  v_q = v * f.v_q(He)
+
+#Equilibrium estimate of P given prawn predator parameters and q
+  P.eq = phi_P*(1 - muPq/f_P)         
+
+    if(P.eq<0){P.eq = 0}
+
+#Equilibrium estimate of N given snail parameters
+  N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
+                         c(0, as.numeric(phi_Nq))))
+
+    if(N.eq<0){N.eq = 0}
+
+#Equilibrium predation rate estimate
+  psi.eq = alpha_q/(1+alpha*Th*(N.eq/area))
+
+#R_0 of q estimate
+  e.hat = (theta_q*H*lamda*pi_Cq*omega) / (mu_Nq + mu_I + P.eq*psi.eq)
+  i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
+  w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
+
+    r0 = sqrt(e.hat * i.hat * w.hat)
+
+return(c(N.eq, P.eq, r0))
+
+}
+  
+r0.Fe = function(Fe = 0,
+                 f.f_Nq = nil1, 
+                 f.mu_Pq = nil0,
+                 f.phi_Nq = nil1, 
+                 f.mu_Nq = nil0, 
+                 f.alpha_q = nil1,
+                 f.theta_q = nil1, 
+                 f.pi_Mq = nil1, 
+                 f.pi_Cq = nil1, 
+                 f.v_q = nil1)
+  
+{ area = parameters['A']
+  sigma = parameters['sigma']
+  lamda = parameters['lamda']
+  omega = parameters['Om']
+  theta = parameters['theta']
+  pi_C = parameters['pi_C']
+  beta = parameters['beta']
+  H = parameters['H']
+  m = parameters['m']
+  v = parameters['v']
+  pi_M = parameters['pi_M']
+  mu_N = parameters['mu_N']
+  mu_I = parameters['mu_I']
+  mu_H = parameters['mu_H']
+  mu_W = parameters['mu_W']
+  mu_P = parameters['mu_P']
+  f_P = parameters['f_P']
+  phi_P = parameters['phi_P']
+  alpha = parameters['alpha']
+  Th = parameters['Th']
+  f_N = parameters['f_N']
+  phi_N = parameters['phi_N']
+  
+  f_Nq = f_N * f.f_Nq(Fe)
+  muPq = mu_P + f.mu_Pq(Fe)
+  phi_Nq = phi_N * f.phi_Nq(Fe)
+  mu_Nq = mu_N + f.mu_Nq(Fe)
+  alpha_q = alpha * f.alpha_q(Fe)
+  theta_q = theta * f.theta_q(Fe)
+  pi_Mq = f.pi_Mq(Fe)
+  pi_Cq = f.pi_Cq(Fe)
+  v_q = v * f.v_q(Fe)
+
+#Equilibrium estimate of P given prawn predator parameters and q
+  P.eq = phi_P*(1 - muPq/f_P)         
+
+    if(P.eq<0){P.eq = 0}
+
+#Equilibrium estimate of N given snail parameters
+  N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
+                         c(0, as.numeric(phi_Nq))))
+
+    if(N.eq<0){N.eq = 0}
+
+#Equilibrium predation rate estimate
+  psi.eq = alpha_q/(1+alpha*Th*(N.eq/area))
+
+#R_0 of q estimate
+  e.hat = (theta_q*H*lamda*pi_Cq*omega) / (mu_Nq + mu_I + P.eq*psi.eq)
+  i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
+  w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
+
+  r0 = sqrt(e.hat * i.hat * w.hat)
+
+return(c(N.eq, P.eq, r0))
 
 }
   
@@ -143,14 +282,12 @@ pred.dens = seq(0,1,0.01)
 
 for(i in 1:length(pred.dens)){
   parameters['phi_P'] = pred.dens[i]*area
-  r0.pd[i] = r0.q(conc = 0)[3]
-  print(r0.q(conc = 0))
+  r0.pd[i] = r0.In(In = 0)[3]
+  print(r0.In(In = 0))
 }
  
   plot(pred.dens, r0.pd, type = 'l', lwd = 2, xlab = 'pred density', ylab = 'R0')
   
-parameters['phi_P'] = 0.1*area  
+  parameters['phi_P'] = 0.1*area
   
-r0.q(conc = 0)  #R0 = 3.38: coexistence of snail population, pred population, and disease @ pred density of 0.1/m^2
-
-r0.q(conc = 5, f.mu_Pq = muPq_ch_sat09) #R0 = 5.39: Pred population eliminated, max r0 in pred-free environment
+r0.In(In = 0)  #R0 = 3.61: coexistence of snail population, pred population, and disease @ pred density of 0.1/m^2

@@ -250,4 +250,68 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
          pch = c(16,17,17,17), col = c(1,2,3,4), cex = 0.7)
   legend('topright',  legend = 'predicted', lty = 2, cex = 0.7)
   title(main = 'Ghaffar 2016 long. survival to Pendimethalin',
-        sub = 'predicted vs observed (adults)')  
+        sub = 'predicted vs observed (adults)')
+  
+#Reductions in adult snail (B. alexandrina) reproduction ###########  
+  gafrep = data.frame('but.conc'=lc.but.vals[1:4],
+                      'gly.conc'=lc.gly.vals[1:4],
+                      'pen.conc'=lc.pen.vals[1:4],
+                      'but.rep'=c(44.231, 7.05, 4.52, 4.04)/44.231,
+                      'gly.rep'=c(44.231, 4.87, 4.20, 4.23)/44.231,
+                      'pen.rep'=c(44.231, 5.18, 4.75, 4.27)/44.231)
+  
+  plot(gafrep$gly.conc, gafrep$gly.rep, pch = 16, col = 'firebrick', xlim = c(0,10000), ylim = c(0,1),
+       xlab = 'Herbicide Concentration', ylab = 'relative reproduction (R0)')
+    points(gafrep$but.conc, gafrep$but.rep, pch = 16, col = 'darkorange')
+    points(gafrep$pen.conc, gafrep$pen.rep, pch = 16, col = 'indianred2')
+    
+#Fit function for butralin
+  but.fN.pred = nls(but.rep ~ exp(-b*but.conc), data=gafrep, start = list(b=0.001))
+    summary(but.fN.pred)
+    
+    f_N_but_gaf16 = function(He){
+      exp(-summary(but.fN.pred)$parameters[1]*He) 
+    }
+    
+    but.fN.pred.l2 = drm(gafrep$but.rep  ~ gafrep$but.conc, type = 'binomial', fct = LL2.2())
+    
+    f_N_but_gaf16.l2 = function(He){
+      (1/(1+exp(but.fN.pred.l2$coefficients[1]*(log(He)-but.fN.pred.l2$coefficients[2]))))
+    }
+    
+    lines(c(0:10000), f_N_but_gaf16(c(0:10000)), lty=2, col='darkorange')  
+    lines(c(0:10000), f_N_but_gaf16.l2(c(0:10000)), lty=3, col='darkorange')   
+    
+#Fit function for glyphosate
+  gly.fN.pred = nls(gly.rep ~ exp(-b*gly.conc), data=gafrep, start = list(b=0.001))
+    summary(gly.fN.pred)
+    
+    f_N_gly_gaf16 = function(He){
+      exp(-summary(gly.fN.pred)$parameters[1]*He) 
+    }
+    
+    gly.fN.pred.l2 = drm(gafrep$gly.rep  ~ gafrep$gly.conc, type = 'binomial', fct = LL2.2())
+    
+    f_N_gly_gaf16.l2 = function(He){
+      (1/(1+exp(gly.fN.pred.l2$coefficients[1]*(log(He)-gly.fN.pred.l2$coefficients[2]))))
+    }
+    
+    lines(c(0:10000), f_N_gly_gaf16(c(0:10000)), lty=2, col='firebrick')  
+    lines(c(0:10000), f_N_gly_gaf16.l2(c(0:10000)), lty=3, col='firebrick')   
+    
+#Fit function for pendimethalin
+  pen.fN.pred = nls(pen.rep ~ exp(-b*pen.conc), data=gafrep, start = list(b=0.001))
+    summary(pen.fN.pred)
+    
+    f_N_pen_gaf16 = function(He){
+      exp(-summary(pen.fN.pred)$parameters[1]*He) 
+    }
+    
+    pen.fN.pred.l2 = drm(gafrep$pen.rep  ~ gafrep$pen.conc, type = 'binomial', fct = LL2.2())
+    
+    f_N_pen_gaf16.l2 = function(He){
+      (1/(1+exp(pen.fN.pred.l2$coefficients[1]*(log(He)-pen.fN.pred.l2$coefficients[2]))))
+    }
+    
+    lines(c(0:10000), f_N_pen_gaf16(c(0:10000)), lty=2, col='firebrick')  
+    lines(c(0:10000), f_N_pen_gaf16.l2(c(0:10000)), lty=3, col='firebrick')   

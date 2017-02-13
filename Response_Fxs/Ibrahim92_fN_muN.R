@@ -1,37 +1,73 @@
 #Toxicity to Biomphalaria snails from Ibrahim 1992 ###################
 # reduction in snail fecundity: from table 1, relative change in number of juveniles produced over the 8 week experiment
 snail.repro = data.frame(dose = c(0,125,250,500),
-                         f_red = c(1, 3005/4225, 1749/4225, 1313/4225))
+                         juvs = c(4225, 3005, 1749, 1313))
 
-
-plot(snail.repro$dose, snail.repro$f_red, ylim = c(0,1), pch = 16, 
-     ylab = 'reduction in snail recruitment rate', xlab = 'ChlorP ppb', main='Ibrahim92 snail recruitment')
-
-mod1<-nls(f_red ~ exp(-b*(dose)), data=snail.repro, start = list(b=0.01))
-  summary(mod1)
-
-dose = c(0:500)
-
-f_Nq_chlor_ibrahim92 = function(In){
-  exp(-0.0028479*(In))
+chlor.fN.predict = drm(juvs ~ dose, data = snail.repro, type = 'continuous',
+                       fct = LL.4(names = c("Slope", "Lower Limit", "Upper Limit", "ED50"),
+                                  fixed = c(NA, 0, 4225, NA)))
+  summary(chlor.fN.predict)
+  plot(chlor.fN.predict)
+  
+f_N_chlor_ibr92 = function(In){
+    predict(chlor.fN.predict, data.frame(dose = In)) / predict(chlor.fN.predict, data.frame(dose = 0))
 }
 
-lines(dose, f_Nq_chlor_ibrahim92(dose), lty=2, col='red')
-text(75,0.1, labels = expression(paste('f'[N],'(q) = ', 'e'^'-bq', '     b=0.00285', sep='')))
+ibr92.fn.df = data.frame(dose = c(0:500),
+                         Prediction = 0,
+                         Lower = 0,
+                         Upper = 0)
 
-#Snail mortality -- relative change in survival over entire experiment period (12 weeks)
-snail.mort = data.frame(dose = c(0,125,250,500),
-                        mort = c(16.7, 23.3, 26.7, 100))
+ibr92.fn.df[,2:4] <- predict(chlor.fN.predict, newdata = ibr92.fn.df, 
+                             interval = 'confidence', level = 0.95)
 
-plot(snail.mort$dose, (snail.mort$mort - snail.mort$mort[1])/100, ylim = c(0,1), pch = 16, 
-     ylab = 'increased snail mortality', xlab = 'ChlorP ppb', main = 'Ibrahim 92 snail mortality')
+plot(snail.repro$dose, snail.repro$juvs / snail.repro$juvs[1], pch = 16, ylim = c(0,1),
+     ylab = 'relative produced over 8 weeks', xlab = 'ChlorP ppb', main='Ibrahim92 snail recruitment')
+  
+  lines(ibr92.fn.df$dose, ibr92.fn.df$Prediction / ibr92.fn.df$Prediction[1], col = 2, lty=2)
+  lines(ibr92.fn.df$dose, ibr92.fn.df$Lower / ibr92.fn.df$Prediction[1], col = 2, lty=3)
+  lines(ibr92.fn.df$dose, ibr92.fn.df$Upper / ibr92.fn.df$Prediction[1], col = 2, lty=3)
+  
+plot(snail.repro$dose, snail.repro$juvs, pch = 16, ylim = c(0,4500),
+      ylab = 'juveniles produced over 8 weeks', xlab = 'ChlorP ppb', main='Ibrahim92 snail recruitment')
+  
+  lines(ibr92.fn.df$dose, ibr92.fn.df$Prediction, col = 2, lty=2)
+  lines(ibr92.fn.df$dose, ibr92.fn.df$Lower, col = 2, lty=3)
+  lines(ibr92.fn.df$dose, ibr92.fn.df$Upper, col = 2, lty=3)
 
-ibr_muNq<-drm((snail.mort$mort - snail.mort$mort[1])/100 ~ snail.mort$dose,
-              data = snail.mort, type = 'binomial', fct = LL.2())
+#Snail mortality #############
+  #-- relative change in survival over entire experiment period (12 weeks)
+  snail.mort = data.frame(dose = c(0,125,250,500),
+                          total = rep(30,4),
+                          dead = c(5,7,8,30))
+  
+  snail.mort$mort = snail.mort$dead / snail.mort$total
+  snail.mort$mean.daily.rate = snail.mort$mort / 84
+  
+    
+  ibr_muNq<-drm(dead/total ~ dose, weights = total, data = snail.mort,
+                type = 'binomial', fct = LL.4(names = c("Slope", "Lower Limit", "Upper Limit", "ED50"),
+                                              fixed = c(NA, 0, 1, NA)))
+  
+    summary(ibr_muNq)
+    plot(ibr_muNq, ylim = c(0,1))
+    
+  mu_N_chlor_ibr92 = function(In){
+      predict(ibr_muNq, data.frame(dose = In))
+  }
+    
+  ibr92.muN.df = data.frame(dose = c(0:500),
+                             Prediction = 0,
+                             Lower = 0,
+                             Upper = 0)
+    
+    ibr92.muN.df[,2:4] <- predict(ibr_muNq, newdata = ibr92.muN.df, 
+                                 interval = 'confidence', level = 0.95)
+    
+plot(snail.mort$dose, snail.mort$mort, ylim = c(0,1), pch = 16, 
+       ylab = '12-week mortality rate', xlab = 'ChlorP ppb', main = 'Ibrahim92 12-week snail mortality')
 
-muNq_chlor_ibrahim92<-function(In){
-  1/(1+exp(ibr_muNq$coefficients[1]*(log(In)-log(ibr_muNq$coefficients[2]))))
-}  
-
-lines(dose, muNq_chlor_ibrahim92(dose), lty=2, col='red')
-text(150,0.5, labels = expression(paste(mu[N],'(q) = ', 'f(SF,LC'[50],',q)', '     SF=-3.87, LC'[50],'=358.5', sep='')), cex=0.7)
+    
+    lines(ibr92.muN.df$dose, ibr92.muN.df$Prediction, col = 2, lty=2)
+    lines(ibr92.muN.df$dose, ibr92.muN.df$Lower, col = 2, lty=3)
+    lines(ibr92.muN.df$dose, ibr92.muN.df$Upper, col = 2, lty=3)

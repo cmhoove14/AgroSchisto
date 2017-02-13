@@ -4,18 +4,51 @@ require(drc)
 #Atrazine effect on phi_Nq (snail carrying capacity) from Baxter et al 2011 data with Rohr et al analysis####
 atra.df<-data.frame('atra' = c(0,1,10,30,100),              #Raw atrazine concentration (ppb)
                     'logatra' = log(c(0,1,10,30,100)+1),    #Log atrazine concentration (ppb)
-                    'phiNq' = c(1,1.2888,1.6535,0.9960,2.3215))  #Snail population response measured as peak snail growth rate and 
-                                                            #interpreted as changes in snail carrying capacity
+                    'growthrate' = c(0.119406, 0.153891, 0.19744, 0.118918, 0.27719), #Peak growth rate in Rohr reanalysis of Baxter data  
+                    'st.err' = c(0.015949, 0.026329, 0.035467, 0.016286, 0.047113))     #interpreted as changes in snail carrying capacity 
 
-plot(atra.df$logatra, atra.df$phiNq, pch = 16, xlab = 'log+1 atrazine (ppb)', ylab = 'Relative peak growth rate')
+plot(atra.df$logatra, atra.df$growthrate, pch = 16, ylim = c(0,0.3),
+     xlab = 'ln+1 atrazine (ppb)', ylab = 'growth rate')
+  segments(x0 = atra.df$logatra, y0 = atra.df$growthrate + atra.df$st.err,
+           x1 = atra.df$logatra, y1 = atra.df$growthrate - atra.df$st.err)
 
-atr_phiNq<-nls(phiNq ~ 1 + b * log(atra+1), data = atra.df, start = list(b = 0.25))
-  summary(atr_phiNq)
+bax.mod = lm(growthrate ~ logatra, weights = st.err^-1, data = atra.df)
+  summary(bax.mod)
 
-atr.con = c(0:100)
+  bax.phin.df = data.frame(atra = c(0:200),
+                           logatra = log(c(0:200)+1),
+                           Prediction = 0,
+                           st.err = 0)
+  
+  bax.phin.df[,3:4] <- predict(bax.mod, newdata = bax.phin.df, 
+                               type = 'response', se.fit = T)[1:2]
+  
+  lines(bax.phin.df$logatra, bax.phin.df$Prediction, lty=2)
+    lines(bax.phin.df$logatra, bax.phin.df$Prediction + 1.96*bax.phin.df$st.err, lty=3)
+    lines(bax.phin.df$logatra, bax.phin.df$Prediction - 1.96*bax.phin.df$st.err, lty=3)  
 
-phi_Nq_atr_baxrohr<-function(Fe){
-  1 + (summary(atr_phiNq)$parameters[1] * log(Fe + 1))
+
+phi_Nq_atr_baxrohr = function(He){
+  if(He == 0){phiNq = 1} else{
+    u = predict(bax.mod, newdata = data.frame(logatra = log(He+1)), type = 'response',
+                se.fit = TRUE)[1:2]
+    phiNq = rnorm(1, u$fit, u$se.fit) / predict(bax.mod, newdata = data.frame(logatra = 0), 
+                                                type = 'response')
+  }
+  
+  phiNq
+  
 }
 
-lines(log(atr.con+1), phi_Nq_atr_baxrohr(atr.con), lty=2, col='red')
+plot(atra.df$atra, atra.df$growthrate / atra.df$growthrate[1], 
+     pch = 16, ylim = c(0.8, 3.0),
+     xlab = 'atrazine (ppb)', ylab = 'growth rate')
+  segments(x0 = atra.df$atra, 
+           y0 = (atra.df$growthrate + atra.df$st.err) / atra.df$growthrate[1],
+           x1 = atra.df$atra, 
+           y1 = (atra.df$growthrate - atra.df$st.err) / atra.df$growthrate[1])
+  for(i in 0:200){
+    points(i, phi_Nq_atr_baxrohr(i), pch = 17, col=4, cex=0.6)
+  }
+  
+  title('atrazine:peak growth rate (~carrying capacity)')

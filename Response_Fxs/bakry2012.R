@@ -1,34 +1,81 @@
 #Data extraction and model fitting to Bakry 2012 data
 require(drc)
 
-#Snail (B. alexandrina) toxicity ##########
-#Atrazine
-lc50.n.atr<-1.25
-slp.n.atr<-2.48
+#Snail (B. alexandrina) toxicity; create data frame, clean, etc. ##########
+muN.bak = data.frame(atr = c(.330, 1.250, 4.750),
+                     atr.se = 0,
+                     gly = c(.840, 3.150, 12.600),
+                     gly.se = 0,
+                     mort = c(0.1, 0.5, 0.9))
 
-mu_Nq_atr_bak12<-function(In){
-  Ins = In/1000
-  1 - 1/(1+exp(slp.n.atr*(log(Ins)-log(lc50.n.atr))))
-} 
+  muN.bak$surv = 1 - muN.bak$mort
 
-mu_Nq_atr_bak12(lc50.n.atr*1000)
+#Standard errors imputed assuming proportional error to concentration
+  
+  se.atr = (log10(1.88) - log10(1.25)) / 1.96 #st. err of lc50 in ppm
+  se.gly = (log10(4.82) - log10(3.15)) / 1.96 #error bars are assymetrical in this data even after log transformation
+                                              #so not entirely sure how to handle that...
 
-plot(c(0:10000), mu_Nq_atr_bak12(c(0:10000)), lwd = 2, type = 'l', xlab = 'atrazine concentration (ppb)',
-     ylab = 'mu_Nq', ylim = c(0,1), main = 'atrazine toxicity to snails, bakry2012')
+  muN.bak$atr.se = (muN.bak$atr / 1.25) * se.atr #st. err proportional to concentration
+  muN.bak$gly.se = (muN.bak$gly / 3.15) * se.gly #st. err proportional to concentration
 
-#Deltamethrin     
-lc50.n.gly<-3.15
-slp.n.gly<-2.16
+#visualize ##############
+  plot(muN.bak$atr, muN.bak$mort, ylim = c(0,1), xlim = c(0,13),
+       pch = 16, col = 'gold', xlab = 'Herbicide (ppm)', ylab = 'mortality')
+    points(muN.bak$gly, muN.bak$mort, pch = 16, col = 3)
+    for(i in 1:length(muN.bak$atr)){
+      segments(y0 = muN.bak$mort[i], x0 = muN.bak$atr[i] + muN.bak$atr.se[i],
+               y1 = muN.bak$mort[i], x1 = muN.bak$atr[i] - muN.bak$atr.se[i], col='gold')
+      segments(y0 = muN.bak$mort[i], x0 = muN.bak$gly[i] + muN.bak$gly.se[i],
+               y1 = muN.bak$mort[i], x1 = muN.bak$gly[i] - muN.bak$gly.se[i], col=3)
+    }
+    
+#fit functions using drm assuming cohort size of 50 snails for each LC outcome ################
+  #50 snails used in longitudinal LC10 exposure studies, so seems like a reasonable assusmption  
+  bak12.atr.drm = drm(mort ~ atr, weights = rep(50,3), data = muN.bak, type = 'binomial',
+                      fct = LL.2())
 
-mu_Nq_gly_bak12<-function(In){
-  Ins = In/1000
-  1 - 1/(1+exp(slp.n.gly*(log(Ins)-log(lc50.n.gly))))
-} 
+  bak12.gly.drm = drm(mort ~ gly, weights = rep(50,3), data = muN.bak, type = 'binomial',
+                      fct = LL.2())
 
-mu_Nq_gly_bak12(lc50.n.gly*1000)
+#visualize fits ##########
+  bak.test.df = data.frame(atr = seq(0,13,0.1),
+                           gly = seq(0,13,0.1),
+                           atr.muN = 0,
+                           atr.se = 0,
+                           gly.muN = 0,
+                           gly.se = 0)
+  
+#plot functions to visualize fit to data
+  bak.test.df[,3:4] = predict(bak12.atr.drm, newdata = bak.test.df, se.fit = TRUE)
+  bak.test.df[,5:6] = predict(bak12.gly.drm, newdata = bak.test.df, se.fit = TRUE)
+  
+    lines(bak.test.df$atr, bak.test.df$atr.muN, col='gold', lty=2)
+      lines(bak.test.df$atr, bak.test.df$atr.muN + 1.96*bak.test.df$atr.se, col='gold', lty=3)
+      lines(bak.test.df$atr, bak.test.df$atr.muN - 1.96*bak.test.df$atr.se, col='gold', lty=3)
+      
+    lines(bak.test.df$gly, bak.test.df$gly.muN, col=3, lty=2)
+      lines(bak.test.df$gly, bak.test.df$gly.muN + 1.96*bak.test.df$gly.se, col=3, lty=3)
+      lines(bak.test.df$gly, bak.test.df$gly.muN - 1.96*bak.test.df$gly.se, col=3, lty=3)
+      
+#derive functions for each snail mortality response ####################    
+  muNq_atr_bak12<-function(He){
+    He.use = He/1000
+    rdrm(1, LL.2(), coef(bak12.atr.drm), He.use, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+  }
+    #for(i in seq(0,13000,10)){
+    #  points(i/1000, muNq_atr_bak12(i), pch = 17, cex=0.5, col=2)
+    #}
 
-plot(c(0:10000), mu_Nq_gly_bak12(c(0:10000)), lwd = 2, type = 'l', xlab = 'glyphosate concentration (ppb)',
-     ylab = 'mu_Nq', ylim = c(0,1), main = 'glyphosate toxicity to snails, bakry2012')
+  muNq_gly_bak12<-function(He){
+    He.use = He/1000
+    rdrm(1, LL.2(), coef(bak12.gly.drm), He.use, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+  }
+    #for(i in seq(0,13000,10)){
+    #  points(i/1000, muNq_gly_bak12(i), pch = 17, cex=0.5, col=4)
+    #}
+  
+  keep.bak12 = c('muNq_atr_bak12', 'muNq_gly_bak12', 'bak12.atr.drm', 'bak12.gly.drm')
 
 #The paper also provides info on longitudinal survival of snail cohorts exposed to LC10 of each herbicide ################
 #So let's compare that data with the expected long. survival from the model at the same concentration
@@ -57,8 +104,8 @@ m.df[1,c(2:4)] = 50
 
 for(i in 1:42){
   m.df[i+1, 2] = m.df[i,2] + m  #subtract deaths per day (from control slope derived above)
-  m.df[i+1, 3] = m.df[i,3] - m.df[i,3] * mu_Nq_atr_bak12(330)  #for agrochemical toxicity, additional mortality as per capita deaths
-  m.df[i+1, 4] = m.df[i,4] - m.df[i,4] * mu_Nq_gly_bak12(840) #for agrochemical toxicity, additional mortality as per capita deaths
+  m.df[i+1, 3] = m.df[i,3] - m.df[i,3] * muNq_atr_bak12(330)  #for agrochemical toxicity, additional mortality as per capita deaths
+  m.df[i+1, 4] = m.df[i,4] - m.df[i,4] * muNq_gly_bak12(840) #for agrochemical toxicity, additional mortality as per capita deaths
 }
 
 lines(m.df$days, m.df$control, lty = 2, lwd=2)

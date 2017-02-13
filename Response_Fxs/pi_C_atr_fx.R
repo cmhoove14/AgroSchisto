@@ -1,29 +1,32 @@
 require(drc)
+
+#Incorporate data from all three studies investigating atrazine/E. trivolvis cercarial die-off relationship
+#This would probably work better with a random effects model or something of that sort, but will have to revisit later
+
 source('Response_fxs/rohr08_piC.R')
 source('Response_fxs/griggs08_piC.R')
 source('Response_fxs/koprivnikar06_piC.R')
 
-atr.rel.auc = c(1, as.numeric(rel.auc.rohr[2]),rel.auc.kop[c(2,3)], rel.auc.grg[c(2,3)])
+atr.rel.auc = c(1, as.numeric(rel.auc.rohr[2]), auc.kop[c(2,3)] / auc.kop[1], auc.grg[c(2,3)] / auc.grg[1])
 atr.conc = c(0, 201, 20, 200, 15, 100)
 
-plot(x=log(atr.conc+1), y=atr.rel.auc, pch = 16, xlab = 'log+1 Atrazine (ppb)', ylab = 'Relative daily auc', ylim = c(0,1))
-
-plot(c(0,20,200), rel.auc.kop, pch = 16, ylim=c(0,1), ylab = 'relative auc', xlim = c(0,210),
-     xlab = 'atrazine concentration (ppb)', main = 'Atrazine toxicity to E. trivolvis pooled')
-  lines(atr.k.con, pi_C_atr_kop06(atr.k.con), lty=2)
- points(c(15,100), rel.auc.grg[c(2,3)], pch = 16, col='red')
-  lines(atr.k.con, pi_C_atr_grg08(atr.k.con), lty=2, col='red')
- points(201, as.numeric(rel.auc.rohr[2]), pch = 16, col='blue')
-  lines(atr.k.con, pi_C_atr_rohr08(atr.k.con), lty=2, col='blue')
-
-atr.piC.fx<-nls(atr.rel.auc ~ exp(-b*atr.conc), start = list(b = 0.01))  
-  summary(atr.piC.fx)
+atr.meta = drm(atr.rel.auc ~ atr.conc, fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                          fixed = c(NA, NA, NA, NA)))
+  summary(atr.meta)
+  plot(atr.meta)
   
-  pi_C_atr_all = function(He){
-    exp(-summary(atr.piC.fx)$parameters[1]*(He)) 
-  } 
+  plot(x=atr.conc, y=atr.rel.auc, pch = 16, xlab = 'Atrazine (ppb)', ylab = 'Relative daily auc', ylim = c(0,1))
   
-    lines(atr.con, pi_C_atr_all(atr.con), lty=2, col='green')
-    
-  legend('bottomleft', legend = c('Koprivnikar06', 'Griggs08', 'Rohr08', 'Pooled'),
-         pch = 16, col = c('black', 'red', 'blue', 'green'), cex=0.8)
+  piC.meta.df = data.frame(conc = c(0:200),
+                           Prediction = 0,
+                           Lower = 0,
+                           Upper = 0)
+  
+  piC.meta.df[,2:4] <- predict(atr.meta, newdata = piC.meta.df, 
+                               interval = 'confidence', level = 0.95)
+  
+  lines(piC.meta.df$conc, piC.meta.df$Prediction / piC.meta.df$Prediction[1], lty=2)
+  lines(piC.meta.df$conc, piC.meta.df$Lower / piC.meta.df$Prediction[1], lty=3)
+  lines(piC.meta.df$conc, piC.meta.df$Upper / piC.meta.df$Prediction[1], lty=3)
+  
+  title(main = expression(paste(pi[C], '(atrazine) meta')))
