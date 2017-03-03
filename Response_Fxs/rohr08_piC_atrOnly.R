@@ -24,9 +24,9 @@ atr.drm = drm(alive/total ~ conc, total, data=atr, type = 'binomial',
 
     atr.test[,3:5] = predict(atr.lin, newdata = atr.test, interval = 'confidence', level = 0.95)
     
-      lines(atr.test$log_conc, atr.test$pred.lin, lty=2, col=2)
-      lines(atr.test$log_conc, atr.test$pred.lin.hi, lty=3, col=2)
-      lines(atr.test$log_conc, atr.test$pred.lin.lo, lty=3, col=2)
+      lines(atr.test$log_conc, atr.test$pred.lin, lty=2)
+      lines(atr.test$log_conc, atr.test$pred.lin.hi, lty=3)
+      lines(atr.test$log_conc, atr.test$pred.lin.lo, lty=3)
       
     atr.test[,6:8] = predict(atr.drm, newdata = atr.test, interval = 'confidence', level = 0.95) 
     
@@ -47,17 +47,14 @@ atr.drm = drm(alive/total ~ conc, total, data=atr, type = 'binomial',
 
       piC
   } 
+  
+  
 #Plot to see how it does
   plot(atr$conc, atr$surv / atr$surv[1], pch = 16, xlim = c(0,2000), ylim = c(0,1),
-       ylab = 'rel prop alive @ 14-18 hrs', xlab = 'Atrazine (ppb)')
-    lines(atr$conc, predict(atr.lin, newdata = atr)/ atr.lin$coefficients[1], lty = 2, col=3) 
-    lines(atr$conc, predict(atr.drm, newdata = atr)/ atr$surv[1], lty = 2, col=4) 
-    
-  
-  for(i in 0:2000){
-    points(i, piC.atr.rohr08.uncertainty(i), pch = 17, col=4, cex=0.5)
-    points(i, piC.atr.rohr08.lin(i), pch = 17, col=3, cex=0.5)
-  }
+       ylab = 'rel prop alive @ 14-18 hrs', xlab = 'Atrazine (ppb)',
+       main = 'Sample output of cercarial mortality')
+    points(seq(0, 2000, 5), sapply(seq(0, 2000, 5), piC.atr.rohr08.lin), pch = 17, col=3, cex = 0.5) 
+    legend('bottomleft', legend = c('Observed', 'Modeled'), pch = c(16,17), col = c(1,3), cex = 0.7)
 
 #Vector of items to keep
   keep.atr.rohr08 = c('atr', 'piC.atr.rohr08.uncertainty', 'atr.drm', 'atr.lin', 'piC.atr.rohr08.lin')
