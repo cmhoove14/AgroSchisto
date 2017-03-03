@@ -198,3 +198,7 @@ title('Koprivnikar 06 cercarial survival parameters')
   
   keep.kop06.beq = c('kopatr.auc', 'piC.kop_atr_unc', 'predk.fx', 'piC.kop_atr_unc2', 'predk.fx2',
                      'ek.mod', 'bk.mod', 'bk.mod2')
+  
+  plot(c(0:500), sapply(c(0:500), piC.kop_atr_unc2), pch = 17, cex = 0.5, ylim = c(0,1),
+       xlab = 'atrazine (ppb)', ylab = expression(paste(pi[C], 'estimate')),
+       main = 'Sample Output of cercarial mortality function')

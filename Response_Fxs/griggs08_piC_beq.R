@@ -179,3 +179,8 @@ plot(c(0:500), sapply(c(0:500), piC.grg08_atr_unc), pch = 1, ylim = c(0,1),
   
 keep.grg08 = c('grgatr.auc', 'piC.grg08_atr_unc', 'grg.fx', 'piC.grg08_atr_unc2', 'grg.fx2',
                'eg.mod', 'eg.mod2', 'bg.mod')
+
+#Plot sample function output across atrazine conc
+plot(c(0:500), sapply(c(0:500), piC.grg08_atr_unc2), pch = 17, cex = 0.5,
+     xlab = 'Atrazine (ppb)', ylab = expression(paste(pi[C])),
+     main = 'Sample Output of cercarial mortality function')
