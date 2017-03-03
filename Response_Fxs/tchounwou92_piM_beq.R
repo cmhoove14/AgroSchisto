@@ -12,7 +12,7 @@
 require(drc)
 
 ll4 = function(hi,lo,slp,lc,x){
-  lo + ((hi-lo)/(1+exp(slp*(log(x)-lc))))
+  lo + ((hi-lo)/(1+exp(slp*(log(x/lc)))))
 }
 
 #miracidial mortality (S. mansoni) from Tchounwou 1991 ####################################
@@ -33,44 +33,87 @@ legend('topright', legend = c(0, 30, 60, 90, 120, 150), title = 'Malathion (ppm)
 #Fit LL.2 function to each conentration time series  ####################################
 mir.ctrl = subset(mir.mal, conc == 0)
 ctrl.mod = drm(alive/total ~ time_hrs, total, data = mir.ctrl, 
-               type = 'binomial', fct = LL2.2())
+               type = 'binomial', fct = LL.2())
 
   lines(time, ll4(1,0,ctrl.mod$coefficients[1], ctrl.mod$coefficients[2], time), lty=2)
+  
+  mir.fx0 = function(t){
+    1/(1+exp(summary(ctrl.mod)$coefficients[1]*(log(t/summary(ctrl.mod)$coefficients[2]))))
+  }
+  
+  auc.mir0 = integrate(mir.fx0, lower = 0, upper = 24)$value
 
 #Malathion = 30000 ppb ********************************************************************************************  
 mir.mal30 = subset(mir.mal, conc == 30000)
 mal30.mod = drm(alive/total ~ time_hrs, total, data = mir.mal30, 
-                type = 'binomial', fct = LL2.2())
+                type = 'binomial', fct = LL.2())
 
   lines(time, ll4(1,0,mal30.mod$coefficients[1], mal30.mod$coefficients[2], time), lty=2, col=2)
+  
+  mir.fx30 = function(t){
+    1/(1+exp(summary(mal30.mod)$coefficients[1]*(log(t/summary(mal30.mod)$coefficients[2]))))
+  }
+  
+  auc.mir30 = integrate(mir.fx30, lower = 0, upper = 24)$value
 
 #Malathion = 60000 ppb ********************************************************************************************  
 mir.mal60 = subset(mir.mal, conc == 60000)
 mal60.mod = drm(alive/total ~ time_hrs, total, data = mir.mal60, 
-                type = 'binomial', fct = LL2.2())
+                type = 'binomial', fct = LL.2())
 
-lines(time, ll4(1,0,mal60.mod$coefficients[1], mal60.mod$coefficients[2], time), lty=2, col=3)
+  lines(time, ll4(1,0,mal60.mod$coefficients[1], mal60.mod$coefficients[2], time), lty=2, col=3)
+  
+  mir.fx60 = function(t){
+    1/(1+exp(summary(mal60.mod)$coefficients[1]*(log(t/summary(mal60.mod)$coefficients[2]))))
+  }
+  
+  auc.mir60 = integrate(mir.fx60, lower = 0, upper = 24)$value
 
 #Malathion = 90000 ********************************************************************************************  
 mir.mal90 = subset(mir.mal, conc == 90000)
 mal90.mod = drm(alive/total ~ time_hrs, total, data = mir.mal90, 
-                type = 'binomial', fct = LL2.2())
+                type = 'binomial', fct = LL.2())
 
   lines(time, ll4(1,0,mal90.mod$coefficients[1], mal90.mod$coefficients[2], time), lty=2, col=4)
+  
+  mir.fx90 = function(t){
+    1/(1+exp(summary(mal90.mod)$coefficients[1]*(log(t/summary(mal90.mod)$coefficients[2]))))
+  }
+  
+  auc.mir90 = integrate(mir.fx90, lower = 0, upper = 24)$value
 
 #Malathion = 120000 ********************************************************************************************  
 mir.mal120 = subset(mir.mal, conc == 120000)
 mal120.mod = drm(alive/total ~ time_hrs, total, data = mir.mal120, 
-                 type = 'binomial', fct = LL2.2())
+                 type = 'binomial', fct = LL.2())
 
   lines(time, ll4(1,0,mal120.mod$coefficients[1], mal120.mod$coefficients[2], time), lty=2, col=5)
+  
+  mir.fx120 = function(t){
+    1/(1+exp(summary(mal120.mod)$coefficients[1]*(log(t/summary(mal120.mod)$coefficients[2]))))
+  }
+  
+  auc.mir120 = integrate(mir.fx120, lower = 0, upper = 24)$value
 
 #Malathion = 150000 ********************************************************************************************  
 mir.mal150 = subset(mir.mal, conc == 150000)
 mal150.mod = drm(alive/total ~ time_hrs, total, data = mir.mal150, 
-                 type = 'binomial', fct = LL2.2())
+                 type = 'binomial', fct = LL.2())
 
   lines(time, ll4(1,0,mal150.mod$coefficients[1], mal150.mod$coefficients[2], time), lty=2, col=6)
+  
+  mir.fx150 = function(t){
+    1/(1+exp(summary(mal150.mod)$coefficients[1]*(log(t/summary(mal150.mod)$coefficients[2]))))
+  }
+  
+  auc.mir150 = integrate(mir.fx150, lower = 0, upper = 24)$value
+  
+#Data frame of AUC vals ######## ************************************************************************  
+  mir.auc.mal = data.frame(mal = unique(mir$conc[mir$chem == 'mal']),
+                           auc = c(auc.mir0, auc.mir30, auc.mir60, 
+                                   auc.mir90, auc.mir120, auc.mir150),
+                           piM = c(auc.mir0, auc.mir30, auc.mir60, 
+                                   auc.mir90, auc.mir120, auc.mir150) / auc.mir0)
 
 #Create data frame with parameter values and malathion concentrations #######################
 mirp.df = data.frame(mal = c(0,30,60,90,120,150),
@@ -128,11 +171,15 @@ predm.fx = function(In){
   auc
 }  
   
-#Final:generate relative cercariae-hrs function  
+#Final:generate relative miracidia-hrs function ***NOTE:Doesn't work well at very high concentrations as***
 piM.tch91_mal_unc = function(In){
   piM = predm.fx(In) / predm.fx(0)
   if(piM > 1) piM = 1
   else(return(piM))
 }
 
-keep.tch91.beq = c('piM.tch91_mal_unc', 'predm.fx', 'em.mod', 'bm.mod')
+keep.tch91.beq = c('mir.auc.mal', 'piM.tch91_mal_unc', 'predm.fx', 'em.mod', 'bm.mod')
+
+plot(seq(0, 150000, 1001)/1000, sapply(seq(0, 150000, 1001), piM.tch91_mal_unc), pch = 15, cex = 0.5,
+     xlab = 'Malathion (ppm)', ylab = expression(paste(pi[M])),
+     main = 'Sample Output of miracidial mortality function')

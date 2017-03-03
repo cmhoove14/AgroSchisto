@@ -36,6 +36,12 @@ plot(x = kop.cc$time_hrs, y = kop.cc$surv,
   
   lines(time, ll4(1,0,summary(kop.ctrl)$coefficients[1],
                   summary(kop.ctrl)$coefficients[2], time), lty=2)
+  
+  kop.fx0 = function(t){
+    1/(1+exp(summary(kop.ctrl)$coefficients[1]*(log(t/summary(kop.ctrl)$coefficients[2]))))
+  }
+  
+  auc.kop0 = integrate(kop.fx0, lower = 0, upper = 24)$value
 
 #20 ppb atrazine ##################
 kop.20 = subset(kop.c, conc == 20)
@@ -48,6 +54,12 @@ kop.20 = subset(kop.c, conc == 20)
   lines(time, ll4(1,0,summary(kop.20mod)$coefficients[1],
                   summary(kop.20mod)$coefficients[2], time), lty=3)
   
+  kop.fx20 = function(t){
+    1/(1+exp(summary(kop.20mod)$coefficients[1]*(log(t/summary(kop.20mod)$coefficients[2]))))
+  }
+  
+  auc.kop20 = integrate(kop.fx20, lower = 0, upper = 24)$value
+  
 #200 ppb atrazine ##################
 kop.200 = subset(kop.c, conc == 200)
   
@@ -59,11 +71,22 @@ kop.200 = subset(kop.c, conc == 200)
   lines(time, ll4(1,0,summary(kop.200mod)$coefficients[1],
                   summary(kop.200mod)$coefficients[2], time), lty=4)
   
+  kop.fx200 = function(t){
+    1/(1+exp(summary(kop.200mod)$coefficients[1]*(log(t/summary(kop.200mod)$coefficients[2]))))
+  }
+  
+  auc.kop200 = integrate(kop.fx200, lower = 0, upper = 24)$value
+  
   title(main='Koprivnikar2006 Cercarial mortality (E.trivolvis)')
   legend('topright', legend = c('control', '20ppb', '200ppb'), pch = c(16,17,15), cex=0.8)
+  
+  kopatr.auc = data.frame(atr = unique(kop.c$conc),
+                          auc = c(auc.kop0, auc.kop20, auc.kop200),
+                          piC = c(auc.kop0, auc.kop20, auc.kop200)/auc.kop0)
 
 #Create data frame with parameter values and atrazine concentrations #######################
 kopatr.df = data.frame(atr = c(0,20,200),
+                       logatr = log(c(0,20,200)+1),
                        e = c(coef(kop.ctrl)[2], coef(kop.20mod)[2], coef(kop.200mod)[2]),
                        e.se = c(summary(kop.ctrl)$coefficients[2,2], summary(kop.20mod)$coefficients[2,2],
                                 summary(kop.200mod)$coefficients[2,2]),
@@ -72,7 +95,7 @@ kopatr.df = data.frame(atr = c(0,20,200),
                                 summary(kop.200mod)$coefficients[1,2]))
   
 plot(kopatr.df$atr, kopatr.df$e, pch = 16, xlab = 'atrazine (ppb)', ylab = 'LL.2 Parameters',
-     ylim = c(0, 20))
+     ylim = c(0, 20), xlim = c(0,400))
   points(kopatr.df$atr, kopatr.df$b, pch = 17, col=2)
   for(i in 1:length(kopatr.df$atr)){
     segments(x0 = kopatr.df$atr[i], y0 = kopatr.df$e[i] + kopatr.df$e.se[i],
@@ -83,15 +106,21 @@ plot(kopatr.df$atr, kopatr.df$e, pch = 16, xlab = 'atrazine (ppb)', ylab = 'LL.2
   
   ek.mod = lm(e ~ atr, weights = e.se^-1, data = kopatr.df) 
   bk.mod = lm(b ~ atr, weights = b.se^-1, data = kopatr.df) 
+  bk.mod2 = lm(b~logatr, weights = b.se^-1, data = kopatr.df)
   
-modkopdf= data.frame(atr = c(0:250),
+modkopdf= data.frame(atr = c(0:400),
+                     logatr = log(c(0:400)+1),
                      pred.e = 0,
                      pred.e.se = 0,
                      pred.b = 0,
-                     pred.b.se = 0)
+                     pred.b.se = 0,
+                     pred.b2 = 0,
+                     pred.b2.se = 0)
   
-  modkopdf[,2:3] = predict(ek.mod, newdata = modkopdf, se.fit = TRUE)[1:2]
-  modkopdf[,4:5] = predict(bk.mod, newdata = modkopdf, se.fit = TRUE)[1:2]
+  modkopdf[,3:4] = predict(ek.mod, newdata = modkopdf, se.fit = TRUE)[1:2]
+  modkopdf[,5:6] = predict(bk.mod, newdata = modkopdf, se.fit = TRUE)[1:2]
+  modkopdf[,7:8] = predict(bk.mod2, newdata = modkopdf, se.fit = TRUE)[1:2]
+  
   
 lines(modkopdf$atr, modkopdf$pred.e, lty = 2)
   lines(modkopdf$atr, modkopdf$pred.e + 1.96*modkopdf$pred.e.se, lty = 3)
@@ -101,9 +130,13 @@ lines(modkopdf$atr, modkopdf$pred.b, lty = 2, col=2)
   lines(modkopdf$atr, modkopdf$pred.b + 1.96*modkopdf$pred.b.se, lty = 3, col=2)
   lines(modkopdf$atr, modkopdf$pred.b - 1.96*modkopdf$pred.b.se, lty = 3, col=2)
   
+lines(modkopdf$atr, modkopdf$pred.b2, lty = 2, col=3)
+  lines(modkopdf$atr, modkopdf$pred.b2 + 1.96*modkopdf$pred.b2.se, lty = 3, col=3)
+  lines(modkopdf$atr, modkopdf$pred.b2 - 1.96*modkopdf$pred.b2.se, lty = 3, col=3)
+  
 legend('topright', legend = c('slp', 'lc50'), pch = c(17, 16), col=c(2,1), cex = 0.7)  
 title('Koprivnikar 06 cercarial survival parameters')  
-#Create function to generate d-r function #####################
+#Create function to generate d-r function with linear b function#####################
   predk.fx = function(He){
     e = as.numeric(predict(ek.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
     b = as.numeric(predict(bk.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
@@ -111,18 +144,57 @@ title('Koprivnikar 06 cercarial survival parameters')
     e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     
-    lines(time, ll4(1,0,b.use, log(e.use), time), lty=2, col=3)
+    #lines(time, ll4(1,0,b.use, log(e.use), time), lty=2, col=3)
     
-    auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t)-e.use))))}, 
-                    lower=0, upper=24)[1]$value
+    if(e.use <= 0){auc=0} else{
+      auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t / e.use)))))}, 
+                      lower=0, upper=24, stop.on.error = FALSE)[1]$value
+    }
+    
     auc
   }  
   
 #Final:generate relative cercariae-hrs function  
   piC.kop_atr_unc = function(He){
-    piC = predk.fx(In) / predk.fx(0)
-    if(piC > 1) piC = 1
-    else(return(piC))
+    piC = predk.fx(He) / predk.fx(0)
+    if(piC > 1) {piC = 1} else {
+      return(piC)
+    }
   }
   
-  keep.kop06.beq = c('piC.kop_atr_unc', 'predk.fx', 'ek.mod', 'bk.mod')
+#Create function to generate d-r function with exponential b function#####################
+  predk.fx2 = function(He){
+    e = as.numeric(predict(ek.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(bk.mod2, newdata = data.frame(logatr = log(He+1)), se.fit = TRUE)[1:2])
+    
+    e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    
+    #lines(time, ll4(1,0,b.use, log(e.use), time), lty=2, col=3)
+    
+    if(e.use <= 0){auc=0} else{
+      auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t / e.use)))))}, 
+                      lower=0, upper=24, stop.on.error = FALSE)[1]$value
+    }
+    
+    auc
+  }  
+  
+  #Final:generate relative cercariae-hrs function  
+  piC.kop_atr_unc2 = function(He){
+    piC = predk.fx2(He) / predk.fx2(0)
+    if(piC > 1) {piC = 1} else {
+      return(piC)
+    }
+  }
+
+#Compare the linear and exponential functions and store key items ##############
+  plot(c(0:500), sapply(c(0:500), piC.kop_atr_unc), pch = 1, col = 2, ylim = c(0,1),
+       xlab = 'atrazine (ppb)', ylab = expression(paste(pi[C], 'estimate')))
+    points(c(0:500), sapply(c(0:500), piC.kop_atr_unc2), pch = 1, col = 3)
+    legend('bottomleft', legend = c('linear', 'exponential'), pch = 1, col = c(2,3),
+           title = 'Function fit to slp parameter', cex = 0.7)
+  
+  
+  keep.kop06.beq = c('kopatr.auc', 'piC.kop_atr_unc', 'predk.fx', 'piC.kop_atr_unc2', 'predk.fx2',
+                     'ek.mod', 'bk.mod', 'bk.mod2')

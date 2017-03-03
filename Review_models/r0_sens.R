@@ -12,26 +12,26 @@ require(rootSolve)
 require(deSolve)
 
 #Model parameters ##############
-area = 1
-parameters=c(
+area = 200
+prams=c(
   # Location parameters
   A = area,          # Area of site of interest, m^2
   H = 1.5*area,      # Human population at site of interest (based on 300 people at 200m^2 water contact site from Sokolow PNAS)
   Om = 1,            # degree of overlap between water contamination, snail, and human habitats
   
   # Snail reproductive parameters
-  f_N = 0.10,        # Birth rate of adult snails (snails/reproductive snail/day, including survival to detection - more like a recruitment rate); 
-  #   from Sokolow et al. 2015 
+  f_N = 0.60,        # Birth rate of adult snails (snails/reproductive snail/day, including survival to detection - more like a recruitment rate); 
+  #   from Woolhouse & Chandiwana et al. 1990 
   phi_N = 50*area,        # Carrying capacity of snails (snails/m^2), from Sokolow et al. 2015
   z = 0.7,           # Fraction of exposed snails that reproduce
   
   # Snail mortality parameters
-  mu_N = 1/60,        # Natural mortality rate of large snails (deaths/snail/day; assume mean lifespan = 60 days)
+  mu_N = 0.03,        # Natural mortality rate of large snails (deaths/snail/day; mean lifespan ~ 33 days (~1 month))
   mu_I = 1/10,        # Additional mortality rate of shedding snails as a result of infection, from Sokolow et al. 2015
   
   # Predator pop dynamic parameters (from pred tweaking code)
   f_P = 0.02,          #Predator intrinsic recruitment rate
-  phi_P = 0.5*area,         #Predator carrying capacity (0.5/m^2)
+  phi_P = 0.1*area,    #Predator carrying capacity (0.1/m^2)
   mu_P = 0.0026,       #Predator mortality rate
   
   # Predation parameters
@@ -49,9 +49,9 @@ parameters=c(
   pi_C = 1,          # cercarial infectivity parameter
   
   # transmission parameters
-  beta = 1e-5,       # Human-to-snail infection probability in reference area (infected snails/miracidia/snail/day)
+  beta = 2e-4/area,       # Human-to-snail infection probability in reference area (infected snails/miracidia/snail/day)
   sigma = 1/40,      # Latent period for exposed snails (infectious snails/exposed snail/day))
-  lamda = 2.8e-4,      # Snail-to-human infection probability per cercaria
+  lamda = 2e-4/area,      # Snail-to-human infection probability per cercaria
   k=0.2,             # Clumping parameter of negative binomial distribution of worms in humans
   
   # Schisto mortality parameters
@@ -64,14 +64,15 @@ require(sensitivity)
 #Get parameter sets to sample from #######################
 sims = 50
 #parameters ranges
-f_N.range<-seq(0.05, 0.45, length.out = sims)
-phi_N.range<-seq(10, 70, length.out = sims)
+f_N.range<-seq(0.01, 1.2, length.out = sims)
+phi_N.range<-seq(10, 70, length.out = sims)*area
 z.range<-seq(0.2, 1.0, length.out = sims)
-mu_N.range<-seq(1/20, 1/100, length.out = sims)
-mu_I.range<-seq(1/2, 1/20, length.out = sims)
+H.range<-seq(0.1, 3.0, length.out = sims)*area
+mu_N.range<-seq(1/100, 1/20, length.out = sims)
+mu_I.range<-seq(1/20, 1/2, length.out = sims)
 f_P.range<-seq(0.001, 0.2, length.out = sims)
-phi_P.range<-seq(0.1, 5.0, length.out = sims)
-mu_P.range<-seq(1/100, 1/(365*2), length.out = sims)
+phi_P.range<-seq(0.1, 5.0, length.out = sims)*area
+mu_P.range<-seq(1/(365*2), 1/100, length.out = sims)
 alpha.range<-seq(0.00001, 0.3, length.out = sims)
 Th.range<-seq(1/30, 1/5, length.out = sims)
 nn.range<-seq(1, 3, length.out = sims)
@@ -80,9 +81,9 @@ v.range<-seq(0.02, .20, length.out = sims)
 pi_M.range<-seq(0, 1.0, length.out = sims)
 theta.range<-seq(10, 500, length.out = sims)
 pi_C.range<-seq(0, 1.0, length.out = sims)
-beta.range<-seq(1e-7, 1e-3, length.out = sims)
+beta.range<-seq(1e-7, 1e-3, length.out = sims)/area
 sigma.range<-seq(1/10, 1/60, length.out = sims)
-lamda.range<-seq(1e-6, 1e-3, length.out = sims)
+lamda.range<-seq(1e-7, 1e-3, length.out = sims)/area
 k.range<-seq(0.01, 1.0, length.out = sims)
 mu_W.range<-seq(1/365, 1/(365*10), length.out = sims)
 mu_H.range<-seq(1/(365*10), 1/(365*80), length.out = sims)
@@ -91,6 +92,7 @@ mu_H.range<-seq(1/(365*10), 1/(365*80), length.out = sims)
 paranges<-cbind("f_N" = f_N.range,
                 "phi_N" = phi_N.range,
                 "z" = z.range,
+                "H" = H.range,
                 "mu_N" = mu_N.range,
                 "mu_I" = mu_I.range,
                 "f_P" = f_P.range,
@@ -111,13 +113,13 @@ paranges<-cbind("f_N" = f_N.range,
                 "mu_W" = mu_W.range,
                 "mu_H" = mu_H.range)
 
-constantparams<-matrix(ncol = length(parameters), nrow = sims)
+constantparams<-matrix(ncol = length(prams), nrow = sims)
 
-for(i in 1:length(parameters)){
-  constantparams[,i] = rep(parameters[i],sims)
+for(i in 1:length(prams)){
+  constantparams[,i] = rep(prams[i],sims)
 }
 
-colnames(constantparams)<-names(parameters)
+colnames(constantparams)<-names(prams)
 vars<-colnames(paranges)
 #R0(q) function ###############
 r0.In = function(conc = 0, 
@@ -165,24 +167,26 @@ r0.In = function(conc = 0,
   pi_Cq = pi_C
   v_q = v
 
-  #Equilibrium estimate of P given prawn predator parameters and q
+#Equilibrium estimate of P given prawn predator parameters and q
   P.eq = phi_P*(1 - muPq/f_P)         
   
   if(P.eq<0){P.eq = 0}
   
-  #Equilibrium estimate of N given snail parameters
-  N.eq = max(uniroot.all(f = function(y){
-    (f_Nq)*(1 - (y)/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*(y))
-    }, c(0, as.numeric(phi_Nq))))
+#Equilibrium estimate of N given snail parameters
+  N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
+                         c(0, as.numeric(phi_Nq))))
   
   if(N.eq<0){N.eq = 0}
   
-  #Equilibrium predation rate estimate
-  psi.eq = alpha_q/(1+alpha*Th*N.eq)
+#Equilibrium predation rate estimate
+  psi.eq = alpha_q/(1+alpha*Th*(N.eq/area))
   
-  #R_0 of q estimate
-  r0 <- sqrt((sigma*lamda*omega^2*theta_q*pi_Cq*beta*N.eq*H*m*v_q*pi_Mq) / 
-              (2*(mu_Nq + P.eq*psi.eq + sigma)*(mu_Nq + P.eq*psi.eq + mu_I)*(mu_H + mu_W)))
+#R_0 of q estimate
+  e.hat = (theta_q*H*lamda*pi_Cq*omega) / (mu_Nq + mu_I + P.eq*psi.eq)
+  i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
+  w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
+  
+  r0 = sqrt(e.hat * i.hat * w.hat)
   
   return(c(N.eq, P.eq, r0))
 
@@ -195,7 +199,7 @@ nil0<-function(In){
   return(0)
 }
 
-#First check scatter plots of outcomes across each parameter range while holding other parameters equal ############
+#Check scatter plots of outcomes across each parameter range while holding other parameters equal ############
 outputfillr0<-matrix(ncol = length(vars), nrow = sims)
 outputfillN.eq<-matrix(ncol = length(vars), nrow = sims)
 
@@ -216,7 +220,7 @@ for(j in 1:length(vars)){
   }
   
   mypath <- file.path("C:","Users","chris_hoover","Documents","RemaisWork","Schisto","R Codes",
-                      "ag_schist","Review_models","Sensitivity_Plots", "r0",
+                      "ag_schist","Review_models","Sensitivity_Plots", "r0_2-15-17",
                       paste("r0_only-sens_", vars[j], ".jpg", sep = ""))
   
   jpeg(file=mypath, width = 750, height = 625, units = "px")
@@ -226,7 +230,7 @@ for(j in 1:length(vars)){
   plot(x = parametersuse[,dim(parametersuse)[2]], y = outputfillr0[,j], 
        xlab = vars[j], ylab = 'r0', type = 'l', lwd=2,
        pch = 16, cex = 0.75, col = 'navy', 
-       ylim = c(0,5))
+       ylim = c(0,10))
   
   #plot(x = parametersuse[,dim(parametersuse)[2]], y = outputfillN.eq[,j], 
    #    xlab = vars[j], ylab = 'N.eq', type = 'l', lwd=2,

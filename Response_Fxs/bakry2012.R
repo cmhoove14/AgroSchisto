@@ -58,6 +58,8 @@ muN.bak = data.frame(atr = c(.330, 1.250, 4.750),
       lines(bak.test.df$gly, bak.test.df$gly.muN + 1.96*bak.test.df$gly.se, col=3, lty=3)
       lines(bak.test.df$gly, bak.test.df$gly.muN - 1.96*bak.test.df$gly.se, col=3, lty=3)
       
+    legend('bottomright', legend = c('atrazine', 'glyphosate', '95% CI'), col = c('gold', 3, 1), 
+           cex = 0.7, lty=c(2,2,3))  
 #derive functions for each snail mortality response ####################    
   muNq_atr_bak12<-function(He){
     He.use = He/1000
@@ -75,7 +77,7 @@ muN.bak = data.frame(atr = c(.330, 1.250, 4.750),
     #  points(i/1000, muNq_gly_bak12(i), pch = 17, cex=0.5, col=4)
     #}
   
-  keep.bak12 = c('muNq_atr_bak12', 'muNq_gly_bak12', 'bak12.atr.drm', 'bak12.gly.drm')
+  keep.bak12 = c('muN.bak', 'muNq_atr_bak12', 'muNq_gly_bak12', 'bak12.atr.drm', 'bak12.gly.drm')
 
 #The paper also provides info on longitudinal survival of snail cohorts exposed to LC10 of each herbicide ################
 #So let's compare that data with the expected long. survival from the model at the same concentration

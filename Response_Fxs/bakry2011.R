@@ -216,5 +216,5 @@ muNq_del_Bakry11_uncertainty<-function(In){
   #  points(i/1000, fNq_del_Bakry11_uncertainty(i), pch = 17, cex = 0.4, col = 3)
   #}
   
-  keep.bak11.N = c('muNq_mal_Bakry11_uncertainty', 'bak11.mod', 'muNq_del_Bakry11_uncertainty', 'bak11.mod2',
+  keep.bak11.N = c('mun.mal', 'muNq_mal_Bakry11_uncertainty', 'bak11.mod', 'muNq_del_Bakry11_uncertainty', 'bak11.mod2',
                    'fNq_mal_Bakry11_uncertainty', 'fn.bak.mal', 'fNq_del_Bakry11_uncertainty', 'fn.bak.del')

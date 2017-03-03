@@ -2,7 +2,6 @@ require(drc)
 require(lme4)
 
 #Incorporate data from all three studies investigating atrazine/E. trivolvis cercarial die-off relationship
-#This would probably work better with a random effects model or something of that sort, but will revisit later
 
 source('Response_fxs/rohr08_piC_beq.R')
 source('Response_fxs/griggs08_piC_beq.R')
@@ -45,7 +44,7 @@ plot(x = cerc.g0$time_hrs,y = cerc.g0$surv/100,
   
 #b (lc50) model and plots #################  
   plot(eb.meta$atr, eb.meta$b, pch = 17, ylim = c(0,20), ylab = 'tox params',
-       xlab = 'atrazine (ppb)', xlim = c(0,210), col=2)
+       xlab = 'atrazine (ppb)', xlim = c(0,500), col=2)
     points(eb.meta$atr, eb.meta$e, pch = 16)
     for(i in 1:length(eb.meta$atr)){
       segments(x0 = eb.meta$atr[i], y0 = eb.meta$e[i] + eb.meta$e.se[i],
@@ -54,7 +53,7 @@ plot(x = cerc.g0$time_hrs,y = cerc.g0$surv/100,
                x1 = eb.meta$atr[i], y1 = eb.meta$b[i] - eb.meta$b.se[i], col=2)
     }
     
-    legend('topright', legend = c('slp', 'lc50'), pch = c(17, 16), col=c(2,1), cex = 0.7)  
+    legend('right', legend = c('slp', 'lc50'), pch = c(17, 16), col=c(2,1), cex = 0.7)  
   
   #Model two-parameter log-logistic parameters as a function of atrazine concentration
     atrmeta.bme = lmer(b ~ atr + (1|study), weights = b.se^-1, data = eb.meta)
@@ -63,7 +62,7 @@ plot(x = cerc.g0$time_hrs,y = cerc.g0$surv/100,
     atrmeta.b = lm(b ~ atr, weights = b.se^-1, data = eb.meta)
     atrmeta.e = lm(e ~ atr, weights = e.se^-1, data = eb.meta)
 
-  atrmeta.df = data.frame(atr = c(0:210),
+  atrmeta.df = data.frame(atr = c(0:500),
                           e.pred = 0,
                           e.se = 0,
                           b.pred = 0,
@@ -88,10 +87,11 @@ plot(x = cerc.g0$time_hrs,y = cerc.g0$surv/100,
     lines(atrmeta.df$atr, atrmeta.df$e.pred + 1.96 * atrmeta.df$e.se, lty=3)
     lines(atrmeta.df$atr, atrmeta.df$e.pred - 1.96 * atrmeta.df$e.se, lty=3) 
   #Compare estimates from mixed effects model  
-    #lines(atrmeta.df$atr, atrmeta.df$bme.pred, lty=2, col=4)
-    #lines(atrmeta.df$atr, atrmeta.df$eme.pred, lty=2, col=4)
+    lines(atrmeta.df$atr, atrmeta.df$bme.pred, lty=2, col=4, lwd = 2)
+    lines(atrmeta.df$atr, atrmeta.df$eme.pred, lty=2, col=4, lwd = 2)
  
-    
+  legend('topright', legend = c('lm model slp', 'lm model lc50', 'ME model', '95% CIs'),
+         lty = c(2,2,2,3), lwd = c(1,1,2,1), col = c(1,2,4,1), cex = 0.6)  
   title('Pooled cercarial survival (atrazine) parameters')
   
 #Create function to generate d-r function #####################
@@ -102,8 +102,11 @@ plot(x = cerc.g0$time_hrs,y = cerc.g0$surv/100,
     e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     
-    auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t / e.use)))))}, 
-                    lower=0, upper=24)[1]$value
+    if(e.use <= 0){auc=0} else{
+      auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t / e.use)))))}, 
+                    lower=0, upper=24, stop.on.error = FALSE)[1]$value
+    }
+    
     auc
   }  
   
