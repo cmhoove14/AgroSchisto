@@ -65,18 +65,18 @@ phi_Nq_atr_baxrohr.no30 = function(He){
 
 plot(atra.df$atra, atra.df$growthrate / atra.df$growthrate[1], 
      pch = 16, ylim = c(0.8, 3.0),
-     xlab = 'atrazine (ppb)', ylab = 'growth rate')
+     xlab = 'atrazine (ppb)', ylab = 'growth rate',
+     main = 'atrazine:peak growth rate (~carrying capacity)')
+#Add error bars
   segments(x0 = atra.df$atra, 
            y0 = (atra.df$growthrate + atra.df$st.err) / atra.df$growthrate[1],
            x1 = atra.df$atra, 
            y1 = (atra.df$growthrate - atra.df$st.err) / atra.df$growthrate[1])
-  for(i in 0:200){
-    points(i, phi_Nq_atr_baxrohr(i), pch = 17, col=4, cex=0.6)
-  }
-  for(i in 0:200){
-    points(i, phi_Nq_atr_baxrohr.no30(i), pch = 17, col=2, cex=0.6)
-  }
+#add model predictions  
+    points(c(0:200), sapply(c(0:200), phi_Nq_atr_baxrohr), pch = 17, col=4, cex=0.6)
+    points(c(0:200), sapply(c(0:200), phi_Nq_atr_baxrohr.no30), pch = 17, col=2, cex=0.6)
+
+  legend('topleft', legend = c('30ppb included', '30ppb excluded'), pch = 17, col = c(4,2), cex = 0.7)
   
-  title('atrazine:peak growth rate (~carrying capacity)')
-  
+
   keep.baxrohr = c('atra.df', 'phi_Nq_atr_baxrohr', 'bax.mod', 'phi_Nq_atr_baxrohr.no30', 'bax.mod.no30')
