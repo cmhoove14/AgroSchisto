@@ -111,7 +111,8 @@ legend('topright', title = 'Mal(ppm)', legend = c(0,50,100,150,200,250), pch = c
   }
   
   auc.cerc250 = integrate(cerc.fx250, lower = 0, upper = 24)$value
-  
+
+#Store relative auc values as observed points ###############    
   cerc.auc.mal = data.frame(mal = unique(cerc$conc[cerc$chem == 'malathion']),
                             auc = c(auc.cerc0, auc.cerc50, auc.cerc100, 
                                     auc.cerc150, auc.cerc200, auc.cerc250),
@@ -132,7 +133,7 @@ parms.df = data.frame(mal = c(0,50,100,150,200,250),
                                summary(mal100.mod)$coefficients[1,2], summary(mal150.mod)$coefficients[1,2],
                                summary(mal200.mod)$coefficients[1,2], summary(mal250.mod)$coefficients[1,2]))
 
-  plot(parms.df$mal, parms.df$e, pch = 16, xlab = 'malathion (ppb)', ylab = 'LL.2 Parameters',
+  plot(parms.df$mal, parms.df$e, pch = 16, xlab = 'malathion (ppm)', ylab = 'LL.2 Parameters',
        ylim = c(0, 15))
     points(parms.df$mal, parms.df$b, pch = 17, col=2)
     for(i in 1:length(parms.df$mal)){
@@ -141,6 +142,8 @@ parms.df = data.frame(mal = c(0,50,100,150,200,250),
       segments(x0 = parms.df$mal[i], y0 = parms.df$b[i] + parms.df$b.se[i],
                x1 = parms.df$mal[i], y1 = parms.df$b[i] - parms.df$b.se[i], col=2)
     }
+    legend('topright', pch = c(16,17), col = c(1,2), legend = c('LC50', 'slp'),
+           cex = 0.8, bty = 'n', title = 'Observed points')
     
   e.mod = lm(e ~ mal, weights = e.se^-1, data = parms.df) 
   e.mod2 = lm(e ~ logmal, weights = e.se^-1, data = parms.df)
@@ -174,16 +177,23 @@ parms.df = data.frame(mal = c(0,50,100,150,200,250),
   lines(mod.df$mal, mod.df$pred.b, lty = 2, col=2)
     lines(mod.df$mal, mod.df$pred.b + 1.96*mod.df$pred.b.se, lty = 3, col=2)
     lines(mod.df$mal, mod.df$pred.b - 1.96*mod.df$pred.b.se, lty = 3, col=2)
+    
+  legend('top', lty = c(2,2,2,3), col = c(1,4,2,1), bty = 'n', title = 'Fit models',
+         legend = c('LC50 - Linear',
+                    'LC50 - Exponential',
+                    'Slp - linear',
+                    '95% CI'), cex = 0.7)  
 
-#Function to estimate survival curve as function of q #####################################
+#Function to estimate survival curve as function of malathion conc #####################################
 pred.fx = function(In){
   e = as.numeric(predict(e.mod2, newdata = data.frame(logmal = log(In/1000+1)), se.fit = TRUE)[1:2])
   b = as.numeric(predict(b.mod, newdata = data.frame(mal = In/1000), se.fit = TRUE)[1:2])
   
   e.use = rnorm(1, e[1], e[2])
+    if(e.use <= 0) e.use = mal250.mod$coefficients[2]
   b.use = rnorm(1, b[1], b[2])
   
-  auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t)-e.use))))}, 
+  auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t/e.use)))))}, 
                   lower=0, upper=24)[1]$value
   auc
 }  
@@ -195,8 +205,42 @@ piC.tch92_mal_unc = function(In){
   else(return(piC))
 }  
 
-keep.tch92.beq = c('cerc.auc.mal', 'piC.tch92_mal_unc', 'pred.fx', 'e.mod2', 'b.mod')  
+keep.tch92.beq = c('cerc.auc.mal', 'piC.tch92_mal_unc', 'mal250.mod', 'pred.fx', 'e.mod2', 'b.mod')  
 
-plot(seq(0, 250000, 1001)/1000, sapply(seq(0, 250000, 1001), piC.tch92_mal_unc), pch = 17, cex = 0.5,
-     xlab = 'Malathion (ppm)', ylab = expression(paste(pi[C])),
-     main = 'Sample Output of cercarial mortality function')
+#Qualitative model validation ###############
+#Regenerate plot of observed data
+plot(cerc.t$time_hrs[cerc.t$conc==0], cerc.t$surv[cerc.t$conc==0]/100, pch=17, xlab = 'time(hrs)',
+     ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24), 
+     main = expression(paste(pi[C], ' Model sim-val')))
+  for(i in 2:length(unique(cerc.t$conc[cerc.t$chem == 'malathion']))){
+    points(cerc.t$time_hrs[cerc.t$conc==unique(cerc.t$conc[cerc.t$chem == 'malathion'])[i]], 
+           cerc.t$surv[cerc.t$conc==unique(cerc.t$conc[cerc.t$chem == 'malathion'])[i]]/100, pch=16,
+           col = i)
+  }
+legend('topright', title = 'Mal(ppm)', legend = c(0,50,100,150,200,250), pch = c(17,rep(16,4)),
+       col = c(1:6), cex=0.7)
+
+#function to plot model predictions
+pred.fx.plot = function(In, clr){
+  e = as.numeric(predict(e.mod2, newdata = data.frame(logmal = log(In/1000+1)), se.fit = TRUE)[1:2])
+  b = as.numeric(predict(b.mod, newdata = data.frame(mal = In/1000), se.fit = TRUE)[1:2])
+  
+  e.use = rnorm(1, e[1], e[2])
+    if(e.use <= 0) e.use = mal250.mod$coefficients[2]
+  b.use = rnorm(1, b[1], b[2])
+  
+  lines(time, ll4(1,0, b.use, e.use, time), lty=2, col = clr)
+}   
+
+#plot model predictions
+for(i in c(0,50,100,150,200,250)*1000){
+  c = i/50000 + 1
+  print(c)
+    replicate(10, pred.fx.plot(In = i, clr = c))
+  }
+  
+#plot model output compared to observed points
+set.seed = 0
+plot(seq(0,250000, 1000), sapply(seq(0,250000, 1000), piC.tch92_mal_unc), pch = 17, cex = 0.5,
+     xlab = 'Malathion (ppb)', ylab = expression(paste(pi[C], 'estimate', sep = ' ')))
+  points(cerc.auc.mal$mal, cerc.auc.mal$piC, pch = 16, col=2)

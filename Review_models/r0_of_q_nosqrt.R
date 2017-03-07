@@ -133,7 +133,7 @@ r0.In = function(In = 0,
   i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
   w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
   
-  r0 = sqrt(e.hat * i.hat * w.hat)
+  r0 = e.hat * i.hat * w.hat
   
   return(c(N.eq, P.eq, r0))
 
@@ -202,7 +202,7 @@ r0.He = function(He = 0,
   i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
   w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
 
-    r0 = sqrt(e.hat * i.hat * w.hat)
+    r0 = e.hat * i.hat * w.hat
 
 return(c(N.eq, P.eq, r0))
 
@@ -271,7 +271,7 @@ r0.Fe = function(Fe = 0,
   i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
   w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
 
-  r0 = sqrt(e.hat * i.hat * w.hat)
+  r0 = e.hat * i.hat * w.hat
 
 return(c(N.eq, P.eq, r0))
 
@@ -339,7 +339,7 @@ P.eq = phi_P*(1 - muPq/f_P)
   i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
   w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
 
-r0 = sqrt(e.hat * i.hat * w.hat)
+r0 = e.hat * i.hat * w.hat
 
 return(c(N.eq, P.eq, r0))
 

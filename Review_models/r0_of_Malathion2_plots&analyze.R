@@ -9,72 +9,186 @@
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
 
-#Load results of simulations #############
-  load('Review_models/r0_of_malathion2_ws.RData')
+  load('Review_models/r0_of_malathion2_ws.RData') #conc range = 0 - 2000 by 2s, 2000 - 2e5 by 200s
   require(rootSolve)
 
-#Plot results ###################
-#mean of all sims as points  
-plot(lowess(conc.mal, conc.mal.means.r0[,1] - r0.In(0)[3], f = 0.25), lty=2, lwd=2, type = 'l', col = 2, 
-     xlab = 'Malathion (ppb)', ylab = expression(paste(Delta, R[0], '(q)')),
-     ylim = c(-3,3), xlim = c(0, max(conc.mal)))
-  for(i in 2:(length(parfx)+2)){
-    lines(lowess(conc.mal, conc.mal.means.r0[,i] - r0.In(0)[3], f = 0.25), lty=2, lwd=2, col = i+1)
-  }
-  legend('topright', lty=2, col = c(2,3,6,7,8), cex = 0.7,
-         legend = c('piC', 'piM', 'muP', 'muN', 'piC & piM & muP'))
-  
-plot(conc.mal, conc.mal.means.r0[,1], pch = 17, cex=0.5, col = 2, xlab = 'Malathion (ppb)', ylab = expression(paste(R[0], '(q)')),
-     ylim = c(0,4), xlim = c(0, 1000))
-  for(i in 2:(length(parfx)+2)){
-    points(conc.mal, conc.mal.means.r0[,i], pch = 17, cex=0.5, col = i+1)
-  }  
-  legend('bottomleft', pch = 17, col = c(4,5,7), cex = 0.7,
-         legend = c('fN', 'muN', 'fN & muN'))
-
-#loess regression lines of single sims
-plot(c(0,max(conc.mal)), c(rep(r0.In(0)[3],2) - r0.In(0)[3]), type='l', lwd = 2, ylim = c(-4,3), xlim = c(0, max(conc.mal)),
+#Plot results of individual parameter functions ###################
+#mean of all r0 sims   
+plot(lowess(conc.mal, conc.mal.means.r0[,1] - r0.In(0)[3], f = 0.01), 
+     lwd=2, type = 'l', ylim = c(-3,3), xlim = c(0, 150000),
      xlab = 'Malathion (ppb)', ylab = expression(paste(Delta, R[0], '(q)')))
-  lines(l1.mal.df$mal, l1.mal.df$pred.2 - r0.In(0)[3], lty = 2, col=2)
-    lines(l1.mal.df$mal, l1.mal.df$pred.2 + l1.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=2)
-    lines(l1.mal.df$mal, l1.mal.df$pred.2 - l1.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=2)
-  lines(l2.mal.df$mal, l2.mal.df$pred.2 - r0.In(0)[3], lty = 2, col=5)
-    lines(l2.mal.df$mal, l2.mal.df$pred.2 + l2.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=5)
-    lines(l2.mal.df$mal, l2.mal.df$pred.2 - l2.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=5)
-  lines(l3.mal.df$mal, l3.mal.df$pred.2 - r0.In(0)[3], lty = 2, col=7)
-    lines(l3.mal.df$mal, l3.mal.df$pred.2 + l3.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=7)
-    lines(l3.mal.df$mal, l3.mal.df$pred.2 - l3.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=7)
-  lines(l4.mal.df$mal, l4.mal.df$pred.2 - r0.In(0)[3], lty = 2, col=4)
-    lines(l4.mal.df$mal, l4.mal.df$pred.2 + l4.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=4)
-    lines(l4.mal.df$mal, l4.mal.df$pred.2 - l4.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=4)
-  lines(l5.mal.df$mal, l5.mal.df$pred.2 - r0.In(0)[3], lty = 2, col=6)
-    lines(l5.mal.df$mal, l5.mal.df$pred.2 + l5.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=6)
-    lines(l5.mal.df$mal, l5.mal.df$pred.2 - l5.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=6)
-  lines(l6.mal.df$mal, l6.mal.df$pred.2 - r0.In(0)[3], lty = 2, col=8)
-    lines(l6.mal.df$mal, l6.mal.df$pred.2 + l6.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=8)
-    lines(l6.mal.df$mal, l6.mal.df$pred.2 - l6.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=8)
-  lines(l7.mal.df$mal, l7.mal.df$pred.2 - r0.In(0)[3], lty = 2, col=3)
-    lines(l7.mal.df$mal, l7.mal.df$pred.2 + l7.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=3)
-    lines(l7.mal.df$mal, l7.mal.df$pred.2 - l7.mal.df$se.2*qnorm(1-.05/2) - r0.In(0)[3], lty = 3, col=3)
-    
-      #Point estimates from studies
-  points(r0.mal.fix.n0$mal[r0.mal.fix.n0$par == 'phi_N'], r0.mal.fix.n0$r0[r0.mal.fix.n0$par == 'phi_N'] - r0.In(0)[3],
-         pch = 17, cex = 0.8, col = 6)  
-  points(r0.mal.fix.n0$mal[r0.mal.fix.n0$par == 'piC'], r0.mal.fix.n0$r0[r0.mal.fix.n0$par == 'piC'] - r0.In(0)[3],
-         pch = 17, cex = 0.8, col = 2)  
-  points(r0.mal.fix.n0$mal[r0.mal.fix.n0$par == 'muN'], r0.mal.fix.n0$r0[r0.mal.fix.n0$par == 'muN'] - r0.In(0)[3],
-         pch = 17, cex = 0.8, col = 4)  
-  legend('bottomleft', title = 'Parameters', legend = c('Baseline',
-                                                        expression(paste(pi[C], ' meta')),
-                                                        expression(paste(mu[N], ' Bakry 2012')),
-                                                        expression(paste(Phi[N], ' Baxter 2011')),
-                                                        'Combined functions'),
-         lty = c(1, rep(2,4)), col = c(1,2,4,6,3), cex = 0.8)  
-  title(expression(paste('Malathion influence on ', R[0], sep ='')))
+  for(i in 2:length(parfx)){
+    lines(lowess(conc.mal, conc.mal.means.r0[,i] - r0.In(0)[3], f = 0.01), lwd=2, col = i)
+  }
+  for(i in 1:length(parfx)){
+    lines(lowess(conc.mal, (conc.mal.means.r0[,i] + conc.mal.sds.r0[,i] - r0.In(0)[3]), f = 0.01), 
+          col = i, lty=2)
+    lines(lowess(conc.mal, (conc.mal.means.r0[,i] - conc.mal.sds.r0[,i] - r0.In(0)[3]), f = 0.01), 
+          col = i, lty=2)
+  }
+  legend(135000, 2, lwd=2, col = c(1:5), cex = 0.7, bty = 'n',
+         legend = c(expression(paste(pi[C], sep = '')), 
+                    expression(paste(pi[M], sep = '')), 
+                    expression(paste('f'[N], sep = '')), 
+                    expression(paste(mu[P], sep = '')), 
+                    expression(paste(mu[N], sep = ''))))
   
+#zoom   
+plot(lowess(conc.mal, conc.mal.means.r0[,1] - r0.In(0)[3], f = 0.01), 
+     lwd=2, type = 'l', ylim = c(-4,0), xlim = c(0, 2000),
+     xlab = 'Malathion (ppb)', ylab = expression(paste(Delta, R[0], '(q)')))
+  for(i in 3:4){
+    lines(lowess(conc.mal[c(0:1000)], (conc.mal.means.r0[c(0:1000),i] - r0.In(0)[3]), f = 0.01), 
+          lwd=2, col = i)
+  }
+  for(i in 3:4){
+    lines(lowess(conc.mal[c(0:1000)], 
+                 (conc.mal.means.r0[c(0:1000),i] + conc.mal.sds.r0[c(0:1000),i]) - r0.In(0)[3], f = 0.01), 
+          col = i, lty=2)
+    lines(lowess(conc.mal[c(0:1000)], 
+                 (conc.mal.means.r0[c(0:1000),i] - conc.mal.sds.r0[c(0:1000),i]) - r0.In(0)[3], f = 0.01), 
+          col = i, lty=2)
+  }
+    legend('right', lwd=2, col = c(1,3,4), cex = 0.7, bty = 'n',
+           legend = c(expression(paste(pi[C], sep = '')), 
+                      expression(paste('f'[N], sep = '')), 
+                      expression(paste(mu[N], sep = ''))))
+  
+#log scale   
+plot(lowess(log(conc.mal+1), conc.mal.means.r0[,1] - r0.In(0)[3], f = 0.01), 
+     lwd=2, type = 'l', ylim = c(-4,4), xlim = log(c(0, 200000)+1),
+     xlab = 'ln+1 Malathion (ppb)', ylab = expression(paste(Delta, R[0], '(q)')))
+  for(i in 2:length(parfx)){
+    lines(lowess(log(conc.mal+1), conc.mal.means.r0[,i] - r0.In(0)[3], f = 0.01), lwd=2, col = i)
+  }
+  for(i in 1:length(parfx)){
+    lines(lowess(log(conc.mal+1), 
+                 (conc.mal.means.r0[,i] + conc.mal.sds.r0[,i] - r0.In(0)[3]), f = 0.01), 
+          col = i, lty=2)
+    lines(lowess(log(conc.mal+1), 
+                 (conc.mal.means.r0[,i] - conc.mal.sds.r0[,i] - r0.In(0)[3]), f = 0.01), 
+          col = i, lty=2)
+  }
+legend('topleft', lwd=2, col = c(1:5), cex = 0.7, bty = 'n',
+       legend = c(expression(paste(pi[C], sep = '')), 
+                  expression(paste(pi[M], sep = '')), 
+                  expression(paste('f'[N], sep = '')), 
+                  expression(paste(mu[N], sep = '')), 
+                  expression(paste(mu[P], sep = ''))))
 
-  legend('topright', legend = c(expression(paste(pi[C], '(q)')),
-                                expression(paste(pi[M], '(q)')),
-                                expression(paste(f[N], '(q)')),
-                                expression(paste(mu[N], '(q)')),
-                                expression(paste(mu[P], '(q)'))), pch = 17, col = c(2:6), cex = 0.7)
+#Add Point estimates from studies
+  points(log(r0.mal.fix.n0$mal[r0.mal.fix.n0$par == 'muN']+1), 
+         r0.mal.fix.n0$r0[r0.mal.fix.n0$par == 'muN'] - r0.In(0)[3],
+         pch = 17, cex = 0.8, col = 6)  
+  points(log(r0.mal.fix.n0$mal[r0.mal.fix.n0$par == 'piC']+1), 
+         r0.mal.fix.n0$r0[r0.mal.fix.n0$par == 'piC'] - r0.In(0)[3],
+         pch = 17, cex = 0.8, col = 'gold')  
+  points(log(r0.mal.fix.n0$mal[r0.mal.fix.n0$par == 'piM']+1), 
+         r0.mal.fix.n0$r0[r0.mal.fix.n0$par == 'piM'] - r0.In(0)[3],
+         pch = 17, cex = 0.8, col = 8)  
+  points(log(r0.mal.fix.n0$mal[r0.mal.fix.n0$par == 'muP']+1), 
+         r0.mal.fix.n0$r0[r0.mal.fix.n0$par == 'muP'] - r0.In(0)[3],
+         pch = 17, cex = 0.8, col = 'orange')
+  legend('bottomleft', title = 'Observed Points', 
+         legend = c(expression(paste(mu[N], ' Bakry 2011')),
+                    expression(paste(pi[C], ' Tchounwou 1992')),
+                    expression(paste(pi[M], ' Tchounwou 1991')),
+                    expression(paste(mu[P], ' Halstead 2015'))),
+         pch = 17, col = c(6,'gold', 8, 'orange'), cex = 0.7, bty = 'n')  
+  title('Malathion')
+  
+#Plot results of parameter combinations #########
+#Larval toxicity  
+  plot(lowess(log(conc.mal+1), conc.mal.means.r0[,1] - r0.In(0)[3], f = 0.01), 
+       lwd=2, type = 'l', ylim = c(-4,0), xlim = log(c(0, 200000)+1),
+       xlab = 'ln+1 Malathion (ppb)', ylab = expression(paste(Delta, R[0], '(q)')))
+  for(i in c(2,6)){
+    lines(lowess(log(conc.mal+1), conc.mal.means.r0[,i] - r0.In(0)[3], f = 0.01), lwd=2, col = i)
+  }
+  for(i in c(1,2,6)){
+    lines(lowess(log(conc.mal+1), 
+                 (conc.mal.means.r0[,i] + conc.mal.sds.r0[,i] - r0.In(0)[3]), f = 0.01), 
+          col = i, lty=2)
+    lines(lowess(log(conc.mal+1), 
+                 (conc.mal.means.r0[,i] - conc.mal.sds.r0[,i] - r0.In(0)[3]), f = 0.01), 
+          col = i, lty=2)
+  }
+  legend('bottomleft', lwd=2, col = c(1,2,6), cex = 0.7, bty = 'n',
+         legend = c(expression(paste(pi[C], sep = '')), 
+                    expression(paste(pi[M], sep = '')), 
+                    expression(paste(pi[C], ' & ', pi[M], sep = ' '))))
+  title('Malathion larval effects')
+  
+#Snail toxicity
+  plot(lowess(log(conc.mal+1), conc.mal.means.r0[,3] - r0.In(0)[3], f = 0.01), 
+       lwd=2, type = 'l', col = 3, ylim = c(-4,0), xlim = log(c(0, 200000)+1),
+       xlab = 'ln+1 Malathion (ppb)', ylab = expression(paste(Delta, R[0], '(q)')))
+  for(i in c(4,7)){
+    lines(lowess(log(conc.mal+1), conc.mal.means.r0[,i] - r0.In(0)[3], f = 0.01), lwd=2, col = i)
+  }
+  for(i in c(3,4,7)){
+    lines(lowess(log(conc.mal+1), 
+                 (conc.mal.means.r0[,i] + conc.mal.sds.r0[,i] - r0.In(0)[3]), f = 0.01), 
+          col = i, lty=2)
+    lines(lowess(log(conc.mal+1), 
+                 (conc.mal.means.r0[,i] - conc.mal.sds.r0[,i] - r0.In(0)[3]), f = 0.01), 
+          col = i, lty=2)
+  }
+  legend('bottomleft', lwd=2, col = c(3,4,7), cex = 0.7, bty = 'n',
+         legend = c(expression(paste('f'[N], sep = '')), 
+                    expression(paste(mu[N], sep = '')), 
+                    expression(paste('f'[N], ' & ', mu[N], sep = ''))))
+  title('Malathion snail effects')
+  
+#Predator mortality with larval and snail effects
+  plot(lowess(log(conc.mal+1), conc.mal.means.r0[,5] - r0.In(0)[3], f = 0.01), 
+       lwd=2, type = 'l', col = 5, ylim = c(-4,4), xlim = log(c(0, 200000)+1),
+       xlab = 'ln+1 Malathion (ppb)', ylab = expression(paste(Delta, R[0], '(q)')))
+  lines(lowess(log(conc.mal+1), 
+               (conc.mal.means.r0[,5] + conc.mal.sds.r0[,5] - r0.In(0)[3]), f = 0.01), 
+        col = 5, lty=2)
+  lines(lowess(log(conc.mal+1), 
+               (conc.mal.means.r0[,5] - conc.mal.sds.r0[,5] - r0.In(0)[3]), f = 0.01), 
+        col = 5, lty=2)
+  for(i in c(8,9)){
+    lines(lowess(log(conc.mal+1), conc.mal.means.r0[,i] - r0.In(0)[3], f = 0.01), lwd=2, col = i-2)
+  }
+  for(i in c(8,9)){
+    lines(lowess(log(conc.mal+1), 
+                 (conc.mal.means.r0[,i] + conc.mal.sds.r0[,i] - r0.In(0)[3]), f = 0.01), 
+          col = i-2, lty=2)
+    lines(lowess(log(conc.mal+1), 
+                 (conc.mal.means.r0[,i] - conc.mal.sds.r0[,i] - r0.In(0)[3]), f = 0.01), 
+          col = i-2, lty=2)
+  }
+  legend('topleft', lwd=2, col = c(5,6,7), cex = 0.7, bty = 'n',
+         legend = c(expression(paste(mu[P], sep = '')),
+                    expression(paste(mu[P], ' & ', pi[C], ' & ', pi[C])),
+                    expression(paste(mu[P], ' & f'[N], ' & ', mu[N]))))
+  
+#Plot total r0 of q function ###############
+  #with reduction in snail reproduction
+  plot(lowess(log(conc.mal+1), conc.mal.means.r0[,10] - r0.In(0)[3], f = 0.01), 
+       lwd=2, type = 'l', col = 2, ylim = c(-4,4), xlim = log(c(0, 200000)+1),
+       xlab = 'ln+1 Malathion (ppb)', ylab = expression(paste(Delta, R[0], '(q)')))
+  lines(lowess(log(conc.mal+1), 
+               (conc.mal.means.r0[,10] + conc.mal.sds.r0[,10] - r0.In(0)[3]), f = 0.01), 
+        col = 2, lty=2)
+  lines(lowess(log(conc.mal+1), 
+               (conc.mal.means.r0[,10] - conc.mal.sds.r0[,10] - r0.In(0)[3]), f = 0.01), 
+        col = 2, lty=2)
+  title('Malathion - all possible response functions')
+  
+  #W/o reduction in snail reproduction 
+  #with reduction in snail reproduction
+  plot(lowess(log(conc.mal+1), conc.mal.means.r0[,11] - r0.In(0)[3], f = 0.01), 
+       lwd=2, type = 'l', col = 2, ylim = c(-4,4), xlim = log(c(0, 200000)+1),
+       xlab = 'ln+1 Malathion (ppb)', ylab = expression(paste(Delta, R[0], '(q)')))
+  lines(lowess(log(conc.mal+1), 
+               (conc.mal.means.r0[,11] + conc.mal.sds.r0[,11] - r0.In(0)[3]), f = 0.01), 
+        col = 2, lty=2)
+  lines(lowess(log(conc.mal+1), 
+               (conc.mal.means.r0[,11] - conc.mal.sds.r0[,11] - r0.In(0)[3]), f = 0.01), 
+        col = 2, lty=2)
+  title('Malathion - no reduction in snail reproduction')
+  

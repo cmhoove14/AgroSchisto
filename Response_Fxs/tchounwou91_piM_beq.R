@@ -164,9 +164,10 @@ predm.fx = function(In){
   b = as.numeric(predict(bm.mod, newdata = data.frame(mal = In/1000), se.fit = TRUE)[1:2])
   
   e.use = rnorm(1, e[1], e[2])
+    if(e.use <= 0) e.use = mal150.mod$coefficients[2]
   b.use = rnorm(1, b[1], b[2])
   
-  auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t)-e.use))))}, 
+  auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t/e.use)))))}, 
                   lower=0, upper=24)[1]$value
   auc
 }  
@@ -178,8 +179,41 @@ piM.tch91_mal_unc = function(In){
   else(return(piM))
 }
 
-keep.tch91.beq = c('mir.auc.mal', 'piM.tch91_mal_unc', 'predm.fx', 'em.mod', 'bm.mod')
+keep.tch91.beq = c('mir.auc.mal', 'piM.tch91_mal_unc', 'mal150.mod', 'predm.fx', 'em.mod', 'bm.mod')
 
-plot(seq(0, 150000, 1001)/1000, sapply(seq(0, 150000, 1001), piM.tch91_mal_unc), pch = 15, cex = 0.5,
+#Qualitative model validation ###############
+#Regenerate plot of observed data
+plot(mir.mal$time_hrs[mir.mal$conc==0], mir.mal$surv[mir.mal$conc==0], pch=17, xlab = 'time(hrs)',
+     ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
+  for(i in 2:length(unique(mir.mal$conc))){
+    points(mir.mal$time_hrs[mir.mal$conc==unique(mir.mal$conc)[i]], 
+           mir.mal$surv[mir.mal$conc==unique(mir.mal$conc)[i]], pch=16,
+           col = i)
+  }
+  legend('topright', legend = c(0, 30, 60, 90, 120, 150), title = 'Malathion (ppm)',
+         pch = c(17,rep(16,5)), col = c(1,2:6), cex = 0.8)
+
+#function to plot model predictions
+predm.fx.plot = function(In, clr){
+  e = as.numeric(predict(em.mod, newdata = data.frame(mal = In/1000), se.fit = TRUE)[1:2])
+  b = as.numeric(predict(bm.mod, newdata = data.frame(mal = In/1000), se.fit = TRUE)[1:2])
+  
+  e.use = rnorm(1, e[1], e[2])
+    if(e.use <= 0) e.use = mal150.mod$coefficients[2]
+  b.use = rnorm(1, b[1], b[2])
+  
+  lines(time, ll4(1,0, b.use, e.use, time), lty=2, col = clr)
+}   
+
+#plot model predictions
+for(i in c(0,30,60,90,120,150)*1000){
+  c = i/30000 + 1
+  print(c)
+  replicate(10, predm.fx.plot(In = i, clr = c))
+}
+
+#plot model output compared to observed points
+plot(seq(0, 150000, 1001)/1000, sapply(seq(0, 150000, 1001), piM.tch91_mal_unc), pch = 17, cex = 0.5,
      xlab = 'Malathion (ppm)', ylab = expression(paste(pi[M])),
      main = 'Sample Output of miracidial mortality function')
+  points(mir.auc.mal$mal/1000, mir.auc.mal$piM, pch = 16, col=2)

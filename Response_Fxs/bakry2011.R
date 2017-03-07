@@ -14,15 +14,15 @@ require(drc)
 
   plot(mun.mal$conc, mun.mal$mort, pch = 16, cex = 1.2, 
        xlab = 'Malathion (ppm)', ylab = 'prop dead', ylim = c(0,1), xlim = c(0,5))
-  for(i in 1:length(unique(mun.mal$conc))){
-    segments(x0 = mun.mal$conc[i] + mun.mal$se[i], y0 = mun.mal$mort[i],
-             x1 = mun.mal$conc[i] - mun.mal$se[i], y1 = mun.mal$mort[i])
-  }
+    for(i in 1:length(unique(mun.mal$conc))){
+      segments(x0 = mun.mal$conc[i] + mun.mal$se[i], y0 = mun.mal$mort[i],
+               x1 = mun.mal$conc[i] - mun.mal$se[i], y1 = mun.mal$mort[i])
+    }
   
   bak11.mod = drm(mort ~ conc, data = mun.mal, weights = se^-1, type = 'binomial',
                   fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                   fixed = c(NA, 0, 1, NA)))
-    summary(bak11.mod)
+#    summary(bak11.mod)
     
   muNq_mal_Bakry11<-function(In){
     Ins = In/1000
@@ -46,9 +46,9 @@ require(drc)
       rdrm(1, LL.2(), coef(bak11.mod), Ins, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
     }
 #Plotting function to check estimates vs data and model  
-  #  for(i in 0:5000){
-  #    points(i/1000, muNq_mal_Bakry11_uncertainty(i), col=4, pch=17, cex=0.5)
-  #  }
+    points(seq(0,5,0.01), sapply(seq(0, 5000, 10), muNq_mal_Bakry11_uncertainty), 
+           col=2, pch=1, cex=0.5)
+    
     
 #Deltamethrin     
 mun.del = data.frame(conc = c(.482, 1.21, 2.034, 4.82, 7.26),
@@ -85,18 +85,17 @@ bak.del.df = data.frame(conc = seq(0,10,0.01),
   bak.del.df[,2:4] <- predict(bak11.mod2, newdata = bak.del.df, 
                               interval = 'confidence', level = 0.95)
   
-    lines(bak.del.df$conc, bak.del.df$Prediction, col = 2, lty=2)
-    lines(bak.del.df$conc, bak.del.df$Lower, col = 2, lty=3)
-    lines(bak.del.df$conc, bak.del.df$Upper, col = 2, lty=3)
+    lines(bak.del.df$conc, bak.del.df$Prediction, col = 4, lty=2)
+    lines(bak.del.df$conc, bak.del.df$Lower, col = 4, lty=3)
+    lines(bak.del.df$conc, bak.del.df$Upper, col = 4, lty=3)
 
-muNq_del_Bakry11_uncertainty<-function(In){
-  Ins = In/1000
-  rdrm(1, LL.2(), coef(bak11.mod2), Ins, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
-}
+  muNq_del_Bakry11_uncertainty<-function(In){
+      Ins = In/1000
+      rdrm(1, LL.2(), coef(bak11.mod2), Ins, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+    }
 #Plotting function to check estimates vs data and model  
-#for(i in 0:10000){
-#  points(i/1000, muNq_del_Bakry11_uncertainty(i), col=4, pch=17, cex=0.5)
-#}
+points(seq(0,10,0.01), sapply(seq(0, 10000, 10), muNq_del_Bakry11_uncertainty), 
+       col=4, pch=1, cex=0.5)
 
 #The paper also provides info on longitudinal survival of snail cohorts exposed to LC10 of each insecticide ################
   #So let's compare that data with the expected long. survival from the model at the same concentration
