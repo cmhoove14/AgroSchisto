@@ -51,11 +51,11 @@ muNq_mal_tch91_uncertainty<-function(In){
          lty = 2, col = 2, cex = 0.6, bty='n')
   
 #Fit model to egg daily mortality ###########
-plot(eg$conc_ppb, eg$prop_dead, pch = 16, xlim = c(0,5e5),
+plot(eg$conc_ppb, eg$prop_surv, pch = 16, xlim = c(0,5e5),
      xlab = 'Malathion (ppb)', ylab = 'Prop eggs dead', 
      main = 'Tchounwou 91 B. havenensis egg viability data')
 
-eg.mod = drm(prop_dead ~ conc_ppb, data = eg, type = 'binomial',
+eg.mod = drm(prop_surv ~ conc_ppb, data = eg, type = 'binomial',
              fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                         fixed = c(NA, 0, 1, NA)))
   
