@@ -128,7 +128,7 @@ mirp.df = data.frame(mal = c(0,30,60,90,120,150),
                                summary(mal60.mod)$coefficients[1,2], summary(mal90.mod)$coefficients[1,2],
                                summary(mal120.mod)$coefficients[1,2], summary(mal150.mod)$coefficients[1,2]))
 
-plot(mirp.df$mal, mirp.df$e, pch = 16, xlab = 'malathion (ppb)', ylab = 'LL.2 Parameters',
+plot(mirp.df$mal, mirp.df$e, pch = 16, xlab = 'malathion (ppm)', ylab = 'LL.2 Parameters',
      ylim = c(0, 10))
 points(mirp.df$mal, mirp.df$b, pch = 17, col=2)
   for(i in 1:length(mirp.df$mal)){
@@ -174,7 +174,8 @@ predm.fx = function(In){
   
 #Final:generate relative miracidia-hrs function ***NOTE:Doesn't work well at very high concentrations as***
 piM.tch91_mal_unc = function(In){
-  piM = predm.fx(In) / predm.fx(0)
+  if(In == 0) piM = 1
+  else(piM = predm.fx(In) / predm.fx(0))
   if(piM > 1) piM = 1
   else(return(piM))
 }

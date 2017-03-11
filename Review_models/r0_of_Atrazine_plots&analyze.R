@@ -50,7 +50,7 @@ plot(lowess(conc.atr, conc.atr.means.r0[,4] - r0.He(0)[3], f = 0.01),
          r0.atr.fix.n0$r0[r0.atr.fix.n0$study == 'Rohr08'] - r0.He(0)[3], pch = 17, col = 8)  
   points(r0.atr.fix.n0$atr[r0.atr.fix.n0$par == 'muN'], 
          r0.atr.fix.n0$r0[r0.atr.fix.n0$par == 'muN'] - r0.He(0)[3], pch = 17, col = 6)  
-  legend('bottomleft', title = 'Parameters', 
+  legend('bottomleft', title = 'Modeled Functions', 
          legend = c(expression(paste(pi[C], ' Rohr08')), 
                     expression(paste(mu[N], ' Bakry12')),
                     expression(paste(Phi[N], ' Baxter11')),
@@ -122,3 +122,28 @@ plot(lowess(conc.atr, conc.atr.means.r0[,5] - r0.He(0)[3], f = 0.01), ylim = c(-
                     'St. Dev.'),
          col = c(5,6,11,1), cex = 0.7, lwd=c(rep(2,3),1), lty=c(rep(1,3),2), bty='n') 
   title(expression(paste(mu[N],' & ', Phi[N], ' influence on ', R[0])), cex = 0.8)  
+#Plot total r0 of q function ###############
+  #with reduction in snail reproduction
+  plot(lowess(conc.atr, conc.atr.means.r0[,13] - r0.He(0)[3], f = 0.01), 
+       lwd=2, type = 'l', col = 3, ylim = c(-4,4), xlim = c(0, 500),
+       xlab = 'Atrazine (ppb)', ylab = expression(paste(Delta, R[0], '(q)')))
+  lines(lowess(conc.atr, 
+               (conc.atr.means.r0[,13] + conc.atr.sds.r0[,13] - r0.He(0)[3]), f = 0.01), 
+        col = 3, lty=2)
+  lines(lowess(conc.atr, 
+               (conc.atr.means.r0[,13] - conc.atr.sds.r0[,13] - r0.He(0)[3]), f = 0.01), 
+        col = 3, lty=2)
+  title('Atrazine - all response functions incorporated')
+  
+  #Restrict to 200ppb
+  plot(lowess(conc.atr, conc.atr.means.r0[,13] - r0.He(0)[3], f = 0.01), 
+       lwd=2, type = 'l', col = 3, ylim = c(-4,4), xlim = c(0, 200),
+       xlab = 'Atrazine (ppb)', ylab = expression(paste(Delta, R[0], '(q)')))
+  lines(lowess(conc.atr, 
+               (conc.atr.means.r0[,13] + conc.atr.sds.r0[,13] - r0.He(0)[3]), f = 0.01), 
+        col = 3, lty=2)
+  lines(lowess(conc.atr, 
+               (conc.atr.means.r0[,13] - conc.atr.sds.r0[,13] - r0.He(0)[3]), f = 0.01), 
+        col = 3, lty=2)
+  title('Atrazine - all response functions incorporated')
+  

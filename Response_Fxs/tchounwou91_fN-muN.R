@@ -63,8 +63,8 @@ eg.mod = drm(prop_surv ~ conc_ppb, data = eg, type = 'binomial',
                                 interval = 'confidence', level = 0.95)
   
     lines(tch.mal.df$conc, tch.mal.df$Prediction, col = 2, lty=2)
-    lines(tch.mal.df$conc, tch.mal.df$Lower, col = 2, lty=3)
-    lines(tch.mal.df$conc, tch.mal.df$Upper, col = 2, lty=3)
+      lines(tch.mal.df$conc, tch.mal.df$Lower, col = 2, lty=3)
+      lines(tch.mal.df$conc, tch.mal.df$Upper, col = 2, lty=3)
   
   fNq_mal_tch91_uncertainty<-function(In){
     rdrm(1, LL.2(), coef(eg.mod), In, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
@@ -73,7 +73,7 @@ eg.mod = drm(prop_surv ~ conc_ppb, data = eg, type = 'binomial',
   points(seq(0, 5e5, 5e5/1000), 
          sapply(seq(0, 5e5, 5e5/1000), fNq_mal_tch91_uncertainty),
          pch = 17, col=4, cex = 0.5)  
-  legend('bottomright', legend = c('Observed points', 'Simulated points'),
+  legend('topright', legend = c('Observed points', 'Simulated points'),
          pch = c(16,17), col = c(1,4), cex = 0.6, bty='n')
   legend('right', legend = c('Prediction/ 95%CI'),
          lty = 2, col = 2, cex = 0.6, bty='n')

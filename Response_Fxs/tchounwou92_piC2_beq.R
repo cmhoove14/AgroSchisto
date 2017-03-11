@@ -200,7 +200,8 @@ pred.fx = function(In){
 
 #Final function and keep vector ###############
 piC.tch92_mal_unc = function(In){
-  piC = pred.fx(In) / pred.fx(0)
+  if(In == 0) piC = 1
+  else(piC = pred.fx(In) / pred.fx(0))
   if(piC > 1) piC = 1
   else(return(piC))
 }  

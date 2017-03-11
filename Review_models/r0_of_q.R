@@ -70,6 +70,7 @@ parameters=c(
   }
 
 #R0(q) functions ###############
+#r0 of insecticide function
 r0.In = function(In = 0,
                 f.f_Nq = nil1, 
                 f.mu_Pq = nil0,
@@ -138,7 +139,7 @@ r0.In = function(In = 0,
   return(c(N.eq, P.eq, r0))
 
 }
-
+#r0 of herbicide function
 r0.He = function(He = 0,
                  f.f_Nq = nil1, 
                  f.mu_Pq = nil0,
@@ -207,7 +208,7 @@ r0.He = function(He = 0,
 return(c(N.eq, P.eq, r0))
 
 }
-  
+#r0 of fertilizer function  
 r0.Fe = function(Fe = 0,
                  f.f_Nq = nil1, 
                  f.mu_Pq = nil0,
@@ -276,7 +277,7 @@ r0.Fe = function(Fe = 0,
 return(c(N.eq, P.eq, r0))
 
 }
-
+#r0 with fixed parameter values
 r0.fix = function(f_Nqx = 1, 
                   mu_Pqx = 0,
                   phi_Nqx = 1, 
@@ -338,6 +339,110 @@ P.eq = phi_P*(1 - muPq/f_P)
   e.hat = (theta_q*H*lamda*pi_Cq*omega) / (mu_Nq + mu_I + P.eq*psi.eq)
   i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
   w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
+
+r0 = sqrt(e.hat * i.hat * w.hat)
+
+return(c(N.eq, P.eq, r0))
+
+}
+#r0 for agrochemical combinations
+r0.Ag = function(In = 0,
+                 He = 0,
+                 Fe = 0,
+                 
+                 f.in.f_Nq = nil1, 
+                 f.he.f_Nq = nil1, 
+                 f.fe.f_Nq = nil1, 
+                 
+                 f.in.mu_Pq = nil0,
+                 f.he.mu_Pq = nil0,
+                 f.fe.mu_Pq = nil0,
+                 
+                 f.in.phi_Nq = nil1, 
+                 f.he.phi_Nq = nil1, 
+                 f.fe.phi_Nq = nil1, 
+                 
+                 f.in.mu_Nq = nil0, 
+                 f.he.mu_Nq = nil0, 
+                 f.fe.mu_Nq = nil0,
+                 
+                 f.in.alpha_q = nil1,
+                 f.he.alpha_q = nil1,
+                 f.fe.alpha_q = nil1,
+                 
+                 f.in.theta_q = nil1, 
+                 f.he.theta_q = nil1, 
+                 f.fe.theta_q = nil1, 
+                 
+                 f.in.pi_Mq = nil1, 
+                 f.he.pi_Mq = nil1, 
+                 f.fe.pi_Mq = nil1, 
+                 
+                 f.in.pi_Cq = nil1, 
+                 f.he.pi_Cq = nil1, 
+                 f.fe.pi_Cq = nil1, 
+                 
+                 f.in.v_q = nil1,
+                 f.he.v_q = nil1,
+                 f.fe.v_q = nil1)
+
+{ area = parameters['A']
+sigma = parameters['sigma']
+lamda = parameters['lamda']
+omega = parameters['Om']
+theta = parameters['theta']
+pi_C = parameters['pi_C']
+beta = parameters['beta']
+H = parameters['H']
+m = parameters['m']
+v = parameters['v']
+pi_M = parameters['pi_M']
+mu_N = parameters['mu_N']
+mu_I = parameters['mu_I']
+mu_H = parameters['mu_H']
+mu_W = parameters['mu_W']
+mu_P = parameters['mu_P']
+f_P = parameters['f_P']
+phi_P = parameters['phi_P']
+alpha = parameters['alpha']
+Th = parameters['Th']
+f_N = parameters['f_N']
+phi_N = parameters['phi_N']
+
+f_Nq = f_N * (1-sum(1-c(f.in.f_Nq(In), f.he.f_Nq(He), f.fe.f_Nq(Fe))))
+  if(f_Nq < 0) f_Nq = 0
+muPq = mu_P + (f.in.mu_Pq(In) + f.he.mu_Pq(He) + f.fe.mu_Pq(Fe))
+phi_Nq = phi_N * (1-sum(1-c(f.in.phi_Nq(In), f.he.phi_Nq(He), f.fe.phi_Nq(Fe))))
+  if(phi_Nq < 0) phi_Nq = 0
+mu_Nq = mu_N + (f.in.mu_Nq(In) + f.he.mu_Nq(He) + f.fe.mu_Nq(Fe))
+alpha_q = alpha * (1-sum(1-c(f.in.alpha_q(In), f.he.alpha_q(He), f.fe.alpha_q(Fe))))
+  if(alpha_q < 0) alpha_q = 0
+theta_q = theta * (1-sum(1-c(f.in.theta_q(In), f.he.theta_q(He), f.fe.theta_q(Fe))))
+  if(theta_q < 0) theta_q = 0
+pi_Mq = 1-sum(1-c(f.in.pi_Mq(In), f.he.pi_Mq(He), f.fe.pi_Mq(Fe)))
+  if(pi_Mq < 0) pi_Mq = 0
+pi_Cq = 1-sum(1-c(f.in.pi_Cq(In), f.he.pi_Cq(He), f.fe.pi_Cq(Fe)))
+  if(pi_Cq < 0) pi_Cq = 0
+v_q = v * (1-sum(1-c(f.in.v_q(In), f.he.v_q(He), f.fe.v_q(Fe))))
+  if(v_q < 0) v_q = 0
+#Equilibrium estimate of P given prawn predator parameters and q
+P.eq = phi_P*(1 - muPq/f_P)         
+
+if(P.eq<0){P.eq = 0}
+
+#Equilibrium estimate of N given snail parameters
+N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
+                       c(0, as.numeric(phi_Nq))))
+
+if(N.eq<0){N.eq = 0}
+
+#Equilibrium predation rate estimate
+psi.eq = alpha_q/(1+alpha*Th*(N.eq/area))
+
+#R_0 of q estimate
+e.hat = (theta_q*H*lamda*pi_Cq*omega) / (mu_Nq + mu_I + P.eq*psi.eq)
+i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
+w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
 
 r0 = sqrt(e.hat * i.hat * w.hat)
 
