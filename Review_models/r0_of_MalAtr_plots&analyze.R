@@ -48,55 +48,6 @@ persp(y = mal.range, ylim = range(mal.range), x = atr.range, xlim = range(atr.ra
       ylab = 'Malathion', xlab = 'Atrazine', zlab = 'Change in R0',
       phi = 20, theta = 60, col = colmalatr[facetcol2])
 
-#Find volume of concentration space resulting in increased R0
-  df.malatra.d = df.malatra
-    df.malatra.d[,c(3:(nsims+2))] = df.malatra.d[,c(3:(nsims+2))] - r0.Ag(0)[3]
-    
-  df.malatra.d0 = df.malatra.d
-    df.malatra.d0[df.malatra.d0 < 0] = 0
-    
-  da = 1/(nconc-1)
-    a = unique(df.malatra.d$atr.norm)
-  dm = 1/(nconc-1)
-    m = unique(df.malatra.d$mal.norm)
-    
-  vr0 = array(data = NA, dim = c((nconc - 1), (nconc - 1), nsims, 2))
-
-  for(h in 3:(nsims+2)){
-   for(i in 1:(nconc - 1)){
-    for(j in 1:(nconc - 1)){
-      print(c(i,j,h))
-      
-      h1 = mean(df.malatra.d[df.malatra.d$atr.norm == a[i] & df.malatra.d$mal.norm == m[j],h],
-                df.malatra.d[df.malatra.d$atr.norm == a[i] & df.malatra.d$mal.norm == m[j+1],h],
-                df.malatra.d[df.malatra.d$atr.norm == a[i+1] & df.malatra.d$mal.norm == m[j],h],
-                df.malatra.d[df.malatra.d$atr.norm == a[i+1] & df.malatra.d$mal.norm == m[j+1],h])
-      
-      h2 = mean(df.malatra.d0[df.malatra.d0$atr.norm == a[i] & df.malatra.d0$mal.norm == m[j],h],
-                df.malatra.d0[df.malatra.d0$atr.norm == a[i] & df.malatra.d0$mal.norm == m[j+1],h],
-                df.malatra.d0[df.malatra.d0$atr.norm == a[i+1] & df.malatra.d0$mal.norm == m[j],h],
-                df.malatra.d0[df.malatra.d0$atr.norm == a[i+1] & df.malatra.d0$mal.norm == m[j+1],h])
-      
-      fill1 = da*dm*h1
-      fill2 = da*dm*h2
-      vr0[i,j,h-2,1] = fill1
-      vr0[i,j,h-2,2] = fill2
-    }
-  }
-}  
-
-#Volume of entire surface   
-  vs = as.numeric()
-  for(i in 1:nsims){
-    vs[i] = sum(vr0[, , i, 1])
-  }
-
-#Volume of increased r0 area    
-  vs0 = as.numeric()
-  for(i in 1:nsims){
-    vs0[i] = sum(vr0[, , i, 2])
-  }
- 
 #Smoothed area of r0>0 ############
   smth.malatrg0 = smth.malatr - r0.Ag(0)[3] 
   smth.malatrg0[smth.malatrg0 < 0] = 0
@@ -112,3 +63,18 @@ persp(y = mal.range, ylim = range(mal.range), x = atr.range, xlim = range(atr.ra
         ylab = 'Malathion', xlab = 'Atrazine', zlab = 'Change in R0',
         phi = 30, theta = 60, col = colmalatr[facetcol3])
 
+#Volume of entire surface   
+  vs = as.numeric()
+  for(i in 1:nsims){
+    vs[i] = sum(vr0[, , i, 1])
+  }
+  
+  boxplot(vs)
+
+#Volume of increased r0 area    
+  vs0 = as.numeric()
+  for(i in 1:nsims){
+    vs0[i] = sum(vr0[, , i, 2])
+  }
+  
+  boxplot(vs0)

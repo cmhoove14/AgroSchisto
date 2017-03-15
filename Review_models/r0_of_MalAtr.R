@@ -76,3 +76,40 @@ stopCluster(clusmalatr)
 colnames(df.malatra)[1:2] = c('atr', 'mal')
   
   df.malatra$mean = rowMeans(df.malatra[,3:nsims])
+  
+#Find ~volume of concentration space resulting in increased R0
+  df.malatra.d = df.malatra
+  df.malatra.d[,c(3:(nsims+2))] = df.malatra.d[,c(3:(nsims+2))] - r0.Ag(0)[3]
+  
+  df.malatra.d0 = df.malatra.d
+  df.malatra.d0[df.malatra.d0 < 0] = 0
+  
+  da = 1/(nconc-1) #change in atrazine concentration = length
+    a = unique(df.malatra.d$atr.norm)
+  dm = 1/(nconc-1) #change in malathion concentration = width
+    m = unique(df.malatra.d$mal.norm)
+  
+  vr0 = array(data = NA, dim = c((nconc - 1), (nconc - 1), nsims, 2))
+  
+  for(h in 3:(nsims+2)){
+    for(i in 1:(nconc - 1)){
+      for(j in 1:(nconc - 1)){
+      #mean of change in r0 at four concentration cooredinates approximates height
+        h1 = mean(df.malatra.d[df.malatra.d$atr.norm == a[i] & df.malatra.d$mal.norm == m[j],h],
+                  df.malatra.d[df.malatra.d$atr.norm == a[i] & df.malatra.d$mal.norm == m[j+1],h],
+                  df.malatra.d[df.malatra.d$atr.norm == a[i+1] & df.malatra.d$mal.norm == m[j],h],
+                  df.malatra.d[df.malatra.d$atr.norm == a[i+1] & df.malatra.d$mal.norm == m[j+1],h])
+        
+        h2 = mean(df.malatra.d0[df.malatra.d0$atr.norm == a[i] & df.malatra.d0$mal.norm == m[j],h],
+                  df.malatra.d0[df.malatra.d0$atr.norm == a[i] & df.malatra.d0$mal.norm == m[j+1],h],
+                  df.malatra.d0[df.malatra.d0$atr.norm == a[i+1] & df.malatra.d0$mal.norm == m[j],h],
+                  df.malatra.d0[df.malatra.d0$atr.norm == a[i+1] & df.malatra.d0$mal.norm == m[j+1],h])
+        
+        fill1 = da*dm*h1 #V = length*width*height
+        fill2 = da*dm*h2 #V = length*width*height
+        vr0[i,j,h-2,1] = fill1
+        vr0[i,j,h-2,2] = fill2
+      }
+    }
+  }  
+  
