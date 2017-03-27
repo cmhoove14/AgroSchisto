@@ -37,13 +37,13 @@ plot(lowess(conc.mal, conc.mal.means.r0[,1] - r0.In(0)[3], f = 0.01),
   
 #zoom   
 plot(lowess(conc.mal, conc.mal.means.r0[,1] - r0.In(0)[3], f = 0.01), 
-     lwd=2, type = 'l', ylim = c(-4,0), xlim = c(0, 2000),
+     lwd=2, type = 'l', ylim = c(-4,0), xlim = c(0, 1000),
      xlab = 'Malathion (ppb)', ylab = expression(paste(Delta, R[0], '(q)')))
-  for(i in 3:4){
+  for(i in 2:length(parfx)){
     lines(lowess(conc.mal[c(0:1000)], (conc.mal.means.r0[c(0:1000),i] - r0.In(0)[3]), f = 0.01), 
           lwd=2, col = i)
   }
-  for(i in 3:4){
+  for(i in 1:length(parfx)){
     lines(lowess(conc.mal[c(0:1000)], 
                  (conc.mal.means.r0[c(0:1000),i] + conc.mal.sds.r0[c(0:1000),i]) - r0.In(0)[3], f = 0.01), 
           col = i, lty=2)
@@ -51,10 +51,14 @@ plot(lowess(conc.mal, conc.mal.means.r0[,1] - r0.In(0)[3], f = 0.01),
                  (conc.mal.means.r0[c(0:1000),i] - conc.mal.sds.r0[c(0:1000),i]) - r0.In(0)[3], f = 0.01), 
           col = i, lty=2)
   }
-    legend('right', lwd=2, col = c(1,3,4), cex = 0.7, bty = 'n',
-           legend = c(expression(paste(pi[C], sep = '')), 
-                      expression(paste('f'[N], sep = '')), 
-                      expression(paste(mu[N], sep = ''))))
+legend('bottomleft', lwd=2, col = c(1:7), cex = 0.6, bty = 'n',
+       legend = c(expression(paste(pi[C], ' - Tchounwou 1992', sep = '')), 
+                  expression(paste(pi[M], ' - Tchounwou 1991a', sep = '')), 
+                  expression(paste('f'[N], ' - Bakry 2011', sep = '')), 
+                  expression(paste(mu[N], ' - Bakry 2011', sep = '')),
+                  expression(paste(mu[P], ' - Halstead 2015', sep = '')), 
+                  expression(paste('f'[N], ' - Tchounwou 1991b', sep = '')), 
+                  expression(paste(mu[N], ' - Tchounwou 1991b', sep = ''))))
   
 #log scale   
 plot(lowess(log(conc.mal+1), conc.mal.means.r0[,1] - r0.In(0)[3], f = 0.01), 

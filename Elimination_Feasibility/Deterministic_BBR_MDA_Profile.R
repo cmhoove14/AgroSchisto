@@ -154,7 +154,3 @@ for(y in 1:nrow(shortlist_first100)){
     lines(time/365, mean.w.k008.mda1[,1], lty=2)
     lines(time/365, mean.w.k008.mda1[,2], lty=3)
     
-  bbr.pdd = array(data = NA, dims = c(100, mda.years))
-  for(i in 1:mda.years){
-    
-  }
