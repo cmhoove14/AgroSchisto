@@ -297,7 +297,6 @@ plot(bbr.df$time, bbr.df$bbr.slp, type = 'l', lwd = 2,
 
 #plot epsilon over time 
   
-  
   plot(c(3:ncol(bbr)), eps.mean, pch = 16, cex = 0.8, xlim = c(0,20), ylim = c(-0.03, 0.01), xlab = 'time (yrs)',
         ylab = expression(paste('Elimination Feasibility Estimator ( ', epsilon, ')',sep = '')))
     points(c(3:ncol(bbr)), eps.pdd.mean, pch = 16, cex = 0.8, col=2)
@@ -330,7 +329,7 @@ eps.ggp = ggplot(eps.gg, aes(x = time, y = eps, fill = Model)) +
             annotate('text', x = c(3:ncol(bbr)), y = 0.008, label = c(rep('a', 3), rep('b', 14)), size = 3)
 eps.ggp
     
-#manuscript plot version
+#manuscript plot version ######
   opar<-par()
 
 windows(width = 11)    
