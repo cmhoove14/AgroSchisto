@@ -17,11 +17,11 @@ load('Elimination_Feasibility/eps_surface_lam1.2-3.7_kap0-2.RData')
 windows()
 
 persp(y = lam.range, ylim = range(lam.range), x = kap.range, xlim = range(kap.range),
-      z = eps.fill, ticktype = 'detailed', nticks = 4, 
+      z = eps.fill, zlim = c(-0.05, 0.05), ticktype = 'detailed', nticks = 4, 
       xlab = 'Pos. Density Dependence',
       ylab = 'Transmission Intensity',
       zlab = 'Elimination Feasibility Estimator',
-      phi = 30, theta = 45, shade = 0.4)
+      phi = 18, theta = 45, shade = 0.4)
 
 rm(list = ls())
 

@@ -13,6 +13,7 @@
 require(deSolve)
 require(graphics)
 require(ggplot2)
+require(Rmisc)
 
 #Simulations with 100 transmission parameter sets, k=2, double round of MDA annually #####
 load("Elimination_Feasibility/det_sim_k200_mda1&2.RData")
@@ -162,6 +163,7 @@ bbr.pdd = (1/w.pos.k2.mda1.pdd[,c(1:19)])*(w.pre.k2.mda1.pdd[,c(2:20)] - w.pos.k
 #Some post-processing of data; lowest transmisison intensity plotting
   lowest = as.data.frame(det.runs.k008.mda1[ , , 1, 1]  )
     colnames(lowest) = c('time', 'S', 'E', 'I', 'Wt', 'Wu')
+  mean.w = as.data.frame(mean(det.runs.k008.mda1[ , , 1, 1]  ))
     
   lowest$W = cov*lowest$Wt + (1-cov)*lowest$Wu
     plot(lowest$time/365, lowest$W, type = 'l', lwd = 2, ylim = c(0,80))
@@ -190,7 +192,7 @@ lowest$W[lowest$time == 366]
     bbr.pdd.sd = apply(bbr.pdd, 2, sd)  
       
 #plot   
-  plot(c(1:19), bbr.mean, pch = 16, xlab = 'time (yrs)', ylab = 'BBR', ylim = c(-0.35, 0.35))
+  plot(c(1:19), bbr.mean, pch = 16, xlab = 'time (yrs)', ylab = 'BBR', ylim = c(-0.1, 0.35))
     for(i in 1:length(bbr.sd)){
         segments(x0 = i, x1 = i, 
                  y0 = bbr.mean[i] + bbr.sd[i], y1 = bbr.mean[i] - bbr.sd[i])
@@ -309,69 +311,68 @@ plot(bbr.df$time, bbr.df$bbr.slp, type = 'l', lwd = 2,
                y0 = eps.pdd.mean[s] + eps.pdd.sd[s], y1 = eps.pdd.mean[s] - eps.pdd.sd[s], col = 2)
     }
 
-#Create df for using ggplot
+
+    
+#manuscript plot version ######
+#worm burden trajectories
+w.gg = rbind(lowest[,c(1,7)], lowest.pdd[,c(1,7)])
+  w.gg$Model = c(rep('PDD-free', nrow(lowest)), rep('PDD', nrow(lowest.pdd)))
+  w.gg$W[w.gg$Model == 'PDD-free'] = w.gg$W[w.gg$Model == 'PDD-free']+2
+  w.gg$time[w.gg$Model == 'PDD-free'] = w.gg$time[w.gg$Model == 'PDD-free']+60
+    w.gg$time = w.gg$time / 365
+
+w.ggp = ggplot(w.gg, aes(x = time, y = W, color = Model)) +
+          theme_bw(base_size = 15) +
+          theme(plot.margin = unit(c(1.5,0.5,1,1), 'cm')) +
+          xlim(0,60) +
+          ylim(0,80) +
+          labs(x = 'time (yrs)',
+               y = expression(paste('Mean Worm Burden (', italic('W'), ')',sep = ''))) +
+          scale_color_manual(values = c('black', 'red')) +
+          geom_line(size = 1) +
+          annotate('text', x = 60, y = 80, label = 'a', size = 8)
+
+#Bounce back rates  
+bbr.gg = rbind(bbr.df, bbr.pdd.df)
+  bbr.gg$pdd = c(rep('PDD', nrow(bbr.pdd.df)), rep('PDD-free', nrow(bbr.df)))
+
+bbr.ggp = ggplot(bbr.gg, aes(x = time, y = bbr, color = pdd)) +
+            theme_bw(base_size = 15) +
+            theme(plot.margin = unit(c(1.5,0.5,1,1), 'cm'), legend.position = 'none') +
+            xlim(0,20) +
+            ylim(-0.05,0.35) +
+            labs(x = 'time (yrs)',
+                 y = expression(paste('Bounce Back Rate (', italic('BBR'), ')', sep = ''))) +
+            scale_color_manual(values = alpha(c('red', 'black'), .9)) +
+            geom_point() +
+            geom_errorbar(aes(x = time, ymin = (bbr - bbr.sd), ymax = (bbr + bbr.sd)), 
+                          width = 0.25) +
+            annotate('text', x = 0, y = 0.34, label = 'b', size = 8)
+
+#epsilon estimates
   eps.gg = data.frame(eps = c(eps.mean, eps.pdd.mean),
                       eps.sd = c(eps.sd, eps.pdd.sd),
                       time = rep(c(3:ncol(bbr)), 2),
                       Model = c(rep('PDD-free', length(eps.mean)), rep('PDD', length(eps.mean))))  
   
 eps.ggp = ggplot(eps.gg, aes(x = time, y = eps, fill = Model)) +
-            theme_bw() +
-            theme(plot.margin = unit(c(1.5,0.5,1,1), 'cm')) +
+            theme_bw(base_size = 15) +
+            theme(plot.margin = unit(c(1.5,0.5,1,1), 'cm'), legend.position = 'none') +
             xlim(0,20) +
             ylim(-0.035,0.01) +
             labs(x = 'time (yrs)',
-                 y = expression(paste('Elimination Feasibility Estimator (', epsilon, ')',sep = ''))) +
+                 y = expression(paste('Elimination Feasibility Coefficient ( ', epsilon, ')',sep = ''))) +
             geom_bar(position = 'dodge', stat = 'identity', width = 0.8) +
-            scale_fill_manual(values = alpha(c('red', 'black'), .6)) +
+            scale_fill_manual(values = alpha(c('black', 'red'), .6)) +
             geom_errorbar(aes(x = time, ymin = (eps - eps.sd), ymax = (eps + eps.sd)), 
                           width = 0.25, position = position_dodge(width = 0.8)) +
-            annotate('text', x = c(3:ncol(bbr)), y = 0.008, label = c(rep('a', 3), rep('b', 14)), size = 3)
-eps.ggp
-    
-#manuscript plot version ######
-  opar<-par()
+            geom_vline(xintercept = 5.5, lty=2) +
+            annotate('text', x = 0, y = 0.009, label = 'c', size = 8)
 
-windows(width = 11)    
-  par(mfrow = c(2,2), pin = c(11,7), mar = c(3,4,3,1)+0.1)
-    plot(lowest$time/365, lowest$W, type = 'l', lwd = 2, ylim = c(0,80),
-         xlab = 'Time (years)', ylab = expression(italic(W)))
-      #lines(lowest$time/365, lowest$Wt, type = 'l', lty = 2)
-      #lines(lowest$time/365, lowest$Wu, type = 'l', lty = 3)
-  
-    plot(lowest.pdd$time/365, lowest.pdd$W, type = 'l', lwd = 2, ylim = c(0,80), col=2,
-         xlab = 'Time (years)', ylab = expression(italic(W)))
-      #lines(lowest.pdd$time/365, lowest.pdd$Wt, type = 'l', lty = 2)
-      #lines(lowest.pdd$time/365, lowest.pdd$Wu, type = 'l', lty = 3)
-      
-    plot(c(1:19), bbr.mean, pch = 16, cex = 0.8, ylim = c(-0.1, 0.35), xlim = c(0,20),
-         xlab = 'Time (yrs)', ylab = expression(italic(BBR)))
-      for(i in 1:length(bbr.sd)){
-        segments(x0 = i, x1 = i, 
-                 y0 = bbr.mean[i] + bbr.sd[i], y1 = bbr.mean[i] - bbr.sd[i])
-      }
-      
-      points(c(1:19), bbr.pdd.mean, pch = 16, cex = 0.8, col = 2)
-      for(i in 1:length(bbr.pdd.sd)){
-        segments(x0 = i, x1 = i, 
-                 y0 = bbr.pdd.mean[i] + bbr.pdd.sd[i], y1 = bbr.pdd.mean[i] - bbr.pdd.sd[i],
-                 col = 2)
-      }
-      
-      legend('bottomright', legend = c('PDD-free model', 'PDD-model'), 
-             pch = 16, cex = 0.8, col = c(1,2), bty='n')
-      
-      plot(c(3:ncol(bbr)), eps.mean, pch = 16, cex = 0.8, xlim = c(0,20), ylim = c(-0.03, 0.01), xlab = 'time (yrs)',
-           ylab = expression(paste('Elimination Feasibility Estimator ( ', epsilon, ')',sep = '')))
-        points(c(3:ncol(bbr)), eps.pdd.mean, pch = 16, cex = 0.8, col=2)
-      
-      #Add error bars as st dev
-        for(s in 1:length(eps.sd)){
-          segments(x0 = s+2, x1 = s+2, 
-                   y0 = eps.mean[s] + eps.sd[s], y1 = eps.mean[s] - eps.sd[s])
-          segments(x0 = s+2, x1 = s+2, 
-                   y0 = eps.pdd.mean[s] + eps.pdd.sd[s], y1 = eps.pdd.mean[s] - eps.pdd.sd[s], col = 2)
-        }
+
+#combine plots with multiplot
+windows(width = 14, height = 9)
+  multiplot(w.ggp, bbr.ggp, eps.ggp, layout = matrix(c(1,1,2,3), nrow = 2, byrow = T))
   
 
 #BELOW IS DEPRECATED #########
@@ -432,3 +433,45 @@ windows(width = 11)
       legend('bottomright', bty='n', cex = 0.8, lty = c(1,1,2,2,3), lwd = c(2,2,1,1,3), col = c(1,2,1,2,3),
              legend = c('PDD-free model', 'PDD model', '95% CI PDD-free', '95% CI PDD', 'p-value')) 
       
+opar<-par()
+
+windows(width = 11)    
+  par(mfrow = c(2,2), pin = c(11,7), mar = c(3,4,3,1)+0.1)
+    plot(lowest$time/365, lowest$W, type = 'l', lwd = 2, ylim = c(0,80),
+         xlab = 'Time (years)', ylab = expression(italic(W)))
+      #lines(lowest$time/365, lowest$Wt, type = 'l', lty = 2)
+      #lines(lowest$time/365, lowest$Wu, type = 'l', lty = 3)
+  
+    plot(lowest.pdd$time/365, lowest.pdd$W, type = 'l', lwd = 2, ylim = c(0,80), col=2,
+         xlab = 'Time (years)', ylab = expression(italic(W)))
+      #lines(lowest.pdd$time/365, lowest.pdd$Wt, type = 'l', lty = 2)
+      #lines(lowest.pdd$time/365, lowest.pdd$Wu, type = 'l', lty = 3)
+      
+    plot(c(1:19), bbr.mean, pch = 16, cex = 0.8, ylim = c(-0.1, 0.35), xlim = c(0,20),
+         xlab = 'Time (yrs)', ylab = expression(italic(BBR)))
+      for(i in 1:length(bbr.sd)){
+        segments(x0 = i, x1 = i, 
+                 y0 = bbr.mean[i] + bbr.sd[i], y1 = bbr.mean[i] - bbr.sd[i])
+      }
+      
+      points(c(1:19), bbr.pdd.mean, pch = 16, cex = 0.8, col = 2)
+      for(i in 1:length(bbr.pdd.sd)){
+        segments(x0 = i, x1 = i, 
+                 y0 = bbr.pdd.mean[i] + bbr.pdd.sd[i], y1 = bbr.pdd.mean[i] - bbr.pdd.sd[i],
+                 col = 2)
+      }
+      
+      legend('bottomright', legend = c('PDD-free model', 'PDD-model'), 
+             pch = 16, cex = 0.8, col = c(1,2), bty='n')
+      
+      plot(c(3:ncol(bbr)), eps.mean, pch = 16, cex = 0.8, xlim = c(0,20), ylim = c(-0.03, 0.01), xlab = 'time (yrs)',
+           ylab = expression(paste('Elimination Feasibility Estimator ( ', epsilon, ')',sep = '')))
+        points(c(3:ncol(bbr)), eps.pdd.mean, pch = 16, cex = 0.8, col=2)
+      
+      #Add error bars as st dev
+        for(s in 1:length(eps.sd)){
+          segments(x0 = s+2, x1 = s+2, 
+                   y0 = eps.mean[s] + eps.sd[s], y1 = eps.mean[s] - eps.sd[s])
+          segments(x0 = s+2, x1 = s+2, 
+                   y0 = eps.pdd.mean[s] + eps.pdd.sd[s], y1 = eps.pdd.mean[s] - eps.pdd.sd[s], col = 2)
+        }

@@ -11,12 +11,6 @@
 
 #This code adapted from Arathi's "schisto_halstead_2pops_mda_bouncebackRate_cloudParam.R"
 
-# This code seeks to test the bounce back rate concept. Given the worm burden from a model, can we determine if
-# it has positive DD and hence possible to eliminate? Or has no DD and is harder to eliminate.
-# We first start with a deterministic model
-# We will then fit it to the Lampsar II data to get a collection of parameter values that fit max likelihood bounds
-# Each parameter value will give a unique W for pre and post mda in this model and a unique bounce back rate curve
-# If there are 100 parameter values for example, how many have Reff<1 after 10 rounds?
 ##################################################################################################
 
 require(deSolve)

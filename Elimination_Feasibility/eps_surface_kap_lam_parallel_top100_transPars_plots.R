@@ -32,7 +32,7 @@ epss<-read.csv("Elimination_Feasibility/eps_estimates_100bestfit_kap0-3.csv")
   plot(epss$lam.vec[epss$kap.vec==0], epss$eps.vec[epss$kap.vec==3], pch=16, cex=0.7)
   plot(epss$beta.vec[epss$kap.vec==0], epss$eps.vec[epss$kap.vec==3], pch=16, cex=0.7)
   
-#Reshape data frame for surface plot
+#Reshape data frame and surface plot ######
   epss.rs = reshape(epss,
                     timevar = 'kap.vec',
                     idvar = c('beta.vec', 'lam.vec', 'r0.vec'),
