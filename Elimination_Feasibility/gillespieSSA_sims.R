@@ -24,23 +24,24 @@ sort_ind<-order(shortlist_first100$R0, decreasing=FALSE)
 shortlist_first100<-shortlist_first100[sort_ind,]
   shortlist_first100 = shortlist_first100[c(1:100),] #Get rid of other parameter estimates
 
-phi.parms = read.csv('Elimination_Feasibility/phi_parameters_simplified.csv')  
+phi.params = read.csv('Elimination_Feasibility/phi_parameters_simplified.csv')  
 
 #Other initial dependencies ########
-  parms = parameters_2pops_mda_Chris1
+  params = parameters_2pops_mda_Chris1
   cov = 0.8
-  parms['cov'] = cov
+  params['cov'] = cov
+  k.range = phi.params$k
   
   x0.init = c(S=3892,E=3750,I=1200, Wt=50, Wu=50)
   
 #SSA function ########
-  getSSA<-function(x0, time, k, phi.a, phi.b){
-    parms['k'] = k
-    parms['a'] = phi.parms$a[phi.parms$k == k]
-    parms['b'] = phi.parms$b[phi.parms$k == k]
+  getSSA<-function(params, x0, time, k){
+    params['k'] = k
+    params['phi_a'] = phi.params$a[phi.params$k == k]
+    params['phi_b'] = phi.params$b[phi.params$k == k]
     
     a1<-"f_N*(1-((S+E+I)/phi_N) )*(S+E)"
-    a2<-"0.5*beta*(cov*Wt+((1-cov)*Wu))*H*S*(a-a/((cov*Wt+((1-cov)*Wu))+1)^(b))"
+    a2<-"0.5*beta*(cov*Wt+((1-cov)*Wu))*H*S*(phi_a-(phi_a/((cov*Wt+(1-cov)*Wu)+1)^phi_b))"
     a3<-"mu_N*E"
     a4<-"(sigma*E)"
     a5<-"( (mu_N+mu_I)*I)"
@@ -58,23 +59,20 @@ phi.parms = read.csv('Elimination_Feasibility/phi_parameters_simplified.csv')
                    0, 0, 0, 0, 0, 1,-1, 0,-1, 0,
                    0, 0, 0, 0, 0, 1, 0,-1, 0, 0),nrow=5,byrow=TRUE)
     
-    x0[which(x0<0)]<-0  #No negative initial values
-    
     out <- (ssa(x0,                              # initial state vector
                 a,                               # propensity vector (i.e. model)
                 nu,                              # state-change matrix
-                parms,                           # parameter values
+                parms = params,                  # parameter values
                 tf=time,                         # final run time
                 simName="basic model",           
                 censusInterval=0, 
                 ignoreNegativeState=TRUE, 
                 method="ETL", 
-                verbose=FALSE, 
-                tau=0.3))
-    
-    output<-as.data.frame(out$data)
+                verbose=F, 
+                tau=0.3))$data
     
     
-    output
+    out
   }
   
+getSSA(params = params, x0 = x0.init, time = c(1:(365*2)), k = k.range[5])  
