@@ -85,7 +85,8 @@ phi_Wk<-function(W, k){
   r0.seq = as.numeric()
   dwdt.seq = as.numeric()
   dwdt.seq2 = as.numeric()
-  
+
+#Fill vectors across range of W values    
 for(w in 1:length(W.seq)){
     W = W.seq[w]
     Reff.seq[w] = getReff(W, k)[1]
@@ -217,3 +218,6 @@ plot(log(W.seq), dwdt.seq, type = 'l', lwd = 2, xaxt = 'n', yaxt = 'n', bty = 'n
     
     abline(h = 0, lty=3)
     lines(log(W.seq), dwdt.seq2, lwd = 2, lty = 2)
+    
+par(opar)    
+graphics.off()

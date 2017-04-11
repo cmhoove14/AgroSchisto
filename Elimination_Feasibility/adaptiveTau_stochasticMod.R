@@ -10,7 +10,6 @@
 #and indicate changes that were made.###############
 
 #Load packages and other files ##########
-
 library(adaptivetau)
 source("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Monash/lib_schistoModels_DDandNODD_CH.R")
 source("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Monash/Reff_fn_lib_CH.R")
@@ -21,6 +20,7 @@ sort_ind<-order(shortlist_first100$R0, decreasing=FALSE)
 shortlist_first100<-shortlist_first100[sort_ind,]
   shortlist_first100 = shortlist_first100[c(1:100),] #Get rid of other parameter estimates
 
+#Set parameters #######
 cov = 0.8
 eff = 0.99
 mda.years = c(2:21)
@@ -30,18 +30,19 @@ params = as.list(parameters_2pops_mda_Chris1)
   params$lamda = shortlist_first100$lamda.twa[1]
   params$cov = cov
   
-
-init1 = c(S = 5000, # susceptible humans
+#Get initial state variable values ######
+start = c(S = 5000, # susceptible humans
           E = 2000, # infected humans
           I = 500, # infected humans
           Wt = 72,
           Wu = 72) # recovered (and immune) humans
 
-eq = as.data.frame(ode(init1,seq(0,200*365,30),
+eq = as.data.frame(ode(start,seq(0,200*365,30),
       schisto_halstead_2pops_mda,params))[length(seq(0,200*365,30)), c(2:6)]
 
 init1 = setNames(as.numeric(round(eq)), colnames(eq))
 
+#adaptivetau model ############
 transitions = list(
   c(S = 1),             #New snail born
   c(S = -1),            #Susceptible snail dies
@@ -73,13 +74,65 @@ sfx <- function(x, p, t) {
            (p$mu_W + p$mu_H) * Wu))    #Adult worm in untreated population dies
 }
 
-fill = list()
-
+#Test the model #######
 r1=as.data.frame(ssa.adaptivetau(init1, transitions, 
                                 sfx, params, tf=365))
 
-fill[[1]] = ssa.adaptivetau(init1, transitions, 
-                               sfx, params, tf=365)
+#parameter values to sim over & objects to fill in simulation #########
+par.sims = 50                                    #number of values within test parameter range to simulate
+lam.range = seq(1e-4, 3e-4, length.out = par.sims)  #transmission intensity
+kap.range = seq(0, 2, length.out = par.sims)            #Pos. density dependence
+
+stoch.sims = 100   #number of simulations for each parameter set
+
+fill = list()     #list to fill in each simulation
+
+all.fill = array(data = NA, dim = c(all.fill, par.sims, par.sims))    #array to fill with all simulations
+
+years = 61
+
+stoch.sim = function(init, k, lam){
+  params['k'] = k
+  params['lamda'] = lam
+  
+  eq = as.data.frame(ode(init,seq(0,200*365,30),
+                         schisto_halstead_2pops_mda,params))[length(seq(0,200*365,30)), c(2:6)]
+  
+  init1 = setNames(as.numeric(round(eq)), colnames(eq))
+  
+  fill[[1]] = ssa.adaptivetau(init1, transitions, 
+                              sfx, params, tf=365)    #simulate 1 year of transmission
+  
+  for(m in 2:21){    #simulate 20 years of MDA
+    init = setNames(as.numeric(fill[[m-1]][dim(fill[[m-1]])[1],c(2:6)]), 
+                    colnames(fill[[m-1]])[c(2:6)]) #reset initial states
+    
+    init[4] = round(init[4]* (1-eff))  #apply MDA
+    
+    fill[[m]] = ssa.adaptivetau(init, transitions, 
+                                sfx, params, tf=365) #stochastic sim for a year
+    
+    fill[[m]][,1] = fill[[m]][,1] + (365*(m-1)+1)    #adjust time
+  }
+  
+  for(f in 22:years){
+    init = setNames(as.numeric(fill[[m-1]][dim(fill[[m-1]])[1],c(2:6)]), 
+                    colnames(fill[[m-1]])[c(2:6)]) #reset initial states
+    
+    #init[4] = round(init[4]* (1-eff))  #NO MDA
+    
+    fill[[m]] = ssa.adaptivetau(init, transitions, 
+                                sfx, params, tf=365) #stochastic sim for a year
+    
+    fill[[m]][,1] = fill[[m]][,1] + (365*(m-1)+1)    #adjust time
+  }
+  
+  matfin = do.call(rbind,fill)
+  
+  matfin = cbind(matfin, cov*matfin[,5] + (1-cov)*matfin[,6])
+  
+  all.fill[1 , which(lam.range == lam), which(kap.range == k)]
+}
 
 for(m in 2:max(mda.years)){
   init = setNames(as.numeric(fill[[m-1]][dim(fill[[m-1]])[1],c(2:6)]), 
@@ -98,3 +151,4 @@ matfin = do.call(rbind,fill)
 Wm = cov*matfin[,5] + (1-cov)*matfin[,6]
 
 matfin = cbind(matfin, Wm)
+

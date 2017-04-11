@@ -178,19 +178,20 @@ bbr.pdd = (1/w.pos.k2.mda1.pdd[,c(1:19)])*(w.pre.k2.mda1.pdd[,c(2:20)] - w.pos.k
       lines(lowest.pdd$time/365, lowest.pdd$Wt, type = 'l', lty = 2)
       lines(lowest.pdd$time/365, lowest.pdd$Wu, type = 'l', lty = 3)
   
-lowest$W[lowest$time == 366]      
-      
 #Find BBR for PDD-free and PDD models #########
   #PDD-free    
   bbr = (1/w.pos.k008.mda1[,c(1:19)])*(w.pre.k008.mda1[,c(2:20)] - w.pos.k008.mda1[,c(1:19)])
     bbr.mean = colMeans(bbr)
     bbr.sd = apply(bbr, 2, sd)
-      
+
   #PDD     
   bbr.pdd = (1/w.pos.k008.mda1.pdd[,c(1:19)])*(w.pre.k008.mda1.pdd[,c(2:20)] - w.pos.k008.mda1.pdd[,c(1:19)])
     bbr.pdd.mean = colMeans(bbr.pdd)
     bbr.pdd.sd = apply(bbr.pdd, 2, sd)  
-      
+    points(seq(365, 365*19, by = 365)/365, w.pos.k008.mda1.pdd[1,c(1:19)], pch = 16, cex = 0.8, col = 2)
+    points(seq(365, 365*19, by = 365)/365 + 1, w.pre.k008.mda1.pdd[1,c(2:20)], pch = 16, cex = 0.8, col = 3)
+    
+    
 #plot   
   plot(c(1:19), bbr.mean, pch = 16, xlab = 'time (yrs)', ylab = 'BBR', ylim = c(-0.1, 0.35))
     for(i in 1:length(bbr.sd)){
