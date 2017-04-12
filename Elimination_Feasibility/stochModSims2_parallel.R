@@ -22,7 +22,7 @@ source("~/ElimFeas_StochMod/lib_schistoModels_DDandNODD_CH.R")
 #Set parameters #######
 cov = 0.8
 eff = 0.99
-mda.years = c(2:21)
+  mda.years = c(2:21)
 
 params = as.list(parameters_2pops_mda_Chris1)
   params$cov = cov
@@ -48,7 +48,8 @@ sfx <- function(x, p, t) {
   Wt = x['Wt']
   Wu = x['Wu']
   W = cov*Wt+(1-cov)*Wu
-  
+
+#model    
   return(c(p$f_N * (1-N/p$phi_N) * (S + E),   #Snail birth
            p$mu_N * S,        #Susceptible snail death
            p$beta * 0.5 *  W * p$H * S * get_phi(W = W, k = p$k),  #Snail exposure
@@ -62,18 +63,19 @@ sfx <- function(x, p, t) {
 
 years = 61
 
+#days where MDA is applied
 year.days = as.numeric()
 for(i in 1:20){
   year.days[i] = 365*i + (i-1)
 }
 
 #objects to fill
-  fill = list()
-  pe1 = as.numeric()
-  w.pre = as.numeric()   
-  w.pos = as.numeric()
-  bbr = as.numeric()
-  eps = as.numeric()     
+  fill = list()           #list to fill with simulations
+  pe1 = as.numeric()      #elimination binary vector to fill for each sim
+  w.pre = as.numeric()    #vector to fill with w_pre values
+  w.pos = as.numeric()    #vector to fill with w_pos values
+  bbr = as.numeric()      #vector to fill with bbr values from w_pre and w_pos  
+  eps = as.numeric()      #vector to fill with epsilon (elim. feas. estimator) vals from slope of bbr
 
 #function to simulate transmission over 61 years (1 year transmission spin up, 20 yrs MDA, 40 yrs recovery)
 
@@ -85,10 +87,12 @@ stoch.sim = function(init, k, lam, sim){
   
   set.seed(sim)
   
+#simulate 1 year of transmission  
   fill[[1]] = ssa.adaptivetau(init1, transitions, 
-                              sfx, params, tf=365)    #simulate 1 year of transmission
+                              sfx, params, tf=365) 
   
-  for(m in 2:21){    #simulate 20 years of MDA
+#simulate 20 years of MDA  
+  for(m in 2:21){    
     init = setNames(as.numeric(fill[[m-1]][dim(fill[[m-1]])[1],c(2:6)]), 
                     colnames(fill[[m-1]])[c(2:6)]) #reset initial states
     
@@ -100,6 +104,7 @@ stoch.sim = function(init, k, lam, sim){
     fill[[m]][,1] = fill[[m]][,1] + (365*(m-1)+(m-1))    #adjust time
   }
   
+#simulate 40 years no MDA  
   for(f in 22:years){
     init = setNames(as.numeric(fill[[f-1]][dim(fill[[f-1]])[1],c(2:6)]), 
                     colnames(fill[[f-1]])[c(2:6)]) #reset initial states
@@ -112,9 +117,10 @@ stoch.sim = function(init, k, lam, sim){
     fill[[f]][,1] = fill[[f]][,1] + (365*(f-1)+(f-1))    #adjust time
   }
   
-  matfin = do.call(rbind,fill)
+  matfin = do.call(rbind,fill) #convert list to matrix
   
-  matfin = cbind(matfin, Wm = cov*matfin[,5] + (1-cov)*matfin[,6])
+#add mean worm burden based on coverage partition between treated and untreated 
+  matfin = cbind(matfin, Wm = cov*matfin[,5] + (1-cov)*matfin[,6])  
   
   if(sum(matfin[max(which(!is.na(matfin[,7]))),][3:7]) == 0){ 
     pe1 = 1   #if no exposed, infected snails and no adult worms, elimination = 1
@@ -125,14 +131,14 @@ stoch.sim = function(init, k, lam, sim){
   w.pre = matfin[ , 7][matfin[ , 1] %in% year.days]     #w.pre values
   w.pos = matfin[ , 7][matfin[ , 1] %in% (year.days+1)] #w.pos values
   
-  bbr = (1/w.pos[c(1:19)])*(w.pre[c(2:20)] - w.pos[c(1:19)])
+  bbr = (1/w.pos[c(1:19)])*(w.pre[c(2:20)] - w.pos[c(1:19)])  #bbr values
   
   #Estimate epsilon for each sim    
     eps = lm(bbr ~ c(1:19))$coefficients[2]
   
   return(c(k, lam, sim, pe1, eps))
   
-}
+} #end function
 
 #Run simulations #######
 #Necesssary parameter values: transmission, PDD, initial state variables  
