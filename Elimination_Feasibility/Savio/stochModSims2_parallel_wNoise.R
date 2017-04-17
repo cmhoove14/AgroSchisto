@@ -18,8 +18,10 @@ n.cores = detectCores() - 1
 
 print(n.cores)
 
-source("~/ElimFeas_StochMod/lib_schistoModels_DDandNODD_CH.R")
+min.sim = 1
+max.sim = 2500
 
+source("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Monash/lib_schistoModels_DDandNODD_CH.R")
 
 #Set parameters #######
 cov = 0.8
@@ -142,12 +144,15 @@ stoch.sim.noise = function(init, k, lam, sim){
   
   
   for(i in 1:length(year.days)){
-     w.pre[i] = mean(rnbinom(params$H, 
+    #mu1[i] = matfin[ , 7][matfin[ , 1] %in% year.days[i]]
+    #mu2[i] = matfin[ , 7][matfin[ , 1] %in% (year.days[i] + 1)]
+    
+    w.pre[i] = mean(rnbinom(params$H, 
                        mu = matfin[ , 7][matfin[ , 1] %in% year.days[i]],
                        size = k)) #w.pre values sampled from 300 individuals
   
     w.pos[i] = mean(rnbinom(params$H, 
-                         mu = matfin[ , 7][matfin[ , 1] %in% year.days[i] + 1],
+                         mu = matfin[ , 7][matfin[ , 1] %in% (year.days[i] + 1)],
                          size = k)) #w.pos values sampled from 300 individuals
   }
  
@@ -168,13 +173,15 @@ par.sims = 50
   kap.range = seq(0, 2, length.out = par.sims)        #Pos. density dependence range
 
 #get matrix of parameter values with equilibrium state variables    
-par.mat = read.csv('~/ElimFeas_StochMod/eq_vals_for_trans_pars.csv')
+par.mat = read.csv('Elimination_Feasibility/eq_vals_for_trans_pars.csv')
   par.mat[c(1:50), 2] = 0.01    #can't sample from neg. binom with k = 0, so replace
-stoch.sims = 1000  #number of simulations for each parameter set
+  par.mat = par.mat[c(min.sim:max.sim),]
+
+  stoch.sims = 10  #number of simulations for each parameter set
 
 #Final values array to fill with p(e), eps, eps.sd
-fill.arr = array(data = NA, dim = c(par.sims, par.sims, 2, stoch.sims)) 
-
+  fill.arr = array(data = NA, dim = c(max.sim - min.sim + 1, 4, stoch.sims))
+  
 #Make cluster ######
 clust = makeCluster(n.cores)
 clusterExport(cl = clust, 
@@ -189,10 +196,10 @@ clusterExport(cl = clust,
 for(s in 1:nrow(par.mat)){
 
 #Run sims for parameter set  
-  fill.arr[which(par.mat[s,1] == lam.range), which(par.mat[s,2] == kap.range), c(1:2), ] = 
-  parSapply(clust, c(1:stoch.sims), stoch.sim.noise, init = par.mat[s,c(3:7)], 
+  fill.arr[s, , ] = 
+    parSapply(clust, c(1:stoch.sims), stoch.sim.noise, init = par.mat[s,c(3:7)], 
                                                 lam = par.mat[s,1], 
-                                                k = par.mat[s,2], simplify = T)[c(4,5),]
+                                                k = par.mat[s,2], simplify = T)[c(1,2,4,5)]
   
   print(s)
 }  

@@ -16,6 +16,9 @@ library(parallel)
 
 n.cores = detectCores() - 1
 
+min.sim = 1501
+max.sim = 2000
+
 source("~/ElimFeas_StochMod/lib_schistoModels_DDandNODD_CH.R")
 
 
@@ -27,6 +30,7 @@ eff = 0.99
 params = as.list(parameters_2pops_mda_Chris1)
   params$cov = cov
   params$beta = 1.63e-06
+
 
 #adaptivetau model ############
 transitions = list(
@@ -79,7 +83,7 @@ for(i in 1:20){
 
 #function to simulate transmission over 61 years (1 year transmission spin up, 20 yrs MDA, 40 yrs recovery)
 
-stoch.sim = function(init, k, lam, sim){
+stoch.sim.noise = function(init, k, lam, sim){
   params['k'] = k
   params['lamda'] = lam
   
@@ -105,21 +109,23 @@ stoch.sim = function(init, k, lam, sim){
   }
   
 #simulate 40 years no MDA  
-  for(f in 22:years){ 
-    #only run if parasite pop is not extinct
+  for(f in 22:years){
+    
     if(sum(as.numeric(fill[[f-1]][dim(fill[[f-1]])[1],c(3:6)])) > 0){
       
       init = setNames(as.numeric(fill[[f-1]][dim(fill[[f-1]])[1],c(2:6)]), 
-                    colnames(fill[[f-1]])[c(2:6)]) #reset initial states
+                      colnames(fill[[f-1]])[c(2:6)]) #reset initial states
     
-    #init[4] = round(init[4]* (1-eff))  #NO MDA
-    
-      fill[[f]] = ssa.adaptivetau(init, transitions, 
+       fill[[f]] = ssa.adaptivetau(init, transitions, 
                                 sfx, params, tf=365) #stochastic sim for a year
-    
-      fill[[f]][,1] = fill[[f]][,1] + (365*(f-1)+(f-1))    #adjust time
+       
+        #init[4] = round(init[4]* (1-eff))  #NO MDA
+
+       fill[[f]][,1] = fill[[f]][,1] + (365*(f-1)+(f-1))    #adjust time
     } else {
+      
       fill[[f]] = matrix(fill[[f-1]][dim(fill[[f-1]])[1],], ncol = 6, byrow = F)
+      
     }
     
   }
@@ -135,12 +141,21 @@ stoch.sim = function(init, k, lam, sim){
     pe1 = 0   #else, elimination = 0
   }
   
-  w.pre = matfin[ , 7][matfin[ , 1] %in% year.days]     #w.pre values
-  w.pos = matfin[ , 7][matfin[ , 1] %in% (year.days+1)] #w.pos values
+  
+  for(i in 1:length(year.days)){
+     w.pre[i] = mean(rnbinom(params$H, 
+                       mu = matfin[ , 7][matfin[ , 1] %in% year.days[i]],
+                       size = k)) #w.pre values sampled from 300 individuals
+  
+    w.pos[i] = mean(rnbinom(params$H, 
+                         mu = matfin[ , 7][matfin[ , 1] %in% (year.days[i] + 1)],
+                         size = k)) #w.pos values sampled from 300 individuals
+  }
+ 
   
   bbr = (1/w.pos[c(1:19)])*(w.pre[c(2:20)] - w.pos[c(1:19)])  #bbr values
     bbr[is.infinite(bbr)] = NA
-    
+  
   #Estimate epsilon for each sim    
     eps = lm(bbr ~ c(1:19))$coefficients[2]
   
@@ -156,34 +171,38 @@ par.sims = 50
 
 #get matrix of parameter values with equilibrium state variables    
 par.mat = read.csv('~/ElimFeas_StochMod/eq_vals_for_trans_pars.csv')
-
+  par.mat[c(1:50), 2] = 0.01    #can't sample from neg. binom with k = 0, so replace
+  par.mat = par.mat[c(min.sim:max.sim),]
+  
 stoch.sims = 1000  #number of simulations for each parameter set
 
 #Final values array to fill with p(e), eps, eps.sd
-fill.arr = array(data = NA, dim = c(par.sims, par.sims, 2, stoch.sims)) 
+fill.arr = array(data = NA, dim = c(max.sim - min.sim + 1, 4, stoch.sims))
 
 #Make cluster ######
 clust = makeCluster(n.cores)
 clusterExport(cl = clust, 
-              varlist = c('params','lam.range', 'kap.range', 'years', 'stoch.sim', 'par.mat',
+              varlist = c('params','lam.range', 'kap.range', 'years', 'stoch.sim.noise', 'par.mat',
                           'mda.years', 'year.days', 'par.sims', 'stoch.sims',
                           'par.mat', 'fill', 'transitions', 'sfx', 'eff',
                           'fill.arr', 'ssa.adaptivetau', 'cov', 'w.pre', 'w.pos',
-                          'get_phi', 'fx', 'pe1', 'bbr', 'eps'))  
+                          'get_phi', 'fx', 'pe1', 'bbr', 'eps', 'min.sim', 'max.sim'))  
 
 
 #run all simulations######
-for(s in 1:nrow(par.mat)){
+for(s in c(min.sim:max.sim)){
+  s2 = s - min.sim + 1
 
 #Run sims for parameter set  
-  fill.arr[which(par.mat[s,1] == lam.range), which(par.mat[s,2] == kap.range), c(1:2), ] = 
-  parSapply(clust, c(1:stoch.sims), stoch.sim, init = par.mat[s,c(3:7)], 
-                                                lam = par.mat[s,1], 
-                                                k = par.mat[s,2], simplify = T)[c(4,5),]
+  fill.arr[s2, , ] = 
+  parSapply(clust, c(1:stoch.sims), stoch.sim.noise, init = par.mat[s2,c(3:7)], 
+                                                lam = par.mat[s2,1], 
+                                                k = par.mat[s2,2], simplify = T)[c(1,2,4,5),]
   
   print(s)
 }  
 
 stopCluster(clust)
 
-save(fill.arr, file = '~/fill_array2.Rdata')
+arr.name = paste('~/ElimFeas_StochMod/wNoise_array', min.sim, '_', max.sim, '.Rdata', sep = '')
+save(fill.arr, file = arr.name)

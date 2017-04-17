@@ -9,15 +9,199 @@
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
 
-#get p(e) for each parameter set
-pe = as.numeric()
-eps.mean = as.numeric()
-eps.sd = as.numeric()
-for(s in 1:nrow(par.mat)){
-  pe[s] = sum(fill.arr[which(par.mat[s,1] == lam.range), which(par.mat[s,2] == kap.range), 1, ]) / stoch.sims
-  eps.mean[s] = mean(fill.arr[which(par.mat[s,1] == lam.range), which(par.mat[s,2] == kap.range), 2, ])
-  eps.sd[s] = sd(fill.arr[which(par.mat[s,1] == lam.range), which(par.mat[s,2] == kap.range), 2, ])
-}
+#Load datasets from simulations with no observation noise #########
+par.mat = read.csv('Elimination_Feasibility/eq_vals_for_trans_pars.csv')   #load parameter sets data frame with eq
+  par.mat$eps = NA       #add column for elim. feas estimator (eps)
+  par.mat$eps.sd = NA    #add column for elim. feas estimator st. dev 
+  par.mat$pe = NA        #add column for proba elimination (P(e))
 
-plot(eps.mean, pe, pch = 16, cex = 0.6,
+#Use array loads from sim runs on savio to fill the data frame
+load('Elimination_Feasibility/Savio/fill_array1_500.Rdata')
+  inarr = fill.arr
+  chunk = 1
+  lo = chunk*dim(inarr)[1] - (dim(inarr)[1]-1)
+  hi = chunk*dim(inarr)[1]
+  
+  for(m in 1:500){
+    par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
+    par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
+    par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    #print(m)
+  }
+  
+load('Elimination_Feasibility/Savio/fill_array501_1000.Rdata')
+  inarr = fill.arr
+  chunk = 2
+  lo = chunk*dim(inarr)[1] - (dim(inarr)[1]-1)
+  hi = chunk*dim(inarr)[1]
+  
+  for(m in 1:500){
+    par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
+    par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
+    par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    #print(m)
+  }
+load('Elimination_Feasibility/Savio/fill_array1001_1500.Rdata')
+  inarr = fill.arr
+  chunk = 3
+  lo = chunk*dim(inarr)[1] - (dim(inarr)[1]-1)
+  hi = chunk*dim(inarr)[1]
+  
+  for(m in 1:500){
+    par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
+    par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
+    par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    #print(m)
+  }
+load('Elimination_Feasibility/Savio/fill_array1501_2000.Rdata')
+  inarr = fill.arr
+  chunk = 4
+  lo = chunk*dim(inarr)[1] - (dim(inarr)[1]-1)
+  hi = chunk*dim(inarr)[1]
+  
+  for(m in 1:500){
+    par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
+    par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
+    par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    #print(m)
+  }
+load('Elimination_Feasibility/Savio/fill_array2001_2500.Rdata')
+  inarr = fill.arr
+  chunk = 5
+  lo = chunk*dim(inarr)[1] - (dim(inarr)[1]-1)
+  hi = chunk*dim(inarr)[1]
+  
+  for(m in 1:500){
+    par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
+    par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
+    par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    #print(m)
+  }
+
+par.mat2 = par.mat  
+#plot P(e) across eps
+plot(par.mat2$eps, par.mat2$pe, pch = 18, cex = 0.6, ylim = c(0,1),
      xlab = expression(epsilon), ylab = expression(italic('P(e)')))
+  #for(e in 1:nrow(par.mat2)){
+  #    segments(y0 = par.mat2$pe[e], y1 = par.mat2$pe[e],
+  #             x0 = par.mat2$eps[e] - par.mat2$eps.sd[e],
+  #             x1 = par.mat2$eps[e] + par.mat2$eps.sd[e])
+  #  } #plot error bars, but makes the plot unreadable
+
+#only plot for vals where p(e) != 1 or 0
+par.mat0_1 = subset(par.mat2, pe != 0 & pe != 1 & V2 != 0)
+
+plot(par.mat0_1$eps, par.mat0_1$pe, pch = 18, cex = 0.6, ylim = c(0,1),
+     xlab = expression(epsilon), ylab = expression(italic('P(e)')))
+
+#logit transform p(e)
+plot(par.mat0_1$eps, log(par.mat0_1$pe / (1 - par.mat0_1$pe)), 
+     pch = 18, cex = 0.6, #ylim = c(0,1),
+     xlab = expression(epsilon), ylab = expression(italic('P(e)')))
+
+#regression
+pe.mod = lm(log(par.mat0_1$pe / (1 - par.mat0_1$pe)) ~ par.mat0_1$eps, data = par.mat0_1)
+  summary(pe.mod)
+  abline(a = pe.mod$coefficients[1], b = pe.mod$coefficients[2],
+         lty = 2, col = 2)
+#plot relationship between eps and its standard deviation
+plot(par.mat2$eps, par.mat2$eps.sd, pch = 18, cex = 0.6, #ylim = c(0,1),
+     ylab = expression(paste(epsilon, ' St. Dev.', sep='')), 
+     xlab = expression(epsilon))
+
+#p(e) across transmission intensity
+plot(par.mat2$V1, par.mat2$pe, pch = 18, cex = 0.6, ylim = c(0,1),
+     xlab = expression(lambda), ylab = expression(italic('P(e)')))
+
+#p(e) across pos. dens. dep.
+plot(par.mat2$V2, par.mat2$pe, pch = 18, cex = 0.6, ylim = c(0,1),
+     xlab = expression(kappa), ylab = expression(italic('P(e)')))
+
+#surface of p(e) across kappa and lambda
+lams = unique(par.mat2$V1)
+kaps = unique(par.mat2$V2)
+
+lkmat = matrix(par.mat2$pe, ncol=50, nrow=50)
+
+persp(x = lams, xlim = range(lams), y = kaps, ylim = range(kaps),
+      z = lkmat, ticktype = 'detailed', nticks = 4, 
+      ylab = 'Pos. Density Dependence',
+      xlab = 'Transmission Intensity',
+      zlab = 'Probability of Elimination',
+      phi = 20, theta = 85, shade = 0.4, col = 'lightblue')
+
+#Same routine for simulations with observation noise #########
+par.mat = read.csv('Elimination_Feasibility/eq_vals_for_trans_pars.csv')   #load parameter sets data frame with eq
+  par.mat$eps = NA       #add column for elim. feas estimator (eps)
+  par.mat$eps.sd = NA    #add column for elim. feas estimator st. dev 
+  par.mat$pe = NA        #add column for proba elimination (P(e))
+
+load('Elimination_Feasibility/Savio/wNoise_array1_500.Rdata')
+  inarr = fill.arr
+  chunk = 1
+  lo = chunk*dim(inarr)[1] - (dim(inarr)[1]-1)
+  hi = chunk*dim(inarr)[1]
+  
+  for(m in 1:500){
+    par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
+    par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
+    par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    #print(m)
+  }
+
+load('Elimination_Feasibility/Savio/wNoise_array501_1000.Rdata')
+inarr = fill.arr
+chunk = 2
+  lo = chunk*dim(inarr)[1] - (dim(inarr)[1]-1)
+  hi = chunk*dim(inarr)[1]
+  
+  for(m in 1:500){
+    par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
+    par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
+    par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    #print(m)
+  }
+
+load('Elimination_Feasibility/Savio/wNoise_array1001_1500.Rdata')
+inarr = fill.arr
+chunk = 3
+  lo = chunk*dim(inarr)[1] - (dim(inarr)[1]-1)
+  hi = chunk*dim(inarr)[1]
+  
+  for(m in 1:500){
+    par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
+    par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
+    par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    #print(m)
+  }
+
+load('Elimination_Feasibility/Savio/wNoise_array1501_2000.Rdata')
+inarr = fill.arr
+chunk = 4
+  lo = chunk*dim(inarr)[1] - (dim(inarr)[1]-1)
+  hi = chunk*dim(inarr)[1]
+  
+  for(m in 1:500){
+    par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
+    par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
+    par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    #print(m)
+  }
+
+load('Elimination_Feasibility/Savio/wNoise_array2001_2500.Rdata')
+inarr = fill.arr
+chunk = 5
+  lo = chunk*dim(inarr)[1] - (dim(inarr)[1]-1)
+  hi = chunk*dim(inarr)[1]
+  
+  for(m in 1:500){
+    par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
+    par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
+    par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    #print(m)
+  }
+
+#plot P(e) across eps
+plot(par.mat$eps, par.mat$pe, pch = 18, cex = 0.6, ylim = c(0,1),
+     xlab = expression(epsilon), ylab = expression(italic('P(e)')))
+  
