@@ -1,34 +1,88 @@
 #Hasheesh and Mohamed 2011 data and analysis assessing toxicity of Chlorpyrifos and Profenofos ###############
-# Direct toxicity to snails affecting snail mortality rate (Table 1); daily mortality rate ########
+# Direct toxicity to snails (Bu. truncatus); daily mortality rate ########
 
-#Chlorpyrifos
-  lc50.ch.n = 1.32
-  slp.ch.n = 2.5
+#Chlorpyrifos #########
+mun.ch = data.frame(conc = c(.72, 1.32, 2.82),
+                     mort = c(.25, .50 , .90),
+                     surv = 0)
+mun.ch$surv = 1 - mun.ch$mort
+ 
+  se = (log10(1.98) - log10(0.88)) / 1.96 #st. err of lc50 in ppm
+
+  mun.ch$se = (mun.ch$conc / 1.32) * se #st. err proportional to concentration
+ 
+plot(mun.ch$conc, mun.ch$mort, pch = 16, cex = 1.2, ylim = c(0,1), xlim = c(0,3.5),
+     xlab = 'Chlorpyrifos (ppm)', ylab = 'prop dead')
+  for(i in 1:length(unique(mun.ch$conc))){
+    segments(x0 = mun.ch$conc[i] + mun.ch$se[i], y0 = mun.ch$mort[i],
+             x1 = mun.ch$conc[i] - mun.ch$se[i], y1 = mun.ch$mort[i])
+  }
   
-  mu_Nq_ch_has11<-function(In){
+  has11ch.mod = drm(mort ~ conc, data = mun.ch, weights = se^-1, type = 'binomial',
+                  fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                             fixed = c(NA, 0, 1, NA)))
+  
+  muNq_ch_Hash11<-function(In){
     Ins = In/1000
-    1 - 1/(1+exp(slp.ch.n*(log(Ins)-log(lc50.ch.n))))
-  } 
+    predict(has11ch.mod, data.frame(conc = Ins))
+  }  
+
+  lines(c(0:4000)/1000, sapply(c(0:4000), muNq_ch_Hash11, simplify = T),
+        lty = 2, col = 2)    
   
-  mu_Nq_ch_has11(64)
+  muNq_ch_Hash11_uncertainty<-function(In){
+    Ins = In/1000
+    rdrm(1, LL.2(), coef(has11ch.mod), Ins, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+  }
+    points(seq(0, 4000, 10)/1000, sapply(seq(0, 4000, 10), muNq_ch_Hash11_uncertainty, simplify = T),
+           pch = 5, cex = 0.6, col = 4)
+    title(main = expression(paste('Hasheesh 2011 - Chlorpyrifos direct toxicity to ',
+                                  italic('Bu. truncatus', sep = ''))))
+      legend('bottomright', pch = c(16, 5), legend = c('Obs. points', 'Est. points'), col = c(1,4),
+             cex = 0.7)
   
-    plot(c(0:2820), mu_Nq_ch_has11(c(0:2820)), lwd = 2, type = 'l', xlab = 'chlorpyrifos concentration (ppb)',
-         ylab = 'mu_Nq', ylim = c(0,1), main = 'chlorpyrifos toxicity to snails, hasheesh2011')
+#Profenofos #########
+mun.prof = data.frame(conc = c(1.4, 2.5, 3.72),
+                    mort = c(.25, .50 , .90),
+                    surv = 0)
+  mun.prof$surv = 1 - mun.prof$mort
     
-#Profenofos    
-  lc50.pr.n = 2.5
-  slp.pr.n = 1.6
-  mu_Nq_pr_has11<-function(In){
-    Ins = In/1000
-    1 - 1/(1+exp(slp.pr.n*(log(Ins)-log(lc50.pr.n))))
-  } 
-  
-  mu_Nq_pr_has11(100)
-  
-    plot(c(0:3720), mu_Nq_pr_has11(c(0:3720)), lwd = 2, type = 'l', xlab = 'profenofos concentration (ppb)',
-         ylab = 'mu_Nq', ylim = c(0,1), main = 'profenofos toxicity to snails, hasheesh2011')
-
-#Compare models above to observed data from longitudinal exposure to LC25 concnentrations
+  se.pr = (log10(3.33) - log10(1.88)) / 1.96 #st. err of lc50 in ppm
+    
+  mun.prof$se = (mun.prof$conc / 2.5) * se.pr #st. err proportional to concentration
+    
+  plot(mun.prof$conc, mun.prof$mort, pch = 16, cex = 1.2, ylim = c(0,1), xlim = c(0,5),
+       xlab = 'Profenofos (ppm)', ylab = 'prop dead')
+    for(i in 1:length(unique(mun.prof$conc))){
+      segments(x0 = mun.prof$conc[i] + mun.prof$se[i], y0 = mun.prof$mort[i],
+               x1 = mun.prof$conc[i] - mun.prof$se[i], y1 = mun.prof$mort[i])
+    }
+    
+    has11pr.mod = drm(mort ~ conc, data = mun.prof, weights = se^-1, type = 'binomial',
+                    fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                               fixed = c(NA, 0, 1, NA)))
+    
+    muNq_prof_Hash11<-function(In){
+      Ins = In/1000
+      predict(has11pr.mod, data.frame(conc = Ins))
+    }  
+    
+    lines(c(0:5000)/1000, sapply(c(0:5000), muNq_prof_Hash11, simplify = T),
+          lty = 2, col = 2)   
+    
+    muNq_prof_Hash11_uncertainty<-function(In){
+      Ins = In/1000
+      rdrm(1, LL.2(), coef(has11pr.mod), Ins, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+    }
+    
+    points(seq(0, 5000, 10)/1000, sapply(seq(0, 5000, 10), muNq_prof_Hash11_uncertainty, simplify = T),
+           pch = 5, cex = 0.5, col = 4)
+      title(main = expression(paste('Hasheesh 2011 - Profenofos direct toxicity to ',
+                                    italic('Bu. truncatus', sep = ''))))
+      legend('bottomright', pch = c(16, 5), legend = c('Obs. points', 'Est. points'), col = c(1,4),
+             cex = 0.7)
+    
+#Compare models above to observed data from longitudinal exposure to LC25 concnentrations #####
 fn<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Snail reproduction/Hasheesh2011_snail_mort_repro_weekly.csv')
  
   plot(fn$time[fn$chem == 'control'], fn$surv[fn$chem == 'control'], pch = 16, cex=1.2,
@@ -40,7 +94,8 @@ fn<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/D
            pch=16 , col = c(1,2, 'orange'), cex = 0.8)
     
 #Generate model predictions    
-  #Background mortality seems to be pretty constant (constant slope in control group), so let's use control group to check that value
+  #Background mortality seems to be pretty constant (constant slope in control group), 
+    #so let's use control group to check that value
     m = (fn$surv[fn$chem == 'control'][11] - fn$surv[fn$chem == 'control'][1]) /
         (fn$time[fn$chem == 'control'][11] - fn$time[fn$chem == 'control'][1])
     
@@ -53,16 +108,18 @@ fn<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/D
     
     for(i in 1:70){
       m.df[i+1, 2] = m.df[i,2] + m  #subtract deaths per day (from control slope derived above)
-      m.df[i+1, 3] = m.df[i,3] + m - m.df[i,3] * mu_Nq_ch_has11(720)  #for agrochemical toxicity, additional mortality as per capita deaths
-      m.df[i+1, 4] = m.df[i,4] + m - m.df[i,4] * mu_Nq_pr_has11(1400) #for agrochemical toxicity, additional mortality as per capita deaths
+      m.df[i+1, 3] = m.df[i,3] - m.df[i,3] * muNq_ch_Hash11(720)  #for agrochemical toxicity, additional mortality as per capita deaths
+      m.df[i+1, 4] = m.df[i,4] - m.df[i,4] * muNq_prof_Hash11(1400) #for agrochemical toxicity, additional mortality as per capita deaths
     }
     
     lines(m.df$days, m.df$control, lty = 2, lwd=2)
     lines(m.df$days, m.df$chlor, lty = 2, col=2, lwd=2)
     lines(m.df$days, m.df$prof, lty = 2, col='orange', lwd=2)
     
+#investigate other effects; but most have only have two data points, 
+  #and unclear what D-R model was used to generate, so no D-R function possible #######    
     
-# Direct toxicity to snails affecting reproduction (Table 2) ###########
+# Direct toxicity to snails affecting reproduction (Table 2)
   plot(fn$time[fn$chem == 'control'], fn$repro[fn$chem == 'control'], type = 'l', lwd=2,
         xlab = 'time (weeks)', ylab = 'eggs/snail', ylim = c(0,max(fn$repro)+2),
         main = 'Snail reproduction over time Hasheesh 2011')
@@ -71,7 +128,8 @@ fn<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/D
     legend('topleft', legend = c('control', 'chlorpyrifos', 'profenofos'),
            lwd = 2, col = c(1,2, 'orange'), cex = 0.8)
 #Derive function as percent reduction in mean eggs/snail over 10 week experiment 
-  #this is slightly different from Ibrahim which was relative juveniles produced; i.e. incorporated hatchability
+#this is slightly different from Ibrahim which was relative juveniles produced; 
+    #i.e. incorporated hatchability
   #chlorpyrifos
     ch.red = sum(fn$repro[fn$chem == 'chlorpyrifos']) / sum(fn$repro[fn$chem == 'control'])
     
