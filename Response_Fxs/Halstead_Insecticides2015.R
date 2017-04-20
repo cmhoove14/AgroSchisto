@@ -20,32 +20,28 @@ require(drc)
       mal.mod<-drm(mal.d / mal.total ~ mal.c, weights = mal.total, data = mal.sum, type = 'binomial',  
                    fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                               fixed = c(NA, 0, 1, NA)))
-#        summary(mal.mod)
-#        plot(mal.mod, ylim = c(0,1))
-        
-#      muPq_mal_Halstead<-function(In){
-#        predict(mal.mod, data.frame(mal.c = In))
-#      }  
-      
-#      mal.hal.df = data.frame(mal.c = c(0:40000),
-#                              Prediction = 0,
-#                              Lower = 0,
-#                              Upper = 0)
-      
-#      mal.hal.df[,2:4] <- predict(mal.mod, newdata = mal.hal.df, 
-#                                        interval = 'confidence', level = 0.95)
-      
-#      plot(mal.sum$mal.c, mal.sum$mort, pch = 16, xlab = 'Malathion Concentration (ppb)', ylab = 'prop dead', ylim = c(0,1))
-#        lines(mal.hal.df$mal.c, mal.hal.df$Prediction, col = 2, lty=2)
-#        lines(mal.hal.df$mal.c, mal.hal.df$Lower, col = 2, lty=3)
-#        lines(mal.hal.df$mal.c, mal.hal.df$Upper, col = 2, lty=3)
+
+     muPq_mal_Halstead<-function(In){
+        predict(mal.mod, data.frame(mal.c = In), interval = 'confidence', level = 0.95)
+      }  
+     
+     plot(mal.sum$mal.c, mal.sum$mort, pch = 16, ylim = c(0,1),
+          xlab = 'Malathion', ylab = 'Mortality', 
+          main = expression(paste('Malathion toxicity to ', italic('P. clarkii')))) 
+     
+     
+      lines(seq(0, max(mal$Conc), 100), sapply(seq(0, max(mal$Conc), 100), muPq_mal_Halstead, simplify = T)[1,],
+            lty = 2, col = 2)
+      lines(seq(0, max(mal$Conc), 100), sapply(seq(0, max(mal$Conc), 100), muPq_mal_Halstead, simplify = T)[2,],
+            lty = 3, col = 2)
+      lines(seq(0, max(mal$Conc), 100), sapply(seq(0, max(mal$Conc), 100), muPq_mal_Halstead, simplify = T)[3,],
+            lty = 3, col = 2)
         
       muPq_mal_Halstead_uncertainty<-function(In){
-        rdrm(1, LL.2(), coef(mal.mod), In, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+        rdrm(1, LL.2(), coef(mal.mod), In, yerror = 'rbinom', ypar = 5)$y / 5 #estimate deaths / live 
       }
-        plot(seq(0, 40000, 40), sapply(seq(0, 40000, 40), muPq_mal_Halstead_uncertainty),
-             pch = 17, col=2, cex = 0.5, xlab = 'Malathion (ppb)', ylab = expression(paste(mu[P])),
-             main = 'Sample output of predator mortality')
+        points(seq(0, 40000, 40), sapply(seq(0, 40000, 40), muPq_mal_Halstead_uncertainty),
+             pch = 5, col=4, cex = 0.5)
     
       
 #Chlorpyrifos   ********************************************************************************************
@@ -64,34 +60,28 @@ require(drc)
     chlor.mod<-drm(chlor.d / chlor.total ~ chlor.c, weights = chlor.total, data = chlor.sum, type = 'binomial',  
                    fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                               fixed = c(NA, 0, 1, NA)))
-#      summary(chlor.mod)
-#      plot(chlor.mod, ylim = c(0,1))
+
+    muPq_chlor_Halstead<-function(In){
+      predict(chlor.mod, data.frame(chlor.c = In), interval = 'confidence', level = 0.95)
+    }  
       
-#    muPq_chlor_Halstead<-function(In){
-#      predict(chlor.mod, data.frame(chlor.c = In))
-#    }  
-      
-#      chlor.hal.df = data.frame(chlor.c = seq(0,100,0.1),
-#                              Prediction = 0,
-#                              Lower = 0,
-#                              Upper = 0)
-      
-#      chlor.hal.df[,2:4] <- predict(chlor.mod, newdata = chlor.hal.df, 
-#                                  interval = 'confidence', level = 0.95)
-      
-#      plot(chlor.sum$chlor.c, chlor.sum$mort, pch = 16, xlab = 'Chlorpyrifos Concentration (ppb)', 
-#           ylab = 'prop dead', ylim = c(0,1))
-#        lines(chlor.hal.df$chlor.c, chlor.hal.df$Prediction, col = 2, lty=2)
-#        lines(chlor.hal.df$chlor.c, chlor.hal.df$Lower, col = 2, lty=3)
-#        lines(chlor.hal.df$chlor.c, chlor.hal.df$Upper, col = 2, lty=3)
+    plot(chlor.sum$chlor.c, chlor.sum$mort, pch = 16, ylim = c(0,1),
+         xlab = 'Chlorpyrifos', ylab = 'Mortality', 
+         main = expression(paste('Chlorpyrifos toxicity to ', italic('P. clarkii')))) 
+    
+    lines(seq(0, max(chlor$Conc), 1), sapply(seq(0, max(chlor$Conc), 1), muPq_chlor_Halstead, simplify = T)[1,],
+          lty = 2, col = 2)
+    lines(seq(0, max(chlor$Conc), 1), sapply(seq(0, max(chlor$Conc), 1), muPq_chlor_Halstead, simplify = T)[2,],
+          lty = 3, col = 2)
+    lines(seq(0, max(chlor$Conc), 1), sapply(seq(0, max(chlor$Conc), 1), muPq_chlor_Halstead, simplify = T)[3,],
+          lty = 3, col = 2)
       
       muPq_chlor_Halstead_uncertainty<-function(In){
-        rdrm(1, LL.2(), coef(chlor.mod), In, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+        rdrm(1, LL.2(), coef(chlor.mod), In, yerror = 'rbinom', ypar = 5)$y / 5
       } 
         
-      plot(c(0:100), sapply(c(0:100), muPq_chlor_Halstead_uncertainty),
-           pch = 17, col=2, cex = 0.5, xlab = 'Chlorpyrifos (ppb)', ylab = expression(paste(mu[P])),
-           main = 'Sample output of predator mortality')
+      points(c(0:100), sapply(c(0:100), muPq_chlor_Halstead_uncertainty),
+           pch = 5, col=4, cex = 0.5)
       
 #Terbufos   ********************************************************************************************
   terb<-subset(data, Chem == 'Terb')
@@ -131,7 +121,7 @@ require(drc)
 #      lines(terb.hal.df$terb.c, terb.hal.df$Upper, col = 2, lty=3)
       
     muPq_terb_Halstead_uncertainty<-function(In){
-      rdrm(1, LL.2(), coef(terb.mod), In, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+      rdrm(1, LL.2(), coef(terb.mod), In, yerror = 'rbinom', ypar = 5)$y / 5
     } 
     
     plot(seq(0, 50, 0.1), sapply(seq(0, 50, 0.1), muPq_terb_Halstead_uncertainty),
@@ -176,7 +166,7 @@ require(drc)
 #    lines(lamcy.hal.df$lamcy.c, lamcy.hal.df$Upper, col = 2, lty=3)
   
   muPq_lamcy_Halstead_uncertainty<-function(In){
-    rdrm(1, LL.2(), coef(lamcy.mod), In, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+    rdrm(1, LL.2(), coef(lamcy.mod), In, yerror = 'rbinom', ypar = 5)$y / 5
   } 
   
   plot(seq(0, 1, 0.001), sapply(seq(0, 1, 0.001), muPq_lamcy_Halstead_uncertainty),
@@ -222,7 +212,7 @@ require(drc)
 #    lines(esfen.hal.df$esfen.c, esfen.hal.df$Upper, col = 2, lty=3)
     
   muPq_esfen_Halstead_uncertainty<-function(In){
-    rdrm(1, LL.2(), coef(esfen.mod), In, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+    rdrm(1, LL.2(), coef(esfen.mod), In, yerror = 'rbinom', ypar = 5)$y / 5 
   } 
   
   plot(seq(0, 1, 0.001), sapply(seq(0, 1, 0.001), muPq_esfen_Halstead_uncertainty),
@@ -267,7 +257,7 @@ require(drc)
 #    lines(perm.hal.df$perm.c, perm.hal.df$Upper, col = 2, lty=3)
   
   muPq_perm_Halstead_uncertainty<-function(In){
-    rdrm(1, LL.2(), coef(perm.mod), In, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+    rdrm(1, LL.2(), coef(perm.mod), In, yerror = 'rbinom', ypar = 5)$y / 5
   }
   
   plot(seq(0, 1, 0.001), sapply(seq(0, 1, 0.001), muPq_perm_Halstead_uncertainty),
