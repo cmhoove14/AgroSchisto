@@ -18,21 +18,25 @@ plot(mun.ch$conc, mun.ch$mort, pch = 16, cex = 1.2, ylim = c(0,1), xlim = c(0,3.
              x1 = mun.ch$conc[i] - mun.ch$se[i], y1 = mun.ch$mort[i])
   }
   
-  has11ch.mod = drm(mort ~ conc, data = mun.ch, weights = se^-1, type = 'binomial',
+  has11ch.mod = drm(mort ~ conc, data = mun.ch, type = 'binomial',
                   fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                              fixed = c(NA, 0, 1, NA)))
   
   muNq_ch_Hash11<-function(In){
     Ins = In/1000
-    predict(has11ch.mod, data.frame(conc = Ins))
+    predict(has11ch.mod, data.frame(conc = Ins), interval = 'confidence', level = 0.95)
   }  
 
-  lines(c(0:4000)/1000, sapply(c(0:4000), muNq_ch_Hash11, simplify = T),
-        lty = 2, col = 2)    
+  lines(c(0:4000)/1000, sapply(c(0:4000), muNq_ch_Hash11, simplify = T)[1,],
+        lty = 2, col = 2) 
+  lines(c(0:4000)/1000, sapply(c(0:4000), muNq_ch_Hash11, simplify = T)[2,],
+        lty = 3, col = 2) 
+  lines(c(0:4000)/1000, sapply(c(0:4000), muNq_ch_Hash11, simplify = T)[3,],
+        lty = 3, col = 2) 
   
   muNq_ch_Hash11_uncertainty<-function(In){
     Ins = In/1000
-    rdrm(1, LL.2(), coef(has11ch.mod), Ins, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+    rdrm(1, LL.2(), coef(has11ch.mod), Ins, yerror = 'rbinom', ypar = 50)$y / 50  
   }
     points(seq(0, 4000, 10)/1000, sapply(seq(0, 4000, 10), muNq_ch_Hash11_uncertainty, simplify = T),
            pch = 5, cex = 0.6, col = 4)
@@ -58,21 +62,25 @@ mun.prof = data.frame(conc = c(1.4, 2.5, 3.72),
                x1 = mun.prof$conc[i] - mun.prof$se[i], y1 = mun.prof$mort[i])
     }
     
-    has11pr.mod = drm(mort ~ conc, data = mun.prof, weights = se^-1, type = 'binomial',
+    has11pr.mod = drm(mort ~ conc, data = mun.prof, type = 'binomial',
                     fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                                fixed = c(NA, 0, 1, NA)))
     
     muNq_prof_Hash11<-function(In){
       Ins = In/1000
-      predict(has11pr.mod, data.frame(conc = Ins))
+      predict(has11pr.mod, data.frame(conc = Ins), interval = 'confidence', level = 0.95)
     }  
     
-    lines(c(0:5000)/1000, sapply(c(0:5000), muNq_prof_Hash11, simplify = T),
-          lty = 2, col = 2)   
+    lines(c(0:5000)/1000, sapply(c(0:5000), muNq_prof_Hash11, simplify = T)[1,],
+          lty = 2, col = 2)  
+    lines(c(0:5000)/1000, sapply(c(0:5000), muNq_prof_Hash11, simplify = T)[2,],
+          lty = 2, col = 2) 
+    lines(c(0:5000)/1000, sapply(c(0:5000), muNq_prof_Hash11, simplify = T)[3,],
+          lty = 2, col = 2) 
     
     muNq_prof_Hash11_uncertainty<-function(In){
       Ins = In/1000
-      rdrm(1, LL.2(), coef(has11pr.mod), Ins, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
+      rdrm(1, LL.2(), coef(has11pr.mod), Ins, yerror = 'rbinom', ypar = 50)$y / 50 #estimate deaths / live 
     }
     
     points(seq(0, 5000, 10)/1000, sapply(seq(0, 5000, 10), muNq_prof_Hash11_uncertainty, simplify = T),
