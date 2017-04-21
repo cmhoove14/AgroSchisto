@@ -147,8 +147,8 @@ parms.df = data.frame(mal = c(0,50,100,150,200,250),
     
   e.mod = lm(e ~ mal, weights = e.se^-1, data = parms.df) 
   e.mod2 = lm(e ~ logmal, weights = e.se^-1, data = parms.df)
-    AIC(e.mod)
-    AIC(e.mod2)
+    AIC(e.mod, e.mod2)
+  
   #Log-linear model fits better and asymptotes at 0 so we'll use it  
   b.mod = lm(b ~ mal, weights = b.se^-1, data = parms.df) 
 
