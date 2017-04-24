@@ -30,11 +30,11 @@ plot(snail.repro$dose, snail.repro$juvs/snail.repro$juvs[1], pch = 16, ylim = c(
       predict(chlor.fN.predict, data.frame(dose = In), interval = 'confidence', level = 0.95)
   }
 
-    lines(seq(0, 5e5, 100), sapply(seq(0, 5e5, 100), f_N_chlor_ibr92, simplify = T)[1,]/snail.repro$juvs[1],
+    lines(seq(0, 5e5, 10000), sapply(seq(0, 5e5, 10000), f_N_chlor_ibr92, simplify = T)[1,]/snail.repro$juvs[1],
             lty = 2, col = 2)
-    lines(seq(0, 5e5, 100), sapply(seq(0, 5e5, 100), f_N_chlor_ibr92, simplify = T)[2,]/snail.repro$juvs[1],
+    lines(seq(0, 5e5, 10000), sapply(seq(0, 5e5, 10000), f_N_chlor_ibr92, simplify = T)[2,]/snail.repro$juvs[1],
             lty = 3, col = 2)
-    lines(seq(0, 5e5, 100), sapply(seq(0, 5e5, 100), f_N_chlor_ibr92, simplify = T)[3,]/snail.repro$juvs[1],
+    lines(seq(0, 5e5, 10000), sapply(seq(0, 5e5, 10000), f_N_chlor_ibr92, simplify = T)[3,]/snail.repro$juvs[1],
             lty = 3, col = 2)
     
 par.tricks = c(coef(chlor.fN.predict), 'Upper Limit:(Intercept)' = 4.245811e+03)[c(1,3,2)]
@@ -93,11 +93,11 @@ par.tricks = c(coef(chlor.fN.predict), 'Upper Limit:(Intercept)' = 4.245811e+03)
       predict(ibr_muNq, data.frame(dose = In), interval = 'confidence', level = 0.95)
   }
   
-    lines(seq(0, 5e5, 100), sapply(seq(0, 5e5, 100), mu_N_chlor_ibr92, simplify = T)[1,],
+    lines(seq(0, 5e5, 10000), sapply(seq(0, 5e5, 10000), mu_N_chlor_ibr92, simplify = T)[1,],
             lty = 2, col = 2)
-    lines(seq(0, 5e5, 100), sapply(seq(0, 5e5, 100), mu_N_chlor_ibr92, simplify = T)[2,],
+    lines(seq(0, 5e5, 10000), sapply(seq(0, 5e5, 10000), mu_N_chlor_ibr92, simplify = T)[2,],
             lty = 3, col = 2)
-    lines(seq(0, 5e5, 100), sapply(seq(0, 5e5, 100), mu_N_chlor_ibr92, simplify = T)[3,],
+    lines(seq(0, 5e5, 10000), sapply(seq(0, 5e5, 10000), mu_N_chlor_ibr92, simplify = T)[3,],
             lty = 3, col = 2)
   
   mu_N_chlor_ibr92_uncertainty<-function(In){
