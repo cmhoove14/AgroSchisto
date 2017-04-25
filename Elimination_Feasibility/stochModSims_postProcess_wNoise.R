@@ -15,7 +15,8 @@ library(aod)
 par.mat = read.csv('Elimination_Feasibility/eq_vals_for_trans_pars.csv')   #load parameter sets data frame with eq
   par.mat$eps = NA       #add column for elim. feas estimator (eps)
   par.mat$eps.sd = NA    #add column for elim. feas estimator st. dev 
-  par.mat$pe = NA        #add column for proba elimination (P(e))
+  par.mat$pe = NA        #add column for prob elimination (P(e))
+  par.mat$eps.med = NA   #add column for median value of epsilon
   
 #Same routine for simulations with observation noise #########
 load('Elimination_Feasibility/Savio/Results/wNoise_array1_500.Rdata')
@@ -28,6 +29,7 @@ load('Elimination_Feasibility/Savio/Results/wNoise_array1_500.Rdata')
     par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
     par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
     par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    par.mat$eps.med[m+lo-1] = median(inarr[m, 4, ])
     #print(m)
   }
 
@@ -41,6 +43,7 @@ chunk = 2
     par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
     par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
     par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    par.mat$eps.med[m+lo-1] = median(inarr[m, 4, ])
     #print(m)
   }
 
@@ -54,6 +57,7 @@ chunk = 3
     par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
     par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
     par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    par.mat$eps.med[m+lo-1] = median(inarr[m, 4, ])
     #print(m)
   }
 
@@ -67,6 +71,7 @@ chunk = 4
     par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
     par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
     par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    par.mat$eps.med[m+lo-1] = median(inarr[m, 4, ])
     #print(m)
   }
 
@@ -80,6 +85,7 @@ chunk = 5
     par.mat$eps[m+lo-1] = mean(inarr[m, 4, ])
     par.mat$eps.sd[m+lo-1] = sd(inarr[m, 4, ])
     par.mat$pe[m+lo-1] = sum(inarr[m, 3, ]) / dim(inarr)[3]  #P(e) = sims that end in elimination / total sims
+    par.mat$eps.med[m+lo-1] = median(inarr[m, 4, ])
     #print(m)
   }
 
@@ -116,9 +122,33 @@ heatmap(heat.eps, Rowv=NA, Colv=NA, col = heat.colors(256), scale="column")
 #plots of and analysis of pe(e) / eps with obs noise #######
 plot(par.mat$eps, par.mat$pe, pch = 18, cex = 0.6, ylim = c(0,1),
      xlab = expression(epsilon), ylab = expression(italic('P(e)')))
+  points(par.mat$eps[par.mat$kappa == 0], par.mat$pe[par.mat$kappa == 0], 
+         pch = 17, cex = 0.8, col = 2)
+  legend('bottom', legend = c(expression(paste(kappa, ' = 0', sep = '')),
+                                expression(paste(kappa, ' > 0', sep = ''))),
+         pch = c(17,18), col = c(2,1), bty = 'n', cex = 0.8)
+
+#st. dev of epsilon
+plot(par.mat$eps, par.mat$eps.sd, pch = 18, cex = 0.6, ylim = range(par.mat$eps.sd), col = 4,
+     ylab = expression(paste('st. dev (', epsilon, ')', sep = '')), 
+     xlab = expression(epsilon))
+  points(par.mat$eps[par.mat$kappa == 0], par.mat$eps.sd[par.mat$kappa == 0], 
+         pch = 17, cex = 0.8, col = 2)
+  legend('left', legend = c(expression(paste(kappa, ' = 0', sep = '')),
+                              expression(paste(kappa, ' > 0', sep = ''))),
+         pch = c(17,18), col = c(2,4), bty = 'n', cex = 0.8)
+  
+#so what about median rather than mean of epsilon vals?
+plot(par.mat$eps.med, par.mat$pe, pch = 18, cex = 0.6, ylim = c(0,1),
+     xlab = expression(epsilon), ylab = expression(italic('P(e)')))
+  points(par.mat$eps.med[par.mat$kappa == 0], par.mat$pe[par.mat$kappa == 0], 
+         pch = 17, cex = 0.8, col = 2)
+  legend('bottom', legend = c(expression(paste(kappa, ' = 0', sep = '')),
+                              expression(paste(kappa, ' > 0', sep = ''))),
+         pch = c(17,18), col = c(2,1), bty = 'n', cex = 0.8)
   
 #ggplot to show val of lambda / kappa in addition to scatterP
-  ggplot(data = par.mat, aes(x = eps, y = pe, col = lambda)) +   #V2 for kappa, V1 for lambda
+  ggplot(data = par.mat, aes(x = eps, y = pe, col = lambda)) +  
     theme_bw() +
     geom_point(shape = 18, size = 1.2) +
     scale_color_gradient(low = 'wheat1', high = 'red') +
