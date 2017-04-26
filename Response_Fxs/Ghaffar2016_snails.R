@@ -1,55 +1,117 @@
 #Data extraction and model fitting to Ghaffar 2016 SNAIL (B. alexandrina) data
 require(drc)
 
-#Snail (B. alexandrina 6-8mm shell width) toxicity ##########
+#Snail (30 B. alexandrina 6-8mm shell width) toxicity ##########
   #Reported lc50/slope combinations did not fit provided data well therefore functions fit to the 
     #reported lc0, lc10, lc25, lc50, and lc90 values were used to model excess daily per capita death rate
-#Butralin
-  lcs = c(0, 0, 10, 25, 50, 90)
-  lc.but.vals = c(0, 556, 2417, 3906, 5560, 8703)
+#Butralin ##############
+but.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
+                     butralin = c(0, 556, 2417, 3906, 5560, 8703))
+  
 
 #Fit function based on provided lc values
-  gaf.muNq.but<-drm(lcs/100 ~ lc.but.vals, type = 'binomial', fct = LL.2())
+  gaf.muNq.but<-drm(lcs/100 ~ butralin, data = but.dat, weights = rep(30, 6),
+                    type = 'binomial', fct = LL.2())
     summary(gaf.muNq.but)
     
-  mu_Nq_butr_gaf16<-function(In){
-    1/(1+exp(gaf.muNq.but$coefficients[1]*(log(In)-log(gaf.muNq.but$coefficients[2]))))
-  }
+  plot(but.dat$butralin, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,13000),
+       xlab = 'Butralin (ppb)', ylab = 'snail mortality rate')
+    segments(x0 = 3700, x1 = 8340, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
+    segments(x0 = 6220, x1 = 12800, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)
+  
+    mu_Nq_butr_gaf16<-function(He){
+      predict(gaf.muNq.but, data.frame(butralin = He), 
+              interval = 'confidence', level = 0.95)
+    }  
+  
+  lines(seq(0,13000,100), sapply(seq(0,13000,100), mu_Nq_butr_gaf16, simplify = T)[1,],
+        lty = 2, col = 2) 
+  lines(seq(0,13000,100), sapply(seq(0,13000,100), mu_Nq_butr_gaf16, simplify = T)[2,],
+        lty = 3, col = 2) 
+  lines(seq(0,13000,100), sapply(seq(0,13000,100), mu_Nq_butr_gaf16, simplify = T)[3,],
+        lty = 3, col = 2) 
+    
+    mu_Nq_butr_gaf16_uncertainty<-function(He){
+      rdrm(1, LL.2(), coef(gaf.muNq.but), He, yerror = 'rbinom', ypar = 30)$y / 30  
+    }
 
-plot(c(0:30000), mu_Nq_butr_gaf16(c(0:30000)), lwd = 2, lty=2, type = 'l', col = 'darkorange', 
-     xlab = 'herbicide concentration (ppb)', ylab = 'mu_Nq', ylim = c(0,1), main = 'herbicide toxicity to snails, Ghaffar2016')
-  points(lc.but.vals, lcs/100, pch = 17, col = 'darkorange')
+    points(seq(0,13000,100), sapply(seq(0,13000,100), 
+                                   mu_Nq_butr_gaf16_uncertainty, 
+                                   simplify = T),
+           pch = 5, col = 4, cex = 0.5)
 
-#Glyphosate
-  lc.gly.vals = c(0, 1506, 3875, 9174, 15062, 26249)
+#Glyphosate #############
+gly.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
+                     glyphosate = c(0, 1506, 3875, 9174, 15062, 26249))
   
 #Fit function based on provided lc values
-  gaf.muNq.gly<-drm(lcs/100 ~ lc.gly.vals, type = 'binomial', fct = LL.2())
+  gaf.muNq.gly<-drm(lcs/100 ~ glyphosate, data = gly.dat, weights = rep(30, 6),
+                    type = 'binomial', fct = LL.2())
     summary(gaf.muNq.gly)
+    
+  plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33000),
+       xlab = 'Glyphosate (ppb)', ylab = 'snail mortality rate')
+    segments(x0 = 9130, x1 = 16570, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
+    segments(x0 = 23870, x1 = 28900, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)
+    
   
-  mu_Nq_gly_gaf16<-function(In){
-    1/(1+exp(gaf.muNq.gly$coefficients[1]*(log(In)-log(gaf.muNq.gly$coefficients[2]))))
-  }
+  mu_Nq_gly_gaf16<-function(He){
+    predict(gaf.muNq.gly, data.frame(butralin = He), 
+            interval = 'confidence', level = 0.95)
+  }  
   
-  points(lc.gly.vals, lcs/100, pch = 17, col = 'firebrick')
-  lines(c(0:30000), mu_Nq_gly_gaf16(c(0:30000)), lwd = 2, lty=2, col = 'firebrick')
+  lines(seq(0,33000,150), sapply(seq(0,33000,150), mu_Nq_gly_gaf16, simplify = T)[1,],
+        lty = 2, col = 2) 
+  lines(seq(0,33000,150), sapply(seq(0,33000,150), mu_Nq_gly_gaf16, simplify = T)[2,],
+        lty = 3, col = 2) 
+  lines(seq(0,33000,150), sapply(seq(0,33000,150), mu_Nq_gly_gaf16, simplify = T)[3,],
+        lty = 3, col = 2) 
+  
+    mu_Nq_gly_gaf16_uncertainty<-function(He){
+      rdrm(1, LL.2(), coef(gaf.muNq.gly), He, yerror = 'rbinom', ypar = 30)$y / 30  
+    }
+    
+    points(seq(0,33000,200), sapply(seq(0,33000,200), 
+                                    mu_Nq_gly_gaf16_uncertainty, 
+                                    simplify = T),
+           pch = 5, col = 4, cex = 0.5)
+    
+#Pendimethalin ##############
+pen.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
+                     pendimethalin = c(0, 214.8, 535, 1299, 2148, 3762))
 
-#Pendimethalin
-  lc.pen.vals = c(0, 214.8, 535, 1299, 2148, 3762)
   
 #Fit function based on provided lc values
-  gaf.muNq.pen<-drm(lcs/100 ~ lc.pen.vals, type = 'binomial', fct = LL.2())
+  gaf.muNq.pen<-drm(lcs/100 ~ pendimethalin, data = pen.dat, weights = rep(30, 6),
+                    type = 'binomial', fct = LL.2())
     summary(gaf.muNq.pen)
-  
-  mu_Nq_pen_gaf16<-function(In){
-    1/(1+exp(gaf.muNq.pen$coefficients[1]*(log(In)-log(gaf.muNq.pen$coefficients[2]))))
+    
+  plot(pen.dat$pendimethalin, pen.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,7000),
+       xlab = 'pendimethalin (ppb)', ylab = 'snail mortality rate')
+    segments(x0 = 1430, x1 = 3220, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
+    segments(x0 = 2400, x1 = 6420, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)
+    
+  mu_Nq_pen_gaf16<-function(He){
+    predict(gaf.muNq.pen, data.frame(glyphosate = He), 
+            interval = 'confidence', level = 0.95)  
   }
   
-  points(lc.pen.vals, lcs/100, pch = 17, col = 'indianred2')
-  lines(c(0:30000), mu_Nq_pen_gaf16(c(0:30000)), lwd = 2, lty=2, col = 'indianred2')
-  legend('bottomright', legend = c('Butralin', 'Glyphosate', 'Pendimethalin'), lwd=2, 
-         col = c('darkorange','firebrick','indianred2'), cex=0.75)
+  lines(seq(0,7000,50), sapply(seq(0,7000,50), mu_Nq_pen_gaf16, simplify = T)[1,],
+        lty = 2, col = 2) 
+  lines(seq(0,7000,50), sapply(seq(0,7000,50), mu_Nq_pen_gaf16, simplify = T)[2,],
+        lty = 3, col = 2) 
+  lines(seq(0,7000,50), sapply(seq(0,7000,50), mu_Nq_pen_gaf16, simplify = T)[3,],
+        lty = 3, col = 2) 
   
+  mu_Nq_pen_gaf16_uncertainty<-function(He){
+    rdrm(1, LL.2(), coef(gaf.muNq.pen), He, yerror = 'rbinom', ypar = 30)$y / 30  
+  }
+  
+  points(seq(0,7000,50), sapply(seq(0,7000,50), 
+                                  mu_Nq_pen_gaf16_uncertainty, 
+                                  simplify = T),
+         pch = 5, col = 4, cex = 0.5)
+
 #Longitudinal juvenile snail (B. alexandrina <3.6mm shell width) toxicity ###########
 gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/ghaffar2016_juv.csv')
   cont.surv = gaf16.juv$prop_surv[gaf16.juv$chem == 'control']
@@ -79,7 +141,7 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
   gaf16.juv$pred = 0
   gaf16.juv$pred[gaf16.juv$chem == 'butralin'] = 
     pred(t = gaf16.juv$time[gaf16.juv$chem == 'butralin'],
-         rate = -mu_Nq_butr_gaf16(gaf16.juv$conc[gaf16.juv$chem == 'butralin']) - 
+         rate = -mu_Nq_butr_gaf16(gaf16.juv$conc[gaf16.juv$chem == 'butralin'])[,1] - 
                 summary(bakground)$parameters[1])/100
   
   for(i in 1:length(unique(gaf16.juv$conc[gaf16.juv$chem == 'butralin']))){
@@ -108,7 +170,7 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
   
   gaf16.juv$pred[gaf16.juv$chem == 'glyphosate'] = 
     pred(t = gaf16.juv$time[gaf16.juv$chem == 'glyphosate'],
-         rate = -mu_Nq_gly_gaf16(gaf16.juv$conc[gaf16.juv$chem == 'glyphosate']) - 
+         rate = -mu_Nq_gly_gaf16(gaf16.juv$conc[gaf16.juv$chem == 'glyphosate'])[,1] - 
                 summary(bakground)$parameters[1])/100
   
   for(i in 1:length(unique(gaf16.juv$conc[gaf16.juv$chem == 'glyphosate']))){
@@ -137,7 +199,7 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
   
   gaf16.juv$pred[gaf16.juv$chem == 'pendimethalin'] = 
     pred(t = gaf16.juv$time[gaf16.juv$chem == 'pendimethalin'],
-         rate = -mu_Nq_pen_gaf16(gaf16.juv$conc[gaf16.juv$chem == 'pendimethalin']) - 
+         rate = -mu_Nq_pen_gaf16(gaf16.juv$conc[gaf16.juv$chem == 'pendimethalin'])[,1] - 
                 summary(bakground)$parameters[1])/100
   
   for(i in 1:length(unique(gaf16.juv$conc[gaf16.juv$chem == 'pendimethalin']))){
@@ -177,7 +239,7 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
   gaf16.ad$pred = 0
   gaf16.ad$pred[gaf16.ad$chem == 'butralin'] = 
     pred(t = gaf16.ad$time[gaf16.ad$chem == 'butralin'],
-         rate = -mu_Nq_butr_gaf16(gaf16.ad$conc[gaf16.ad$chem == 'butralin']) - 
+         rate = -mu_Nq_butr_gaf16(gaf16.ad$conc[gaf16.ad$chem == 'butralin'])[,1] - 
            summary(bakground2)$parameters[1])/100
   
   for(i in 1:length(unique(gaf16.ad$conc[gaf16.ad$chem == 'butralin']))){
@@ -206,7 +268,7 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
   
   gaf16.ad$pred[gaf16.ad$chem == 'glyphosate'] = 
     pred(t = gaf16.ad$time[gaf16.ad$chem == 'glyphosate'],
-         rate = -mu_Nq_gly_gaf16(gaf16.ad$conc[gaf16.ad$chem == 'glyphosate']) - 
+         rate = -mu_Nq_gly_gaf16(gaf16.ad$conc[gaf16.ad$chem == 'glyphosate'])[,1] - 
            summary(bakground2)$parameters[1])/100
   
   for(i in 1:length(unique(gaf16.ad$conc[gaf16.ad$chem == 'glyphosate']))){
@@ -235,7 +297,7 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
   
   gaf16.ad$pred[gaf16.ad$chem == 'pendimethalin'] = 
     pred(t = gaf16.ad$time[gaf16.ad$chem == 'pendimethalin'],
-         rate = -mu_Nq_pen_gaf16(gaf16.ad$conc[gaf16.ad$chem == 'pendimethalin']) - 
+         rate = -mu_Nq_pen_gaf16(gaf16.ad$conc[gaf16.ad$chem == 'pendimethalin'])[,1] - 
            summary(bakground2)$parameters[1])/100
   
   for(i in 1:length(unique(gaf16.ad$conc[gaf16.ad$chem == 'pendimethalin']))){
@@ -253,65 +315,128 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
         sub = 'predicted vs observed (adults)')
   
 #Reductions in adult snail (B. alexandrina) reproduction ###########  
-  gafrep = data.frame('but.conc'=lc.but.vals[1:4],
-                      'gly.conc'=lc.gly.vals[1:4],
-                      'pen.conc'=lc.pen.vals[1:4],
-                      'but.rep'=c(44.231, 7.05, 4.52, 4.04)/44.231,
-                      'gly.rep'=c(44.231, 4.87, 4.20, 4.23)/44.231,
-                      'pen.rep'=c(44.231, 5.18, 4.75, 4.27)/44.231)
+  #Paper reports reproduction as R0: the summed product of live snails * eggs produced
+  #we just want reduction in eggs produced as the model already takes additional mortality 
+  #into account; therefore we normalize reported R0s by relative survival between treatment groups
+  #to get relative estimate of eggs/snail/week
+sn.wk = as.numeric()  #snails/week estimates for each treatment
+for(i in 1:length(unique(gaf16.ad$conc))){
+  sn.wk[i] = sum(gaf16.ad$prop_surv[gaf16.ad$conc == unique(gaf16.ad$conc)[i]])
+}  
+
+htch.wk = c(0.99, 0.92, 0.82, 0.24,
+            0.89, 0.58, 0.46,
+            0.9, 0.3, 0.05)   #vector of hatching proportions (hatches/egg)
+
+#vector of concnetrations and reproduction measured as approximate hatchlings/snail/week
+  gafrep = data.frame('but.conc'=but.dat$butralin[1:4],
+                      'gly.conc'=gly.dat$glyphosate[1:4],
+                      'pen.conc'=pen.dat$pendimethalin[1:4],
+                      'but.rep'=c(44.231/sn.wk[1]*htch.wk[1], 7.05/sn.wk[2]*htch.wk[2], 
+                                  4.52/sn.wk[3]*htch.wk[3], 4.04/sn.wk[4]*htch.wk[4]),
+                      'gly.rep'=c(44.231/sn.wk[1]*htch.wk[1], 4.87/sn.wk[5]*htch.wk[5], 
+                                  4.20/sn.wk[6]*htch.wk[6], 4.23/sn.wk[7]*htch.wk[7]),
+                      'pen.rep'=c(44.231/sn.wk[1]*htch.wk[1], 5.18/sn.wk[8]*htch.wk[8], 
+                                  4.75/sn.wk[9]*htch.wk[9], 4.27/sn.wk[10]*htch.wk[10]))
   
-  plot(gafrep$gly.conc, gafrep$gly.rep, pch = 16, col = 'firebrick', xlim = c(0,10000), ylim = c(0,1),
-       xlab = 'Herbicide Concentration', ylab = 'relative reproduction (R0)')
-    points(gafrep$but.conc, gafrep$but.rep, pch = 16, col = 'darkorange')
-    points(gafrep$pen.conc, gafrep$pen.rep, pch = 16, col = 'indianred2')
+#Reductions from butralin ##########
+plot(gafrep$but.conc, gafrep$but.rep, pch = 16, ylim = c(0,6),
+     xlab = 'Butralin (ppb)', ylab = 'reproduction (hatchlings/snail/week)')
     
-#Fit function for butralin
-  but.fN.pred = nls(but.rep ~ exp(-b*but.conc), data=gafrep, start = list(b=0.001))
-    summary(but.fN.pred)
+  but.r0 = drm(but.rep ~ but.conc, data = gafrep, type = 'continuous',
+               fct = LL.4(names = c("b", "c", "d", "e"),
+                          fixed = c(NA, gafrep$but.rep[4], gafrep$but.rep[1], NA))) 
+    summary(but.r0)
     
-    f_N_but_gaf16 = function(He){
-      exp(-summary(but.fN.pred)$parameters[1]*He) 
+  but.r0.pred = function(He){
+    predict(but.r0, newdata = data.frame(but.conc = He), interval = 'confidence', level = 0.95)
+  }
+  
+    lines(seq(0,4500,10), sapply(seq(0,4500,10), but.r0.pred, simplify = T)[1,],
+          lty = 2, col = 2) 
+    lines(seq(0,4500,10), sapply(seq(0,4500,10), but.r0.pred, simplify = T)[2,],
+          lty = 3, col = 2) 
+    lines(seq(0,4500,10), sapply(seq(0,4500,10), but.r0.pred, simplify = T)[3,],
+          lty = 3, col = 2) 
+  
+ fN.butr.fx.uncertainty = function(He){
+   init = predict(but.r0, newdata = data.frame(but.conc = He), se.fit = T)
+   fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
+   while(fn < 0 && fn > 1.00000){
+     fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
+   }
+   return(fn)
+ } #normalized to 1
+ 
+ points(seq(0,4500,10), 
+        sapply(seq(0,4500,10), fN.butr.fx.uncertainty, simplify = T)*gafrep$but.rep[1],
+        pch = 5, col = 4, cex = 0.5) #plot with reference back to raw control value
+
+#Reductions from glyphosate ##########
+ plot(gafrep$gly.conc, gafrep$gly.rep, pch = 16, ylim = c(0,6),
+      xlab = 'glyphosate (ppb)', ylab = 'reproduction (hatchlings/snail/week)')
+ 
+   gly.r0 = drm(gly.rep ~ gly.conc, data = gafrep, type = 'continuous',
+                fct = LL.4(names = c("b", "c", "d", "e"),
+                          fixed = c(NA, gafrep$gly.rep[4], gafrep$but.rep[1], NA)))  
+   summary(gly.r0)
+   
+ gly.r0.pred = function(He){
+   predict(gly.r0, newdata = data.frame(gly.conc = He), interval = 'confidence', level = 0.95)
+ }
+ 
+   lines(c(0:1000, seq(1001, 10000,100)), sapply(c(0:1000, seq(1001, 10000,100)), 
+                                                 gly.r0.pred, simplify = T)[1,],
+         lty = 2, col = 2) 
+   lines(c(0:1000, seq(1001, 10000,100)), sapply(c(0:1000, seq(1001, 10000,100)), 
+                                                 gly.r0.pred, simplify = T)[2,],
+         lty = 3, col = 2) 
+   lines(c(0:1000, seq(1001, 10000,100)), sapply(c(0:1000, seq(1001, 10000,100)), 
+                                                 gly.r0.pred, simplify = T)[3,],
+         lty = 3, col = 2) 
+ 
+   fN.gly.fx.uncertainty = function(He){
+     init = predict(gly.r0, newdata = data.frame(gly.conc = He), se.fit = T)
+     fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
+     while(fn < 0 && fn > 1){
+       fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
+     }
+     return(fn)
+   } #normalized to 1
+ 
+     points(seq(1, 10000,100), 
+            sapply(seq(1, 10000,100), fN.gly.fx.uncertainty, simplify = T)*gafrep$but.rep[1],
+            pch = 5, col = 4, cex = 0.5) #plot with reference back to raw control value
+     
+#Reductions from pendimethalin ##########
+plot(gafrep$pen.conc, gafrep$pen.rep, pch = 16, ylim = c(0,6),
+     xlab = 'pendimethalin (ppb)', ylab = 'reproduction (hatchlings/snail/week)')
+     
+  pen.r0 = drm(pen.rep ~ pen.conc, data = gafrep, type = 'continuous',
+               fct = LL.4(names = c("b", "c", "d", "e"),
+                         fixed = c(NA, gafrep$pen.rep[4], gafrep$but.rep[1], NA)))  
+    summary(pen.r0)
+     
+  pen.r0.pred = function(He){
+      predict(pen.r0, newdata = data.frame(pen.conc = He), interval = 'confidence', level = 0.95)
+  }
+     
+     lines(c(0:1300), sapply(c(0:1300), pen.r0.pred, simplify = T)[1,],
+           lty = 2, col = 2) 
+     lines(c(0:1300), sapply(c(0:1300), pen.r0.pred, simplify = T)[2,],
+           lty = 3, col = 2) 
+     lines(c(0:1300), sapply(c(0:1300), pen.r0.pred, simplify = T)[3,],
+           lty = 3, col = 2) 
+     
+  fN.pen.fx.uncertainty = function(He){
+    init = predict(pen.r0, newdata = data.frame(pen.conc = He), se.fit = T)
+    fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
+    while(fn < 0 && fn > 1){
+      fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
     }
-    
-    but.fN.pred.l2 = drm(gafrep$but.rep  ~ gafrep$but.conc, type = 'binomial', fct = LL2.2())
-    
-    f_N_but_gaf16.l2 = function(He){
-      (1/(1+exp(but.fN.pred.l2$coefficients[1]*(log(He)-but.fN.pred.l2$coefficients[2]))))
-    }
-    
-    lines(c(0:10000), f_N_but_gaf16(c(0:10000)), lty=2, col='darkorange')  
-    lines(c(0:10000), f_N_but_gaf16.l2(c(0:10000)), lty=3, col='darkorange')   
-    
-#Fit function for glyphosate
-  gly.fN.pred = nls(gly.rep ~ exp(-b*gly.conc), data=gafrep, start = list(b=0.001))
-    summary(gly.fN.pred)
-    
-    f_N_gly_gaf16 = function(He){
-      exp(-summary(gly.fN.pred)$parameters[1]*He) 
-    }
-    
-    gly.fN.pred.l2 = drm(gafrep$gly.rep  ~ gafrep$gly.conc, type = 'binomial', fct = LL2.2())
-    
-    f_N_gly_gaf16.l2 = function(He){
-      (1/(1+exp(gly.fN.pred.l2$coefficients[1]*(log(He)-gly.fN.pred.l2$coefficients[2]))))
-    }
-    
-    lines(c(0:10000), f_N_gly_gaf16(c(0:10000)), lty=2, col='firebrick')  
-    lines(c(0:10000), f_N_gly_gaf16.l2(c(0:10000)), lty=3, col='firebrick')   
-    
-#Fit function for pendimethalin
-  pen.fN.pred = nls(pen.rep ~ exp(-b*pen.conc), data=gafrep, start = list(b=0.001))
-    summary(pen.fN.pred)
-    
-    f_N_pen_gaf16 = function(He){
-      exp(-summary(pen.fN.pred)$parameters[1]*He) 
-    }
-    
-    pen.fN.pred.l2 = drm(gafrep$pen.rep  ~ gafrep$pen.conc, type = 'binomial', fct = LL2.2())
-    
-    f_N_pen_gaf16.l2 = function(He){
-      (1/(1+exp(pen.fN.pred.l2$coefficients[1]*(log(He)-pen.fN.pred.l2$coefficients[2]))))
-    }
-    
-    lines(c(0:10000), f_N_pen_gaf16(c(0:10000)), lty=2, col='firebrick')  
-    lines(c(0:10000), f_N_pen_gaf16.l2(c(0:10000)), lty=3, col='firebrick')   
+    return(fn)  
+  } #normalized to 1
+     
+     points(seq(0,1300, 10), 
+            sapply(seq(0,1300, 10), fN.pen.fx.uncertainty, simplify = T)*gafrep$but.rep[1],
+            pch = 5, col = 4, cex = 0.5) #plot with reference back to raw control value

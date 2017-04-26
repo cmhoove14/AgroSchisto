@@ -40,12 +40,12 @@ plot(snail.repro$dose, snail.repro$juvs/snail.repro$juvs[1], pch = 16, ylim = c(
 par.tricks = c(coef(chlor.fN.predict), 'Upper Limit:(Intercept)' = 4.245811e+03)[c(1,3,2)]
 
   f_N_chlor_ibr92_uncertainty<-function(In){
-    rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks, yerror = 'rnorm', xerror = In,
-         ypar = c(0, predict(chlor.fN.predict, data.frame(dose = In), se.fit = T)[2]))$y / snail.repro$juvs[1]
+    fn = predict(chlor.fN.predict, data.frame(dose = In), se.fit = T)
+    rnorm(1, fn[1], fn[2]) / snail.repro$juvs[1]
   }
   
     points(seq(0, 5e5, 1000), sapply(seq(0, 5e5, 1000), f_N_chlor_ibr92_uncertainty, simplify = T),
-               pch = 5, cex = 0.6, col = 4)
+               pch = 5, cex = 0.6, col = 3)
     title(main = expression(paste('Ibrahim1992 - Chlorpyrifos reproductive toxicity to ',
                                   italic('Bi. alexandrina', sep = ''))))
       legend('topright', pch = c(16, 5), legend = c('Obs. points', 'Est. points'), col = c(1,4),
