@@ -9,7 +9,7 @@
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
 
-#meta-analysis of glyphosate effects on Bi. glabrate
+#meta-analysis of glyphosate effects on Bi. alexandrina
 
 source('Response_Fxs/Ghaffar2016_snails.R')
 source('Response_Fxs/bakry2012.R')
