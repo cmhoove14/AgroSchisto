@@ -18,18 +18,47 @@ require(drc)
 #Butralin ##############
 but.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
                      butralin = c(0, 556, 2417, 3906, 5560, 8703))
-  
 
-#Fit function based on provided lc values
+plot(but.dat$butralin, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,13000),
+     xlab = 'Butralin (ppb)', ylab = 'snail mortality rate', 
+     main = 'D-R function based on reported values')
+    segments(x0 = 3700, x1 = 8340, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
+    segments(x0 = 6220, x1 = 12800, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)
+  
+#function based on reported LC50 and slope values
+  lc50.mun.but = 5.56
+    se.lc50.mun.but = mean(log(8.34/lc50.mun.but), log(lc50.mun.but/3.7)) / 1.96
+  slp.mun.but = 1.093
+  
+  fx.mun.but = function(He, lc = lc50.mun.but){
+    heu = He/1000
+    pnorm(exp(slp.mun.but) * log(heu/lc))
+  }
+  
+  lines(seq(0,13000,10), sapply(seq(0,13000,10), fx.mun.but), lty = 2, col = 2)
+  lines(seq(0,13000,10), sapply(seq(0,13000,10), fx.mun.but, lc = 8.34), lty = 3, col = 2)
+  lines(seq(0,13000,10), sapply(seq(0,13000,10), fx.mun.but, lc = 3.7), lty = 3, col = 2)
+  
+  
+  mu_Nq_butr_gaf16_uncertainty = function(He){
+    heu = He/1000
+    lc50 = exp(rnorm(1, log(lc50.mun.but), se.lc50.mun.but))
+    pnorm(exp(slp.mun.but) * log(heu/lc50))
+  }
+    points(seq(0,13000,10), sapply(seq(0,13000,10), mu_Nq_butr_gaf16_uncertainty, simplify = T), 
+           pch = 5, col = 4, cex = 0.5)
+    
+#Fit function based on provided lc values assuming %mortality = lc value
+plot(but.dat$butralin, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,13000),
+    xlab = 'Butralin (ppb)', ylab = 'snail mortality rate',
+     main = 'D-R function based on fit to LC values')
+  segments(x0 = 3700, x1 = 8340, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
+  segments(x0 = 6220, x1 = 12800, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)  
+  
   gaf.muNq.but<-drm(lcs/100 ~ butralin, data = but.dat, weights = rep(30, 6),
                     type = 'binomial', fct = LL.2())
     summary(gaf.muNq.but)
     
-  plot(but.dat$butralin, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,13000),
-       xlab = 'Butralin (ppb)', ylab = 'snail mortality rate')
-    segments(x0 = 3700, x1 = 8340, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
-    segments(x0 = 6220, x1 = 12800, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)
-  
     mu_Nq_butr_gaf16<-function(He){
       predict(gaf.muNq.but, data.frame(butralin = He), 
               interval = 'confidence', level = 0.95)
@@ -42,28 +71,59 @@ but.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
   lines(seq(0,13000,100), sapply(seq(0,13000,100), mu_Nq_butr_gaf16, simplify = T)[3,],
         lty = 3, col = 2) 
     
-    mu_Nq_butr_gaf16_uncertainty<-function(He){
+    mu_Nq_butr_gaf16_uncertainty2<-function(He){
       rdrm(1, LL.2(), coef(gaf.muNq.but), He, yerror = 'rbinom', ypar = 30)$y / 30  
     }
 
-    points(seq(0,13000,100), sapply(seq(0,13000,100), 
-                                   mu_Nq_butr_gaf16_uncertainty, 
-                                   simplify = T),
+    points(seq(0,13000,10), sapply(seq(0,13000,10), 
+                                    mu_Nq_butr_gaf16_uncertainty2, 
+                                    simplify = T),
            pch = 5, col = 4, cex = 0.5)
 
 #Glyphosate #############
 gly.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
                      glyphosate = c(0, 1506, 3875, 9174, 15062, 26249))
+    
+plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33000),
+     xlab = 'Glyphosate (ppb)', ylab = 'snail mortality rate',
+     main = 'D-R function based on reported values')
+    segments(x0 = 9130, x1 = 16570, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
+    segments(x0 = 23870, x1 = 28900, y0 = 0.9, y1 = 0.9, lty = 1, col = 1) 
+
+#function based on reported lc50 and slope values        
+  lc50.mun.gly = 15.062
+    se.lc50.mun.gly = mean(log(16.57/lc50.mun.gly), log(lc50.mun.gly/9.13)) / 1.96
+  slp.mun.gly = 0.335
+
+    fx.mun.gly = function(He, lc = lc50.mun.gly){
+      heu = He/1000
+      pnorm(exp(slp.mun.gly) * log(heu/lc))
+    }
+
+  lines(seq(0,33000,10), sapply(seq(0,33000,10), fx.mun.gly), lty = 2, col = 2)
+  lines(seq(0,33000,10), sapply(seq(0,33000,10), fx.mun.gly, lc = 16.57), lty = 3, col = 2)
+  lines(seq(0,33000,10), sapply(seq(0,33000,10), fx.mun.gly, lc = 9.13), lty = 3, col = 2)
   
+  mu_Nq_gly_gaf16_uncertainty = function(He){
+    heu = He/1000
+    lc50 = exp(rnorm(1, log(lc50.mun.gly), se.lc50.mun.gly))
+    pnorm(exp(slp.mun.gly) * log(heu/lc50))
+  }
+
+    points(seq(0,33000,30), sapply(seq(0,33000,30), mu_Nq_gly_gaf16_uncertainty, simplify = T), 
+           pch = 5, col = 4, cex = 0.5)
+
 #Fit function based on provided lc values
+plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33000),
+     xlab = 'Glyphosate (ppb)', ylab = 'snail mortality rate',
+     main = 'D-R function based on fit to lc values')
+
+      segments(x0 = 9130, x1 = 16570, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
+      segments(x0 = 23870, x1 = 28900, y0 = 0.9, y1 = 0.9, lty = 1, col = 1) 
+      
   gaf.muNq.gly<-drm(lcs/100 ~ glyphosate, data = gly.dat, weights = rep(30, 6),
                     type = 'binomial', fct = LL.2())
     summary(gaf.muNq.gly)
-    
-  plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33000),
-       xlab = 'Glyphosate (ppb)', ylab = 'snail mortality rate')
-    segments(x0 = 9130, x1 = 16570, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
-    segments(x0 = 23870, x1 = 28900, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)
     
   
   mu_Nq_gly_gaf16<-function(He){
@@ -78,30 +138,59 @@ gly.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
   lines(seq(0,33000,150), sapply(seq(0,33000,150), mu_Nq_gly_gaf16, simplify = T)[3,],
         lty = 3, col = 2) 
   
-    mu_Nq_gly_gaf16_uncertainty<-function(He){
+    mu_Nq_gly_gaf16_uncertainty2<-function(He){
       rdrm(1, LL.2(), coef(gaf.muNq.gly), He, yerror = 'rbinom', ypar = 30)$y / 30  
     }
     
-    points(seq(0,33000,200), sapply(seq(0,33000,200), 
-                                    mu_Nq_gly_gaf16_uncertainty, 
+    points(seq(0,33000,30), sapply(seq(0,33000,30), 
+                                    mu_Nq_gly_gaf16_uncertainty2, 
                                     simplify = T),
            pch = 5, col = 4, cex = 0.5)
     
 #Pendimethalin ##############
 pen.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
                      pendimethalin = c(0, 214.8, 535, 1299, 2148, 3762))
-
-  
-#Fit function based on provided lc values
-  gaf.muNq.pen<-drm(lcs/100 ~ pendimethalin, data = pen.dat, weights = rep(30, 6),
-                    type = 'binomial', fct = LL.2())
-    summary(gaf.muNq.pen)
     
-  plot(pen.dat$pendimethalin, pen.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,7000),
-       xlab = 'pendimethalin (ppb)', ylab = 'snail mortality rate')
+plot(pen.dat$pendimethalin, pen.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,7000),
+     xlab = 'pendimethalin (ppb)', ylab = 'snail mortality rate',
+     main = 'D-R function based on reported values')
     segments(x0 = 1430, x1 = 3220, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
     segments(x0 = 2400, x1 = 6420, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)
     
+#Fit function based on reported parameter values  
+lc50.mun.pen = 2.148
+  se.lc50.mun.pen = mean(log(3.22/lc50.mun.pen), log(lc50.mun.pen/1.43)) / 1.96
+  slp.mun.pen = 1.820
+
+  fx.mun.pen = function(He, lc = lc50.mun.pen){
+    heu = He/1000
+    pnorm(exp(slp.mun.pen) * log(heu/lc))
+  }
+
+    lines(seq(0,7500,5), sapply(seq(0,7500,5), fx.mun.pen), lty = 2, col = 2)
+    lines(seq(0,7500,5), sapply(seq(0,7500,5), fx.mun.pen, lc = 3.22), lty = 3, col = 2)
+    lines(seq(0,7500,5), sapply(seq(0,7500,5), fx.mun.pen, lc = 1.43), lty = 3, col = 2)
+
+mu_Nq_pen_gaf16_uncertainty = function(He){
+  heu = He/1000
+  lc50 = exp(rnorm(1, log(lc50.mun.pen), se.lc50.mun.pen))
+  pnorm(exp(slp.mun.pen) * log(heu/lc50))
+}
+  
+  points(seq(0,7500,5), sapply(seq(0,7500,5), mu_Nq_pen_gaf16_uncertainty, simplify = T), 
+         pch = 5, col = 4, cex = 0.5)
+  
+#Fit function based on provided lc values
+  plot(pen.dat$pendimethalin, pen.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,7000),
+       xlab = 'pendimethalin (ppb)', ylab = 'snail mortality rate',
+       main = 'D-R function based on fit to lc values')
+  segments(x0 = 1430, x1 = 3220, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
+  segments(x0 = 2400, x1 = 6420, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)
+  
+  gaf.muNq.pen<-drm(lcs/100 ~ pendimethalin, data = pen.dat, weights = rep(30, 6),
+                    type = 'binomial', fct = LL.2())
+    summary(gaf.muNq.pen)
+  
   mu_Nq_pen_gaf16<-function(He){
     predict(gaf.muNq.pen, data.frame(glyphosate = He), 
             interval = 'confidence', level = 0.95)  
