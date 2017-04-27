@@ -1,3 +1,14 @@
+#This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License#########
+#<http://creativecommons.org/licenses/by-nc/4.0/> by Christopher Hoover, Arathi Arakala, Manoj Gambhir 
+#and Justin Remais. This work was supported in part by the National Institutes of Health/National Science 
+#Foundation Ecology of Infectious Disease program funded by the Fogarty International Center 
+#(grant R01TW010286), the National Institute of Allergy and Infectious Diseases (grant K01AI091864), 
+#and the National Science Foundation Water Sustainability and Climate Program (grant 1360330).
+
+#Per the terms of this license, if you are making derivative use of this work, you must identify that 
+#your work is a derivative work, give credit to the original work, provide a link to the license, 
+#and indicate changes that were made.###############
+
 #Data extraction and model fitting to Bakry 2012 data
 require(drc)
 
@@ -19,148 +30,83 @@ muN.bak = data.frame(atr = c(.330, 1.250, 4.750),
   muN.bak$atr.se = (muN.bak$atr / 1.25) * se.atr #st. err proportional to concentration
   muN.bak$gly.se = (muN.bak$gly / 3.15) * se.gly #st. err proportional to concentration
 
-#visualize ##############
-  plot(muN.bak$atr, muN.bak$mort, ylim = c(0,1), xlim = c(0,13),
-       pch = 16, col = 'gold', xlab = 'Herbicide (ppm)', ylab = 'mortality')
-    points(muN.bak$gly, muN.bak$mort, pch = 16, col = 3)
-    for(i in 1:length(muN.bak$atr)){
-      segments(y0 = muN.bak$mort[i], x0 = muN.bak$atr[i] + muN.bak$atr.se[i],
-               y1 = muN.bak$mort[i], x1 = muN.bak$atr[i] - muN.bak$atr.se[i], col='gold')
-      segments(y0 = muN.bak$mort[i], x0 = muN.bak$gly[i] + muN.bak$gly.se[i],
-               y1 = muN.bak$mort[i], x1 = muN.bak$gly[i] - muN.bak$gly.se[i], col=3)
-    }
-    
-#fit functions using drm assuming cohort size of 50 snails for each LC outcome ################
-  #50 snails used in longitudinal LC10 exposure studies, so seems like a reasonable assusmption  
+#direct snail toxicity from Atrazine ############  
+plot(muN.bak$atr, muN.bak$mort, ylim = c(0,1), xlim = c(0,13),
+       pch = 16, xlab = 'atrazine (ppm)', ylab = 'mortality')
+  for(i in 1:length(muN.bak$atr)){
+    segments(y0 = muN.bak$mort[i], x0 = muN.bak$atr[i] + muN.bak$atr.se[i],
+             y1 = muN.bak$mort[i], x1 = muN.bak$atr[i] - muN.bak$atr.se[i])
+
+  }
+  
   bak12.atr.drm = drm(mort ~ atr, weights = rep(50,3), data = muN.bak, type = 'binomial',
                       fct = LL.2())
-
+  
+    bak12.atr.pred = function(He){
+      predict(bak12.atr.drm, newdata = data.frame(atr = He), interval = 'confidence', level = 0.95)
+    }
+    
+  lines(seq(0,13, 0.1), sapply(seq(0,13, 0.1), bak12.atr.pred, simplify = T)[1,], col = 2, lty = 2)
+  lines(seq(0,13, 0.1), sapply(seq(0,13, 0.1), bak12.atr.pred, simplify = T)[2,], col = 2, lty = 3)
+  lines(seq(0,13, 0.1), sapply(seq(0,13, 0.1), bak12.atr.pred, simplify = T)[3,], col = 2, lty = 3)
+  
+  mu_Nq_atr_bak12_uncertainty<-function(He){
+    He.u = He/1000
+    rdrm(1, LL.2(), coef(bak12.atr.drm), He.u, yerror = 'rbinom', ypar = 50)$y / 50  
+  }
+  
+  points(seq(0,13, 0.1), sapply(seq(0,13, 0.1)*1000, mu_Nq_atr_bak12_uncertainty, simplify = T),
+         col = 4, pch = 5, cex = 0.5)
+  
+#direct snail toxicity from Glyphosate ############  
+  plot(muN.bak$gly, muN.bak$mort, ylim = c(0,1), xlim = c(0,13),
+       pch = 16, xlab = 'glyphosate (ppm)', ylab = 'mortality')  
+    for(i in 1:length(muN.bak$atr)){
+      segments(y0 = muN.bak$mort[i], x0 = muN.bak$gly[i] + muN.bak$gly.se[i],
+               y1 = muN.bak$mort[i], x1 = muN.bak$gly[i] - muN.bak$gly.se[i])
+    }
+    
   bak12.gly.drm = drm(mort ~ gly, weights = rep(50,3), data = muN.bak, type = 'binomial',
                       fct = LL.2())
-
-#visualize fits ##########
-  bak.test.df = data.frame(atr = seq(0,13,0.1),
-                           gly = seq(0,13,0.1),
-                           atr.muN = 0,
-                           atr.se = 0,
-                           gly.muN = 0,
-                           gly.se = 0)
   
-#plot functions to visualize fit to data
-  bak.test.df[,3:4] = predict(bak12.atr.drm, newdata = bak.test.df, se.fit = TRUE)
-  bak.test.df[,5:6] = predict(bak12.gly.drm, newdata = bak.test.df, se.fit = TRUE)
+    bak12.gly.pred = function(He){
+      predict(bak12.gly.drm, newdata = data.frame(gly = He), interval = 'confidence', level = 0.95)
+    }
+
+    lines(seq(0,13, 0.1), sapply(seq(0,13, 0.1), bak12.gly.pred, simplify = T)[1,], col = 2, lty = 2)
+    lines(seq(0,13, 0.1), sapply(seq(0,13, 0.1), bak12.gly.pred, simplify = T)[2,], col = 2, lty = 3)
+    lines(seq(0,13, 0.1), sapply(seq(0,13, 0.1), bak12.gly.pred, simplify = T)[3,], col = 2, lty = 3)
+    
+    mu_Nq_gly_bak12_uncertainty<-function(He){
+      He.u = He/1000
+      rdrm(1, LL.2(), coef(bak12.gly.drm), He.u, yerror = 'rbinom', ypar = 50)$y / 50  
+    }
+    
+    points(seq(0,13, 0.1), sapply(seq(0,13, 0.1)*1000, mu_Nq_gly_bak12_uncertainty, simplify = T),
+           col = 4, pch = 5, cex = 0.5)
+    
   
-    lines(bak.test.df$atr, bak.test.df$atr.muN, col='gold', lty=2)
-      lines(bak.test.df$atr, bak.test.df$atr.muN + 1.96*bak.test.df$atr.se, col='gold', lty=3)
-      lines(bak.test.df$atr, bak.test.df$atr.muN - 1.96*bak.test.df$atr.se, col='gold', lty=3)
-      
-    lines(bak.test.df$gly, bak.test.df$gly.muN, col=3, lty=2)
-      lines(bak.test.df$gly, bak.test.df$gly.muN + 1.96*bak.test.df$gly.se, col=3, lty=3)
-      lines(bak.test.df$gly, bak.test.df$gly.muN - 1.96*bak.test.df$gly.se, col=3, lty=3)
-      
-    legend('bottomright', legend = c('atrazine', 'glyphosate', '95% CI'), col = c('gold', 3, 1), 
-           cex = 0.7, lty=c(2,2,3))  
-#derive functions for each snail mortality response ####################    
-  muNq_atr_bak12<-function(He){
-    He.use = He/1000
-    rdrm(1, LL.2(), coef(bak12.atr.drm), He.use, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
-  }
-    #for(i in seq(0,13000,10)){
-    #  points(i/1000, muNq_atr_bak12(i), pch = 17, cex=0.5, col=2)
-    #}
-
-  muNq_gly_bak12<-function(He){
-    He.use = He/1000
-    rdrm(1, LL.2(), coef(bak12.gly.drm), He.use, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
-  }
-    #for(i in seq(0,13000,10)){
-    #  points(i/1000, muNq_gly_bak12(i), pch = 17, cex=0.5, col=4)
-    #}
-  
-  keep.bak12 = c('muN.bak', 'muNq_atr_bak12', 'muNq_gly_bak12', 'bak12.atr.drm', 'bak12.gly.drm')
-
-#The paper also provides info on longitudinal survival of snail cohorts exposed to LC10 of each herbicide ################
-#So let's compare that data with the expected long. survival from the model at the same concentration
-bakry12<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/bakry2012.csv')
-
-#Plot data from paper  
-plot(bakry12$time[bakry12$chem == 'control'], bakry12$surv[bakry12$chem == 'control'], ylim = c(0,50), pch = 16, cex = 1.2,
-     xlab = 'time (days)', ylab = 'n alive')
-  points(bakry12$time[bakry12$chem == 'atrazine'], bakry12$surv[bakry12$chem == 'atrazine'], col = 'goldenrod', pch = 16, cex = 1.2)
-  points(bakry12$time[bakry12$chem == 'glyphosate'], bakry12$surv[bakry12$chem == 'glyphosate'], col = 'forestgreen', pch = 16, cex = 1.2)
-  title('long. snail survival exposed to LC10s')
-  legend('bottomleft', legend = c('control', 'atrazine', 'glyphosate'), col = c(1,'goldenrod','forestgreen'), pch = 16, cex=0.7, 
-         title = 'observed')
-
-#Generate model predictions    
-#Background mortality seems to be pretty constant (constant slope in control group), so let's use control group to check that value
-m = (bakry12$surv[bakry12$chem == 'control'][7] - bakry12$surv[bakry12$chem == 'control'][1]) /
-    (bakry12$time[bakry12$chem == 'control'][7] - bakry12$time[bakry12$chem == 'control'][1])
-
-m.df = data.frame('days' = c(0:42),
-                  'control' = 0,
-                  'atr' = 0,
-                  'gly' = 0)
-
-m.df[1,c(2:4)] = 50
-
-for(i in 1:42){
-  m.df[i+1, 2] = m.df[i,2] + m  #subtract deaths per day (from control slope derived above)
-  m.df[i+1, 3] = m.df[i,3] - m.df[i,3] * muNq_atr_bak12(330)  #for agrochemical toxicity, additional mortality as per capita deaths
-  m.df[i+1, 4] = m.df[i,4] - m.df[i,4] * muNq_gly_bak12(840) #for agrochemical toxicity, additional mortality as per capita deaths
-}
-
-lines(m.df$days, m.df$control, lty = 2, lwd=2)
-lines(m.df$days, m.df$atr, lty = 2, col='goldenrod', lwd=2)
-lines(m.df$days, m.df$gly, lty = 2, col='forestgreen', lwd=2)
-legend('topright', legend = c('control', 'atrazine', 'glyphosate'), col = c(1,'goldenrod','forestgreen'),  lty=2, cex=0.7, 
-       title = 'modeled')
+  keep.bak12 = c('muN.bak', 'mu_Nq_atr_bak12_uncertainty', 'mu_Nq_gly_bak12_uncertainty', 
+                 'bak12.atr.drm', 'bak12.gly.drm')
 
 #Now lets look at reproduction over time ###########
-  plot(bakry12$time[bakry12$chem == 'control'], bakry12$hatch[bakry12$chem == 'control'], type='l', lwd=2, ylim = c(0,450),
-       xlab = 'time (days)', ylab = 'total hatches')    
-    lines(bakry12$time[bakry12$chem == 'atrazine'], bakry12$hatch[bakry12$chem == 'atrazine'], col='goldenrod', lwd=2)
-    lines(bakry12$time[bakry12$chem == 'glyphosate'], bakry12$hatch[bakry12$chem == 'glyphosate'], col='forestgreen', lwd=2)
-    legend('topright', legend = c('control', 'atrazine', 'glyphosate'), col = c(1,'goldenrod','forestgreen'), lwd=2, cex=0.7)
-
-#Relative decreases in eggs/snail for 4 week study period
-  fn.atr = sum(bakry12$hatch[bakry12$chem == 'atrazine']) / sum(bakry12$hatch[bakry12$chem == 'control'])
-  fn.gly = sum(bakry12$hatch[bakry12$chem == 'glyphosate']) / sum(bakry12$hatch[bakry12$chem == 'control'])
-
-plot(1,1, ylab = 'relative hatchlings', xlab = 'herbicide concentration', ylim = c(0,1), xlim = c(0,1000), pch = 16)
-  points(330, fn.atr, col='goldenrod', pch=16)
-  points(840, fn.gly, col='forestgreen', pch=16)
-
-legend('topright', legend = c('control', 'atrazine', 'glyphosate'), col = c(1,'goldenrod','forestgreen'), pch=16, cex=0.7)
-
-#Fit function to atrazine data points  
-#nls estimate for a negative exponential would not converge (only two data points to fit to);
-#Estimate of 0.0078 as the coefficient comes from fit in excel, appears to fit pretty well
-  lines(c(0:1000), exp(-0.0078*c(0:1000)), lty = 2, col = 'goldenrod')
+bakry12<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/bakry2012.csv')
+  bak12 = subset(bakry12, time != 0)
   
-  f_Nq_atr_bak12_exp<-function(In){
-    exp(-0.0078 * In)
+sn.wk = as.numeric()  #snails/week estimates for each treatment
+  for(i in 1:length(unique(bak12$conc))){
+    sn.wk[i] = sum(bak12$prop_surv[bak12$conc == unique(bak12$conc)[i]])
   }  
   
-  #Try a linear fit as well
-  lines(c(0:1000), 1-((fn.atr-1)/(-330))*c(0:1000), lty = 3, col = 'goldenrod')
-  
-  f_Nq_atr_bak12_lin<-function(In){
-    1 - 0.0028*In
+hatches = as.numeric()
+  for(i in 1:length(unique(bak12$conc))){
+    hatches[i] = sum(bak12$hatch[bak12$conc == unique(bak12$conc)[i]])
   } 
-  
-  #Fit function to deltamethrin data points  
-  #nls estimate for a negative exponential would not converge (only two data points to fit to);
-  #Estimate of 0.0028 as the coefficient comes from fit in excel, appears to fit pretty well
-  lines(c(0:1000), exp(-0.0028*c(0:1000)), lty = 2, col = 'forestgreen')
-  
-  f_Nq_gly_bak12_exp<-function(In){
-    exp(-0.0028 * In)
-  }  
-  
-  #Try a linear fit as well
-  lines(c(0:1000), 1-((fn.gly-1)/(-840))*c(0:1000), lty = 3, col = 'forestgreen')
-  
-  f_Nq_gly_bak12_lin<-function(In){
-    1 - 0.0011*In
-  } 
+
+fn = hatches / sn.wk
+
+bak.fn = data.frame(gly.conc = c(0, 840),
+                    atr.conc = c(0, 330),
+                    gly.rep = c(fn[1], fn[3]),
+                    atr.rep = c(fn[1], fn[2]))  
+#No function attempted to fit because only control and single concentration data point for each agroC

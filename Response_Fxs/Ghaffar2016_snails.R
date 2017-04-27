@@ -1,3 +1,14 @@
+#This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License#########
+#<http://creativecommons.org/licenses/by-nc/4.0/> by Christopher Hoover, Arathi Arakala, Manoj Gambhir 
+#and Justin Remais. This work was supported in part by the National Institutes of Health/National Science 
+#Foundation Ecology of Infectious Disease program funded by the Fogarty International Center 
+#(grant R01TW010286), the National Institute of Allergy and Infectious Diseases (grant K01AI091864), 
+#and the National Science Foundation Water Sustainability and Climate Program (grant 1360330).
+
+#Per the terms of this license, if you are making derivative use of this work, you must identify that 
+#your work is a derivative work, give credit to the original work, provide a link to the license, 
+#and indicate changes that were made.###############
+
 #Data extraction and model fitting to Ghaffar 2016 SNAIL (B. alexandrina) data
 require(drc)
 
@@ -340,8 +351,8 @@ htch.wk = c(0.99, 0.92, 0.82, 0.24,
                                   4.75/sn.wk[9]*htch.wk[9], 4.27/sn.wk[10]*htch.wk[10]))
   
 #Reductions from butralin ##########
-plot(gafrep$but.conc, gafrep$but.rep, pch = 16, ylim = c(0,6),
-     xlab = 'Butralin (ppb)', ylab = 'reproduction (hatchlings/snail/week)')
+plot(gafrep$but.conc, gafrep$but.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
+     xlab = 'Butralin (ppb)', ylab = 'relative reproduction rate')
     
   but.r0 = drm(but.rep ~ but.conc, data = gafrep, type = 'continuous',
                fct = LL.4(names = c("b", "c", "d", "e"),
@@ -352,11 +363,11 @@ plot(gafrep$but.conc, gafrep$but.rep, pch = 16, ylim = c(0,6),
     predict(but.r0, newdata = data.frame(but.conc = He), interval = 'confidence', level = 0.95)
   }
   
-    lines(seq(0,4500,10), sapply(seq(0,4500,10), but.r0.pred, simplify = T)[1,],
+    lines(seq(0,4500,10), sapply(seq(0,4500,10), but.r0.pred, simplify = T)[1,] / gafrep$but.rep[1],
           lty = 2, col = 2) 
-    lines(seq(0,4500,10), sapply(seq(0,4500,10), but.r0.pred, simplify = T)[2,],
+    lines(seq(0,4500,10), sapply(seq(0,4500,10), but.r0.pred, simplify = T)[2,] / gafrep$but.rep[1],
           lty = 3, col = 2) 
-    lines(seq(0,4500,10), sapply(seq(0,4500,10), but.r0.pred, simplify = T)[3,],
+    lines(seq(0,4500,10), sapply(seq(0,4500,10), but.r0.pred, simplify = T)[3,] / gafrep$but.rep[1],
           lty = 3, col = 2) 
   
  fN.butr.fx.uncertainty = function(He){
@@ -369,12 +380,12 @@ plot(gafrep$but.conc, gafrep$but.rep, pch = 16, ylim = c(0,6),
  } #normalized to 1
  
  points(seq(0,4500,10), 
-        sapply(seq(0,4500,10), fN.butr.fx.uncertainty, simplify = T)*gafrep$but.rep[1],
-        pch = 5, col = 4, cex = 0.5) #plot with reference back to raw control value
+        sapply(seq(0,4500,10), fN.butr.fx.uncertainty, simplify = T),
+        pch = 5, col = 4, cex = 0.5) 
 
 #Reductions from glyphosate ##########
- plot(gafrep$gly.conc, gafrep$gly.rep, pch = 16, ylim = c(0,6),
-      xlab = 'glyphosate (ppb)', ylab = 'reproduction (hatchlings/snail/week)')
+ plot(gafrep$gly.conc, gafrep$gly.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
+      xlab = 'glyphosate (ppb)', ylab = 'relative reproduction rate')
  
    gly.r0 = drm(gly.rep ~ gly.conc, data = gafrep, type = 'continuous',
                 fct = LL.4(names = c("b", "c", "d", "e"),
@@ -386,13 +397,13 @@ plot(gafrep$but.conc, gafrep$but.rep, pch = 16, ylim = c(0,6),
  }
  
    lines(c(0:1000, seq(1001, 10000,100)), sapply(c(0:1000, seq(1001, 10000,100)), 
-                                                 gly.r0.pred, simplify = T)[1,],
+                                                 gly.r0.pred, simplify = T)[1,]/gafrep$but.rep[1],
          lty = 2, col = 2) 
    lines(c(0:1000, seq(1001, 10000,100)), sapply(c(0:1000, seq(1001, 10000,100)), 
-                                                 gly.r0.pred, simplify = T)[2,],
+                                                 gly.r0.pred, simplify = T)[2,]/gafrep$but.rep[1],
          lty = 3, col = 2) 
    lines(c(0:1000, seq(1001, 10000,100)), sapply(c(0:1000, seq(1001, 10000,100)), 
-                                                 gly.r0.pred, simplify = T)[3,],
+                                                 gly.r0.pred, simplify = T)[3,]/gafrep$but.rep[1],
          lty = 3, col = 2) 
  
    fN.gly.fx.uncertainty = function(He){
@@ -405,12 +416,12 @@ plot(gafrep$but.conc, gafrep$but.rep, pch = 16, ylim = c(0,6),
    } #normalized to 1
  
      points(seq(1, 10000,100), 
-            sapply(seq(1, 10000,100), fN.gly.fx.uncertainty, simplify = T)*gafrep$but.rep[1],
-            pch = 5, col = 4, cex = 0.5) #plot with reference back to raw control value
+            sapply(seq(1, 10000,100), fN.gly.fx.uncertainty, simplify = T),
+            pch = 5, col = 4, cex = 0.5) 
      
 #Reductions from pendimethalin ##########
-plot(gafrep$pen.conc, gafrep$pen.rep, pch = 16, ylim = c(0,6),
-     xlab = 'pendimethalin (ppb)', ylab = 'reproduction (hatchlings/snail/week)')
+plot(gafrep$pen.conc, gafrep$pen.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
+     xlab = 'pendimethalin (ppb)', ylab = 'relative reproduction rate')
      
   pen.r0 = drm(pen.rep ~ pen.conc, data = gafrep, type = 'continuous',
                fct = LL.4(names = c("b", "c", "d", "e"),
@@ -421,11 +432,11 @@ plot(gafrep$pen.conc, gafrep$pen.rep, pch = 16, ylim = c(0,6),
       predict(pen.r0, newdata = data.frame(pen.conc = He), interval = 'confidence', level = 0.95)
   }
      
-     lines(c(0:1300), sapply(c(0:1300), pen.r0.pred, simplify = T)[1,],
+     lines(c(0:1300), sapply(c(0:1300), pen.r0.pred, simplify = T)[1,]/gafrep$but.rep[1],
            lty = 2, col = 2) 
-     lines(c(0:1300), sapply(c(0:1300), pen.r0.pred, simplify = T)[2,],
+     lines(c(0:1300), sapply(c(0:1300), pen.r0.pred, simplify = T)[2,]/gafrep$but.rep[1],
            lty = 3, col = 2) 
-     lines(c(0:1300), sapply(c(0:1300), pen.r0.pred, simplify = T)[3,],
+     lines(c(0:1300), sapply(c(0:1300), pen.r0.pred, simplify = T)[3,]/gafrep$but.rep[1],
            lty = 3, col = 2) 
      
   fN.pen.fx.uncertainty = function(He){
@@ -438,5 +449,5 @@ plot(gafrep$pen.conc, gafrep$pen.rep, pch = 16, ylim = c(0,6),
   } #normalized to 1
      
      points(seq(0,1300, 10), 
-            sapply(seq(0,1300, 10), fN.pen.fx.uncertainty, simplify = T)*gafrep$but.rep[1],
+            sapply(seq(0,1300, 10), fN.pen.fx.uncertainty, simplify = T),
             pch = 5, col = 4, cex = 0.5) #plot with reference back to raw control value
