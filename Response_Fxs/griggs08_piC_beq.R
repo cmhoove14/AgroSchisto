@@ -82,13 +82,13 @@ grgc.df = data.frame(atr = c(0,15,100),
                               summary(grg.100)$coefficients[1,2]))
     
   plot(grgc.df$atr, grgc.df$e, pch = 16, xlab = 'atrazine (ppb)', ylab = 'LL.2 Parameters',
-       ylim = c(2,18), xlim = c(0,300))
-  points(grgc.df$atr, grgc.df$b, pch = 17, col=2)
+       ylim = c(0,17), xlim = c(0,300))
+  points(grgc.df$atr+3, grgc.df$b, pch = 17, col=2)
     for(i in 1:length(grgc.df$atr)){
       segments(x0 = grgc.df$atr[i], y0 = grgc.df$e[i] + grgc.df$e.se[i],
                x1 = grgc.df$atr[i], y1 = grgc.df$e[i] - grgc.df$e.se[i])
-      segments(x0 = grgc.df$atr[i], y0 = grgc.df$b[i] + grgc.df$b.se[i],
-               x1 = grgc.df$atr[i], y1 = grgc.df$b[i] - grgc.df$b.se[i], col=2)
+      segments(x0 = grgc.df$atr[i]+3, y0 = grgc.df$b[i] + grgc.df$b.se[i],
+               x1 = grgc.df$atr[i]+3, y1 = grgc.df$b[i] - grgc.df$b.se[i], col=2)
     }
 #parameters as function of atrazine  
   eg.mod = lm(e ~ atr, weights = e.se^-1, data = grgc.df) 
@@ -120,7 +120,7 @@ lines(modgdf$atr, modgdf$pred.b, lty = 2, col=2)
   lines(modgdf$atr, modgdf$pred.b + 1.96*modgdf$pred.b.se, lty = 3, col=2)
   lines(modgdf$atr, modgdf$pred.b - 1.96*modgdf$pred.b.se, lty = 3, col=2)
   
-legend('topright', legend = c('slp', 'lc50'), pch = c(17, 16), col=c(2,1), cex = 0.7)  
+legend('topright', legend = c('slp', 'lc50'), pch = c(17, 16), col=c(2,1), cex = 0.7, bty='n')  
 title('Griggs 08 cercarial survival parameters')  
 #Create function to generate d-r function with linear fit to lc50 parameter#####################
   grg.fx = function(He){
@@ -130,11 +130,12 @@ title('Griggs 08 cercarial survival parameters')
     e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     
-    if(e.use <= 0){auc=0} else {
-      auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t / e.use)))))}, 
-                      lower=0, upper=24, stop.on.error = FALSE)[1]$value
+    while(e.use<0){
+      e.use = rnorm(1, e[1], e[2])
     }
     
+    auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t / e.use)))))}, 
+                      lower=0, upper=24, stop.on.error = FALSE)[1]$value
     auc
   }  
   
@@ -154,28 +155,31 @@ title('Griggs 08 cercarial survival parameters')
     e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     
-    if(e.use <= 0){auc=0} else {
-      auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t / e.use)))))}, 
-                      lower=0, upper=24, stop.on.error = FALSE)[1]$value
+    while(e.use<0){
+      e.use = rnorm(1, e[1], e[2])
     }
     
+    auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t / e.use)))))}, 
+                      lower=0, upper=24, stop.on.error = FALSE)[1]$value
     auc
   }  
   
   #Final:generate relative cercariae-hrs function  
   piC.grg08_atr_unc2 = function(He){
-    piC = grg.fx(He) / grg.fx(0)
+    piC = grg.fx2(He) / grg.fx2(0)
     if(piC > 1) {piC = 1} else {
       (return(piC))
     }
   }
   
 #Compare the linear and exponential functions and store key items ##############
-plot(c(0:500), sapply(c(0:500), piC.grg08_atr_unc), pch = 1, ylim = c(0,1),
+plot(c(0,15,100), c(auc.grg0, auc.grg15, auc.grg100)/auc.grg0, ylim = c(0,1),pch = 16, cex = 1.2,
      xlab = 'atrazine (ppb)', ylab = expression(paste(pi[C], 'estimate')))
-  points(c(0:500), sapply(c(0:500), piC.grg08_atr_unc2), pch = 1, col = 4)
-  legend('bottomleft', legend = c('linear', 'exponential'), pch = 1, col = c(1,4),
-         title = 'Function fit to lc50 parameter', cex = 0.7)
+  
+  points(c(0:500), sapply(c(0:500), piC.grg08_atr_unc), pch = 5, col = 2, cex = 0.6)
+  points(c(0:500), sapply(c(0:500), piC.grg08_atr_unc2), pch = 5, cex = 0.6, col = 4)
+  legend('bottomleft', legend = c('linear', 'exponential'), pch = 5, col = c(2,4),
+         title = 'Function fit to lc50 parameter', cex = 0.7, bty='n')
   
 keep.grg08 = c('grgatr.auc', 'piC.grg08_atr_unc', 'grg.fx', 'piC.grg08_atr_unc2', 'grg.fx2',
                'eg.mod', 'eg.mod2', 'bg.mod')
