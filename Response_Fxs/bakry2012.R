@@ -14,31 +14,46 @@ require(drc)
 
 #Snail (B. alexandrina) toxicity; create data frame, clean, etc. ##########
 muN.bak = data.frame(atr = c(.330, 1.250, 4.750),
-                     atr.se = 0,
                      gly = c(.840, 3.150, 12.600),
-                     gly.se = 0,
                      mort = c(0.1, 0.5, 0.9))
 
   muN.bak$surv = 1 - muN.bak$mort
 
-#Standard errors imputed assuming proportional error to concentration
-  
-  se.atr = (log10(1.88) - log10(1.25)) / 1.96 #st. err of lc50 in ppm
-  se.gly = (log10(4.82) - log10(3.15)) / 1.96 #error bars are assymetrical in this data even after log transformation
-                                              #so not entirely sure how to handle that...
-
-  muN.bak$atr.se = (muN.bak$atr / 1.25) * se.atr #st. err proportional to concentration
-  muN.bak$gly.se = (muN.bak$gly / 3.15) * se.gly #st. err proportional to concentration
-
 #direct snail toxicity from Atrazine ############  
-plot(muN.bak$atr, muN.bak$mort, ylim = c(0,1), xlim = c(0,13),
-       pch = 16, xlab = 'atrazine (ppm)', ylab = 'mortality')
-  for(i in 1:length(muN.bak$atr)){
-    segments(y0 = muN.bak$mort[i], x0 = muN.bak$atr[i] + muN.bak$atr.se[i],
-             y1 = muN.bak$mort[i], x1 = muN.bak$atr[i] - muN.bak$atr.se[i])
-
-  }
+plot(muN.bak$atr*1000, muN.bak$mort, ylim = c(0,1), xlim = c(0,5000),
+       pch = 16, xlab = 'atrazine (ppb)', ylab = 'snail mortality',
+     main = 'D-R function based on reported values')
   
+    segments(y0 = 0.5, x0 = 830, y1 = 0.5, x1 = 1880)
+
+#function based on reported values    
+  lc50.atr.mun = 1.25
+    se.lc50.atr.mun = mean(log(1.83/1.25), log(1.25/0.88)) / 1.96
+  slp.atr.mun = 2.48
+  
+  fx.mun.atr = function(He, lc = lc50.atr.mun){
+    heu = He/1000
+    pnorm(log(slp.atr.mun) * log(heu/lc))
+  }
+
+    lines(c(0:5000), sapply(c(0:5000), fx.mun.atr), lty = 2, col = 2)
+    lines(c(0:5000), sapply(c(0:5000), fx.mun.atr, lc = 1.83), lty = 3, col = 2)
+    lines(c(0:5000), sapply(c(0:5000), fx.mun.atr, lc = 0.88), lty = 3, col = 2)
+ 
+  muNq_atr_Bakry12_uncertainty = function(He){
+    heu = He/1000
+    lc50 = exp(rnorm(1, log(lc50.atr.mun), se.lc50.atr.mun))
+    pnorm(log(slp.atr.mun) * log(heu/lc50))
+  }   
+    
+    points(seq(0,5000,10), sapply(seq(0,5000,10), muNq_atr_Bakry12_uncertainty), 
+           pch = 5, col = 4, cex = 0.5)  
+    
+#Function based on fit to LC values  
+ plot(muN.bak$atr*1000, muN.bak$mort, ylim = c(0,1), xlim = c(0,5000),
+     pch = 16, xlab = 'atrazine (ppb)', ylab = 'snail mortality',
+     main = 'D-R function based on fit to LC values')    
+    
   bak12.atr.drm = drm(mort ~ atr, weights = rep(50,3), data = muN.bak, type = 'binomial',
                       fct = LL.2())
   
@@ -59,13 +74,35 @@ plot(muN.bak$atr, muN.bak$mort, ylim = c(0,1), xlim = c(0,13),
          col = 4, pch = 5, cex = 0.5)
   
 #direct snail toxicity from Glyphosate ############  
-  plot(muN.bak$gly, muN.bak$mort, ylim = c(0,1), xlim = c(0,13),
-       pch = 16, xlab = 'glyphosate (ppm)', ylab = 'mortality')  
-    for(i in 1:length(muN.bak$atr)){
-      segments(y0 = muN.bak$mort[i], x0 = muN.bak$gly[i] + muN.bak$gly.se[i],
-               y1 = muN.bak$mort[i], x1 = muN.bak$gly[i] - muN.bak$gly.se[i])
-    }
-    
+  plot(muN.bak$gly*1000, muN.bak$mort, ylim = c(0,1), xlim = c(0,13000),
+       pch = 16, xlab = 'glyphosate (ppb)', ylab = 'snail mortality',
+       main = 'D-R function based on reported values')  
+  
+      segments(y0 = 0.5, x0 = 890, y1 = 0.5, x1 = 4820)
+#function based on provided values
+  lc50.gly.mun = 3.15
+    se.lc50.gly.mun = mean(log(4.82/3.15), log(3.15/0.89)) / 1.96
+  slp.gly.mun = 2.16
+  
+  fx.mun.gly = function(He, lc = lc50.gly.mun){
+    heu = He/1000
+    pnorm(log(slp.gly.mun) * log(heu/lc))
+  }
+  
+    lines(seq(0,13000, 13), sapply(seq(0,13000, 13), fx.mun.gly), lty = 2, col = 2)
+    lines(seq(0,13000, 13), sapply(seq(0,13000, 13), fx.mun.gly, lc = 4.82), lty = 3, col = 2)
+    lines(seq(0,13000, 13), sapply(seq(0,13000, 13), fx.mun.gly, lc = 0.89), lty = 3, col = 2)
+  
+  muNq_gly_Bakry12_uncertainty = function(He){
+    heu = He/1000
+    lc50 = exp(rnorm(1, log(lc50.gly.mun), se.lc50.gly.mun))
+    pnorm(log(slp.gly.mun) * log(heu/lc50))
+  }   
+  
+    points(seq(0,13000, 20), sapply(seq(0,13000, 20), muNq_gly_Bakry12_uncertainty), 
+           pch = 5, col = 4, cex = 0.5)  
+
+#function based on fit to LC values    
   bak12.gly.drm = drm(mort ~ gly, weights = rep(50,3), data = muN.bak, type = 'binomial',
                       fct = LL.2())
   
@@ -103,10 +140,72 @@ hatches = as.numeric()
     hatches[i] = sum(bak12$hatch[bak12$conc == unique(bak12$conc)[i]])
   } 
 
-fn = hatches / sn.wk
+fn = hatches / sn.wk #final measure of hatchlings/snail/week
 
-bak.fn = data.frame(gly.conc = c(0, 840),
-                    atr.conc = c(0, 330),
-                    gly.rep = c(fn[1], fn[3]),
-                    atr.rep = c(fn[1], fn[2]))  
-#No function attempted to fit because only control and single concentration data point for each agroC
+#assume lc90 halts all reproduction to provide third data point
+bak.fn = data.frame(gly = c(0, .840, 12.600),
+                    atr = c(0, .330, 4.750),
+                    gly.r = c(fn[1], fn[3], 0),
+                    atr.r = c(fn[1], fn[2], 0))  
+
+#glyphosate influence on reproduction ############
+fn.bak.gly = drm(gly.r ~ gly, data = bak.fn, type = 'continuous',
+                 fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                           fixed = c(NA, 0, bak.fn$gly.r[1], NA)))
+
+  summary(fn.bak.gly)
+
+fn.bak.gly.pred = function(He){
+  heu = He/1000
+  predict(fn.bak.gly, newdata = data.frame(gly = heu), interval = 'confidence', level = 0.95)
+}  
+
+plot(bak.fn$gly*1000, bak.fn$gly.r / bak.fn$gly.r[1] , ylim = c(0,1), pch = 16,
+     xlab = 'glyphosate (ppb)', ylab = 'relative hatchlings/snail/week')
+
+  lines(seq(0,13000, 13), sapply(seq(0,13000, 13), fn.bak.gly.pred)[1,] / bak.fn$gly.r[1], col = 2, lty=2)
+  lines(seq(0,13000, 13), sapply(seq(0,13000, 13), fn.bak.gly.pred)[2,] / bak.fn$gly.r[1], col = 2, lty=3)
+  lines(seq(0,13000, 13), sapply(seq(0,13000, 13), fn.bak.gly.pred)[3,] / bak.fn$gly.r[1], col = 2, lty=3)
+
+fN.gly.fx.uncertainty = function(He){
+  heu = He/1000
+  init = predict(fn.bak.gly, newdata = data.frame(gly = heu), se.fit = T)
+  fn = rnorm(1, init[1], init[2]) / bak.fn$gly.r[1]
+  while(fn < 0 && fn > 1.00000){
+    fn = rnorm(1, init[1], init[2]) / bak.fn$gly.r[1]
+  }
+  return(fn)
+} #normalized to 1, upper limit at 1, lower limit at 0
+
+  points(seq(0,13000, 130), sapply(seq(0,13000, 130), fN.gly.fx.uncertainty), pch = 5, cex = 0.5, col = 4)
+
+#atrazine influence on reproduction ############
+fn.bak.atr = drm(atr.r ~ atr, data = bak.fn, type = 'continuous',
+                 fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                           fixed = c(NA, 0, bak.fn$atr.r[1], NA)))
+
+summary(fn.bak.atr)
+
+fn.bak.atr.pred = function(He){
+  heu = He/1000
+  predict(fn.bak.atr, newdata = data.frame(atr = heu), interval = 'confidence', level = 0.95)
+}  
+
+plot(bak.fn$atr*1000, bak.fn$atr.r / bak.fn$atr.r[1] , ylim = c(0,1), pch = 16,
+     xlab = 'atrazine (ppb)', ylab = 'relative hatchlings/snail/week')
+
+  lines(seq(0,5000,5), sapply(seq(0,5000,5), fn.bak.atr.pred)[1,] / bak.fn$atr.r[1], col = 2, lty=2)
+  lines(seq(0,5000,5), sapply(seq(0,5000,5), fn.bak.atr.pred)[2,] / bak.fn$atr.r[1], col = 2, lty=3)
+  lines(seq(0,5000,5), sapply(seq(0,5000,5), fn.bak.atr.pred)[3,] / bak.fn$atr.r[1], col = 2, lty=3)
+
+fN.atr.fx.uncertainty = function(He){
+  heu = He/1000
+  init = predict(fn.bak.atr, newdata = data.frame(atr = heu), se.fit = T)
+  fn = rnorm(1, init[1], init[2]) / bak.fn$atr.r[1]
+  while(fn < 0 && fn > 1.00000){
+    fn = rnorm(1, init[1], init[2]) / bak.fn$atr.r[1]
+  }
+  return(fn)
+} #normalized to 1, upper limit at 1, lower limit at 0
+
+points(seq(0,5000, 10), sapply(seq(0,5000, 10), fN.atr.fx.uncertainty), pch = 5, cex = 0.5, col = 4)
