@@ -2,6 +2,8 @@
 # Direct toxicity to snails (Bu. truncatus); daily mortality rate ########
 
 #Chlorpyrifos #########
+
+
 mun.ch = data.frame(conc = c(.72, 1.32, 2.82),
                      mort = c(.25, .50 , .90),
                      surv = 0)
@@ -191,20 +193,18 @@ fn<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/D
 #ChlorP miracidia
   lc50m.chlor = 0.78
   slpm.chlor = 1.86
-  
-    pi_Mq_ch_has11<-function(In){
-      Ins = In/1000
-      1 - 1/(1+exp(slpm.chlor*(log(Ins)-log(lc50m.chlor))))
-    }  
-    
-    pi_Mq_ch_has11(780)
     
     in.test = seq(0,10000,1)
     
-    plot(in.test, pi_Mq_ch_has11(in.test), type = 'l', lwd = 2, xlim = c(0,10000),
-        xlab = 'chlorpyrifos concentration (ppb)', ylab = 'pi_M', 
-        main = 'Hasheesh 2011 miracidia chlorpyrifos data')
-
+    plot(in.test, pnorm(slpm.chlor * log(in.test/780)), type = 'l', lty = 2, col = 2,
+         xlim = c(0,10000), ylim = c(0,1),
+         xlab = 'chlorpyrifos concentration (ppb)', ylab = 'pi_M', 
+         main = 'Hasheesh 2011 miracidia chlorpyrifos data')
+    
+      points(c(780, 1800), c(0.5, 0.9), pch = 16, cex = 1.2)
+      lines(in.test, pnorm(slpm.chlor * log(in.test/560)), col = 2, lty = 3)
+      lines(in.test, pnorm(slpm.chlor * log(in.test/1100)), col = 2, lty = 3)
+      
 #Profenofos miracidia
   lc50m.prof = 1.5
   slpm.prof = 1.64
