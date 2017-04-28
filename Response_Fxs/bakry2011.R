@@ -2,22 +2,48 @@
 require(drc)
 
 #Snail (H. duryi) toxicity ##########
-#Malathion
+#Malathion #####################
   mun.mal = data.frame(conc = c(.176, .480, .830, 1.760, 3.360),
                        mort = c(0,   .10, .25, .50 , .90),
                        surv = 0)
   mun.mal$surv = 1 - mun.mal$mort
   
-  se = (log10(3.12) - log10(1.76)) / 1.96 #st. err of lc50 in ppm
-  
-  mun.mal$se = (mun.mal$conc / 1.760) * se #st. err proportional to concentration
+  plot(mun.mal$conc*1000, mun.mal$mort, pch = 16, cex = 1.2, 
+       xlab = 'Malathion (ppm)', ylab = 'prop dead', ylim = c(0,1), xlim = c(0,5000),
+       main = 'D-R function based on reported values')
+      
+    segments(x0 = 3120, y0 = 0.5, x1 = 990, y1 = 0.5)
 
+  
+#function based on provided parameters
+  
+  lc50.mal.mun = 1.76
+    se.lc50.mal.mun = mean(log(3.12/1.76), log(1.76/0.99)) / 1.96
+  slp.mal.mun = 2.68  
+  
+  fx.mun.mal = function(In, lc = lc50.mal.mun){
+    Ins = In/1000
+    pnorm(slp.mal.mun * log(Ins/lc))
+  }
+  
+    lines(c(0:5000), sapply(c(0:5000), fx.mun.mal), lty = 2, col = 2)
+    lines(c(0:5000), sapply(c(0:5000), fx.mun.mal, lc = 3.12), lty = 3, col = 2)
+    lines(c(0:5000), sapply(c(0:5000), fx.mun.mal, lc = 0.99), lty = 3, col = 2)
+    
+  muNq_mal_Bakry11_uncertainty = function(In){
+    Ins = In/1000
+    lc50 = exp(rnorm(1, log(lc50.mal.mun), se.lc50.mal.mun))
+    pnorm(slp.mal.mun * log(Ins/lc50))
+  }   
+  
+  points(seq(0,5000,5), sapply(seq(0,5000,5), muNq_mal_Bakry11_uncertainty), 
+         pch = 5, col = 4, cex = 0.5)
+  
+#function based on fit to lc values
   plot(mun.mal$conc, mun.mal$mort, pch = 16, cex = 1.2, 
-       xlab = 'Malathion (ppm)', ylab = 'prop dead', ylim = c(0,1), xlim = c(0,5))
-    for(i in 1:length(unique(mun.mal$conc))){
-      segments(x0 = mun.mal$conc[i] + mun.mal$se[i], y0 = mun.mal$mort[i],
-               x1 = mun.mal$conc[i] - mun.mal$se[i], y1 = mun.mal$mort[i])
-    }
+       xlab = 'Malathion (ppm)', ylab = 'prop dead', ylim = c(0,1), xlim = c(0,5),
+       main = 'D-R function based on reported values')
+    segments(x0 = 3.120, y0 = 0.5, x1 = .990, y1 = 0.5)
   
   bak11.mod = drm(mort ~ conc, data = mun.mal, weights = se^-1, type = 'binomial',
                   fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
@@ -41,33 +67,57 @@ require(drc)
     lines(bak.mal.df$conc, bak.mal.df$Lower, col = 2, lty=3)
     lines(bak.mal.df$conc, bak.mal.df$Upper, col = 2, lty=3)
     
-    muNq_mal_Bakry11_uncertainty<-function(In){
+    muNq_mal_Bakry11_uncertainty2<-function(In){
       Ins = In/1000
       rdrm(1, LL.2(), coef(bak11.mod), Ins, yerror = 'rbinom', ypar = 100)$y / 100 #estimate deaths / live 
     }
 #Plotting function to check estimates vs data and model  
     points(seq(0,5,0.01), sapply(seq(0, 5000, 10), muNq_mal_Bakry11_uncertainty), 
-           col=2, pch=1, cex=0.5)
+           col=4, pch=5, cex=0.5)
     
     
-#Deltamethrin     
+#Deltamethrin  #############    
 mun.del = data.frame(conc = c(.482, 1.21, 2.034, 4.82, 7.26),
                      mort = c(0,   .10, .25, .50 , .90),
                      surv = 0)
   mun.del$surv = 1 - mun.del$mort
 
-se2 = (log10(7.7) - log10(4.82)) / 1.96 #st. err of lc50 in ppm
+plot(mun.del$conc*1000, mun.del$mort, pch = 16, cex = 1.2, ylim = c(0,1), xlim = c(0,10000),
+     xlab = 'Deltamethrin (ppm)', ylab = 'prop dead', 
+     main = 'D-R function based on reported values')
+    segments(x0 = 310, y0 = 0.5, x1 = 7700, y1 = 0.5)
 
-  mun.del$se2 = (mun.del$conc / 4.82) * se2 #st. err proportional to concentration
+#function based on provided parameters
 
-plot(mun.del$conc, mun.del$mort, pch = 16, cex = 1.2, 
-     xlab = 'Deltamethrin (ppm)', ylab = 'prop dead', ylim = c(0,1), xlim = c(0,10))
-  for(i in 1:length(unique(mun.del$conc))){
-    segments(x0 = mun.del$conc[i] + mun.del$se2[i], y0 = mun.del$mort[i],
-             x1 = mun.del$conc[i] - mun.del$se2[i], y1 = mun.del$mort[i])
-  }
+lc50.del.mun = 4.82
+  se.lc50.del.mun = mean(log(7.7/lc50.del.mun), log(lc50.del.mun/0.31)) / 1.96
+slp.del.mun = 2.74  
 
-bak11.mod2 = drm(mort ~ conc, data = mun.del, weights = se2^-1, type = 'binomial',
+fx.mun.del = function(In, lc = lc50.del.mun){
+  Ins = In/1000
+  pnorm(slp.del.mun * log(Ins/lc))
+}
+
+  lines(seq(0,10000,10), sapply(seq(0,10000,10), fx.mun.del), lty = 2, col = 2)
+  lines(seq(0,10000,10), sapply(seq(0,10000,10), fx.mun.del, lc = 7.7), lty = 3, col = 2)
+  lines(seq(0,10000,10), sapply(seq(0,10000,10), fx.mun.del, lc = 0.31), lty = 3, col = 2)
+
+muNq_del_Bakry11_uncertainty = function(In){
+  Ins = In/1000
+  lc50 = exp(rnorm(1, log(lc50.del.mun), se.lc50.del.mun))
+  pnorm(slp.del.mun * log(Ins/lc50))
+}   
+
+points(seq(0,10000,10), sapply(seq(0,10000,10), muNq_del_Bakry11_uncertainty), 
+       pch = 5, col = 4, cex = 0.5)
+
+#Function based on fit to lc values
+plot(mun.del$conc, mun.del$mort, pch = 16, cex = 1.2, ylim = c(0,1), xlim = c(0,10),
+     xlab = 'Deltamethrin (ppm)', ylab = 'prop dead', 
+     main = 'D-R function based on reported values')
+  segments(x0 = .310, y0 = 0.5, x1 = 7.700, y1 = 0.5)
+
+bak11.mod2 = drm(mort ~ conc, data = mun.del, type = 'binomial',
                 fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                            fixed = c(NA, 0, 1, NA)))
   summary(bak11.mod2)
@@ -85,9 +135,9 @@ bak.del.df = data.frame(conc = seq(0,10,0.01),
   bak.del.df[,2:4] <- predict(bak11.mod2, newdata = bak.del.df, 
                               interval = 'confidence', level = 0.95)
   
-    lines(bak.del.df$conc, bak.del.df$Prediction, col = 4, lty=2)
-    lines(bak.del.df$conc, bak.del.df$Lower, col = 4, lty=3)
-    lines(bak.del.df$conc, bak.del.df$Upper, col = 4, lty=3)
+    lines(bak.del.df$conc, bak.del.df$Prediction, col = 2, lty=2)
+    lines(bak.del.df$conc, bak.del.df$Lower, col = 2, lty=3)
+    lines(bak.del.df$conc, bak.del.df$Upper, col = 2, lty=3)
 
   muNq_del_Bakry11_uncertainty<-function(In){
       Ins = In/1000
@@ -95,7 +145,7 @@ bak.del.df = data.frame(conc = seq(0,10,0.01),
     }
 #Plotting function to check estimates vs data and model  
 points(seq(0,10,0.01), sapply(seq(0, 10000, 10), muNq_del_Bakry11_uncertainty), 
-       col=4, pch=1, cex=0.5)
+       col=4, pch=5, cex=0.5)
 
 #The paper also provides info on longitudinal survival of snail cohorts exposed to LC10 of each insecticide ################
   #So let's compare that data with the expected long. survival from the model at the same concentration
@@ -141,79 +191,72 @@ points(seq(0,10,0.01), sapply(seq(0, 10000, 10), muNq_del_Bakry11_uncertainty),
   #Values for controls are equal to the sum of mean eggs per day produced in the control up to the day where
   #reproduction stops in the lc10 test groups (day4 for malathion, day 14 for deltamethrin)    
       
-  fn.bak = data.frame(mal = c(0, .480, 3.360), #0 ppm = control experiment; assume 0 reproduction at lc90
-                      del = c(0, 1.21, 7.26),  #0 ppm = control experiment; assume 0 reproduction at lc90
-                      mal.r = c(5.2 + 11.4, 3.9, 0),  
-                      del.r = c(5.2 + 11.4 + 10 + 8.8, 14.33, 0))  
-      
+  fn.bak = data.frame(mal = c(0, .480, 3.36),#0 ppm = control experiment; 3rd point assumes lc90 = no reproduction
+                      del = c(0, 1.21, 7.26),#0 ppm = control experiment; 3rd point assumes lc90 = no reproduction
+                      mal.r = c(54.4/(50+47+43+40+36+32+28), #Mean eggs/snail /snails = mean eggs
+                                3.9/(50+34+22+8), 0),      #this normalizes reproduction by snail survival
+                      del.r = c(54.4/(50+47+43+40+36+32+28), 
+                                14.33/(50+41+31+20+10), 0))  
+#Malathion reproduction ##########      
   fn.bak.mal = drm(mal.r ~ mal, data = fn.bak, type = 'continuous',
-                   fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                   fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                               fixed = c(NA, 0, fn.bak$mal.r[1], NA)))
   
     summary(fn.bak.mal)
     
+    fn.bak.mal.pred = function(In){
+      Ins = In/1000
+      predict(fn.bak.mal, newdata = data.frame(mal = Ins), interval = 'confidence', level = 0.95)
+    }  
+    
+plot(fn.bak$mal*1000, fn.bak$mal.r / fn.bak$mal.r[1] , ylim = c(0,1), pch = 16,
+       xlab = 'malathion (ppm)', ylab = 'relative mean eggs/snail')
+    
+  lines(seq(0,4000,4), sapply(seq(0,4000,4), fn.bak.mal.pred)[1,] / fn.bak$mal.r[1], col = 2, lty=2)
+  lines(seq(0,4000,4), sapply(seq(0,4000,4), fn.bak.mal.pred)[2,] / fn.bak$mal.r[1], col = 2, lty=3)
+  lines(seq(0,4000,4), sapply(seq(0,4000,4), fn.bak.mal.pred)[3,] / fn.bak$mal.r[1], col = 2, lty=3)
+    
+  fN.mal.fx.uncertainty = function(In){
+    Ins = In/1000
+    init = predict(fn.bak.mal, newdata = data.frame(mal = Ins), se.fit = T)
+    fn = rnorm(1, init[1], init[2]) / fn.bak$mal.r[1]
+    while(fn < 0 && fn > 1.00000){
+      fn = rnorm(1, init[1], init[2]) / fn.bak$mal.r[1]
+    }
+    return(fn)
+  } #normalized to 1, upper limit at 1, lower limit at 0
+  
+  points(seq(0,4000,10), sapply(seq(0,4000,10), fN.mal.fx.uncertainty), pch = 5, cex = 0.5, col = 4)
+
+#deltamethrin reproduction ##########      
   fn.bak.del = drm(del.r ~ del, data = fn.bak, type = 'continuous',
-                   fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                   fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                               fixed = c(NA, 0, fn.bak$del.r[1], NA)))
     summary(fn.bak.del)
-      
-  plot(fn.bak$mal, fn.bak$mal.r / fn.bak$mal.r[1] , ylim = c(0,1), xlim = c(0,8), pch = 16, col = 'red',
-       xlab = 'conc (ppm)', ylab = 'relative mean eggs/snail')
-    points(fn.bak$del, fn.bak$del.r / fn.bak$del.r[1], pch = 16, col = 'purple')
-
-    bak.mal.df2 = data.frame(mal = seq(0,10,0.001),
-                             Prediction = 0,
-                             Lower = 0,
-                             Upper = 0)
-    
-    bak.mal.df2[,2:4] <- predict(fn.bak.mal, newdata = bak.mal.df2, 
-                                interval = 'confidence', level = 0.95)
-    
-      lines(bak.mal.df2$mal, bak.mal.df2$Prediction / fn.bak$mal.r[1], col = 2, lty=2)
-      lines(bak.mal.df2$mal, bak.mal.df2$Lower / fn.bak$mal.r[1], col = 2, lty=3)
-      lines(bak.mal.df2$mal, bak.mal.df2$Upper / fn.bak$mal.r[1], col = 2, lty=3)
-      
-    bak.del.df2 = data.frame(del = seq(0,10,0.001),
-                             Prediction = 0,
-                             Lower = 0,
-                             Upper = 0)
-    
-    bak.del.df2[,2:4] <- predict(fn.bak.del, newdata = bak.del.df2, 
-                                 interval = 'confidence', level = 0.95)
-    
-    lines(bak.del.df2$del, bak.del.df2$Prediction / fn.bak$del.r[1], col = 'purple', lty=2)
-    lines(bak.del.df2$del, bak.del.df2$Lower / fn.bak$del.r[1], col = 'purple', lty=3)
-    lines(bak.del.df2$del, bak.del.df2$Upper / fn.bak$del.r[1], col = 'purple', lty=3)
-    
-  fNq_mal_Bakry11_uncertainty = function(In){
-    Ins = In/1000 #Input in parts per billion, model in ppm
-    c1 = predict(fn.bak.mal, newdata = data.frame(mal = 0))
-    
-    ts = predict(fn.bak.mal, newdata = data.frame(mal = Ins), se.fit = TRUE)
-    
-    fN = rnorm(1,ts[1],ts[2]) / c1
-    
-    fN
-  } 
-#Plotting function to check estimates vs data and model  
-  #for(i in c(0:10000)){
-  #  points(i/1000, fNq_mal_Bakry11_uncertainty(i), pch = 17, cex = 0.4, col = 4)
-  #}
   
-  fNq_del_Bakry11_uncertainty = function(In){
-    Ins = In/1000 #Input in parts per billion, model in ppm
-    c1 = predict(fn.bak.del, newdata = data.frame(del = 0))
-    
-    ts = predict(fn.bak.del, newdata = data.frame(del = Ins), se.fit = TRUE)
-
-    fN = rnorm(1,ts[1],ts[2]) / c1
-    
-    fN
+  fn.bak.del.pred = function(In){
+    Ins = In/1000
+    predict(fn.bak.del, newdata = data.frame(del = Ins), interval = 'confidence', level = 0.95)
+  }   
+  
+  plot(fn.bak$del*1000, fn.bak$del.r / fn.bak$del.r[1] , ylim = c(0,1), pch = 16,
+       xlab = 'deltamethrin (ppm)', ylab = 'relative mean eggs/snail')
+  
+    lines(seq(0,7000,7), sapply(seq(0,7000,7), fn.bak.del.pred)[1,] / fn.bak$del.r[1], col = 2, lty=2)
+    lines(seq(0,7000,7), sapply(seq(0,7000,7), fn.bak.del.pred)[2,] / fn.bak$del.r[1], col = 2, lty=3)
+    lines(seq(0,7000,7), sapply(seq(0,7000,7), fn.bak.del.pred)[3,] / fn.bak$del.r[1], col = 2, lty=3)
+  
+  fNq_dell_Bakry11_uncertainty = function(In){
+    Ins = In/1000
+    init = predict(fn.bak.del, newdata = data.frame(del = Ins), se.fit = T)
+    fn = rnorm(1, init[1], init[2]) / fn.bak$del.r[1]
+    while(fn < 0 && fn > 1.00000){
+      fn = rnorm(1, init[1], init[2]) / fn.bak$del.r[1]
+    }
+    return(fn)
   } 
-#Plotting function to check estimates vs data and model  
-  #for(i in c(0:10000)){
-  #  points(i/1000, fNq_del_Bakry11_uncertainty(i), pch = 17, cex = 0.4, col = 3)
-  #}
+  
+  points(seq(0,7000,10), sapply(seq(0,7000,10), fNq_dell_Bakry11_uncertainty), pch = 5, cex = 0.5, col = 4)
   
   keep.bak11.N = c('mun.mal', 'muNq_mal_Bakry11_uncertainty', 'bak11.mod', 'muNq_del_Bakry11_uncertainty', 'bak11.mod2',
                    'fNq_mal_Bakry11_uncertainty', 'fn.bak.mal', 'fNq_del_Bakry11_uncertainty', 'fn.bak.del')
