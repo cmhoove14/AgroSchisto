@@ -4,7 +4,7 @@ require(drc)
 #Insecticide toxicity to crustaceans from Halstead et al; 4-day mortality endpoints ################
   data<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Halstead_etal/Cray.LC50.2012.csv')
   
-#Malathion ********************************************************************************************
+#Malathion ******************************************************************************########
   mal<-subset(data, Chem == 'Mal')
     mal.sum = data.frame(mal.c = unique(mal$Conc),
                          mal.total = 5,
@@ -18,7 +18,7 @@ require(drc)
     mal.sum$mort = mal.sum$mal.d / mal.sum$mal.total
     
       mal.mod<-drm(mal.d / mal.total ~ mal.c, weights = mal.total, data = mal.sum, type = 'binomial',  
-                   fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                   fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                               fixed = c(NA, 0, 1, NA)))
 
      muPq_mal_Halstead<-function(In){
@@ -36,15 +36,17 @@ require(drc)
             lty = 3, col = 2)
       lines(seq(0, max(mal$Conc), 100), sapply(seq(0, max(mal$Conc), 100), muPq_mal_Halstead, simplify = T)[3,],
             lty = 3, col = 2)
-        
+   
+    par.mal = c(coef(mal.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Intercept)' = 1)[c(1,3,4,2)]  
+           
       muPq_mal_Halstead_uncertainty<-function(In){
-        rdrm(1, LL.2(), coef(mal.mod), In, yerror = 'rbinom', ypar = 5)$y / 5 #estimate deaths / live 
+        rdrm(1, L.4(), par.mal, In, yerror = 'rbinom', ypar = 5)$y / 5 #estimate deaths / live 
       }
         points(seq(0, 40000, 40), sapply(seq(0, 40000, 40), muPq_mal_Halstead_uncertainty),
              pch = 5, col=4, cex = 0.5)
     
       
-#Chlorpyrifos   ********************************************************************************************
+#Chlorpyrifos   *************************************************************************############
   chlor<-subset(data, Chem == 'Chlor')
     chlor.sum = data.frame(chlor.c = unique(chlor$Conc),
                          chlor.total = 5,
@@ -58,7 +60,7 @@ require(drc)
     chlor.sum$mort = chlor.sum$chlor.d / chlor.sum$chlor.total
       
     chlor.mod<-drm(chlor.d / chlor.total ~ chlor.c, weights = chlor.total, data = chlor.sum, type = 'binomial',  
-                   fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                   fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                               fixed = c(NA, 0, 1, NA)))
 
     muPq_chlor_Halstead<-function(In){
@@ -75,15 +77,17 @@ require(drc)
           lty = 3, col = 2)
     lines(seq(0, max(chlor$Conc), 1), sapply(seq(0, max(chlor$Conc), 1), muPq_chlor_Halstead, simplify = T)[3,],
           lty = 3, col = 2)
-      
+     
+    par.chlor = c(coef(chlor.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Intercept)' = 1)[c(1,3,4,2)]  
+     
       muPq_chlor_Halstead_uncertainty<-function(In){
-        rdrm(1, LL.2(), coef(chlor.mod), In, yerror = 'rbinom', ypar = 5)$y / 5
+        rdrm(1, L.4(), par.chlor, In, yerror = 'rbinom', ypar = 5)$y / 5
       } 
         
       points(c(0:100), sapply(c(0:100), muPq_chlor_Halstead_uncertainty),
            pch = 5, col=4, cex = 0.5)
       
-#Terbufos   ********************************************************************************************
+#Terbufos   *****************************************************************************########
   terb<-subset(data, Chem == 'Terb')
     terb.sum = data.frame(terb.c = unique(terb$Conc),
                              terb.total = 5,
@@ -97,38 +101,30 @@ require(drc)
       terb.sum$mort = terb.sum$terb.d / terb.sum$terb.total
       
   terb.mod<-drm(terb.d / terb.total ~ terb.c, weights = terb.total, data = terb.sum, type = 'binomial', 
-                fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                            fixed = c(NA, 0, 1, NA)))
-#    summary(terb.mod)
-#    plot(terb.mod, ylim = c(0,1))
+  
+  muPq_terb_Halstead<-function(In){
+    predict(terb.mod, newdata = data.frame(terb.c = In), interval = 'confidence', level = 0.95)
+  }
+        
+    plot(terb.sum$terb.c, terb.sum$mort, pch = 16, xlab = 'Terbufos Concentration (ppb)', 
+         ylab = 'prop dead', ylim = c(0,1),
+         main = expression(paste('Terbufos toxicity to ', italic('P. clarkii'))))
+      lines(c(0:170), sapply(c(0:170), muPq_terb_Halstead)[1,], col = 2, lty=2)
+      lines(c(0:170), sapply(c(0:170), muPq_terb_Halstead)[2,], col = 2, lty=3)
+      lines(c(0:170), sapply(c(0:170), muPq_terb_Halstead)[3,], col = 2, lty=3)
       
-#      muPq_terb_Halstead<-function(In){
-#        predict(terb.mod, data.frame(terb.c = In))
-#      }  
-      
-#      terb.hal.df = data.frame(terb.c = seq(0,200,0.1),
-#                                Prediction = 0,
-#                                Lower = 0,
-#                                Upper = 0)
-      
-#      terb.hal.df[,2:4] <- predict(terb.mod, newdata = terb.hal.df, 
-#                                    interval = 'confidence', level = 0.95)
-      
-#    plot(terb.sum$terb.c, terb.sum$mort, pch = 16, xlab = 'Terbufos Concentration (ppb)', 
-#         ylab = 'prop dead', ylim = c(0,1))
-#      lines(terb.hal.df$terb.c, terb.hal.df$Prediction, col = 2, lty=2)
-#      lines(terb.hal.df$terb.c, terb.hal.df$Lower, col = 2, lty=3)
-#      lines(terb.hal.df$terb.c, terb.hal.df$Upper, col = 2, lty=3)
+  par.terb = c(coef(terb.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Intercept)' = 1)[c(1,3,4,2)]  
       
     muPq_terb_Halstead_uncertainty<-function(In){
-      rdrm(1, LL.2(), coef(terb.mod), In, yerror = 'rbinom', ypar = 5)$y / 5
+      rdrm(1, L.4(), par.terb, In, yerror = 'rbinom', ypar = 5)$y / 5
     } 
     
-    plot(seq(0, 50, 0.1), sapply(seq(0, 50, 0.1), muPq_terb_Halstead_uncertainty),
-         pch = 17, col=2, cex = 0.5, xlab = 'Terbufos (ppb)', ylab = expression(paste(mu[P])),
-         main = 'Sample output of predator mortality')
+    points(c(0:170), sapply(c(0:170), muPq_terb_Halstead_uncertainty),
+           pch = 5, col=4, cex = 0.5)
         
-#Lambda-cyhalothrin   ********************************************************************************************
+#Lambda-cyhalothrin   *******************************************************************##########
   lamcy<-subset(data, Chem == 'Lambda')
   lamcy.sum = data.frame(lamcy.c = unique(lamcy$Conc),
                         lamcy.total = 5,
@@ -142,39 +138,31 @@ require(drc)
     lamcy.sum$mort = lamcy.sum$lamcy.d / lamcy.sum$lamcy.total
   
   lamcy.mod<-drm(lamcy.d / lamcy.total ~ lamcy.c, weights = lamcy.total, data = lamcy.sum, type = 'binomial', 
-                fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                            fixed = c(NA, 0, 1, NA)))
-#    summary(lamcy.mod)
-#    plot(lamcy.mod, ylim = c(0,1))
+ 
+    muPq_lamcy_Halstead<-function(In){
+      predict(lamcy.mod, data.frame(lamcy.c = In), interval = 'confidence', level = 0.95)
+    }  
   
-#    muPq_lamcy_Halstead<-function(In){
-#      predict(lamcy.mod, data.frame(lamcy.c = In))
-#    }  
   
-#  lamcy.hal.df = data.frame(lamcy.c = seq(0,5,0.01),
-#                           Prediction = 0,
-#                           Lower = 0,
-#                           Upper = 0)
+  plot(lamcy.sum$lamcy.c, lamcy.sum$mort, pch = 16, xlab = expression(paste(lambda, '-cyhalothrin (ppb)')), 
+       ylab = expression(paste(mu[P])), ylim = c(0,1),
+       main = expression(paste(lambda,'-cyhalothrin toxicity to ', italic('P. clarkii'))))
+    lines(seq(0,3,0.01), sapply(seq(0,3,0.01), muPq_lamcy_Halstead)[1,], col = 2, lty=2)
+    lines(seq(0,3,0.01), sapply(seq(0,3,0.01), muPq_lamcy_Halstead)[2,], col = 2, lty=3)
+    lines(seq(0,3,0.01), sapply(seq(0,3,0.01), muPq_lamcy_Halstead)[3,], col = 2, lty=3)
   
-#    lamcy.hal.df[,2:4] <- predict(lamcy.mod, newdata = lamcy.hal.df, 
-#                                 interval = 'confidence', level = 0.95)
-  
-#  plot(lamcy.sum$lamcy.c, lamcy.sum$mort, pch = 16, xlab = 'Lambda-Cyhalothrin Concentration (ppb)', 
-#       ylab = 'prop dead', ylim = c(0,1))
-#    lines(lamcy.hal.df$lamcy.c, lamcy.hal.df$Prediction, col = 2, lty=2)
-#    lines(lamcy.hal.df$lamcy.c, lamcy.hal.df$Lower, col = 2, lty=3)
-#    lines(lamcy.hal.df$lamcy.c, lamcy.hal.df$Upper, col = 2, lty=3)
-  
+  par.lamcy = c(coef(lamcy.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Intercept)' = 1)[c(1,3,4,2)]  
+    
   muPq_lamcy_Halstead_uncertainty<-function(In){
-    rdrm(1, LL.2(), coef(lamcy.mod), In, yerror = 'rbinom', ypar = 5)$y / 5
+    rdrm(1, L.4(), par.lamcy, In, yerror = 'rbinom', ypar = 5)$y / 5
   } 
   
-  plot(seq(0, 1, 0.001), sapply(seq(0, 1, 0.001), muPq_lamcy_Halstead_uncertainty),
-       pch = 17, col=2, cex = 0.5, 
-       xlab = expression(paste(lambda, '-cyhalothrin (ppb)')), ylab = expression(paste(mu[P])),
-       main = 'Sample output of predator mortality')
+  points(seq(0, 1, 0.001), sapply(seq(0, 1, 0.001), muPq_lamcy_Halstead_uncertainty),
+       pch = 5, col=4, cex = 0.5)
     
-#esfenvalerate  ********************************************************************************************
+#esfenvalerate  *************************************************************************#######
   esfen<-subset(data, Chem == 'Esfen')
     esfen.sum = data.frame(esfen.c = unique(esfen$Conc),
                            esfen.total = 5,
@@ -188,38 +176,31 @@ require(drc)
       esfen.sum$mort = esfen.sum$esfen.d / esfen.sum$esfen.total
   
   esfen.mod<-drm(esfen.d / esfen.total ~ esfen.c, weights = esfen.total, data = esfen.sum, type = 'binomial', 
-                 fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                 fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                             fixed = c(NA, 0, 1, NA)))
-#    summary(esfen.mod)
-#    plot(esfen.mod, ylim = c(0,1))
+
+    muPq_esfen_Halstead<-function(In){
+      predict(esfen.mod, data.frame(esfen.c = In), interval = 'confidence', level = 0.95)
+    }  
   
-#    muPq_esfen_Halstead<-function(In){
-#      predict(esfen.mod, data.frame(esfen.c = In))
-#    }  
-  
-#  esfen.hal.df = data.frame(esfen.c = seq(0,50,0.1),
-#                            Prediction = 0,
-#                            Lower = 0,
-#                            Upper = 0)
-  
-#    esfen.hal.df[,2:4] <- predict(esfen.mod, newdata = esfen.hal.df, 
-#                                  interval = 'confidence', level = 0.95)
-#  
-#  plot(esfen.sum$esfen.c, esfen.sum$mort, pch = 16, xlab = 'Esfenvalerate Concentration (ppb)', 
-#       ylab = 'prop dead', ylim = c(0,1))
-#    lines(esfen.hal.df$esfen.c, esfen.hal.df$Prediction, col = 2, lty=2)
-#    lines(esfen.hal.df$esfen.c, esfen.hal.df$Lower, col = 2, lty=3)
-#    lines(esfen.hal.df$esfen.c, esfen.hal.df$Upper, col = 2, lty=3)
+  plot(esfen.sum$esfen.c, esfen.sum$mort, pch = 16, xlab = 'Esfenvalerate Concentration (ppb)', 
+       ylab = expression(paste(mu[P])), ylim = c(0,1),
+       main = expression(paste('Esfenvalerate toxicity to ', italic('P. clarkii'))))
+    lines(seq(0,25,0.1), sapply(seq(0,25,0.1), muPq_esfen_Halstead)[1,], col = 2, lty=2)
+    lines(seq(0,25,0.1), sapply(seq(0,25,0.1), muPq_esfen_Halstead)[2,], col = 2, lty=3)
+    lines(seq(0,25,0.1), sapply(seq(0,25,0.1), muPq_esfen_Halstead)[3,], col = 2, lty=3)
+    
+par.esfen = c(coef(esfen.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Intercept)' = 1)[c(1,3,4,2)]  
+    
     
   muPq_esfen_Halstead_uncertainty<-function(In){
-    rdrm(1, LL.2(), coef(esfen.mod), In, yerror = 'rbinom', ypar = 5)$y / 5 
+    rdrm(1, L.4(), par.esfen, In, yerror = 'rbinom', ypar = 5)$y / 5 
   } 
   
-  plot(seq(0, 1, 0.001), sapply(seq(0, 1, 0.001), muPq_esfen_Halstead_uncertainty),
-       pch = 17, col=2, cex = 0.5, xlab = 'esfenvalerate', ylab = expression(paste(mu[P])),
-       main = 'Sample output of predator mortality')
+  points(seq(0, 25, 0.1), sapply(seq(0, 25, 0.1), muPq_esfen_Halstead_uncertainty),
+         pch = 5, col=4, cex = 0.5)
   
-#Permethrin ********************************************************************************************
+#Permethrin *****************************************************************************##########
   perm<-subset(data, Chem == 'Perm')
     perm.sum = data.frame(perm.c = unique(perm$Conc),
                            perm.total = 5,
@@ -233,36 +214,28 @@ require(drc)
       perm.sum$mort = perm.sum$perm.d / perm.sum$perm.total
   
   perm.mod<-drm(perm.d / perm.total ~ perm.c, weights = perm.total, data = perm.sum, type = 'binomial', 
-                 fct = LL.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
+                 fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
                             fixed = c(NA, 0, 1, NA)))
-#    summary(perm.mod)
-#    plot(perm.mod, ylim = c(0,1))
   
-#  muPq_perm_Halstead<-function(In){
-#    predict(perm.mod, data.frame(perm.c = In))
-#  }  
+  muPq_perm_Halstead<-function(In){
+    predict(perm.mod, data.frame(perm.c = In), interval = 'confidence', level = 0.95)
+  }  
   
-#  perm.hal.df = data.frame(perm.c = seq(0,10,0.01),
-#                            Prediction = 0,
-#                            Lower = 0,
-#                            Upper = 0)
-  
-#    perm.hal.df[,2:4] <- predict(perm.mod, newdata = perm.hal.df, 
-#                                  interval = 'confidence', level = 0.95)
-  
-#  plot(perm.sum$perm.c, perm.sum$mort, pch = 16, xlab = 'Permethrin Concentration (ppb)', 
-#       ylab = 'prop dead', ylim = c(0,1))
-#    lines(perm.hal.df$perm.c, perm.hal.df$Prediction, col = 2, lty=2)
-#    lines(perm.hal.df$perm.c, perm.hal.df$Lower, col = 2, lty=3)
-#    lines(perm.hal.df$perm.c, perm.hal.df$Upper, col = 2, lty=3)
+  plot(perm.sum$perm.c, perm.sum$mort, pch = 16, xlab = 'Permethrin Concentration (ppb)', 
+       ylab = expression(paste(mu[P])), ylim = c(0,1),
+       main = expression(paste('Permethrin toxicity to ', italic('P. clarkii'))))
+    lines(seq(0,6,0.1), sapply(seq(0,6,0.1), muPq_perm_Halstead)[1,], col = 2, lty=2)
+    lines(seq(0,6,0.1), sapply(seq(0,6,0.1), muPq_perm_Halstead)[2,], col = 2, lty=3)
+    lines(seq(0,6,0.1), sapply(seq(0,6,0.1), muPq_perm_Halstead)[3,], col = 2, lty=3)
+    
+  par.perm = c(coef(perm.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Intercept)' = 1)[c(1,3,4,2)]
   
   muPq_perm_Halstead_uncertainty<-function(In){
-    rdrm(1, LL.2(), coef(perm.mod), In, yerror = 'rbinom', ypar = 5)$y / 5
+    rdrm(1, L.4(), par.perm, In, yerror = 'rbinom', ypar = 5)$y / 5
   }
   
-  plot(seq(0, 1, 0.001), sapply(seq(0, 1, 0.001), muPq_perm_Halstead_uncertainty),
-       pch = 17, col=2, cex = 0.5, xlab = 'Permethrin (ppb)', ylab = expression(paste(mu[P])),
-       main = 'Sample output of predator mortality')
+  points(seq(0, 6, 0.01), sapply(seq(0, 6, 0.01), muPq_perm_Halstead_uncertainty),
+         pch = 5, col=4, cex = 0.5)
   
 #Insecticide info from Halstead et al chemosphere paper ################
 #calculate decay rates (k) from hydrolysis half lives for each chemical in Halstead 2015 (from table S1 and pmep.cce.cornell.edu) 
