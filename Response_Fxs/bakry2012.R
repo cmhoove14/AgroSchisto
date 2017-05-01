@@ -129,24 +129,23 @@ plot(muN.bak$atr*1000, muN.bak$mort, ylim = c(0,1), xlim = c(0,5000),
 #Now lets look at reproduction over time ###########
 bakry12<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/bakry2012.csv')
   bak12 = subset(bakry12, time != 0)
-  
-sn.wk = as.numeric()  #snails/week estimates for each treatment
-  for(i in 1:length(unique(bak12$conc))){
-    sn.wk[i] = sum(bak12$prop_surv[bak12$conc == unique(bak12$conc)[i]])
-  }  
-  
-hatches = as.numeric()
-  for(i in 1:length(unique(bak12$conc))){
-    hatches[i] = sum(bak12$hatch[bak12$conc == unique(bak12$conc)[i]])
-  } 
 
-fn = hatches / sn.wk #final measure of hatchlings/snail/week
+#get estimates of hatchlings/snail/day across all weeks for each treatment   
+fn.ctrl = mean(bak12$hatch_per[bak12$chem == 'control' & bak12$surv != 0] / 7)  
+  fn.ctrl.sd = sd(bak12$hatch_per[bak12$chem == 'control' & bak12$surv != 0] / 7)
+  
+fn.atr = mean(bak12$hatch_per[bak12$chem == 'atrazine' & bak12$surv != 0] / 7)  
+  fn.atr.sd = sd(bak12$hatch_per[bak12$chem == 'atrazine' & bak12$surv != 0] / 7)
+
+fn.gly = mean(bak12$hatch_per[bak12$chem == 'glyphosate' & bak12$surv != 0] / 7)  
+  fn.gly.sd = sd(bak12$hatch_per[bak12$chem == 'glyphosate' & bak12$surv != 0] / 7)
+  
 
 #assume lc90 halts all reproduction to provide third data point
 bak.fn = data.frame(gly = c(0, .840, 12.600),
                     atr = c(0, .330, 4.750),
-                    gly.r = c(fn[1], fn[3], 0),
-                    atr.r = c(fn[1], fn[2], 0))  
+                    gly.r = c(fn.ctrl, fn.atr, 0),
+                    atr.r = c(fn.ctrl, fn.gly, 0))  
 
 #glyphosate influence on reproduction ############
 fn.bak.gly = drm(gly.r ~ gly, data = bak.fn, type = 'continuous',
@@ -168,16 +167,18 @@ plot(bak.fn$gly*1000, bak.fn$gly.r / bak.fn$gly.r[1] , ylim = c(0,1), pch = 16,
   lines(seq(0,13000, 13), sapply(seq(0,13000, 13), fn.bak.gly.pred)[3,] / bak.fn$gly.r[1], col = 2, lty=3)
 
 fN.gly.fx.uncertainty = function(He){
-  heu = He/1000
+  if(He == 0) fn = 1 else{
+    heu = He/1000
   init = predict(fn.bak.gly, newdata = data.frame(gly = heu), se.fit = T)
   fn = rnorm(1, init[1], init[2]) / bak.fn$gly.r[1]
   while(fn < 0 && fn > 1.00000){
     fn = rnorm(1, init[1], init[2]) / bak.fn$gly.r[1]
   }
+}
   return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
 
-  points(seq(0,13000, 130), sapply(seq(0,13000, 130), fN.gly.fx.uncertainty), pch = 5, cex = 0.5, col = 4)
+  points(seq(0,13000, 13), sapply(seq(0,13000, 13), fN.gly.fx.uncertainty), pch = 5, cex = 0.5, col = 4)
 
 #atrazine influence on reproduction ############
 fn.bak.atr = drm(atr.r ~ atr, data = bak.fn, type = 'continuous',
@@ -199,12 +200,14 @@ plot(bak.fn$atr*1000, bak.fn$atr.r / bak.fn$atr.r[1] , ylim = c(0,1), pch = 16,
   lines(seq(0,5000,5), sapply(seq(0,5000,5), fn.bak.atr.pred)[3,] / bak.fn$atr.r[1], col = 2, lty=3)
 
 fN.atr.fx.uncertainty = function(He){
-  heu = He/1000
+  if(He == 0) fn = 1 else{
+    heu = He/1000
   init = predict(fn.bak.atr, newdata = data.frame(atr = heu), se.fit = T)
   fn = rnorm(1, init[1], init[2]) / bak.fn$atr.r[1]
   while(fn < 0 && fn > 1.00000){
     fn = rnorm(1, init[1], init[2]) / bak.fn$atr.r[1]
   }
+}
   return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
 
