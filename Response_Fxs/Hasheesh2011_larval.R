@@ -102,11 +102,11 @@ fx.piC.prof = function(In, lc = lc50.prof.hash.cerc){
   lines(seq(0,5000,10), sapply(seq(0,5000,10), fx.piC.prof, lc = 2.59), lty = 3, col = 2)
   lines(seq(0,5000,10), sapply(seq(0,5000,10), fx.piC.prof, lc = 1.32), lty = 3, col = 2)
   
-  piC_pr_Hash11_uncertainty = function(In){
-    ins = In/1000
-    lc50 = exp(rnorm(1, log(lc50.prof.hash.cerc), se.lc50.prof.hash.cerc))
-    1 - pnorm(slp.prof.hash.cerc * log(ins/lc50))
-  }
+piC_pr_Hash11_uncertainty = function(In){
+  ins = In/1000
+  lc50 = exp(rnorm(1, log(lc50.prof.hash.cerc), se.lc50.prof.hash.cerc))
+  1 - pnorm(slp.prof.hash.cerc * log(ins/lc50))
+}
   
   points(seq(0,5000,5), sapply(seq(0,5000,5), piC_pr_Hash11_uncertainty, simplify = T), 
          pch = 5, col = 4, cex = 0.5)
