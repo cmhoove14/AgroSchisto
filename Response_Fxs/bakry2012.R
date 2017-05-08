@@ -28,22 +28,22 @@ plot(muN.bak$atr*1000, muN.bak$mort, ylim = c(0,1), xlim = c(0,5000),
 
 #function based on reported values    
   lc50.atr.mun = 1.25
-    se.lc50.atr.mun = mean(log(1.83/1.25), log(1.25/0.88)) / 1.96
+    se.lc50.atr.mun = mean(log10(1.88/1.25), log10(1.25/0.83)) / 1.96
   slp.atr.mun = 2.48
   
   fx.mun.atr = function(He, lc = lc50.atr.mun){
     heu = He/1000
-    pnorm(log(slp.atr.mun) * log(heu/lc))
+    pnorm(slp.atr.mun * log10(heu/lc))
   }
 
     lines(c(0:5000), sapply(c(0:5000), fx.mun.atr), lty = 2, col = 2)
-    lines(c(0:5000), sapply(c(0:5000), fx.mun.atr, lc = 1.83), lty = 3, col = 2)
-    lines(c(0:5000), sapply(c(0:5000), fx.mun.atr, lc = 0.88), lty = 3, col = 2)
+    lines(c(0:5000), sapply(c(0:5000), fx.mun.atr, lc = 1.88), lty = 3, col = 2)
+    lines(c(0:5000), sapply(c(0:5000), fx.mun.atr, lc = 0.83), lty = 3, col = 2)
  
   muNq_atr_Bakry12_uncertainty = function(He){
     heu = He/1000
-    lc50 = exp(rnorm(1, log(lc50.atr.mun), se.lc50.atr.mun))
-    pnorm(log(slp.atr.mun) * log(heu/lc50))
+    lc50 = 10^(rnorm(1, log10(lc50.atr.mun), se.lc50.atr.mun))
+    pnorm(slp.atr.mun * log10(heu/lc50))
   }   
     
     points(seq(0,5000,10), sapply(seq(0,5000,10), muNq_atr_Bakry12_uncertainty), 
@@ -53,7 +53,8 @@ plot(muN.bak$atr*1000, muN.bak$mort, ylim = c(0,1), xlim = c(0,5000),
  plot(muN.bak$atr*1000, muN.bak$mort, ylim = c(0,1), xlim = c(0,5000),
      pch = 16, xlab = 'atrazine (ppb)', ylab = 'snail mortality',
      main = 'D-R function based on fit to LC values')    
-    
+  segments(y0 = 0.5, x0 = 830, y1 = 0.5, x1 = 1880)
+ 
   bak12.atr.drm = drm(mort ~ atr, weights = rep(50,3), data = muN.bak, type = 'binomial',
                       fct = LL.2())
   
@@ -61,16 +62,16 @@ plot(muN.bak$atr*1000, muN.bak$mort, ylim = c(0,1), xlim = c(0,5000),
       predict(bak12.atr.drm, newdata = data.frame(atr = He), interval = 'confidence', level = 0.95)
     }
     
-  lines(seq(0,13, 0.1), sapply(seq(0,13, 0.1), bak12.atr.pred, simplify = T)[1,], col = 2, lty = 2)
-  lines(seq(0,13, 0.1), sapply(seq(0,13, 0.1), bak12.atr.pred, simplify = T)[2,], col = 2, lty = 3)
-  lines(seq(0,13, 0.1), sapply(seq(0,13, 0.1), bak12.atr.pred, simplify = T)[3,], col = 2, lty = 3)
+  lines(seq(0,13, 0.1)*1000, sapply(seq(0,13, 0.1), bak12.atr.pred, simplify = T)[1,], col = 2, lty = 2)
+  lines(seq(0,13, 0.1)*1000, sapply(seq(0,13, 0.1), bak12.atr.pred, simplify = T)[2,], col = 2, lty = 3)
+  lines(seq(0,13, 0.1)*1000, sapply(seq(0,13, 0.1), bak12.atr.pred, simplify = T)[3,], col = 2, lty = 3)
   
   mu_Nq_atr_bak12_uncertainty<-function(He){
     He.u = He/1000
     rdrm(1, LL.2(), coef(bak12.atr.drm), He.u, yerror = 'rbinom', ypar = 50)$y / 50  
   }
   
-  points(seq(0,13, 0.1), sapply(seq(0,13, 0.1)*1000, mu_Nq_atr_bak12_uncertainty, simplify = T),
+  points(seq(0,13, 0.01)*1000, sapply(seq(0,13, 0.01)*1000, mu_Nq_atr_bak12_uncertainty, simplify = T),
          col = 4, pch = 5, cex = 0.5)
   
 #direct snail toxicity from Glyphosate ############  
@@ -81,12 +82,12 @@ plot(muN.bak$atr*1000, muN.bak$mort, ylim = c(0,1), xlim = c(0,5000),
       segments(y0 = 0.5, x0 = 890, y1 = 0.5, x1 = 4820)
 #function based on provided values
   lc50.gly.mun = 3.15
-    se.lc50.gly.mun = mean(log(4.82/3.15), log(3.15/0.89)) / 1.96
+    se.lc50.gly.mun = mean(log10(4.82/3.15), log10(3.15/0.89)) / 1.96
   slp.gly.mun = 2.16
   
   fx.mun.gly = function(He, lc = lc50.gly.mun){
     heu = He/1000
-    pnorm(log(slp.gly.mun) * log(heu/lc))
+    pnorm(slp.gly.mun * log10(heu/lc))
   }
   
     lines(seq(0,13000, 13), sapply(seq(0,13000, 13), fx.mun.gly), lty = 2, col = 2)
@@ -95,14 +96,20 @@ plot(muN.bak$atr*1000, muN.bak$mort, ylim = c(0,1), xlim = c(0,5000),
   
   muNq_gly_Bakry12_uncertainty = function(He){
     heu = He/1000
-    lc50 = exp(rnorm(1, log(lc50.gly.mun), se.lc50.gly.mun))
-    pnorm(log(slp.gly.mun) * log(heu/lc50))
+    lc50 = 10^(rnorm(1, log10(lc50.gly.mun), se.lc50.gly.mun))
+    pnorm(slp.gly.mun * log10(heu/lc50))
   }   
   
     points(seq(0,13000, 20), sapply(seq(0,13000, 20), muNq_gly_Bakry12_uncertainty), 
            pch = 5, col = 4, cex = 0.5)  
 
-#function based on fit to LC values    
+#function based on fit to LC values  
+plot(muN.bak$gly*1000, muN.bak$mort, ylim = c(0,1), xlim = c(0,13000),
+     pch = 16, xlab = 'glyphosate (ppb)', ylab = 'snail mortality',
+     main = 'D-R function fit to LC values')  
+    
+    segments(y0 = 0.5, x0 = 890, y1 = 0.5, x1 = 4820)
+    
   bak12.gly.drm = drm(mort ~ gly, weights = rep(50,3), data = muN.bak, type = 'binomial',
                       fct = LL.2())
   
@@ -110,16 +117,16 @@ plot(muN.bak$atr*1000, muN.bak$mort, ylim = c(0,1), xlim = c(0,5000),
       predict(bak12.gly.drm, newdata = data.frame(gly = He), interval = 'confidence', level = 0.95)
     }
 
-    lines(seq(0,13, 0.1), sapply(seq(0,13, 0.1), bak12.gly.pred, simplify = T)[1,], col = 2, lty = 2)
-    lines(seq(0,13, 0.1), sapply(seq(0,13, 0.1), bak12.gly.pred, simplify = T)[2,], col = 2, lty = 3)
-    lines(seq(0,13, 0.1), sapply(seq(0,13, 0.1), bak12.gly.pred, simplify = T)[3,], col = 2, lty = 3)
+    lines(seq(0,13, 0.1)*1000, sapply(seq(0,13, 0.1), bak12.gly.pred, simplify = T)[1,], col = 2, lty = 2)
+    lines(seq(0,13, 0.1)*1000, sapply(seq(0,13, 0.1), bak12.gly.pred, simplify = T)[2,], col = 2, lty = 3)
+    lines(seq(0,13, 0.1)*1000, sapply(seq(0,13, 0.1), bak12.gly.pred, simplify = T)[3,], col = 2, lty = 3)
     
     mu_Nq_gly_bak12_uncertainty<-function(He){
       He.u = He/1000
       rdrm(1, LL.2(), coef(bak12.gly.drm), He.u, yerror = 'rbinom', ypar = 50)$y / 50  
     }
     
-    points(seq(0,13, 0.1), sapply(seq(0,13, 0.1)*1000, mu_Nq_gly_bak12_uncertainty, simplify = T),
+    points(seq(0,13, 0.01)*1000, sapply(seq(0,13, 0.01)*1000, mu_Nq_gly_bak12_uncertainty, simplify = T),
            col = 4, pch = 5, cex = 0.5)
     
   

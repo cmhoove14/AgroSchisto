@@ -15,32 +15,49 @@
 
 #Chlorpyrifos #########
 mun.ch = data.frame(conc = c(.72, 1.32, 2.82),
-                     mort = c(.25, .50 , .90),
-                     surv = 0)
-mun.ch$surv = 1 - mun.ch$mort
+                    mort = c(.25, .50 , .90),
+                    surv = 0)
+  mun.ch$surv = 1 - mun.ch$mort
+  mun.ch$probit = qnorm(mun.ch$mort, mean = 5)
+  mun.ch$log10 = log10(mun.ch$conc)
+  
+plot(mun.ch$log10, mun.ch$probit, pch = 16)  
+  hash.ch.lm = lm(probit ~ log10, data = mun.ch)
+  
+  abline(coef(hash.ch.lm), lty = 2)
+  
+  lc50.ch.hash = 10^(5 - coef(hash.ch.lm)[1]) / coef(hash.ch.lm)[2]
  
 plot(mun.ch$conc*1000, mun.ch$mort, pch = 16, cex = 1.2, ylim = c(0,1), xlim = c(0,3500),
-     xlab = 'Chlorpyrifos (ppm)', ylab = 'prop dead')
+     xlab = 'Chlorpyrifos (ppb)', ylab = 'prop dead')
   segments(x0 = 880, y0 = 0.5, x1 = 1980, y1 = 0.5)
   
 lc50.chlor.hash = 1.32
-  se.lc50.chlor.hash = mean(log(1.98/lc50.chlor.hash), log(lc50.chlor.hash/0.88)) / 1.96
+  se.lc50.chlor.hash = mean(log10(1.98/lc50.chlor.hash), log10(lc50.chlor.hash/0.88)) / 1.96
 slp.chlor.hash = 2.5
+int.chlor.hash = - slp.chlor.hash*lc50.chlor.hash
 
 #function based on provided values
   fx.mun.chlor = function(In, lc = lc50.chlor.hash){
     ins = In/1000
-    pnorm(slp.chlor.hash * log(ins/lc))
+    pnorm(slp.chlor.hash * log10(ins/lc))
   }
   
     lines(seq(0,4000,10), sapply(seq(0,4000,10), fx.mun.chlor), lty = 2, col = 2)
     lines(seq(0,4000,10), sapply(seq(0,4000,10), fx.mun.chlor, lc = 1.98), lty = 3, col = 2)
     lines(seq(0,4000,10), sapply(seq(0,4000,10), fx.mun.chlor, lc = 0.88), lty = 3, col = 2)
 
+  fx.mun.chlor2 = function(In){
+    ins = log10(In/1000)
+    pnorm(slp.chlor.hash*ins + int.chlor.hash)
+  }  
+    lines(seq(0,4000,10), sapply(seq(0,4000,10), fx.mun.chlor2), lty = 2, col = 3)
+    
+  
 mu_Nq_ch_Hash11_uncertainty = function(In){
   ins = In/1000
-  lc50 = exp(rnorm(1, log(lc50.chlor.hash), se.lc50.chlor.hash))
-  pnorm(slp.chlor.hash * log(ins/lc50))
+  lc50 = 10^(rnorm(1, log10(lc50.chlor.hash), se.lc50.chlor.hash))
+  pnorm(slp.chlor.hash * log10(ins/lc50))
 }
 points(seq(0,4000,10), sapply(seq(0,4000,10), mu_Nq_ch_Hash11_uncertainty, simplify = T), 
        pch = 5, col = 4, cex = 0.5)
@@ -56,13 +73,13 @@ mun.prof = data.frame(conc = c(1.4, 2.5, 3.72),
       segments(x0 = 1880, y0 = 0.5, x1 = 3330, y1 = 0.5)
 
 lc50.prof.hash = 2.5
-  se.lc50.prof.hash = mean(log(3.33/lc50.prof.hash), log(lc50.prof.hash/1.88)) / 1.96
+  se.lc50.prof.hash = mean(log10(3.33/lc50.prof.hash), log10(lc50.prof.hash/1.88)) / 1.96
 slp.prof.hash = 1.6
 
 #function based on provided values
 fx.mun.prof = function(In, lc = lc50.prof.hash){
   ins = In/1000
-  pnorm(slp.prof.hash * log(ins/lc))
+  pnorm(slp.prof.hash * log10(ins/lc))
 }
 
   lines(seq(0,5000,10), sapply(seq(0,5000,10), fx.mun.prof), lty = 2, col = 2)
@@ -71,8 +88,8 @@ fx.mun.prof = function(In, lc = lc50.prof.hash){
 
 mu_Nq_prof_Hash11_uncertainty = function(In){
   ins = In/1000
-  lc50 = exp(rnorm(1, log(lc50.prof.hash), se.lc50.prof.hash))
-  pnorm(slp.prof.hash * log(ins/lc50))
+  lc50 = 10^(rnorm(1, log10(lc50.prof.hash), se.lc50.prof.hash))
+  pnorm(slp.prof.hash * log10(ins/lc50))
 }
 points(seq(0,5000,10), sapply(seq(0,5000,10), mu_Nq_prof_Hash11_uncertainty, simplify = T), 
        pch = 5, col = 4, cex = 0.5)

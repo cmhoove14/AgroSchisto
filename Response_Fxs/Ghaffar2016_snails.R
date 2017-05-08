@@ -18,32 +18,61 @@ require(drc)
 #Butralin ##############
 but.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
                      butralin = c(0, 556, 2417, 3906, 5560, 8703))
+but.dat.no0 = subset(but.dat, lcs!=0)
+  but.dat.no0$mort = but.dat.no0$lcs/100
+  but.dat.no0$probit = qnorm(but.dat.no0$lcs/100, mean = 5, sd = 1)
+  but.dat.no0$ppm = but.dat.no0$butralin/1000
+  but.dat.no0$ppmlog10 = log10(but.dat.no0$butralin/1000)
+  but.dat.no0$ppmlog = log(but.dat.no0$butralin/1000)
+  
+plot(but.dat.no0$ppmlog10, but.dat.no0$probit, pch = 16)
 
+  but.bak.lm = lm(probit ~ ppmlog10, data = but.dat.no0)
+  
+    abline(coef(but.bak.lm), lty = 2)
+#looks like probit/log10 plot doesn't recover the underlying function
+plot(but.dat.no0$ppm, but.dat.no0$probit, pch = 16, xlim = c(0,13), ylim = c(3.5,6.5))
+    
+  but.bak.lm = lm(probit ~ ppm, data = but.dat.no0)
+    
+    abline(coef(but.bak.lm), lty = 2)    
+    segments(x0 = (3.7), x1 = (8.34), y0 = 5, y1 = 5)
+    segments(x0 = (6.22), x1 = (12.8), y0 = qnorm(0.9, mean = 5), y1 = qnorm(0.9, mean = 5))
+#non-log transformed concentration recovers underlying linear function; get those parameters
+  lc50.bak.but = (5 - coef(but.bak.lm)[1]) / coef(but.bak.lm)[2]
+  slp.bak.but = coef(but.bak.lm)[2]
+  
 plot(but.dat$butralin, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,13000),
      xlab = 'Butralin (ppb)', ylab = 'snail mortality rate', 
      main = 'D-R function based on reported values')
     segments(x0 = 3700, x1 = 8340, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
     segments(x0 = 6220, x1 = 12800, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)
-  
-#function based on reported LC50 and slope values
-  lc50.mun.but = 5.56
-    se.lc50.mun.but = mean(log(8.34/lc50.mun.but), log(lc50.mun.but/3.7)) / 1.96
-  slp.mun.but = 1.093
-  
-  fx.mun.but = function(He, lc = lc50.mun.but){
-    heu = He/1000
-    pnorm(exp(slp.mun.but) * log(heu/lc))
+
+#compare function to all reported values      
+test.fx.but = function(He){
+  pnorm(predict(but.bak.lm, newdata = data.frame(ppm = (He/1000))), mean = 5)
+}  
+
+lines(seq(0, 13000, 13), sapply(seq(0, 13000, 13), test.fx.but), lty = 2, col = 3)
+#fits well. Create function to incorporate uncertainty into estimates
+se.lc50.bak.but = mean((8.34/lc50.bak.but), (lc50.bak.but/3.7)) / 1.96
+
+  fx.mun.but = function(He, lc = lc50.bak.but){
+    heu = (He/1000)
+    pnorm((slp.bak.but) * (heu - lc))
   }
   
   lines(seq(0,13000,10), sapply(seq(0,13000,10), fx.mun.but), lty = 2, col = 2)
-  lines(seq(0,13000,10), sapply(seq(0,13000,10), fx.mun.but, lc = 8.34), lty = 3, col = 2)
-  lines(seq(0,13000,10), sapply(seq(0,13000,10), fx.mun.but, lc = 3.7), lty = 3, col = 2)
-  
-  
+  lines(seq(0,13000,10), sapply(seq(0,13000,10), fx.mun.but, lc = (8.34)), lty = 3, col = 2)
+  lines(seq(0,13000,10), sapply(seq(0,13000,10), fx.mun.but, lc = (3.7)), lty = 3, col = 2)
+#Doesn't perfectly replicate uncertainty, but variance of underlying function is unobtainable  
   mu_Nq_butr_gaf16_uncertainty = function(He){
-    heu = He/1000
-    lc50 = exp(rnorm(1, log(lc50.mun.but), se.lc50.mun.but))
-    pnorm(exp(slp.mun.but) * log(heu/lc50))
+    if(He == 0) mun = 0 else{
+    heu = (He/1000)
+    lc50 = (rnorm(1, lc50.bak.but, se.lc50.bak.but))
+    mun = pnorm((slp.bak.but) * (heu-lc50))
+    }
+    return(mun)
   }
     points(seq(0,13000,10), sapply(seq(0,13000,10), mu_Nq_butr_gaf16_uncertainty, simplify = T), 
            pch = 5, col = 4, cex = 0.5)
@@ -83,12 +112,32 @@ plot(but.dat$butralin, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,1300
 #Glyphosate #############
 gly.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
                      glyphosate = c(0, 1506, 3875, 9174, 15062, 26249))
+
+gly.dat.no0 = subset(gly.dat, lcs!=0)
+  gly.dat.no0$probit = qnorm(gly.dat.no0$lcs/100, mean = 5, sd = 1)
+  gly.dat.no0$ppm = gly.dat.no0$glyphosate/1000
+  gly.dat.no0$ppmlog10 = log10(gly.dat.no0$glyphosate/1000)
+
+plot(gly.dat.no0$ppmlog10, gly.dat.no0$probit, pch = 16)
+
+  gly.bak.lm = lm(probit ~ ppmlog10, data = gly.dat.no0)
+  
+  abline(coef(gly.bak.lm), lty = 2)
+  
+    lc50.bak.gly = ((5 - coef(gly.bak.lm)[1]) / coef(gly.bak.lm)[2])
+    slp.bak.gly = coef(gly.bak.lm)[2]
     
 plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33000),
      xlab = 'Glyphosate (ppb)', ylab = 'snail mortality rate',
      main = 'D-R function based on reported values')
     segments(x0 = 9130, x1 = 16570, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
     segments(x0 = 23870, x1 = 28900, y0 = 0.9, y1 = 0.9, lty = 1, col = 1) 
+
+test.fx.gly = function(He){
+  pnorm(predict(gly.bak.lm, newdata = data.frame(ppmlog10 = log10(He/1000))), mean = 5)
+}  
+
+lines(seq(0, 33000, 33), sapply(seq(0, 33000, 33), test.fx.gly), lty = 2, col = 3)
 
 #function based on reported lc50 and slope values        
   lc50.mun.gly = 15.062
@@ -97,7 +146,7 @@ plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33
 
     fx.mun.gly = function(He, lc = lc50.mun.gly){
       heu = He/1000
-      pnorm(exp(slp.mun.gly) * log(heu/lc))
+      pnorm((slp.bak.gly) * (heu-lc))
     }
 
   lines(seq(0,33000,10), sapply(seq(0,33000,10), fx.mun.gly), lty = 2, col = 2)
@@ -106,8 +155,8 @@ plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33
   
   mu_Nq_gly_gaf16_uncertainty = function(He){
     heu = He/1000
-    lc50 = exp(rnorm(1, log(lc50.mun.gly), se.lc50.mun.gly))
-    pnorm(exp(slp.mun.gly) * log(heu/lc50))
+    lc50 = 10^(rnorm(1, log10(lc50.mun.gly), se.lc50.mun.gly))
+    pnorm((slp.mun.gly) * log10(heu/lc50))
   }
 
     points(seq(0,33000,30), sapply(seq(0,33000,30), mu_Nq_gly_gaf16_uncertainty, simplify = T), 
@@ -127,7 +176,7 @@ plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33
     
   
   mu_Nq_gly_gaf16<-function(He){
-    predict(gaf.muNq.gly, data.frame(butralin = He), 
+    predict(gaf.muNq.gly, data.frame(glyphosate = He), 
             interval = 'confidence', level = 0.95)
   }  
   
@@ -151,6 +200,21 @@ plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33
 pen.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
                      pendimethalin = c(0, 214.8, 535, 1299, 2148, 3762))
     
+pen.dat.no0 = subset(pen.dat, lcs!=0)
+  pen.dat.no0$probit = qnorm(pen.dat.no0$lcs/100, mean = 5, sd = 1)
+  pen.dat.no0$ppm = pen.dat.no0$pendimethalin/1000
+  pen.dat.no0$ppmlog10 = log10(pen.dat.no0$pendimethalin/1000)
+    
+plot(pen.dat.no0$ppm, pen.dat.no0$probit, pch = 16)
+    
+  pen.bak.lm = lm(probit ~ ppm, data = pen.dat.no0)
+    
+  abline(a = coef(pen.bak.lm)[1], b = coef(pen.bak.lm)[2], lty = 2)
+    
+    lc50.bak.pen = 10^((5 - coef(pen.bak.lm)[1]) / coef(pen.bak.lm)[2])
+    slp.bak.pen = coef(pen.bak.lm)[2]
+    
+    
 plot(pen.dat$pendimethalin, pen.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,7000),
      xlab = 'pendimethalin (ppb)', ylab = 'snail mortality rate',
      main = 'D-R function based on reported values')
@@ -164,7 +228,7 @@ lc50.mun.pen = 2.148
 
   fx.mun.pen = function(He, lc = lc50.mun.pen){
     heu = He/1000
-    pnorm(exp(slp.mun.pen) * log(heu/lc))
+    pnorm(slp.bak.pen * (heu-lc))
   }
 
     lines(seq(0,7500,5), sapply(seq(0,7500,5), fx.mun.pen), lty = 2, col = 2)
@@ -174,7 +238,7 @@ lc50.mun.pen = 2.148
 mu_Nq_pen_gaf16_uncertainty = function(He){
   heu = He/1000
   lc50 = exp(rnorm(1, log(lc50.mun.pen), se.lc50.mun.pen))
-  pnorm(exp(slp.mun.pen) * log(heu/lc50))
+  pnorm((slp.mun.pen) * log(heu/lc50))
 }
   
   points(seq(0,7500,5), sapply(seq(0,7500,5), mu_Nq_pen_gaf16_uncertainty, simplify = T), 

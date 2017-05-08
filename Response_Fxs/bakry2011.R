@@ -8,22 +8,23 @@ require(drc)
                        surv = 0)
   mun.mal$surv = 1 - mun.mal$mort
   
-  plot(mun.mal$conc*1000, mun.mal$mort, pch = 16, cex = 1.2, 
-       xlab = 'Malathion (ppm)', ylab = 'prop dead', ylim = c(0,1), xlim = c(0,5000),
+    plot(log10(mun.mal$conc[c(2:5)]), qnorm(mun.mal$mort[c(2:5)], mean = 5), pch = 16)
+  
+  plot(mun.mal$conc*1000, mun.mal$mort, pch = 16, 
+       xlab = 'Malathion (ppb)', ylab = 'prop dead', ylim = c(0,1), xlim = c(0,5000),
        main = 'D-R function based on reported values')
       
     segments(x0 = 3120, y0 = 0.5, x1 = 990, y1 = 0.5)
 
   
 #function based on provided parameters
-  
   lc50.mal.mun = 1.76
-    se.lc50.mal.mun = mean(log(3.12/1.76), log(1.76/0.99)) / 1.96
+    se.lc50.mal.mun = mean(log10(3.12/lc50.mal.mun), log10(lc50.mal.mun/0.99)) / 1.96
   slp.mal.mun = 2.68  
   
   fx.mun.mal = function(In, lc = lc50.mal.mun){
     Ins = In/1000
-    pnorm(slp.mal.mun * log(Ins/lc))
+    pnorm(slp.mal.mun * log10(Ins/lc))
   }
   
     lines(c(0:5000), sapply(c(0:5000), fx.mun.mal), lty = 2, col = 2)
@@ -32,8 +33,8 @@ require(drc)
     
   muNq_mal_Bakry11_uncertainty = function(In){
     Ins = In/1000
-    lc50 = exp(rnorm(1, log(lc50.mal.mun), se.lc50.mal.mun))
-    pnorm(slp.mal.mun * log(Ins/lc50))
+    lc50 = 10^(rnorm(1, log10(lc50.mal.mun), se.lc50.mal.mun))
+    pnorm(slp.mal.mun * log10(Ins/lc50))
   }   
   
   points(seq(0,5000,5), sapply(seq(0,5000,5), muNq_mal_Bakry11_uncertainty), 
@@ -83,21 +84,21 @@ mun.del = data.frame(conc = c(.482, 1.21, 2.034, 4.82, 7.26),
   mun.del$surv = 1 - mun.del$mort
 
 plot(mun.del$conc*1000, mun.del$mort, pch = 16, cex = 1.2, ylim = c(0,1), xlim = c(0,10000),
-     xlab = 'Deltamethrin (ppm)', ylab = 'prop dead', 
+     xlab = 'Deltamethrin (ppb)', ylab = 'prop dead', 
      main = 'D-R function based on reported values')
-    segments(x0 = 310, y0 = 0.5, x1 = 7700, y1 = 0.5)
+    segments(x0 = 3100, y0 = 0.5, x1 = 7700, y1 = 0.5)
 
 #function based on provided parameters
 
 lc50.del.mun = 4.82
 #Pretty sure lower confidence limit is supposed to be 3.1, not 0.31, 
-  #but doesn't ultimately affect the function too much, and don't want to assume typos
-  se.lc50.del.mun = mean(log(7.7/lc50.del.mun), log(lc50.del.mun/0.31)) / 1.96
+  #don't want to assume typos, but makes sense and function ultimately isn't affected too much
+  se.lc50.del.mun = mean(log10(7.7/lc50.del.mun), log10(lc50.del.mun/3.1)) / 1.96
 slp.del.mun = 2.74  
 
 fx.mun.del = function(In, lc = lc50.del.mun){
   Ins = In/1000
-  pnorm(slp.del.mun * log(Ins/lc))
+  pnorm(slp.del.mun * log10(Ins/lc))
 }
 
   lines(seq(0,10000,10), sapply(seq(0,10000,10), fx.mun.del), lty = 2, col = 2)
@@ -106,8 +107,8 @@ fx.mun.del = function(In, lc = lc50.del.mun){
 
 muNq_del_Bakry11_uncertainty = function(In){
   Ins = In/1000
-  lc50 = exp(rnorm(1, log(lc50.del.mun), se.lc50.del.mun))
-  pnorm(slp.del.mun * log(Ins/lc50))
+  lc50 = 10^(rnorm(1, log10(lc50.del.mun), se.lc50.del.mun))
+  pnorm(slp.del.mun * log10(Ins/lc50))
 }   
 
 points(seq(0,10000,10), sapply(seq(0,10000,10), muNq_del_Bakry11_uncertainty), 

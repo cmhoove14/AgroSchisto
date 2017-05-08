@@ -31,6 +31,9 @@ plot(ons.atr$log_conc, ons.atr$prob_mort, pch = 16, col = 'gold', ylim = c(0,7),
 ons.lm.atr = lm(prob_mort ~ log_conc, data = ons.atr)  
   summary(ons.lm.atr)
   
+  lc50.ons.atr = 10^((5 - coef(ons.lm.atr)[1]) / coef(ons.lm.atr)[2])
+  slp.ons.atr = coef(ons.lm.atr)[2]
+  
 ons.pred.atr = function(He){
   predict(ons.lm.atr, newdata = data.frame(log_conc = He), interval = 'confidence', level = 0.95)
 } 
@@ -40,6 +43,9 @@ ons.pred.atr = function(He){
   
 ons.lm.gly = lm(prob_mort ~ log_conc, data = ons.gly)  
   summary(ons.lm.gly)
+  
+  lc50.ons.gly = 10^((5 - coef(ons.lm.gly)[1]) / coef(ons.lm.gly)[2])
+  slp.ons.gly = coef(ons.lm.gly)[2]
   
 ons.pred.gly = function(He){
   predict(ons.lm.gly, newdata = data.frame(log_conc = He), interval = 'confidence', level = 0.95)
@@ -55,6 +61,15 @@ legend('bottomright', pch = 16, col = c('gold', 'green'), legend = c('Atrazine',
 plot(ons.atr$conc10_ppm, ons.atr$mort, pch = 16,  ylim = c(0,1), xlim = c(0,500),
      xlab = 'atrazine (ppm)', ylab = 'mortality rate')
 
+#function based on lc50 and slope derived from L&W plots of probit mortality/log10 concentration
+ons.fx.atr = function(He, lc = lc50.ons.atr){
+  heu = He/1000
+  pnorm(slp.ons.atr * log10(heu/lc))
+}
+
+  lines(c(0:500), sapply(c(0:500)*1000, ons.fx.atr), lty = 2, col = 2)
+ 
+#Function incorporating uncertainty  
 ons.munq.atr = function(He){
   if(He == 0) munq = 0 else{
     heu = log10(He/1000)  #convert ppb to log10 of ppm
@@ -72,9 +87,19 @@ plot(ons.atr$conc10_ppm, ons.atr$mort, pch = 16,  ylim = c(0,1), xlim = c(0,5),
 
 points(seq(0,5,0.01), sapply(seq(0,5,0.01)*1000, ons.munq.atr), pch = 5, cex = 0.5, col = 4)
 
+
 #derive function for Glyphosate  ############
 plot(ons.gly$conc10_ppm, ons.gly$mort, pch = 16,  ylim = c(0,1), xlim = c(0,500),
      xlab = 'glyphosate (ppm)', ylab = 'mortality rate')
+
+#function based on lc50 and slope derived from L&W plots of probit mortality/log10 concentration
+ons.fx.gly = function(He, lc = lc50.ons.gly){
+  heu = He/1000
+  pnorm(slp.ons.gly * log10(heu/lc))
+}
+
+lines(c(0:500), sapply(c(0:500)*1000, ons.fx.gly), lty = 2, col = 2)
+
 
 ons.munq.gly = function(He){
   if(He == 0) munq = 0 else{
