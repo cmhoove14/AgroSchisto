@@ -124,19 +124,19 @@ plot(par.mat$eps, par.mat$pe, pch = 18, cex = 0.6, ylim = c(0,1),
      xlab = expression(epsilon), ylab = expression(italic('P(e)')))
   points(par.mat$eps[par.mat$kappa == 0], par.mat$pe[par.mat$kappa == 0], 
          pch = 17, cex = 0.8, col = 2)
-  legend('bottom', legend = c(expression(paste(kappa, ' = 0', sep = '')),
+  legend('bottomleft', legend = c(expression(paste(kappa, ' = 0', sep = '')),
                                 expression(paste(kappa, ' > 0', sep = ''))),
          pch = c(17,18), col = c(2,1), bty = 'n', cex = 0.8)
 
 #st. dev of epsilon
-plot(par.mat$eps, par.mat$eps.sd, pch = 18, cex = 0.6, ylim = range(par.mat$eps.sd), col = 4,
+plot(par.mat$eps, par.mat$eps.sd, pch = 18, cex = 0.6, ylim = range(par.mat$eps.sd),# col = 4,
      ylab = expression(paste('st. dev (', epsilon, ')', sep = '')), 
      xlab = expression(epsilon))
   points(par.mat$eps[par.mat$kappa == 0], par.mat$eps.sd[par.mat$kappa == 0], 
          pch = 17, cex = 0.8, col = 2)
   legend('left', legend = c(expression(paste(kappa, ' = 0', sep = '')),
                               expression(paste(kappa, ' > 0', sep = ''))),
-         pch = c(17,18), col = c(2,4), bty = 'n', cex = 0.8)
+         pch = c(17,18), col = c(2,1), bty = 'n', cex = 0.8)
   
 #so what about median rather than mean of epsilon vals?
 plot(par.mat$eps.med, par.mat$pe, pch = 18, cex = 0.6, ylim = c(0,1),
