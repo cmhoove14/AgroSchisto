@@ -49,8 +49,3 @@ fx = function(d, lc){
   
 #slope function by hand
   slp = predlinear(c(16,50,84), fLW)
-  
-  plot(slp[,2], qnorm(slp[,1]/100), pch = 16)
-    abline()
-  
-  S = (slp[3,2]/slp[2,2]+slp[2,2]/slp[1,2])/2

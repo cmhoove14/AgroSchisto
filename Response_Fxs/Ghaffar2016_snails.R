@@ -25,12 +25,6 @@ but.dat.no0 = subset(but.dat, lcs!=0)
   but.dat.no0$ppmlog10 = log10(but.dat.no0$butralin/1000)
   but.dat.no0$ppmlog = log(but.dat.no0$butralin/1000)
   
-plot(but.dat.no0$ppmlog10, but.dat.no0$probit, pch = 16)
-
-  but.bak.lm = lm(probit ~ ppmlog10, data = but.dat.no0)
-  
-    abline(coef(but.bak.lm), lty = 2)
-#looks like probit/log10 plot doesn't recover the underlying function
 plot(but.dat.no0$ppm, but.dat.no0$probit, pch = 16, xlim = c(0,13), ylim = c(3.5,6.5))
     
   but.bak.lm = lm(probit ~ ppm, data = but.dat.no0)
@@ -41,21 +35,14 @@ plot(but.dat.no0$ppm, but.dat.no0$probit, pch = 16, xlim = c(0,13), ylim = c(3.5
 #non-log transformed concentration recovers underlying linear function; get those parameters
   lc50.bak.but = (5 - coef(but.bak.lm)[1]) / coef(but.bak.lm)[2]
   slp.bak.but = coef(but.bak.lm)[2]
-  
+  #get standard error from reported 95% CIs of lc50
+  se.lc50.bak.but = mean(c(8.34/lc50.bak.but, lc50.bak.but/3.7)) / 1.96
+
 plot(but.dat$butralin, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,13000),
      xlab = 'Butralin (ppb)', ylab = 'snail mortality rate', 
      main = 'D-R function based on reported values')
     segments(x0 = 3700, x1 = 8340, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
     segments(x0 = 6220, x1 = 12800, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)
-
-#compare function to all reported values      
-test.fx.but = function(He){
-  pnorm(predict(but.bak.lm, newdata = data.frame(ppm = (He/1000))), mean = 5)
-}  
-
-lines(seq(0, 13000, 13), sapply(seq(0, 13000, 13), test.fx.but), lty = 2, col = 3)
-#fits well. Create function to incorporate uncertainty into estimates
-se.lc50.bak.but = mean((8.34/lc50.bak.but), (lc50.bak.but/3.7)) / 1.96
 
   fx.mun.but = function(He, lc = lc50.bak.but){
     heu = (He/1000)
@@ -70,45 +57,18 @@ se.lc50.bak.but = mean((8.34/lc50.bak.but), (lc50.bak.but/3.7)) / 1.96
     if(He == 0) mun = 0 else{
     heu = (He/1000)
     lc50 = (rnorm(1, lc50.bak.but, se.lc50.bak.but))
-    mun = pnorm((slp.bak.but) * (heu-lc50))
+    mun = pnorm((slp.bak.but) * (heu-lc50)) - fx.mun.but(0)
     }
+    if(mun < 0) mun = 0
     return(mun)
   }
-    points(seq(0,13000,10), sapply(seq(0,13000,10), mu_Nq_butr_gaf16_uncertainty, simplify = T), 
-           pch = 5, col = 4, cex = 0.5)
-    
-#Fit function based on provided lc values assuming %mortality = lc value
-plot(but.dat$butralin, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,13000),
-    xlab = 'Butralin (ppb)', ylab = 'snail mortality rate',
-     main = 'D-R function based on fit to LC values')
-  segments(x0 = 3700, x1 = 8340, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
-  segments(x0 = 6220, x1 = 12800, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)  
-  
-  gaf.muNq.but<-drm(lcs/100 ~ butralin, data = but.dat, weights = rep(30, 6),
-                    type = 'binomial', fct = LL.2())
-    summary(gaf.muNq.but)
-    
-    mu_Nq_butr_gaf16<-function(He){
-      predict(gaf.muNq.but, data.frame(butralin = He), 
-              interval = 'confidence', level = 0.95)
-    }  
-  
-  lines(seq(0,13000,100), sapply(seq(0,13000,100), mu_Nq_butr_gaf16, simplify = T)[1,],
-        lty = 2, col = 2) 
-  lines(seq(0,13000,100), sapply(seq(0,13000,100), mu_Nq_butr_gaf16, simplify = T)[2,],
-        lty = 3, col = 2) 
-  lines(seq(0,13000,100), sapply(seq(0,13000,100), mu_Nq_butr_gaf16, simplify = T)[3,],
-        lty = 3, col = 2) 
-    
-    mu_Nq_butr_gaf16_uncertainty2<-function(He){
-      rdrm(1, LL.2(), coef(gaf.muNq.but), He, yerror = 'rbinom', ypar = 30)$y / 30  
-    }
-
-    points(seq(0,13000,10), sapply(seq(0,13000,10), 
-                                    mu_Nq_butr_gaf16_uncertainty2, 
-                                    simplify = T),
+    points(seq(0,13000,50), sapply(seq(0,13000,50), mu_Nq_butr_gaf16_uncertainty, simplify = T), 
            pch = 5, col = 4, cex = 0.5)
 
+#keep vector
+keep.bak.but = c('mu_Nq_butr_gaf16_uncertainty', 'fx.mun.but',
+                 'lc50.bak.but', 'se.lc50.bak.but', 'slp.bak.but')    
+        
 #Glyphosate #############
 gly.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
                      glyphosate = c(0, 1506, 3875, 9174, 15062, 26249))
@@ -118,14 +78,15 @@ gly.dat.no0 = subset(gly.dat, lcs!=0)
   gly.dat.no0$ppm = gly.dat.no0$glyphosate/1000
   gly.dat.no0$ppmlog10 = log10(gly.dat.no0$glyphosate/1000)
 
-plot(gly.dat.no0$ppmlog10, gly.dat.no0$probit, pch = 16)
+plot(gly.dat.no0$ppm, gly.dat.no0$probit, pch = 16)
 
-  gly.bak.lm = lm(probit ~ ppmlog10, data = gly.dat.no0)
+  gly.bak.lm = lm(probit ~ ppm, data = gly.dat.no0)
   
   abline(coef(gly.bak.lm), lty = 2)
   
     lc50.bak.gly = ((5 - coef(gly.bak.lm)[1]) / coef(gly.bak.lm)[2])
     slp.bak.gly = coef(gly.bak.lm)[2]
+    se.lc50.bak.gly = mean(c(16.57/lc50.bak.gly, lc50.bak.gly/9.13)) / 1.96
     
 plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33000),
      xlab = 'Glyphosate (ppb)', ylab = 'snail mortality rate',
@@ -133,18 +94,7 @@ plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33
     segments(x0 = 9130, x1 = 16570, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
     segments(x0 = 23870, x1 = 28900, y0 = 0.9, y1 = 0.9, lty = 1, col = 1) 
 
-test.fx.gly = function(He){
-  pnorm(predict(gly.bak.lm, newdata = data.frame(ppmlog10 = log10(He/1000))), mean = 5)
-}  
-
-lines(seq(0, 33000, 33), sapply(seq(0, 33000, 33), test.fx.gly), lty = 2, col = 3)
-
-#function based on reported lc50 and slope values        
-  lc50.mun.gly = 15.062
-    se.lc50.mun.gly = mean(log(16.57/lc50.mun.gly), log(lc50.mun.gly/9.13)) / 1.96
-  slp.mun.gly = 0.335
-
-    fx.mun.gly = function(He, lc = lc50.mun.gly){
+    fx.mun.gly = function(He, lc = lc50.bak.gly){
       heu = He/1000
       pnorm((slp.bak.gly) * (heu-lc))
     }
@@ -154,47 +104,20 @@ lines(seq(0, 33000, 33), sapply(seq(0, 33000, 33), test.fx.gly), lty = 2, col = 
   lines(seq(0,33000,10), sapply(seq(0,33000,10), fx.mun.gly, lc = 9.13), lty = 3, col = 2)
   
   mu_Nq_gly_gaf16_uncertainty = function(He){
-    heu = He/1000
-    lc50 = 10^(rnorm(1, log10(lc50.mun.gly), se.lc50.mun.gly))
-    pnorm((slp.mun.gly) * log10(heu/lc50))
+    if(He == 0) mun = 0 else{
+      heu = He/1000
+      lc50 = (rnorm(1, (lc50.bak.gly), se.lc50.bak.gly))
+      mun = pnorm((slp.bak.gly) * (heu - lc50)) - fx.mun.gly(0) #mortality normalized to 0
+    }
+    if(mun < 0) mun = 0
+    return(mun)
   }
 
-    points(seq(0,33000,30), sapply(seq(0,33000,30), mu_Nq_gly_gaf16_uncertainty, simplify = T), 
+    points(seq(0,33000,100), sapply(seq(0,33000,100), mu_Nq_gly_gaf16_uncertainty, simplify = T), 
            pch = 5, col = 4, cex = 0.5)
 
-#Fit function based on provided lc values
-plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33000),
-     xlab = 'Glyphosate (ppb)', ylab = 'snail mortality rate',
-     main = 'D-R function based on fit to lc values')
-
-      segments(x0 = 9130, x1 = 16570, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
-      segments(x0 = 23870, x1 = 28900, y0 = 0.9, y1 = 0.9, lty = 1, col = 1) 
-      
-  gaf.muNq.gly<-drm(lcs/100 ~ glyphosate, data = gly.dat, weights = rep(30, 6),
-                    type = 'binomial', fct = LL.2())
-    summary(gaf.muNq.gly)
-    
-  
-  mu_Nq_gly_gaf16<-function(He){
-    predict(gaf.muNq.gly, data.frame(glyphosate = He), 
-            interval = 'confidence', level = 0.95)
-  }  
-  
-  lines(seq(0,33000,150), sapply(seq(0,33000,150), mu_Nq_gly_gaf16, simplify = T)[1,],
-        lty = 2, col = 2) 
-  lines(seq(0,33000,150), sapply(seq(0,33000,150), mu_Nq_gly_gaf16, simplify = T)[2,],
-        lty = 3, col = 2) 
-  lines(seq(0,33000,150), sapply(seq(0,33000,150), mu_Nq_gly_gaf16, simplify = T)[3,],
-        lty = 3, col = 2) 
-  
-    mu_Nq_gly_gaf16_uncertainty2<-function(He){
-      rdrm(1, LL.2(), coef(gaf.muNq.gly), He, yerror = 'rbinom', ypar = 30)$y / 30  
-    }
-    
-    points(seq(0,33000,30), sapply(seq(0,33000,30), 
-                                    mu_Nq_gly_gaf16_uncertainty2, 
-                                    simplify = T),
-           pch = 5, col = 4, cex = 0.5)
+keep.bak.gly = c('mu_Nq_gly_gaf16_uncertainty', 'fx.mun.gly',
+                 'lc50.bak.gly', 'se.lc50.bak.gly', 'slp.bak.gly')    
     
 #Pendimethalin ##############
 pen.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
@@ -211,8 +134,9 @@ plot(pen.dat.no0$ppm, pen.dat.no0$probit, pch = 16)
     
   abline(a = coef(pen.bak.lm)[1], b = coef(pen.bak.lm)[2], lty = 2)
     
-    lc50.bak.pen = 10^((5 - coef(pen.bak.lm)[1]) / coef(pen.bak.lm)[2])
+    lc50.bak.pen = (5 - coef(pen.bak.lm)[1]) / coef(pen.bak.lm)[2]
     slp.bak.pen = coef(pen.bak.lm)[2]
+    se.lc50.bak.pen = mean(c(3.22/lc50.bak.pen, lc50.bak.pen/1.43)) / 1.96
     
     
 plot(pen.dat$pendimethalin, pen.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,7000),
@@ -220,13 +144,8 @@ plot(pen.dat$pendimethalin, pen.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0
      main = 'D-R function based on reported values')
     segments(x0 = 1430, x1 = 3220, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
     segments(x0 = 2400, x1 = 6420, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)
-    
-#Fit function based on reported parameter values  
-lc50.mun.pen = 2.148
-  se.lc50.mun.pen = mean(log(3.22/lc50.mun.pen), log(lc50.mun.pen/1.43)) / 1.96
-  slp.mun.pen = 1.820
-
-  fx.mun.pen = function(He, lc = lc50.mun.pen){
+  
+  fx.mun.pen = function(He, lc = lc50.bak.pen){
     heu = He/1000
     pnorm(slp.bak.pen * (heu-lc))
   }
@@ -236,45 +155,20 @@ lc50.mun.pen = 2.148
     lines(seq(0,7500,5), sapply(seq(0,7500,5), fx.mun.pen, lc = 1.43), lty = 3, col = 2)
 
 mu_Nq_pen_gaf16_uncertainty = function(He){
-  heu = He/1000
-  lc50 = exp(rnorm(1, log(lc50.mun.pen), se.lc50.mun.pen))
-  pnorm((slp.mun.pen) * log(heu/lc50))
+  if(He == 0) mun = 0 else{
+    heu = He/1000
+  lc50 = (rnorm(1, (lc50.bak.pen), se.lc50.bak.pen))
+  mun = pnorm((slp.bak.pen) * (heu - lc50)) - fx.mun.pen(0) #mortality normalized to 0
+  }
+  if(mun < 0) mun = 0
+  return(mun)
 }
   
-  points(seq(0,7500,5), sapply(seq(0,7500,5), mu_Nq_pen_gaf16_uncertainty, simplify = T), 
+  points(seq(0,7500,25), sapply(seq(0,7500,25), mu_Nq_pen_gaf16_uncertainty, simplify = T), 
          pch = 5, col = 4, cex = 0.5)
   
-#Fit function based on provided lc values
-  plot(pen.dat$pendimethalin, pen.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,7000),
-       xlab = 'pendimethalin (ppb)', ylab = 'snail mortality rate',
-       main = 'D-R function based on fit to lc values')
-  segments(x0 = 1430, x1 = 3220, y0 = 0.5, y1 = 0.5, lty = 1, col = 1)
-  segments(x0 = 2400, x1 = 6420, y0 = 0.9, y1 = 0.9, lty = 1, col = 1)
-  
-  gaf.muNq.pen<-drm(lcs/100 ~ pendimethalin, data = pen.dat, weights = rep(30, 6),
-                    type = 'binomial', fct = LL.2())
-    summary(gaf.muNq.pen)
-  
-  mu_Nq_pen_gaf16<-function(He){
-    predict(gaf.muNq.pen, data.frame(glyphosate = He), 
-            interval = 'confidence', level = 0.95)  
-  }
-  
-  lines(seq(0,7000,50), sapply(seq(0,7000,50), mu_Nq_pen_gaf16, simplify = T)[1,],
-        lty = 2, col = 2) 
-  lines(seq(0,7000,50), sapply(seq(0,7000,50), mu_Nq_pen_gaf16, simplify = T)[2,],
-        lty = 3, col = 2) 
-  lines(seq(0,7000,50), sapply(seq(0,7000,50), mu_Nq_pen_gaf16, simplify = T)[3,],
-        lty = 3, col = 2) 
-  
-  mu_Nq_pen_gaf16_uncertainty<-function(He){
-    rdrm(1, LL.2(), coef(gaf.muNq.pen), He, yerror = 'rbinom', ypar = 30)$y / 30  
-  }
-  
-  points(seq(0,7000,50), sapply(seq(0,7000,50), 
-                                  mu_Nq_pen_gaf16_uncertainty, 
-                                  simplify = T),
-         pch = 5, col = 4, cex = 0.5)
+keep.bak.pen = c('mu_Nq_pen_gaf16_uncertainty', 'fx.mun.pen',
+                 'lc50.bak.pen', 'se.lc50.bak.pen', 'slp.bak.pen')    
 
 #Longitudinal juvenile snail (B. alexandrina <3.6mm shell width) toxicity ###########
 gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/ghaffar2016_juv.csv')
@@ -305,7 +199,7 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
   gaf16.juv$pred = 0
   gaf16.juv$pred[gaf16.juv$chem == 'butralin'] = 
     pred(t = gaf16.juv$time[gaf16.juv$chem == 'butralin'],
-         rate = -mu_Nq_butr_gaf16(gaf16.juv$conc[gaf16.juv$chem == 'butralin'])[,1] - 
+         rate = -fx.mun.but(gaf16.juv$conc[gaf16.juv$chem == 'butralin']) - 
                 summary(bakground)$parameters[1])/100
   
   for(i in 1:length(unique(gaf16.juv$conc[gaf16.juv$chem == 'butralin']))){
@@ -334,7 +228,7 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
   
   gaf16.juv$pred[gaf16.juv$chem == 'glyphosate'] = 
     pred(t = gaf16.juv$time[gaf16.juv$chem == 'glyphosate'],
-         rate = -mu_Nq_gly_gaf16(gaf16.juv$conc[gaf16.juv$chem == 'glyphosate'])[,1] - 
+         rate = -fx.mun.gly(gaf16.juv$conc[gaf16.juv$chem == 'glyphosate']) - 
                 summary(bakground)$parameters[1])/100
   
   for(i in 1:length(unique(gaf16.juv$conc[gaf16.juv$chem == 'glyphosate']))){
@@ -363,7 +257,7 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
   
   gaf16.juv$pred[gaf16.juv$chem == 'pendimethalin'] = 
     pred(t = gaf16.juv$time[gaf16.juv$chem == 'pendimethalin'],
-         rate = -mu_Nq_pen_gaf16(gaf16.juv$conc[gaf16.juv$chem == 'pendimethalin'])[,1] - 
+         rate = -fx.mun.pen(gaf16.juv$conc[gaf16.juv$chem == 'pendimethalin']) - 
                 summary(bakground)$parameters[1])/100
   
   for(i in 1:length(unique(gaf16.juv$conc[gaf16.juv$chem == 'pendimethalin']))){
@@ -403,7 +297,7 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
   gaf16.ad$pred = 0
   gaf16.ad$pred[gaf16.ad$chem == 'butralin'] = 
     pred(t = gaf16.ad$time[gaf16.ad$chem == 'butralin'],
-         rate = -mu_Nq_butr_gaf16(gaf16.ad$conc[gaf16.ad$chem == 'butralin'])[,1] - 
+         rate = -fx.mun.but(gaf16.ad$conc[gaf16.ad$chem == 'butralin']) - 
            summary(bakground2)$parameters[1])/100
   
   for(i in 1:length(unique(gaf16.ad$conc[gaf16.ad$chem == 'butralin']))){
@@ -432,7 +326,7 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
   
   gaf16.ad$pred[gaf16.ad$chem == 'glyphosate'] = 
     pred(t = gaf16.ad$time[gaf16.ad$chem == 'glyphosate'],
-         rate = -mu_Nq_gly_gaf16(gaf16.ad$conc[gaf16.ad$chem == 'glyphosate'])[,1] - 
+         rate = -fx.mun.gly(gaf16.ad$conc[gaf16.ad$chem == 'glyphosate']) - 
            summary(bakground2)$parameters[1])/100
   
   for(i in 1:length(unique(gaf16.ad$conc[gaf16.ad$chem == 'glyphosate']))){
@@ -461,7 +355,7 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
   
   gaf16.ad$pred[gaf16.ad$chem == 'pendimethalin'] = 
     pred(t = gaf16.ad$time[gaf16.ad$chem == 'pendimethalin'],
-         rate = -mu_Nq_pen_gaf16(gaf16.ad$conc[gaf16.ad$chem == 'pendimethalin'])[,1] - 
+         rate = -fx.mun.pen(gaf16.ad$conc[gaf16.ad$chem == 'pendimethalin'])[,1] - 
            summary(bakground2)$parameters[1])/100
   
   for(i in 1:length(unique(gaf16.ad$conc[gaf16.ad$chem == 'pendimethalin']))){
@@ -492,7 +386,7 @@ htch.wk = c(0.99, 0.92, 0.82, 0.24,
             0.89, 0.58, 0.46,
             0.9, 0.3, 0.05)   #vector of hatching proportions (hatches/egg)
 
-#vector of concnetrations and reproduction measured as approximate hatchlings/snail/week
+#vector of concentrations and reproduction measured as approximate hatchlings/snail/week
   gafrep = data.frame('but.conc'=but.dat$butralin[1:4],
                       'gly.conc'=gly.dat$glyphosate[1:4],
                       'pen.conc'=pen.dat$pendimethalin[1:4],
@@ -526,14 +420,14 @@ plot(gafrep$but.conc, gafrep$but.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
  fN.butr.fx.uncertainty = function(He){
    init = predict(but.r0, newdata = data.frame(but.conc = He), se.fit = T)
    fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
-   while(fn < 0 && fn > 1.00000){
+   while(fn < 0 || fn > 1.00000){
      fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
    }
    return(fn)
  } #normalized to 1
  
- points(seq(0,4500,10), 
-        sapply(seq(0,4500,10), fN.butr.fx.uncertainty, simplify = T),
+ points(seq(0,4500,50), 
+        sapply(seq(0,4500,50), fN.butr.fx.uncertainty, simplify = T),
         pch = 5, col = 4, cex = 0.5) 
 
 #Reductions from glyphosate ##########
@@ -562,7 +456,7 @@ plot(gafrep$but.conc, gafrep$but.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
    fN.gly.fx.uncertainty = function(He){
      init = predict(gly.r0, newdata = data.frame(gly.conc = He), se.fit = T)
      fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
-     while(fn < 0 && fn > 1){
+     while(fn < 0 || fn > 1){
        fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
      }
      return(fn)
@@ -595,7 +489,7 @@ plot(gafrep$pen.conc, gafrep$pen.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
   fN.pen.fx.uncertainty = function(He){
     init = predict(pen.r0, newdata = data.frame(pen.conc = He), se.fit = T)
     fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
-    while(fn < 0 && fn > 1){
+    while(fn < 0 || fn > 1){
       fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
     }
     return(fn)  
