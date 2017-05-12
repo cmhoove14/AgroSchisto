@@ -32,7 +32,7 @@ require(drc)
     lc50.bak.mal = (5 - coef(lm.bak.mal)[1]) / coef(lm.bak.mal)[2]
     slp.bak.mal = coef(lm.bak.mal)[2]
     #get standard error from reported 95% CIs of lc50
-    se.lc50.bak.mal = mean(c(3.12/lc50.bak.mal, lc50.bak.mal/0.99)) / 1.96
+    se.lc50.bak.mal = mean(c(3.12-lc50.bak.mal, lc50.bak.mal-0.99)) / 1.96
     
   plot(mun.mal$conc, mun.mal$mort, pch = 16, 
        xlab = 'Malathion (ppb)', ylab = 'prop dead', ylim = c(0,1), xlim = c(0,5000),
@@ -83,14 +83,14 @@ plot(mun.del$ppm, mun.del$probit, pch = 16)
   lc50.bak.del = (5 - coef(lm.bak.del)[1]) / coef(lm.bak.del)[2]
   slp.bak.del = coef(lm.bak.del)[2]
   #get standard error from reported 95% CIs of lc50; assuming 0.31 is typo meaning 3.1
-  se.lc50.bak.del = mean(c(7.7/lc50.bak.del, lc50.bak.del/3.1)) / 1.96
+  se.lc50.bak.del = mean(c(7.7-lc50.bak.del, lc50.bak.del-3.1)) / 1.96
   
   fx.bak.del = function(In, lc = lc50.bak.del){
     Ins = In/1000
     pnorm(slp.bak.del * (Ins - lc))
   }
   
-plot(mun.del$conc, mun.del$mort, pch = 16, cex = 1.2, ylim = c(0,1), xlim = c(0,10000),
+plot(mun.del$conc, mun.del$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
      xlab = 'Deltamethrin (ppb)', ylab = 'prop dead', 
      main = 'D-R function based on reported values')
     segments(x0 = 3100, y0 = 0.5, x1 = 7700, y1 = 0.5)
@@ -111,7 +111,7 @@ plot(mun.del$conc, mun.del$mort, pch = 16, cex = 1.2, ylim = c(0,1), xlim = c(0,
     } 
     return(mun)
   }
-  points(seq(0,10000,100), sapply(seq(0,10000,100), muNq_del_Bakry11_uncertainty), 
+  points(seq(0,10000,50), sapply(seq(0,10000,50), muNq_del_Bakry11_uncertainty), 
          pch = 5, col = 4, cex = 0.5)
   
   #keep vector

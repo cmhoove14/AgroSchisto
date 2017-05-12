@@ -36,7 +36,7 @@ plot(but.dat.no0$ppm, but.dat.no0$probit, pch = 16, xlim = c(0,13), ylim = c(3.5
   lc50.gaf.but = (5 - coef(but.gaf.lm)[1]) / coef(but.gaf.lm)[2]
   slp.gaf.but = coef(but.gaf.lm)[2]
   #get standard error from reported 95% CIs of lc50
-  se.lc50.gaf.but = mean(c(8.34/lc50.gaf.but, lc50.gaf.but/3.7)) / 1.96
+  se.lc50.gaf.but = mean(c(8.34-lc50.gaf.but, lc50.gaf.but-3.7)) / 1.96
 
 plot(but.dat$butralin, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,13000),
      xlab = 'Butralin (ppb)', ylab = 'snail mortality rate', 
@@ -89,7 +89,7 @@ plot(gly.dat.no0$ppm, gly.dat.no0$probit, pch = 16)
   
     lc50.gaf.gly = ((5 - coef(gly.gaf.lm)[1]) / coef(gly.gaf.lm)[2])
     slp.gaf.gly = coef(gly.gaf.lm)[2]
-    se.lc50.gaf.gly = mean(c(16.57/lc50.gaf.gly, lc50.gaf.gly/9.13)) / 1.96
+    se.lc50.gaf.gly = mean(c(16.57-lc50.gaf.gly, lc50.gaf.gly-9.13)) / 1.96
     
 plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33000),
      xlab = 'Glyphosate (ppb)', ylab = 'snail mortality rate',
@@ -142,7 +142,7 @@ plot(pen.dat.no0$ppm, pen.dat.no0$probit, pch = 16)
     
     lc50.gaf.pen = (5 - coef(pen.gaf.lm)[1]) / coef(pen.gaf.lm)[2]
     slp.gaf.pen = coef(pen.gaf.lm)[2]
-    se.lc50.gaf.pen = mean(c(3.22/lc50.gaf.pen, lc50.gaf.pen/1.43)) / 1.96
+    se.lc50.gaf.pen = mean(c(3.22-lc50.gaf.pen, lc50.gaf.pen-1.43)) / 1.96
     
     
 plot(pen.dat$pendimethalin, pen.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,7000),
