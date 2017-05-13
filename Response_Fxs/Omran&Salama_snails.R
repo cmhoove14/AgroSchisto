@@ -15,106 +15,108 @@
 require(drc)
 
 ons = read.csv('~/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/Omran&Salama2013.csv')
-  ons$mort = pnorm(ons$prob_mort, mean = 5, sd = 1)
+  ons$mort = pnorm(ons$probit, mean = 5)
   ons$surv = 1 - ons$mort
-  ons$dead = round(50*ons$mort)
-  ons$live = round(50*ons$surv)
-  ons$total = 50
-  
+
 ons.atr = subset(ons, chem == 'atrazine')
 ons.gly = subset(ons, chem == 'glyphosate')
 
-plot(ons.atr$log_conc, ons.atr$prob_mort, pch = 16, col = 'gold', ylim = c(0,7), xlim = c(0, 3),
-     xlab = 'Log10 Concentration', ylab = c('Probit mortality')) 
-  points(ons.gly$log_conc, ons.gly$prob_mort, pch = 16, col = 'green')
+#Atrazine mortality ############
+plot(ons.atr$log_conc, ons.atr$probit, pch = 16, col = 'gold', #ylim = c(0,7), xlim = c(0, 3),
+     xlab = 'atrazine (ppm)', ylab = c('Probit mortality')) 
+  lm.ons.atr = lm(probit ~ log_conc, data = ons.atr)
+  
+  abline(coef(lm.ons.atr), lty = 2, col = 'gold')
+  
+  lc50.ons.atr = 10^((5 - coef(lm.ons.atr)[1]) / coef(lm.ons.atr)[2])
+  slp.ons.atr = coef(lm.ons.atr)[2]
 
-ons.lm.atr = lm(prob_mort ~ log_conc, data = ons.atr)  
-  summary(ons.lm.atr)
-  
-  lc50.ons.atr = 10^((5 - coef(ons.lm.atr)[1]) / coef(ons.lm.atr)[2])
-  slp.ons.atr = coef(ons.lm.atr)[2]
-  
-ons.pred.atr = function(He){
-  predict(ons.lm.atr, newdata = data.frame(log_conc = He), interval = 'confidence', level = 0.95)
+plot(ons.atr$conc, ons.atr$mort, pch = 16, ylim = c(0,1),
+     xlab = 'atrazine (ppb)', ylab = c('mortality')) 
+    
+fx.ons.atr = function(He){
+  heu = log10(He/1000)
+  pnorm(predict(lm.ons.atr, newdata = data.frame(log_conc = heu), 
+                interval = 'confidence', level = 0.95), mean = 5)
 } 
-  lines(seq(0,4,0.01), sapply(seq(0,4,0.01), ons.pred.atr)[1,], lty = 2, col = 'gold')
-  lines(seq(0,4,0.01), sapply(seq(0,4,0.01), ons.pred.atr)[2,], lty = 3, col = 'gold')
-  lines(seq(0,4,0.01), sapply(seq(0,4,0.01), ons.pred.atr)[3,], lty = 3, col = 'gold')
-  
-ons.lm.gly = lm(prob_mort ~ log_conc, data = ons.gly)  
-  summary(ons.lm.gly)
-  
-  lc50.ons.gly = 10^((5 - coef(ons.lm.gly)[1]) / coef(ons.lm.gly)[2])
-  slp.ons.gly = coef(ons.lm.gly)[2]
-  
-ons.pred.gly = function(He){
-  predict(ons.lm.gly, newdata = data.frame(log_conc = He), interval = 'confidence', level = 0.95)
-} 
-  lines(seq(0,4,0.01), sapply(seq(0,4,0.01), ons.pred.gly)[1,], lty = 2, col = 'green')
-  lines(seq(0,4,0.01), sapply(seq(0,4,0.01), ons.pred.gly)[2,], lty = 3, col = 'green')
-  lines(seq(0,4,0.01), sapply(seq(0,4,0.01), ons.pred.gly)[3,], lty = 3, col = 'green')
-  
-title(expression(paste('Omran & Salama herbicide toxicity to ', italic('Bi. alexandrina'))))
-legend('bottomright', pch = 16, col = c('gold', 'green'), legend = c('Atrazine', 'Glyphosate'), bty = 'n', cex = 0.8)
+  lines(seq(0,5e5,500), sapply(seq(0,5e5,500), fx.ons.atr)[1,], lty = 2, col = 2)
+  lines(seq(0,5e5,500), sapply(seq(0,5e5,500), fx.ons.atr)[2,], lty = 3, col = 2)
+  lines(seq(0,5e5,500), sapply(seq(0,5e5,500), fx.ons.atr)[3,], lty = 3, col = 2)
 
-#derive function for Atrazine  ############
-plot(ons.atr$conc10_ppm, ons.atr$mort, pch = 16,  ylim = c(0,1), xlim = c(0,500),
-     xlab = 'atrazine (ppm)', ylab = 'mortality rate')
-
-#function based on lc50 and slope derived from L&W plots of probit mortality/log10 concentration
-ons.fx.atr = function(He, lc = lc50.ons.atr){
-  heu = He/1000
-  pnorm(slp.ons.atr * log10(heu/lc))
-}
-
-  lines(c(0:500), sapply(c(0:500)*1000, ons.fx.atr), lty = 2, col = 2)
- 
-#Function incorporating uncertainty  
 ons.munq.atr = function(He){
-  if(He == 0) munq = 0 else{
-    heu = log10(He/1000)  #convert ppb to log10 of ppm
-    init = predict(ons.lm.atr, newdata = data.frame(log_conc = heu), se.fit = T) 
-    munq = pnorm(rnorm(1, init$fit, init$se.fit), mean = 5, sd = 1)
-  }
-  return(munq)
-}
-
-points(c(0:500), sapply(c(0:500)*1000, ons.munq.atr), pch = 5, cex = 0.5, col = 4)
-
-#zoom to more environmentally feasible range (still 5000 ppb which is real high)
-plot(ons.atr$conc10_ppm, ons.atr$mort, pch = 16,  ylim = c(0,1), xlim = c(0,5),
-     xlab = 'atrazine (ppm)', ylab = 'mortality rate')
-
-points(seq(0,5,0.01), sapply(seq(0,5,0.01)*1000, ons.munq.atr), pch = 5, cex = 0.5, col = 4)
-
-
-#derive function for Glyphosate  ############
-plot(ons.gly$conc10_ppm, ons.gly$mort, pch = 16,  ylim = c(0,1), xlim = c(0,500),
-     xlab = 'glyphosate (ppm)', ylab = 'mortality rate')
-
-#function based on lc50 and slope derived from L&W plots of probit mortality/log10 concentration
-ons.fx.gly = function(He, lc = lc50.ons.gly){
-  heu = He/1000
-  pnorm(slp.ons.gly * log10(heu/lc))
-}
-
-lines(c(0:500), sapply(c(0:500)*1000, ons.fx.gly), lty = 2, col = 2)
-
-
-ons.munq.gly = function(He){
-  if(He == 0) munq = 0 else{
+  if(He == 0) mun = 0 else{
     heu = log10(He/1000)
-    init = predict(ons.lm.gly, newdata = data.frame(log_conc = heu), se.fit = T) 
-    munq = pnorm(rnorm(1, init$fit, init$se.fit), mean = 5, sd = 1)
+    init = predict(lm.ons.atr, newdata = data.frame(log_conc = heu), se.fit = T)
+    est = rnorm(1, init$fit, init$se.fit)
+  while(est < 0){
+    est = rnorm(1, init$fit, init$se.fit)
   }
-  return(munq)
+    mun = pnorm(est, mean = 5)
+  }
+  return(mun)
+} 
+
+points(seq(0,5e5,1000), sapply(seq(0,5e5,1000), ons.munq.atr),
+       pch = 5, col = 4, cex = 0.5)
+
+keep.ons.atr = c('ons.munq.atr', 'lm.ons.atr')
+#zoom just to check out low conc
+plot(ons.atr$conc, ons.atr$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
+     xlab = 'atrazine (ppb)', ylab = c('mortality')) 
+  lines(seq(0,10000,20), sapply(seq(0,10000,20), fx.ons.atr)[1,], lty = 2, col = 2)
+  lines(seq(0,10000,20), sapply(seq(0,10000,20), fx.ons.atr)[2,], lty = 3, col = 2)
+  lines(seq(0,10000,20), sapply(seq(0,10000,20), fx.ons.atr)[3,], lty = 3, col = 2)
+
+  points(seq(0,10000,50), sapply(seq(0,10000,50), muNq_ons_atr_uncertainty),
+         pch = 5, col = 4, cex = 0.5)
+
+#glyphosate toxicity ############   
+plot(ons.gly$log_conc, ons.gly$probit, pch = 16, #xlim = c(0,3), ylim = c(4,6)
+     col = 3)  
+  lm.ons.gly = lm(probit ~ log_conc, data = ons.gly)  
+
+  abline(coef(lm.ons.gly), lty = 2, col = 3)
+  
+  lc50.ons.gly = 10^((5 - coef(lm.ons.gly)[1]) / coef(lm.ons.gly)[2])
+  slp.ons.gly = coef(lm.ons.gly)[2]
+  
+fx.ons.gly = function(He){
+  heu = log10(He/1000)
+  pnorm(predict(lm.ons.gly, newdata = data.frame(log_conc = heu), 
+          interval = 'confidence', level = 0.95), mean = 5)
+} 
+
+plot(ons.gly$conc, ons.gly$mort, pch = 16, ylim = c(0,1),
+     xlab = 'Glyphosate (ppb)', ylab = 'mortality')
+  lines(seq(0,5e5,500), sapply(seq(0,5e5,500), fx.ons.gly)[1,], lty = 2, col = 2)
+  lines(seq(0,5e5,500), sapply(seq(0,5e5,500), fx.ons.gly)[2,], lty = 3, col = 2)
+  lines(seq(0,5e5,500), sapply(seq(0,5e5,500), fx.ons.gly)[3,], lty = 3, col = 2)
+  
+ons.munq.gly = function(He){
+  if(He == 0) mun = 0 else{
+    heu = log10(He/1000)
+    init = predict(lm.ons.gly, newdata = data.frame(log_conc = heu), se.fit = T)
+    est = rnorm(1, init$fit, init$se.fit)
+    while(est < 0){
+      est = rnorm(1, init$fit, init$se.fit)
+    }
+    mun = pnorm(est, mean = 5)
+  }
+  return(mun)
 }
 
-points(c(0:500), sapply(c(0:500)*1000, ons.munq.gly), pch = 5, cex = 0.5, col = 4)
+points(seq(0,5e5,1000), sapply(seq(0,5e5,1000), ons.munq.gly),
+       pch = 5, col = 4, cex = 0.5)
 
+keep.ons.gly = c('ons.munq.gly', 'lm.ons.gly')
 
 #zoom to more environmentally feasible range (still 5000 ppb which is real high)
-plot(ons.gly$conc10_ppm, ons.gly$mort, pch = 16,  ylim = c(0,1), xlim = c(0,5),
-     xlab = 'glyphosate (ppm)', ylab = 'mortality rate')
+plot(ons.gly$conc, ons.gly$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
+     xlab = 'Glyphosate (ppb)', ylab = 'mortality')
+  lines(seq(0,10000,100), sapply(seq(0,10000,100), fx.ons.gly)[1,], lty = 2, col = 2)
+  lines(seq(0,10000,100), sapply(seq(0,10000,100), fx.ons.gly)[2,], lty = 3, col = 2)
+  lines(seq(0,10000,100), sapply(seq(0,10000,100), fx.ons.gly)[3,], lty = 3, col = 2)
 
-points(seq(0,5,0.01), sapply(seq(0,5,0.01)*1000, ons.munq.gly), pch = 5, cex = 0.5, col = 4)
+  points(seq(0,10000,50), sapply(seq(0,10000,50), ons.munq.gly),
+         pch = 5, col = 4, cex = 0.5)
+  
