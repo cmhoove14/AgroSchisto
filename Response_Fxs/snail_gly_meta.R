@@ -30,11 +30,11 @@ plot(seq(0, 5000, 10), sapply(seq(0, 5000, 10), muNq_gly_Bakry12_uncertainty),
   
 #combine data from each study
 gly.mun = data.frame(conc = c(gly.dat$glyphosate, mun.bak.gly$conc*1000, ons.gly$conc), 
-                     logconc = log10(c(gly.dat$glyphosate, mun.bak.gly$conc*1000, ons.gly$conc)+1),
+                     log10 = log10(c(gly.dat$glyphosate, mun.bak.gly$conc*1000, ons.gly$conc)+1),
                      mort = c(gly.dat$lcs/100, mun.bak.gly$mort, ons.gly$mort),
                      tot = c(rep(30,6), rep(50,10)))
-plot(gly.mun$logconc, gly.mun$mort, pch = 16, ylim = c(0,1), 
-     xlab = 'log+1 glyphosate (ppb)', ylab = 'mortality')
+plot(gly.mun$log10, gly.mun$mort, pch = 16, ylim = c(0,1), 
+     xlab = 'log10+1 glyphosate (ppb)', ylab = 'mortality')
   
   gly.mun.meta = drm(mort ~ conc, weights = tot, data = gly.mun, type = 'binomial',
                      fct = LL.4(names = c('b', 'c', 'd', 'e'),
@@ -59,7 +59,7 @@ plot(gly.mun$logconc, gly.mun$mort, pch = 16, ylim = c(0,1),
          col = 4, pch = 5, cex = 0.5)
   
 #compare meta estimate to individual estimates ########
-plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,46000),
+plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), #xlim = c(0,46000),
      xlab = 'Glyphosate (ppb)', ylab = 'snail mortality rate')
   
   points(mun.bak.gly$gly*1000, mun.bak.gly$mort, pch = 17)
