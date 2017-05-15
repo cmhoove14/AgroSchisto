@@ -29,9 +29,9 @@ plot(seq(0, 5000, 10), sapply(seq(0, 5000, 10), muNq_gly_Bakry12_uncertainty),
          pch = 5, col = c(1,2,4), cex = 0.75, bty = 'n', title = 'Function output')
   
 #combine data from each study
-gly.mun = data.frame(conc = c(gly.dat$glyphosate, muN.bak$gly*1000, ons.gly$conc10), 
-                     logconc = log(c(gly.dat$glyphosate, muN.bak$gly*1000, ons.gly$conc10)+1),
-                     mort = c(gly.dat$lcs/100, muN.bak$mort, ons.gly$mort),
+gly.mun = data.frame(conc = c(gly.dat$glyphosate, mun.bak.gly$conc*1000, ons.gly$conc), 
+                     logconc = log10(c(gly.dat$glyphosate, mun.bak.gly$conc*1000, ons.gly$conc)+1),
+                     mort = c(gly.dat$lcs/100, mun.bak.gly$mort, ons.gly$mort),
                      tot = c(rep(30,6), rep(50,10)))
 plot(gly.mun$logconc, gly.mun$mort, pch = 16, ylim = c(0,1), 
      xlab = 'log+1 glyphosate (ppb)', ylab = 'mortality')
@@ -43,25 +43,26 @@ plot(gly.mun$logconc, gly.mun$mort, pch = 16, ylim = c(0,1),
   summary(gly.mun.meta)
   
   gly.meta.pred = function(He){
-    predict(gly.mun.meta, newdata = data.frame(conc = He), interval = 'confidence', level = 0.95)
+    predict(gly.mun.meta, newdata = data.frame(conc = He), 
+            interval = 'confidence', level = 0.95)
   }
   
-  lines(log(seq(0,500000,500)+1), sapply(seq(0,500000,500), gly.meta.pred, simplify = T)[1,], col = 2, lty = 2)
-  lines(log(seq(0,500000,500)+1), sapply(seq(0,500000,500), gly.meta.pred, simplify = T)[2,], col = 2, lty = 3)
-  lines(log(seq(0,500000,500)+1), sapply(seq(0,500000,500), gly.meta.pred, simplify = T)[3,], col = 2, lty = 3)
+  lines(log10(seq(0,500000,500)+1), sapply(seq(0,500000,500), gly.meta.pred, simplify = T)[1,], col = 2, lty = 2)
+  lines(log10(seq(0,500000,500)+1), sapply(seq(0,500000,500), gly.meta.pred, simplify = T)[2,], col = 2, lty = 3)
+  lines(log10(seq(0,500000,500)+1), sapply(seq(0,500000,500), gly.meta.pred, simplify = T)[3,], col = 2, lty = 3)
   
   mu_Nq_meta_gly_uncertainty<-function(He){
     rdrm(1, LL.2(), coef(gly.mun.meta), He, yerror = 'rbinom', ypar = 50)$y / 50  
   }
   
-  points(log(seq(0,500000,500)+1), sapply(seq(0,500000,500), mu_Nq_meta_gly_uncertainty, simplify = T),
+  points(log10(seq(0,500000,500)+1), sapply(seq(0,500000,500), mu_Nq_meta_gly_uncertainty, simplify = T),
          col = 4, pch = 5, cex = 0.5)
   
 #compare meta estimate to individual estimates ########
 plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,46000),
      xlab = 'Glyphosate (ppb)', ylab = 'snail mortality rate')
   
-  points(muN.bak$gly*1000, muN.bak$mort, pch = 17)
+  points(mun.bak.gly$gly*1000, mun.bak.gly$mort, pch = 17)
   points(ons.gly$conc10, ons.gly$mort, pch = 15)
   legend('bottomright', legend = c('Abdel-Ghaffar 2016', 'Bakry 2012', 'Omran&Salama 2013'),
          pch = c(16,17,15), cex = 0.7, bty = 'n', title = 'Data')

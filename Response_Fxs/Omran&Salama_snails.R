@@ -67,7 +67,7 @@ plot(ons.atr$conc, ons.atr$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
   lines(seq(0,10000,20), sapply(seq(0,10000,20), fx.ons.atr)[2,], lty = 3, col = 2)
   lines(seq(0,10000,20), sapply(seq(0,10000,20), fx.ons.atr)[3,], lty = 3, col = 2)
 
-  points(seq(0,10000,50), sapply(seq(0,10000,50), muNq_ons_atr_uncertainty),
+  points(seq(0,10000,50), sapply(seq(0,10000,50), ons.munq.atr),
          pch = 5, col = 4, cex = 0.5)
 
 #glyphosate toxicity ############   
