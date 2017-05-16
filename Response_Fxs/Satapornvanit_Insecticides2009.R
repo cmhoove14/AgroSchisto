@@ -6,7 +6,9 @@ require(drc)
     sap.mort$dead = round(sap.mort$dead)
   mort.sub = subset(sap.mort, chem !='carbendazim') 
   
-  sap.mupq<-drm(dead/total ~ conc, chem, weights = total,  data = mort.sub, fct = LL.2(), type = 'binomial')
+  sap.mupq<-drm(dead/total ~ conc, chem, weights = total,  data = mort.sub, type = 'binomial', 
+                fct = L.4(names = c('b', 'c', 'd', 'e'),
+                          fixed = c(NA, 0, 1, NA)))
     summary(sap.mupq)
     plot(sap.mupq)
     
@@ -23,7 +25,7 @@ require(drc)
     lines(seq(0,900,10), sapply(seq(0,900,10), muPq_zinc_satapornvanit09, simplify = T)[3,], lty=3, col=2)
     
   muPq_zinc_satapornvanit09_uncertainty<-function(In){
-    rdrm(1, LL.2(), coef(sap.mupq)[c(1,5)], In, yerror = 'rbinom', ypar = 30)$y / 30
+    rdrm(1, L.4(), coef(sap.mupq)[c(1,5)], In, yerror = 'rbinom', ypar = 30)$y / 30
   }
     
   points(seq(0,900,10), sapply(seq(0,900,10), muPq_zinc_satapornvanit09_uncertainty, simplify = T), 
@@ -32,7 +34,8 @@ require(drc)
 keep.zinc.sat09 = c('muPq_zinc_satapornvanit09_uncertainty', 'sap.mupq')    
 #Chlorpyrifos ###########    
   muPq_chlor_satapornvanit09<-function(In){
-    predict(sap.mupq, data.frame(conc=In, chem = 'chlorpyrifos'), interval = 'confidence', level = 0.95)
+    predict(sap.mupq, data.frame(conc=In, chem = 'chlorpyrifos'), 
+            interval = 'confidence', level = 0.95)
   }  
     
     plot(sap.mort$conc[sap.mort$chem == 'chlorpyrifos'], sap.mort$mort[sap.mort$chem == 'chlorpyrifos']/100, ylim = c(0,1),
@@ -43,16 +46,24 @@ keep.zinc.sat09 = c('muPq_zinc_satapornvanit09_uncertainty', 'sap.mupq')
       lines(seq(0,5,0.01), sapply(seq(0,5,0.01), muPq_chlor_satapornvanit09, simplify = T)[3,], lty=3, col=2)
     
   muPq_chlor_satapornvanit09_uncertainty<-function(In){
-    rdrm(1, LL.2(), coef(sap.mupq)[c(2,6)], In, yerror = 'rbinom', ypar = 30)$y / 30
+    if(In == 0) mup = 0 else{
+      init = predict(sap.mupq, data.frame(conc=In, chem = 'chlorpyrifos'), se.fit = T)
+      mup = rnorm(1, init[1], init[2]) - muPq_chlor_satapornvanit09(0)[1] #normalize to 0
+    }
+    while(mup < 0 || mup > 1){
+      mup = rnorm(1, init[1], init[2]) - muPq_chlor_satapornvanit09(0)[1] #normalize to 0
+    }
+    return(mup)
   }
       
-  points(seq(0,5,0.1), sapply(seq(0,5,0.1), muPq_chlor_satapornvanit09_uncertainty, simplify = T), 
+  points(seq(0,5,0.01), sapply(seq(0,5,0.01), muPq_chlor_satapornvanit09_uncertainty, simplify = T), 
           pch=5, col=4, cex = 0.5)    
       
-keep.chlor.sat09 = c('muPq_chlor_satapornvanit09_uncertainty', 'sap.mupq')  
+keep.chlor.sat09 = c('muPq_chlor_satapornvanit09_uncertainty', 'muPq_chlor_satapornvanit09','sap.mupq')  
 #Dimethoate ################        
   muPq_dim_satapornvanit09<-function(In){
-    predict(sap.mupq, data.frame(conc=In, chem = 'dimethoate'), interval = 'confidence', level = 0.95)
+    predict(sap.mupq, data.frame(conc=In, chem = 'dimethoate'), 
+            interval = 'confidence', level = 0.95)
   }  
   
   plot(sap.mort$conc[sap.mort$chem == 'dimethoate'], sap.mort$mort[sap.mort$chem == 'dimethoate']/100, ylim = c(0,1),
@@ -63,12 +74,19 @@ keep.chlor.sat09 = c('muPq_chlor_satapornvanit09_uncertainty', 'sap.mupq')
     lines(seq(0,1300,10), sapply(seq(0,1300,10), muPq_dim_satapornvanit09, simplify = T)[3,], lty=3, col=2)
       
   muPq_dim_satapornvanit09_uncertainty<-function(In){
-    rdrm(1, LL.2(), coef(sap.mupq)[c(3,7)], In, yerror = 'rbinom', ypar = 30)$y / 30
+    if(In == 0) mup = 0 else{
+      init = predict(sap.mupq, data.frame(conc=In, chem = 'dimethoate'), se.fit = T)
+      mup = rnorm(1, init[1], init[2]) - muPq_dim_satapornvanit09(0)[1] #normalize to 0
+    }
+    while(mup < 0 || mup > 1){
+      mup = rnorm(1, init[1], init[2]) - muPq_dim_satapornvanit09(0)[1] #normalize to 0
+    }
+    return(mup)
   }
     
   points(seq(0,1300,10), sapply(seq(0,1300,10), muPq_dim_satapornvanit09_uncertainty, simplify = T), 
           pch=5, col=4, cex = 0.5)       
-keep.dim.sat09 = c('muPq_dim_satapornvanit09_uncertainty', 'sap.mupq')
+keep.dim.sat09 = c('muPq_dim_satapornvanit09_uncertainty', 'muPq_dim_satapornvanit09','sap.mupq')
 #Profenofos ################      
   muPq_pr_satapornvanit09<-function(In){
     predict(sap.mupq, data.frame(conc=In, chem = 'profenofos'), interval = 'confidence', level = 0.95)
@@ -82,11 +100,21 @@ keep.dim.sat09 = c('muPq_dim_satapornvanit09_uncertainty', 'sap.mupq')
     lines(seq(0,60,0.1), sapply(seq(0,60,0.1), muPq_pr_satapornvanit09, simplify = T)[3,], lty=3, col=2)
  
   muPq_prof_satapornvanit09_uncertainty<-function(In){
-    rdrm(1, LL.2(), coef(sap.mupq)[c(4,8)], In, yerror = 'rbinom', ypar = 30)$y / 30
+    if(In == 0) mup = 0 else{
+      init = predict(sap.mupq, data.frame(conc=In, chem = 'profenofos'), se.fit = T)
+      mup = rnorm(1, init[1], init[2]) - muPq_pr_satapornvanit09(0)[1] #normalize to 0
+    }
+    while(mup < 0 || mup > 1){
+      mup = rnorm(1, init[1], init[2]) - muPq_pr_satapornvanit09(0)[1] #normalize to 0
+    }
+    return(mup)
   }
     
   points(seq(0,60,0.5), sapply(seq(0,60,0.5), muPq_prof_satapornvanit09_uncertainty, simplify = T), 
-          pch=5, col=4, cex = 0.5)   
+          pch=5, col=4, cex = 0.5) 
+  
+keep.prof.sat09 = c('muPq_prof_satapornvanit09_uncertainty', 'muPq_pr_satapornvanit09','sap.mupq')
+  
 #Carbendazim ###########       
   muPq_carb_satapornvanit09<-function(In){ #Paper found no consistent effect of carbendazim on mortality, even
       0*In                                 #at levels higher than the solubility of carbendazim in water
