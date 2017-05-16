@@ -11,8 +11,8 @@
 
 require(drc)
 
-ll4 = function(hi,lo,slp,lc,x){
-  lo + ((hi-lo)/(1+exp(slp*(log(x/lc)))))
+L.3.fx = function(t, lc50 = lc50, slp = slp){
+  1 / (1+exp(slp*(t - lc50)))
 }
 
 rohr = read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/cercarial Mortality/rohr2008.csv')
@@ -23,9 +23,10 @@ plot(x = rohr$time_hrs[rohr$chem == 'control'], y = rohr$surv[rohr$chem == 'cont
      xlab = 'time (hrs)', ylab = 'prop dead', pch = 16)
 
 rohr.ctrl = drm(alive/total ~ time_hrs, total, data = rohr, 
-                type = 'binomial', fct = LL.2())
+                type = 'binomial', fct = L.4(names = c('b', 'c', 'd', 'e'),
+                                                        fixed = c(NA, 0, 1, NA)))
 
-lines(time, ll4(1,0,coef(rohr.ctrl)[1], coef(rohr.ctrl)[2], time), lty=2)
+lines(time, L.3.fx(time, coef(rohr.ctrl)[2], coef(rohr.ctrl)[1]), lty=2)
 
 #Atrazine ########
 rohr.atr = subset(rohr, chem == 'atrazine')
@@ -33,19 +34,21 @@ points(x = rohr.atr$time_hrs, y = rohr.atr$surv/100,
        col = 'gold', pch = 16)
 
   rohr.atrmod = drm(alive/total ~ time_hrs, total, data = rohr.atr, 
-                    type = 'binomial', fct = LL.2())
+                    type = 'binomial', fct = L.4(names = c('b', 'c', 'd', 'e'),
+                                                 fixed = c(NA, 0, 1, NA)))
   
-  lines(time, ll4(1,0,coef(rohr.atrmod)[1], coef(rohr.atrmod)[2], time), lty=2, col ='gold')
-
+  lines(time, L.3.fx(time, coef(rohr.atrmod)[2], coef(rohr.atrmod)[1]), lty=2, col = 'gold')
+  
 #Malathion ########
   rohr.mal = subset(rohr, chem == 'malathion')
   points(x = rohr.mal$time_hrs, y = rohr.mal$surv/100,
-         col = 'red', pch = 16)
+         col = 2, pch = 16)
   
   rohr.malmod = drm(alive/total ~ time_hrs, total, data = rohr.mal, 
-                    type = 'binomial', fct = LL.2())
+                    type = 'binomial', fct = L.4(names = c('b', 'c', 'd', 'e'),
+                                                 fixed = c(NA, 0, 1, NA)))
   
-  lines(time, ll4(1,0,coef(rohr.malmod)[1], coef(rohr.malmod)[2], time), lty=2, col ='red')
+  lines(time, L.3.fx(time, coef(rohr.malmod)[2], coef(rohr.malmod)[1]), lty=2, col = 2)
   
 #carbaryl ########
   rohr.car = subset(rohr, chem == 'carbaryl')
@@ -53,23 +56,25 @@ points(x = rohr.atr$time_hrs, y = rohr.atr$surv/100,
          col = 'purple', pch = 16)
   
   rohr.carmod = drm(alive/total ~ time_hrs, total, data = rohr.car, 
-                    type = 'binomial', fct = LL.2())
+                    type = 'binomial', fct = L.4(names = c('b', 'c', 'd', 'e'),
+                                                 fixed = c(NA, 0, 1, NA)))
   
-  lines(time, ll4(1,0,coef(rohr.carmod)[1], coef(rohr.carmod)[2], time), lty=2, col ='purple')
+  lines(time, L.3.fx(time, coef(rohr.carmod)[2], coef(rohr.carmod)[1]), lty=2, col = 'purple')
   
 #glyphosate ########
 rohr.gly = subset(rohr, chem == 'glyphosate')
   points(x = rohr.gly$time_hrs, y = rohr.gly$surv/100,
-         col = 'green', pch = 16)
+         col = 3, pch = 16)
   
   rohr.glymod = drm(alive/total ~ time_hrs, total, data = rohr.gly, 
-                    type = 'binomial', fct = LL.2())
+                    type = 'binomial', fct = L.4(names = c('b', 'c', 'd', 'e'),
+                                                 fixed = c(NA, 0, 1, NA)))
   
-  lines(time, ll4(1,0,coef(rohr.glymod)[1], coef(rohr.glymod)[2], time), lty=2, col ='green')
+  lines(time, L.3.fx(time, coef(rohr.glymod)[2], coef(rohr.glymod)[1]), lty=2, col = 3)
   
 #Summaries ##########
-  legend('bottomleft', legend = c('control', 'atrazine', 'carbaryl', 'glyphosate', 'malathion'),
-         col = c('black', 'gold', 'red', 'green','purple'), pch = 16, cex=0.8)
+  legend('bottomleft', legend = c('control', 'atrazine', 'malathion', 'glyphosate', 'carbaryl'),
+         col = c('black', 'gold', 'red', 'green','purple'), pch = 16, cex=0.8, bty = 'n')
   title(main = 'Rohr 2008 cercarial mortality')
   
 rohr.fin = data.frame(chem = c('control', 'atrazine', 'carbaryl', 'glyphosate', 'malathion'),
