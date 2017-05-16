@@ -29,7 +29,7 @@ plot(mun.hsh.ch$ppm, mun.hsh.ch$probit, pch = 16)
   
   lc50.ch.hash = (5 - coef(hash.ch.lm)[1]) / coef(hash.ch.lm)[2]
   slp.ch.hash = coef(hash.ch.lm)[2]
-  se.lc50.ch.hash = mean(c(1.98-lc50.ch.hash , lc50.ch.hash-0.88)) / 1.96
+  se.lc50.ch.hash = mean(c(log10(1.98/lc50.ch.hash) , log10(lc50.ch.hash/0.88))) / 1.96
  
 plot(mun.hsh.ch$conc, mun.hsh.ch$mort, pch = 16, ylim = c(0,1), xlim = c(0,3500),
      xlab = 'Chlorpyrifos (ppb)', ylab = 'prop dead')
@@ -46,11 +46,11 @@ fx.hsh.ch = function(In, lc = lc50.ch.hash){
 muNq_ch_hash11_uncertainty = function(In){
   if(In == 0) mun = 0 else{
     Ins = (In/1000)
-    lc50 = (rnorm(1, lc50.ch.hash, se.lc50.ch.hash))
+    lc50 = 10^(rnorm(1, log10(lc50.ch.hash), se.lc50.ch.hash))
     mun = pnorm((slp.ch.hash) * (Ins-lc50)) - fx.hsh.ch(0)
   }
   while(mun < 0){
-    lc50 = (rnorm(1, lc50.ch.hash, se.lc50.ch.hash))
+    lc50 = 10^(rnorm(1, log10(lc50.ch.hash), se.lc50.ch.hash))
     mun = pnorm((slp.ch.hash) * (Ins-lc50)) - fx.hsh.ch(0)
   } 
   return(mun)
@@ -78,7 +78,7 @@ plot(mun.hsh.prof$ppm, mun.hsh.prof$probit, pch = 16)
   
   lc50.prof.hash = (5 - coef(hash.prof.lm)[1]) / coef(hash.prof.lm)[2]
   slp.prof.hash = coef(hash.prof.lm)[2]
-  se.lc50.prof.hash = mean(c(3.33-lc50.prof.hash , lc50.prof.hash-1.88)) / 1.96
+  se.lc50.prof.hash = mean(c(log10(3.33/lc50.prof.hash) , log10(lc50.prof.hash/1.88))) / 1.96
   
 fx.hsh.prof = function(In, lc = lc50.prof.hash){
   Ins = In/1000
@@ -96,11 +96,11 @@ fx.hsh.prof = function(In, lc = lc50.prof.hash){
 muNq_prof_hash11_uncertainty = function(In){
   if(In == 0) mun = 0 else{
     Ins = (In/1000)
-    lc50 = (rnorm(1, lc50.prof.hash, se.lc50.prof.hash))
+    lc50 = 10^(rnorm(1, log10(lc50.prof.hash), se.lc50.prof.hash))
     mun = pnorm((slp.prof.hash) * (Ins-lc50)) - fx.hsh.prof(0)
   }
   while(mun < 0){
-    lc50 = (rnorm(1, lc50.prof.hash, se.lc50.prof.hash))
+    lc50 = 10^(rnorm(1, log10(lc50.prof.hash), se.lc50.prof.hash))
     mun = pnorm((slp.prof.hash) * (Ins-lc50)) - fx.hsh.prof(0)
   } 
   return(mun)

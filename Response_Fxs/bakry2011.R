@@ -32,7 +32,7 @@ require(drc)
     lc50.bak.mal = (5 - coef(lm.bak.mal)[1]) / coef(lm.bak.mal)[2]
     slp.bak.mal = coef(lm.bak.mal)[2]
     #get standard error from reported 95% CIs of lc50
-    se.lc50.bak.mal = mean(c(3.12-lc50.bak.mal, lc50.bak.mal-0.99)) / 1.96
+    se.lc50.bak.mal = mean(c(log10(3.12/lc50.bak.mal), log10(lc50.bak.mal/0.99))) / 1.96
     
   plot(mun.mal$conc, mun.mal$mort, pch = 16, 
        xlab = 'Malathion (ppb)', ylab = 'prop dead', ylim = c(0,1), xlim = c(0,5000),
@@ -50,11 +50,11 @@ require(drc)
   muNq_mal_Bakry11_uncertainty = function(In){
     if(In == 0) mun = 0 else{
       Ins = (In/1000)
-      lc50 = (rnorm(1, lc50.bak.mal, se.lc50.bak.mal))
+      lc50 = 10^(rnorm(1, log10(lc50.bak.mal), se.lc50.bak.mal))
       mun = pnorm((slp.bak.mal) * (Ins-lc50)) - fx.bak.mal(0)
     }
     while(mun < 0){
-      lc50 = (rnorm(1, lc50.bak.mal, se.lc50.bak.mal))
+      lc50 = 10^(rnorm(1, log10(lc50.bak.mal), se.lc50.bak.mal))
       mun = pnorm((slp.bak.mal) * (Ins-lc50)) - fx.bak.mal(0)
     } 
     return(mun)
@@ -83,7 +83,7 @@ plot(mun.del$ppm, mun.del$probit, pch = 16)
   lc50.bak.del = (5 - coef(lm.bak.del)[1]) / coef(lm.bak.del)[2]
   slp.bak.del = coef(lm.bak.del)[2]
   #get standard error from reported 95% CIs of lc50; assuming 0.31 is typo meaning 3.1
-  se.lc50.bak.del = mean(c(7.7-lc50.bak.del, lc50.bak.del-3.1)) / 1.96
+  se.lc50.bak.del = mean(c(log10(7.7/lc50.bak.del), log10(lc50.bak.del/3.1))) / 1.96
   
   fx.bak.del = function(In, lc = lc50.bak.del){
     Ins = In/1000
@@ -102,11 +102,11 @@ plot(mun.del$conc, mun.del$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
   muNq_del_Bakry11_uncertainty = function(In){
     if(In == 0) mun = 0 else{
       Ins = (In/1000)
-      lc50 = (rnorm(1, lc50.bak.del, se.lc50.bak.del))
+      lc50 = 10^(rnorm(1, log10(lc50.bak.del), se.lc50.bak.del))
       mun = pnorm((slp.bak.del) * (Ins-lc50)) - fx.bak.del(0)
     }
     while(mun < 0){
-      lc50 = (rnorm(1, lc50.bak.del, se.lc50.bak.del))
+      lc50 = 10^(rnorm(1, log10(lc50.bak.del), se.lc50.bak.del))
       mun = pnorm((slp.bak.del) * (Ins-lc50)) - fx.bak.del(0)
     } 
     return(mun)

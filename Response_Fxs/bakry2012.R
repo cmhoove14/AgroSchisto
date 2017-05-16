@@ -27,7 +27,7 @@ plot(mun.bak.atr$log10, mun.bak.atr$probit, pch = 16)
   lc50.bak.atr = 10^((5 - coef(lm.bak.atr)[1]) / coef(lm.bak.atr)[2])
   slp.bak.atr = coef(lm.bak.atr)[2]
   #get standard error from reported 95% CIs of lc50
-  se.lc50.bak.atr = mean(c(1.88 - lc50.bak.atr, lc50.bak.atr - 0.83)) / 1.96
+  se.lc50.bak.atr = mean(c(log10(1.88 / lc50.bak.atr), log10(lc50.bak.atr / 0.83))) / 1.96
   
 plot(mun.bak.atr$conc, mun.bak.atr$mort, ylim = c(0,1), xlim = c(0,5000),
        pch = 16, xlab = 'atrazine (ppb)', ylab = 'snail mortality',
@@ -45,14 +45,14 @@ plot(mun.bak.atr$conc, mun.bak.atr$mort, ylim = c(0,1), xlim = c(0,5000),
 muNq_atr_Bakry12_uncertainty = function(He){
   if(He == 0) mun = 0 else{
     heu = (He/1000)
-    lc50 = (rnorm(1, lc50.bak.atr, se.lc50.bak.atr))
+    lc50 = 10^(rnorm(1, log10(lc50.bak.atr), se.lc50.bak.atr))
   while(lc50 < 0){
-    lc50 = (rnorm(1, lc50.bak.atr, se.lc50.bak.atr))
+    lc50 = 10^(rnorm(1, log10(lc50.bak.atr), se.lc50.bak.atr))
   }  
     mun = pnorm((slp.bak.atr) * log10(heu/lc50)) - fx.bak.atr(0)
   }
   while(mun < 0){
-    lc50 = (rnorm(1, lc50.bak.atr, se.lc50.bak.atr))
+    lc50 = 10^(rnorm(1, log10(lc50.bak.atr), se.lc50.bak.atr))
     mun = pnorm((slp.bak.atr) * log10(heu/lc50)) - fx.bak.atr(0)
   } 
   return(mun)
@@ -80,7 +80,7 @@ plot(mun.bak.gly$log10, mun.bak.gly$probit, pch = 16)
   lc50.bak.gly = 10^((5 - coef(lm.bak.gly)[1]) / coef(lm.bak.gly)[2])
   slp.bak.gly = coef(lm.bak.gly)[2]
   #get standard error from reported 95% CIs of lc50
-  se.lc50.bak.gly = mean(c(4.82 - lc50.bak.gly, lc50.bak.gly - 0.89)) / 1.96
+  se.lc50.bak.gly = mean(c(log10(4.82 / lc50.bak.gly), log10(lc50.bak.gly / 0.89))) / 1.96
   
       
   plot(mun.bak.gly$conc, mun.bak.gly$mort, ylim = c(0,1), xlim = c(0,13000),
@@ -100,14 +100,14 @@ fx.bak.gly = function(He, lc = lc50.bak.gly){
 muNq_gly_Bakry12_uncertainty = function(He){
   if(He == 0) mun = 0 else{
     heu = (He/1000)
-    lc50 = (rnorm(1, lc50.bak.gly, se.lc50.bak.gly))
+    lc50 = 10^(rnorm(1, log10(lc50.bak.gly), se.lc50.bak.gly))
   while(lc50 < 0){
-      lc50 = (rnorm(1, lc50.bak.gly, se.lc50.bak.gly))
+    lc50 = 10^(rnorm(1, log10(lc50.bak.gly), se.lc50.bak.gly))
   }  
     mun = pnorm((slp.bak.gly) * log10(heu/lc50)) - fx.bak.gly(0)
   }
   while(mun < 0){
-    lc50 = (rnorm(1, lc50.bak.gly, se.lc50.bak.gly))
+    lc50 = 10^(rnorm(1, log10(lc50.bak.gly), se.lc50.bak.gly))
     mun = pnorm((slp.bak.gly) * log10(heu/lc50)) - fx.bak.gly(0)
   } 
   return(mun)

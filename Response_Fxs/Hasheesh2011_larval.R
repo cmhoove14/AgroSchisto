@@ -26,7 +26,7 @@ plot(piM.hsh.ch$ppm, piM.hsh.ch$probit, pch = 16)
   
   lc50.hash.pim.ch = 0.78
   slp.hash.pim.ch = coef(lm.hsh.pim.ch)[2]
-  se.lc50.hash.pim.ch = mean(c(1.1 - lc50.hash.pim.ch, lc50.hash.pim.ch - 0.56)) / 1.96
+  se.lc50.hash.pim.ch = mean(c(log10(1.1 / lc50.hash.pim.ch), log10(lc50.hash.pim.ch / 0.56))) / 1.96
 
   plot(piM.hsh.ch$conc, piM.hsh.ch$surv, pch = 16, ylim = c(0,1), xlim = c(0,3500),
        xlab = 'Chlorpyrifos (ppb)', ylab = '8-hr miracidial mortality',
@@ -45,11 +45,11 @@ fx.piM.hsh.chlor = function(In, lc = lc50.hash.pim.ch){
 piM_ch_Hash11_uncertainty = function(In){
   if(In == 0) piM = 1 else{
     Ins = In/1000
-    lc50 = rnorm(1, lc50.hash.pim.ch, se.lc50.hash.pim.ch)
+    lc50 = 10^(rnorm(1, log10(lc50.hash.pim.ch), se.lc50.hash.pim.ch))
     piM = pnorm(-slp.hash.pim.ch * (Ins - lc50)) / fx.piM.hsh.chlor(0)
   }
   while(piM < 0 || piM > 1){
-    lc50 = rnorm(1, lc50.hash.pim.ch, se.lc50.hash.pim.ch)
+    lc50 = 10^(rnorm(1, log10(lc50.hash.pim.ch), se.lc50.hash.pim.ch))
     piM = pnorm(-slp.hash.pim.ch * (Ins - lc50)) / fx.piM.hsh.chlor(0)
   }
   return(piM)
@@ -76,7 +76,7 @@ piM.hsh.prof = data.frame(conc = c(1.5, 2.51)*1000,
   
   lc50.hash.pim.prof = 1.5
   slp.hash.pim.prof = coef(lm.hsh.pim.prof)[2]
-  se.lc50.hash.pim.prof = mean(c(1.95 - lc50.hash.pim.prof, lc50.hash.pim.prof - 1.15)) / 1.96
+  se.lc50.hash.pim.prof = mean(c(log10(1.95 / lc50.hash.pim.prof), log10(lc50.hash.pim.prof / 1.15))) / 1.96
   
 plot(piM.hsh.prof$conc, piM.hsh.prof$surv, pch = 16, ylim = c(0,1), xlim = c(0,3500),
      xlab = 'Profenofos (ppb)', ylab = '8-hr miracidial mortality',
@@ -94,11 +94,11 @@ fx.piM.hsh.prof = function(In, lc = lc50.hash.pim.prof){
 piM_pr_Hash11_uncertainty = function(In){
   if(In == 0) piM = 1 else{
     Ins = In/1000
-    lc50 = rnorm(1, lc50.hash.pim.prof, se.lc50.hash.pim.prof)
+    lc50 = 10^(rnorm(1, log10(lc50.hash.pim.prof), se.lc50.hash.pim.prof))
     piM = pnorm(-slp.hash.pim.prof * (Ins - lc50)) / fx.piM.hsh.prof(0)
   }
   while(piM < 0 || piM > 1){
-    lc50 = rnorm(1, lc50.hash.pim.prof, se.lc50.hash.pim.prof)
+    lc50 = 10^(rnorm(1, log10(lc50.hash.pim.prof), se.lc50.hash.pim.prof))
     piM = pnorm(-slp.hash.pim.prof * (Ins - lc50)) / fx.piM.hsh.prof(0)
   }
   return(piM)
@@ -126,7 +126,7 @@ plot(piC.hsh.prof$ppm, piC.hsh.prof$probit, pch = 16)
 
   lc50.hash.pic.prof = 1.85
   slp.hash.pic.prof = coef(lm.hsh.pic.prof)[2]
-  se.lc50.hash.pic.prof = mean(c(2.59 - lc50.hash.pic.prof, lc50.hash.pic.prof - 1.32)) / 1.96
+  se.lc50.hash.pic.prof = mean(c(log10(2.59 / lc50.hash.pic.prof), log10(lc50.hash.pic.prof / 1.32))) / 1.96
 
 plot(piC.hsh.prof$conc, piC.hsh.prof$surv, pch = 16, ylim = c(0,1), xlim = c(0,3500),
      xlab = 'Profenofos (ppb)', ylab = '8-hr cercarial mortality',
@@ -141,21 +141,21 @@ fx.piC.hsh.prof = function(In, lc = lc50.hash.pic.prof){
   lines(seq(0,4000,10), sapply(seq(0,4000,10), fx.piC.hsh.prof, lc = 2.59), lty = 3, col = 2)
   lines(seq(0,4000,10), sapply(seq(0,4000,10), fx.piC.hsh.prof, lc = 1.32), lty = 3, col = 2)
 
-piC_pr_Hash11_uncertainty = function(In){
-  if(In == 0) piC = 1 else{
-    Ins = In/1000
-    lc50 = rnorm(1, lc50.hash.pic.prof, se.lc50.hash.pic.prof)
-    piC = pnorm(-slp.hash.pic.prof * (Ins - lc50)) / fx.piC.hsh.prof(0)
+  piC_pr_Hash11_uncertainty = function(In){
+    if(In == 0) piC = 1 else{
+      Ins = In/1000
+      lc50 = 10^(rnorm(1, log10(lc50.hash.pic.prof), se.lc50.hash.pic.prof))
+      piC = pnorm(-slp.hash.pic.prof * (Ins - lc50)) / fx.piC.hsh.prof(0)
+    }
+    while(piC < 0 || piC > 1){
+      lc50 = 10^(rnorm(1, log10(lc50.hash.pic.prof), se.lc50.hash.pic.prof))
+      piC = pnorm(-slp.hash.pic.prof * (Ins - lc50)) / fx.piC.hsh.prof(0)
+    }
+    return(piC)
   }
-  while(piC < 0 || piC > 1){
-    lc50 = rnorm(1, lc50.hash.pic.prof, se.lc50.hash.pic.prof)
-    piC = pnorm(-slp.hash.pic.prof * (Ins - lc50)) / fx.piC.hsh.prof(0)
-  }
-  return(piC)
-}
-
-  points(seq(0,4000,10), sapply(seq(0,4000,10), piC_pr_Hash11_uncertainty, simplify = T), 
-         pch = 5, col = 4, cex = 0.5)
+  
+    points(seq(0,4000,10), sapply(seq(0,4000,10), piC_pr_Hash11_uncertainty, simplify = T), 
+           pch = 5, col = 4, cex = 0.5)
 
 keep.hsh.pic.prof = c('piC_pr_Hash11_uncertainty', 'slp.hash.pic.prof', 'lc50.hash.pic.prof',
                       'se.lc50.hash.pic.prof', 'fx.piC.hsh.prof')  
@@ -176,7 +176,7 @@ plot(piC.hsh.ch$ppm, piC.hsh.ch$probit, pch = 16)
   
   lc50.hash.pic.ch = 0.96
   slp.hash.pic.ch = coef(lm.hsh.pic.ch)[2]
-  se.lc50.hash.pic.ch = mean(c(1.44 - lc50.hash.pic.ch, lc50.hash.pic.ch - 0.62)) / 1.96
+  se.lc50.hash.pic.ch = mean(c(log10(1.44 / lc50.hash.pic.ch), log10(lc50.hash.pic.ch / 0.62))) / 1.96
   
 plot(piC.hsh.ch$conc, piC.hsh.ch$surv, pch = 16, ylim = c(0,1), xlim = c(0,3500),
      xlab = 'Chlorpyrifos (ppb)', ylab = '8-hr cercarial mortality',
@@ -194,11 +194,11 @@ plot(piC.hsh.ch$conc, piC.hsh.ch$surv, pch = 16, ylim = c(0,1), xlim = c(0,3500)
   piC_ch_Hash11_uncertainty = function(In){
     if(In == 0) piC = 1 else{
       Ins = In/1000
-      lc50 = rnorm(1, lc50.hash.pic.ch, se.lc50.hash.pic.ch)
+      lc50 = 10^(rnorm(1, log10(lc50.hash.pic.ch), se.lc50.hash.pic.ch))
       piC = pnorm(-slp.hash.pic.ch * (Ins - lc50)) / fx.piC.hsh.chlor(0)
     }
     while(piC < 0 || piC > 1){
-      lc50 = rnorm(1, lc50.hash.pic.ch, se.lc50.hash.pic.ch)
+      lc50 = 10^(rnorm(1, log10(lc50.hash.pic.ch), se.lc50.hash.pic.ch))
       piC = pnorm(-slp.hash.pic.ch * (Ins - lc50)) / fx.piC.hsh.chlor(0)
     }
     return(piC)
