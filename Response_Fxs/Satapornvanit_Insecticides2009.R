@@ -29,7 +29,7 @@ require(drc)
   points(seq(0,900,10), sapply(seq(0,900,10), muPq_zinc_satapornvanit09_uncertainty, simplify = T), 
          pch=5, col=4, cex = 0.5)
   
-    
+keep.zinc.sat09 = c('muPq_zinc_satapornvanit09_uncertainty', 'sap.mupq')    
 #Chlorpyrifos ###########    
   muPq_chlor_satapornvanit09<-function(In){
     predict(sap.mupq, data.frame(conc=In, chem = 'chlorpyrifos'), interval = 'confidence', level = 0.95)
@@ -49,6 +49,7 @@ require(drc)
   points(seq(0,5,0.1), sapply(seq(0,5,0.1), muPq_chlor_satapornvanit09_uncertainty, simplify = T), 
           pch=5, col=4, cex = 0.5)    
       
+keep.chlor.sat09 = c('muPq_chlor_satapornvanit09_uncertainty', 'sap.mupq')  
 #Dimethoate ################        
   muPq_dim_satapornvanit09<-function(In){
     predict(sap.mupq, data.frame(conc=In, chem = 'dimethoate'), interval = 'confidence', level = 0.95)
@@ -67,7 +68,7 @@ require(drc)
     
   points(seq(0,1300,10), sapply(seq(0,1300,10), muPq_dim_satapornvanit09_uncertainty, simplify = T), 
           pch=5, col=4, cex = 0.5)       
-
+keep.dim.sat09 = c('muPq_dim_satapornvanit09_uncertainty', 'sap.mupq')
 #Profenofos ################      
   muPq_pr_satapornvanit09<-function(In){
     predict(sap.mupq, data.frame(conc=In, chem = 'profenofos'), interval = 'confidence', level = 0.95)
@@ -91,7 +92,7 @@ require(drc)
       0*In                                 #at levels higher than the solubility of carbendazim in water
   }  
   
-
+keep.carb.sat09 = c('muPq_carb_satapornvanit09')
 #Reduced feeding rate from zinc and Chlorpyrifos from Satapornvanit et al chemosphere paper ########
 sap.fr<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Predator Mortality/satapornvanit2009_m.rosenbergii_feed_rate.csv")
   fr.z = subset(sap.fr, chem == 'zinc')
@@ -126,7 +127,9 @@ sap.fr<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroDa
     
     points(seq(0,900,10), sapply(seq(0,900,10), psi_q_zinc_satapornvanit09_uncertainty, simplify = T), 
            pch=5, col=4, cex = 0.5)   
-    
+
+keep.zinc.sat09 = c(keep.zinc.sat09, 'psi_q_zinc_satapornvanit09_uncertainty', 
+                    'par.tricksz', 'zinc.fr', 'fr.z')    
 #Chlorpyrifos ###################
   chlor.fr= drm(feed_rate ~ conc, data = fr.ch, type = 'continuous',
                fct = LL.4(names = c("Slope", "Lower Limit", "Upper Limit", "ED50"),
@@ -156,5 +159,7 @@ sap.fr<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroDa
     
     points(seq(0,5,0.05), sapply(seq(0,5,0.05), psi_q_chlor_satapornvanit09_uncertainty, simplify = T), 
            pch=5, col=4, cex = 0.5)   
-    
+
+keep.chlor.sat09 = c(keep.chlor.sat09, 'psi_q_chlor_satapornvanit09_uncertainty', 
+                    'par.tricksc', 'chlor.fr', 'fr.ch')    
 #*Note: checked that this produced the desired relationship on predator feeding rate and it does
