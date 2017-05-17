@@ -10,107 +10,61 @@
 #and indicate changes that were made.###############
 #Data extraction and model fitting to Tantawy 2002 data
 require(drc)
+L.3.fx = function(t, lc50 = lc50, slp = slp){
+  1 / (1+exp(slp*log(t / lc50)))
+}
+time = c(0:25)
+
 
 #miracidia toxicity ############
 tant<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Cercarial Mortality/Tantawy2002.csv')
-  mir<-subset(tant, larv == 'miracidia')
-    
+  tant$total = 100
+    mir<-subset(tant, larv == 'miracidia')
+    mir.but = subset(mir, chem == 'butachlor')
+    mir.fpb = subset(mir, chem == 'fluazifop-p-butyl')
+  
 #butachlor toxicity to miracidia  ###############
-    plot(mir$time_hrs[mir$conc==0 & mir$chem == 'butachlor'], 
-         mir$surv[mir$conc==0 & mir$chem == 'butachlor']/100, 
-         pch=17, xlab = 'time(hrs', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
-    for(i in 2:length(unique(mir$conc[mir$chem == 'butachlor']))){
-      points(mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'butachlor'])[i] & mir$chem == 'butachlor'], 
-             mir$surv[mir$conc==unique(mir$conc[mir$chem == 'butachlor'])[i] & mir$chem == 'butachlor']/100, pch=16,
-             col = i)
-    }
-    
-#fit to control points
-    tant.mir.but0<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'butachlor'])[1] & mir$chem == 'butachlor']/100 ~ 
-                          mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'butachlor'])[1] & mir$chem == 'butachlor'],
-                        type = 'binomial', fct = LL.2())
-    
-    tant.mir.but0.surv = function(t){
-      (1/(1+exp(tant.mir.but0$coefficients[1]*(log(t/tant.mir.but0$coefficients[2])))))
-    } 
-    
-    lines(x=c(0:24), y=tant.mir.but0.surv(c(0:24)), lty = 2)
-    
-    auc.mir.but0=integrate(f = tant.mir.but0.surv, lower=0, upper=24)[1]$value  
-    
-    
-#650 ppb
-    tant.mir.but650<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'butachlor'])[2] & mir$chem == 'butachlor']/100 ~ 
-                            mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'butachlor'])[2] & mir$chem == 'butachlor'],
-                          type = 'binomial', fct = LL.2())
-    
-    tant.mir.but650.surv = function(t){
-      (1/(1+exp(tant.mir.but650$coefficients[1]*(log(t/tant.mir.but650$coefficients[2])))))
-    } 
-    
-    lines(x=c(0:24), y=tant.mir.but650.surv(c(0:24)), lty=2, col=2)
-    
-    auc.mir.but650=integrate(f = tant.mir.but650.surv, lower=0, upper=24)[1]$value  
-    
-    
-#1500 ppb
-    tant.mir.but1500<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'butachlor'])[3] & mir$chem == 'butachlor']/100 ~ 
-                             mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'butachlor'])[3] & mir$chem == 'butachlor'],
-                           type = 'binomial', fct = LL.2())
-    
-    tant.mir.but1500.surv = function(t){
-      (1/(1+exp(tant.mir.but1500$coefficients[1]*(log(t/tant.mir.but1500$coefficients[2])))))
-    } 
-    
-    lines(x=c(0:24), y=tant.mir.but1500.surv(c(0:24)), lty=2, col=3)
-    
-    auc.mir.but1500=integrate(f = tant.mir.but1500.surv, lower=0, upper=24)[1]$value  
-    
-#4500 ppb
-    tant.mir.but4500<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'butachlor'])[4] & mir$chem == 'butachlor']/100 ~ 
-                             mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'butachlor'])[4] & mir$chem == 'butachlor'],
-                           type = 'binomial', fct = LL.2())
-    
-    tant.mir.but4500.surv = function(t){
-      (1/(1+exp(tant.mir.but4500$coefficients[1]*(log(t/tant.mir.but4500$coefficients[2])))))
-    } 
-    
-    lines(x=c(0:24), y=tant.mir.but4500.surv(c(0:24)), lty=2, col=4)
-    
-    auc.mir.but4500=integrate(f = tant.mir.but4500.surv, lower=0, upper=24)[1]$value  
-    
-#6500 ppb
-    tant.mir.but6500<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'butachlor'])[5] & mir$chem == 'butachlor']/100 ~ 
-                             mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'butachlor'])[5] & mir$chem == 'butachlor'],
-                           type = 'binomial', fct = LL.2())
-    
-    tant.mir.but6500.surv = function(t){
-      (1/(1+exp(tant.mir.but6500$coefficients[1]*(log(t/tant.mir.but6500$coefficients[2])))))
-    } 
-    
-    lines(x=c(0:24), y=tant.mir.but6500.surv(c(0:24)), lty=2, col=5)
-    title('butachlor toxicity to miracidia')
-    legend('topright', legend = c('control', 650,1500,4500,6500), pch = c(17,16,16,16,16), col = c(1:5), cex=0.8)
-    
-    auc.mir.but6500=integrate(f = tant.mir.but6500.surv, lower=0, upper=24)[1]$value     
-    
+tant.piM.but<-drm(surv/total ~ time_hrs, conc, weights = total,  
+                  data = mir.but, type = 'binomial', 
+                  fct = LL.4(names = c('b', 'c', 'd', 'e'),
+                             fixed = c(NA, 0, 1, NA)))
+  summary(tant.piM.but)
+  plot(tant.piM.but) 
+
+plot(mir.but$time_hrs[mir.but$conc==0], mir.but$surv[mir.but$conc==0]/100, 
+     pch=17, xlab = 'time(hrs)', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
+  lines(time, predict(tant.piM.but, 
+                      data.frame(time_hrs=time, conc = 0)), lty = 2)
+  for(i in 2:length(unique(mir.but$conc))){
+    points(mir.but$time_hrs[mir.but$conc==unique(mir.but$conc)[i]], 
+           mir.but$surv[mir.but$conc==unique(mir.but$conc)[i]]/100, pch=16,
+           col = i)
+    lines(time, predict(tant.piM.but, 
+                        data.frame(time_hrs=time, conc = unique(mir.but$conc)[i])),
+          lty = 2, col = i)
+  }
+
+title('butachlor toxicity to miracidia')
+legend('topright', legend = c('control', 650,1500,4500,6500), 
+       pch = c(17,16,16,16,16), col = c(1:5), cex=0.8, bty = 'n')  
+
+#Get estimate of cercariae-hrs for each concentration    
+tant.but.piM.aucs = as.numeric()
+
+for(j in 1:length(unique(mir.but$conc))){
+  fx = function(t){
+    predict(tant.piM.but, newdata = data.frame(time_hrs = t, conc = unique(mir.but$conc)[j]))
+  }
+  tant.but.piM.aucs[j] = integrate(f = fx, lower=0, upper=24)[1]$value  
+}
+
 #Compile LL.2 data for functional responses #############
-mir.but = data.frame(e = c(coef(tant.mir.but0)[2], coef(tant.mir.but650)[2], coef(tant.mir.but1500)[2],
-                            coef(tant.mir.but4500)[2], coef(tant.mir.but6500)[2]),
-                      e.se = c(summary(tant.mir.but0)$coefficients[2,2], 
-                               summary(tant.mir.but650)$coefficients[2,2],
-                               summary(tant.mir.but1500)$coefficients[2,2], 
-                               summary(tant.mir.but4500)$coefficients[2,2],
-                               summary(tant.mir.but6500)$coefficients[2,2]),
-                      b = c(coef(tant.mir.but0)[1], coef(tant.mir.but650)[1], coef(tant.mir.but1500)[1],
-                            coef(tant.mir.but4500)[1], coef(tant.mir.but6500)[1]),
-                      b.se = c(summary(tant.mir.but0)$coefficients[1,2], 
-                               summary(tant.mir.but650)$coefficients[1,2],
-                               summary(tant.mir.but1500)$coefficients[1,2], 
-                               summary(tant.mir.but4500)$coefficients[1,2],
-                               summary(tant.mir.but6500)$coefficients[1,2]),
-                      but = c(0,650,1500,4500,6500),
-                      logbut = log(c(0,650,1500,4500,6500)+1))
+mir.but = data.frame(e = summary(tant.piM.but)$coefficients[c(6:10),1],
+                     e.se = summary(tant.piM.but)$coefficients[c(6:10),2],
+                     b = summary(tant.piM.but)$coefficients[c(1:5),1],
+                     b.se = summary(tant.piM.but)$coefficients[c(1:5),2],
+                     but = c(0,650,1500,4500,6500),
+                     logbut = log(c(0,650,1500,4500,6500)+1))
 
 plot(mir.but$but, mir.but$e, pch = 16, xlab = 'butachlor (ppm)', ylab = 'LL.2 Parameters (miracidia',
      ylim = c(0,20))
@@ -137,7 +91,7 @@ el.but.mir = lm(e ~ but, weights = e.se^-1, data = mir.but) #linear response of 
 
 el.but2.mir = lm(e ~ logbut, weights = e.se^-1, data = mir.but) #log-linear response of LC50
   el.pred2.mir = function(but){
-    predict(el.but2.mir, newdata = data.frame(logbut = log(but)+1), 
+    predict(el.but2.mir, newdata = data.frame(logbut = log(but+1)), 
             interval = 'confidence', level = 0.95)
   }
 
@@ -145,7 +99,7 @@ el.but2.mir = lm(e ~ logbut, weights = e.se^-1, data = mir.but) #log-linear resp
   lines(seq(0,7000,7), sapply(seq(0,7000,7), el.pred2.mir, simplify = T)[2,], lty = 3, col=3)
   lines(seq(0,7000,7), sapply(seq(0,7000,7), el.pred2.mir, simplify = T)[3,], lty = 3, col=3)
 
-AIC(el.but.mir, el.but2.mir)  #exponential is a better fit    
+  AIC(el.but.mir, el.but2.mir)  #exponential is a better fit    
 
 bl.but.mir = lm(b ~ but, weights = b.se^-1, data = mir.but)   
   bl.pred.mir = function(but){
@@ -164,164 +118,108 @@ bl.but.mir = lm(b ~ but, weights = b.se^-1, data = mir.but)
   legend('topright', pch = c(16,17), col = c(1,2), legend = c('LC50', 'slp'),
          cex = 0.8, bty = 'n', title = 'Observed points')
 
-but.fx.lin.mir = function(He){
-  e = as.numeric(predict(el.but.mir, newdata = data.frame(but = He), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(bl.but.mir, newdata = data.frame(but = He), se.fit = TRUE)[1:2])
-  
-  e.use = rnorm(1, e[1], e[2])
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t/e.use)))))}, 
-                  lower=0, upper=24)[1]$value
-  auc
+piM.tant02_but.lin_unc = function(He){
+  if(He == 0) piM = 1 else{
+    e = as.numeric(predict(el.but.mir, newdata = data.frame(but = He), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(bl.but.mir, newdata = data.frame(but = He), se.fit = TRUE)[1:2])
+    
+    e.use = rnorm(1, e[1], e[2])
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    
+    auc = integrate(L.3.fx, lc50 = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piM = auc/tant.but.piM.aucs[1]
+    if(piM > 1) piM = 1
+  }
+  return(piM)
 }  #function to estimate AUC 
 
-piM.tant02_but.lin_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = but.fx.lin.mir(He) / but.fx.lin.mir(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
-
-but.fx.exp.mir = function(He){
+piM.tant02_but.exp_unc = function(He){
+  if(He == 0) piM = 1 else{
   e = as.numeric(predict(el.but2.mir, newdata = data.frame(logbut = log(He+1)), se.fit = TRUE)[1:2])
   b = as.numeric(predict(bl.but.mir, newdata = data.frame(but = He), se.fit = TRUE)[1:2])
   
   e.use = rnorm(1, e[1], e[2])
+  while(e.use < 0) e.use = rnorm(1, e[1], e[2])
   b.use = rnorm(1, b[1], b[2])
+  while(b.use < 0) b.use = rnorm(1, e[1], e[2])
   
-  auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t/e.use)))))}, 
-                  lower=0, upper=24)[1]$value
-  auc
+  auc = integrate(L.3.fx, lc50 = e.use, slp = b.use, lower=0, upper=24)[1]$value
+  piM = auc/tant.but.piM.aucs[1]
+  if(piM > 1) piM = 1
+  }
+  return(piM)
 }  #function to estimate AUC 
 
-piM.tant02_but.exp_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = but.fx.exp.mir(He) / but.fx.exp.mir(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
-
 #plot sample outputs compared to observed points ##########
-plot(mir.but$but, c(auc.mir.but0, auc.mir.but650, auc.mir.but1500, 
-                     auc.mir.but4500, auc.mir.but6500)/auc.mir.but0,
+plot(mir.but$but, tant.but.piM.aucs/tant.but.piM.aucs[1],
      xlab = 'Butachlor (ppb)', ylab = 'relative AUC (miracidia-hours)',
      pch = 16, ylim = c(0,1))
-  points(seq(0, 6500,10), sapply(seq(0, 6500,10), piM.tant02_but.lin_unc, simplify = T),
+  points(seq(0, 6500,25), sapply(seq(0, 6500,25), piM.tant02_but.lin_unc, simplify = T),
          pch = 5, col = 4, cex = 0.5)
-  points(seq(0, 6500,10), sapply(seq(0, 6500,10), piM.tant02_but.exp_unc, simplify = T),
+  points(seq(0, 6500,25), sapply(seq(0, 6500,25), piM.tant02_but.exp_unc, simplify = T),
          pch = 5, col = 2, cex = 0.5)
+  
+#keep vector for butachlor toxicity to miracidia
+  keep.tant.but.piM = c('piM.tant02_but.lin_unc', 'piM.tant02_but.exp_unc', 
+                        'el.but.mir', 'el.but2.mir', 'bl.but.mir', 'L.3.fx', 'tant.but.piM.aucs')
     
-#fluazifop-p-butyl toxicity to cercariae ###########
-    plot(mir$time_hrs[mir$conc==0 & mir$chem == 'fluazifop-p-butyl'], 
-         mir$surv[mir$conc==0 & mir$chem == 'fluazifop-p-butyl']/100, 
-         pch=17, xlab = 'time(hrs', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
-    for(i in 2:length(unique(mir$conc[mir$chem == 'fluazifop-p-butyl']))){
-      points(mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'fluazifop-p-butyl'])[i] & mir$chem == 'fluazifop-p-butyl'], 
-             mir$surv[mir$conc==unique(mir$conc[mir$chem == 'fluazifop-p-butyl'])[i] & mir$chem == 'fluazifop-p-butyl']/100, pch=16,
-             col = i)
-    }
-    
-#fit to control points
-    tant.mir.fpb0<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'fluazifop-p-butyl'])[1] & mir$chem == 'fluazifop-p-butyl']/100 ~ 
-                          mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'fluazifop-p-butyl'])[1] & mir$chem == 'fluazifop-p-butyl'],
-                        type = 'binomial', fct = LL.2())
-    
-    tant.mir.fpb0.surv = function(t){
-      (1/(1+exp(tant.mir.fpb0$coefficients[1]*(log(t/tant.mir.fpb0$coefficients[2])))))
-    } 
-    
-    lines(x=c(0:24), y=tant.mir.fpb0.surv(c(0:24)))
-    
-    auc.mir.fpb0=integrate(f = tant.mir.fpb0.surv, lower=0, upper=24)[1]$value  
-    
-    
-#1760 ppb
-    tant.mir.fpb1760<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'fluazifop-p-butyl'])[2] & mir$chem == 'fluazifop-p-butyl']/100 ~ 
-                             mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'fluazifop-p-butyl'])[2] & mir$chem == 'fluazifop-p-butyl'],
-                           type = 'binomial', fct = LL.2())
-    
-    tant.mir.fpb1760.surv = function(t){
-      (1/(1+exp(tant.mir.fpb1760$coefficients[1]*(log(t/tant.mir.fpb1760$coefficients[2])))))
-    } 
-    
-    lines(x=c(0:24), y=tant.mir.fpb1760.surv(c(0:24)), lty=2, col=2)
-    
-    auc.mir.fpb1760=integrate(f = tant.mir.fpb1760.surv, lower=0, upper=24)[1]$value  
-    
-    
-#4500 ppb
-    tant.mir.fpb4500<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'fluazifop-p-butyl'])[3] & mir$chem == 'fluazifop-p-butyl']/100 ~ 
-                             mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'fluazifop-p-butyl'])[3] & mir$chem == 'fluazifop-p-butyl'],
-                           type = 'binomial', fct = LL.2())
-    
-    tant.mir.fpb4500.surv = function(t){
-      (1/(1+exp(tant.mir.fpb4500$coefficients[1]*(log(t/tant.mir.fpb4500$coefficients[2])))))
-    } 
-    
-    lines(x=c(0:24), y=tant.mir.fpb4500.surv(c(0:24)), lty=2, col=3)
-    
-    auc.mir.fpb4500=integrate(f = tant.mir.fpb4500.surv, lower=0, upper=24)[1]$value  
-    
-#9000 ppb
-    tant.mir.fpb9000<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'fluazifop-p-butyl'])[4] & mir$chem == 'fluazifop-p-butyl']/100 ~ 
-                             mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'fluazifop-p-butyl'])[4] & mir$chem == 'fluazifop-p-butyl'],
-                           type = 'binomial', fct = LL.2())
-    
-    tant.mir.fpb9000.surv = function(t){
-      (1/(1+exp(tant.mir.fpb9000$coefficients[1]*(log(t/tant.mir.fpb9000$coefficients[2])))))
-    } 
-    
-    lines(x=c(0:24), y=tant.mir.fpb9000.surv(c(0:24)), lty=2, col=4)
-    
-    auc.mir.fpb9000=integrate(f = tant.mir.fpb9000.surv, lower=0, upper=24)[1]$value  
-    
-#17600 ppb
-    tant.mir.fpb17600<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'fluazifop-p-butyl'])[5] & mir$chem == 'fluazifop-p-butyl']/100 ~ 
-                              mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'fluazifop-p-butyl'])[5] & mir$chem == 'fluazifop-p-butyl'],
-                            type = 'binomial', fct = LL.2())
-    
-    tant.mir.fpb17600.surv = function(t){
-      (1/(1+exp(tant.mir.fpb17600$coefficients[1]*(log(t/tant.mir.fpb17600$coefficients[2])))))
-    } 
-    
-    lines(x=c(0:24), y=tant.mir.fpb17600.surv(c(0:24)), lty=2, col=5)
-    title('fluazifop-p-butyl toxicity to miracidia')
-    legend('topright', legend = c('control', 1760,4500,9000,17600), pch = c(17,16,16,16,16), col = c(1:5), cex=0.8)
-    
-    auc.mir.fpb17600=integrate(f = tant.mir.fpb17600.surv, lower=0, upper=24)[1]$value  
-    
-    
-#Compile LL.2 data for functional responses #############
-mir.fpb = data.frame(e = c(coef(tant.mir.fpb0)[2], coef(tant.mir.fpb1760)[2], coef(tant.mir.fpb4500)[2],
-                           coef(tant.mir.fpb9000)[2], coef(tant.mir.fpb17600)[2]),
-                     e.se = c(summary(tant.mir.fpb0)$coefficients[2,2], 
-                              summary(tant.mir.fpb1760)$coefficients[2,2],
-                              summary(tant.mir.fpb4500)$coefficients[2,2], 
-                              summary(tant.mir.fpb9000)$coefficients[2,2],
-                              summary(tant.mir.fpb17600)$coefficients[2,2]),
-                     b = c(coef(tant.mir.fpb0)[1], coef(tant.mir.fpb1760)[1], coef(tant.mir.fpb4500)[1],
-                           coef(tant.mir.fpb9000)[1], coef(tant.mir.fpb17600)[1]),
-                     b.se = c(summary(tant.mir.fpb0)$coefficients[1,2], 
-                              summary(tant.mir.fpb1760)$coefficients[1,2],
-                              summary(tant.mir.fpb4500)$coefficients[1,2], 
-                              summary(tant.mir.fpb9000)$coefficients[1,2],
-                              summary(tant.mir.fpb17600)$coefficients[1,2]),
-                     fpb = c(0,1760,4500,9000,17600),
-                     logfpb = log(c(0,1760,4500,9000,17600)+1))
+#fluazifop-p-butyl toxicity to miracidia ###########
+tant.piM.fpb<-drm(surv/total ~ time_hrs, conc, weights = total,  
+                  data = mir.fpb, type = 'binomial', 
+                  fct = LL.4(names = c('b', 'c', 'd', 'e'),
+                             fixed = c(NA, 0, 1, NA)))
+  summary(tant.piM.fpb)
+  plot(tant.piM.fpb) 
 
+plot(mir.fpb$time_hrs[mir.fpb$conc==0], mir.fpb$surv[mir.fpb$conc==0]/100, 
+     pch=17, xlab = 'time(hrs)', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
+  lines(time, predict(tant.piM.fpb, 
+                      data.frame(time_hrs=time, conc = 0)), lty = 2)
+  for(i in 2:length(unique(mir.fpb$conc))){
+    points(mir.fpb$time_hrs[mir.fpb$conc==unique(mir.fpb$conc)[i]], 
+           mir.fpb$surv[mir.fpb$conc==unique(mir.fpb$conc)[i]]/100, pch=16,
+           col = i)
+    lines(time, predict(tant.piM.fpb, 
+                        data.frame(time_hrs=time, conc = unique(mir.fpb$conc)[i])),
+          lty = 2, col = i)
+  }
+
+  title('fluazifop-p-butyl toxicity to miracidia')
+  legend('topright', legend = c('control', 1760,4500,9000,17600), 
+         pch = c(17,16,16,16,16), col = c(1:5), cex=0.8, bty = 'n')  
+
+#Get estimate of cercariae-hrs for each concentration    
+  tant.fpb.piM.aucs = as.numeric()
+
+  for(j in 1:length(unique(mir.fpb$conc))){
+    fx = function(t){
+      predict(tant.piM.fpb, newdata = data.frame(time_hrs = t, conc = unique(mir.fpb$conc)[j]))
+    }
+    tant.fpb.piM.aucs[j] = integrate(f = fx, lower=0, upper=24)[1]$value  
+  }
+
+#Compile LL.2 data for functional responses #############
+mir.fpb = data.frame(e = summary(tant.piM.fpb)$coefficients[c(6:10),1],
+                     e.se = summary(tant.piM.fpb)$coefficients[c(6:10),2],
+                     b = summary(tant.piM.fpb)$coefficients[c(1:5),1],
+                     b.se = summary(tant.piM.fpb)$coefficients[c(1:5),2],
+                     fpb = c(0, 1760,4500,9000,17600),
+                     logfpb = log(c(0, 1760,4500,9000,17600)+1))
+  
   plot(mir.fpb$fpb, mir.fpb$e, pch = 16, xlab = 'butachlor (ppm)', ylab = 'LL.2 Parameters (miracidia',
        ylim = c(0,20))
   
-  points(mir.fpb$fpb+150, mir.fpb$b, pch = 17, col=2)
+  points(mir.fpb$fpb+50, mir.fpb$b, pch = 17, col=2)
   
   for(i in 1:length(mir.fpb$fpb)){
     segments(x0 = mir.fpb$fpb[i], y0 = mir.fpb$e[i] + mir.fpb$e.se[i],
              x1 = mir.fpb$fpb[i], y1 = mir.fpb$e[i] - mir.fpb$e.se[i])
-    segments(x0 = mir.fpb$fpb[i]+150, y0 = mir.fpb$b[i] + mir.fpb$b.se[i],
-             x1 = mir.fpb$fpb[i]+150, y1 = mir.fpb$b[i] - mir.fpb$b.se[i], col=2)
+    segments(x0 = mir.fpb$fpb[i]+50, y0 = mir.fpb$b[i] + mir.fpb$b.se[i],
+             x1 = mir.fpb$fpb[i]+50, y1 = mir.fpb$b[i] - mir.fpb$b.se[i], col=2)
   } 
-
+  
 #fit models to LL.2 parameters across concentration ########
 el.fpb.mir = lm(e ~ fpb, weights = e.se^-1, data = mir.fpb) #linear response of LC50
   el.pred.mir.fpb = function(fpb){
@@ -335,7 +233,7 @@ el.fpb.mir = lm(e ~ fpb, weights = e.se^-1, data = mir.fpb) #linear response of 
 
 el.fpb2.mir = lm(e ~ logfpb, weights = e.se^-1, data = mir.fpb) #log-linear response of LC50
   el.pred2.mir.fpb = function(fpb){
-    predict(el.fpb2.mir, newdata = data.frame(logfpb = log(fpb)+1), 
+    predict(el.fpb2.mir, newdata = data.frame(logfpb = log(fpb+1)), 
             interval = 'confidence', level = 0.95)
   }
 
@@ -343,7 +241,7 @@ el.fpb2.mir = lm(e ~ logfpb, weights = e.se^-1, data = mir.fpb) #log-linear resp
   lines(seq(0,18000,100), sapply(seq(0,18000,100), el.pred2.mir.fpb, simplify = T)[2,], lty = 3, col=3)
   lines(seq(0,18000,100), sapply(seq(0,18000,100), el.pred2.mir.fpb, simplify = T)[3,], lty = 3, col=3)
 
-    AIC(el.fpb.mir, el.fpb2.mir)  #Linear is a better fit    
+    AIC(el.fpb.mir, el.fpb2.mir)  #Linear is a slightly better fit    
 
 bl.fpb.mir = lm(b ~ fpb, weights = b.se^-1, data = mir.fpb)   
   bl.pred.mir.fpb = function(fpb){
@@ -362,61 +260,54 @@ bl.fpb.mir = lm(b ~ fpb, weights = b.se^-1, data = mir.fpb)
   legend('topright', pch = c(16,17), col = c(1,2), legend = c('LC50', 'slp'),
          cex = 0.8, bty = 'n', title = 'Observed points')
 
-fpb.fx.lin.mir = function(He){
+piM.tant02_fpb.lin_unc = function(He){
+  if(He == 0) piM = 1 else{
   e = as.numeric(predict(el.fpb.mir, newdata = data.frame(fpb = He), se.fit = TRUE)[1:2])
   b = as.numeric(predict(bl.fpb.mir, newdata = data.frame(fpb = He), se.fit = TRUE)[1:2])
   
   e.use = rnorm(1, e[1], e[2])
+  while(e.use < 0) e.use = rnorm(1, e[1], e[2])
   b.use = rnorm(1, b[1], b[2])
+  while(b.use < 0) b.use = rnorm(1, e[1], e[2])
   
-  auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t/e.use)))))}, 
-                  lower=0, upper=24)[1]$value
-  auc
+  auc = integrate(L.3.fx, lc50 = e.use, slp = b.use, lower=0, upper=24)[1]$value
+  piM = auc/tant.fpb.piM.aucs[1]
+  if(piM > 1) piM = 1
+  }
+  return(piM)
 }  #function to estimate AUC 
 
-piM.tant02_fpb.lin_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = fpb.fx.lin.mir(He) / fpb.fx.lin.mir(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
-
-fpb.fx.exp.mir = function(He){
+piM.tant02_fpb.exp_unc = function(He){
+  if(He == 0) piM = 1 else{
   e = as.numeric(predict(el.fpb2.mir, newdata = data.frame(logfpb = log(He+1)), se.fit = TRUE)[1:2])
   b = as.numeric(predict(bl.fpb.mir, newdata = data.frame(fpb = He), se.fit = TRUE)[1:2])
   
   e.use = rnorm(1, e[1], e[2])
+  while(e.use < 0) e.use = rnorm(1, e[1], e[2])
   b.use = rnorm(1, b[1], b[2])
+  while(b.use < 0) b.use = rnorm(1, e[1], e[2])
   
-  auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t/e.use)))))}, 
-                  lower=0, upper=24)[1]$value
-  auc
+  auc = integrate(L.3.fx, lc50 = e.use, slp = b.use, lower=0, upper=24)[1]$value
+  piM = auc/tant.fpb.piM.aucs[1]
+  if(piM > 1) piM = 1
+  }
+  return(piM)
 }  #function to estimate AUC 
 
-piM.tant02_fpb.exp_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = fpb.fx.exp.mir(He) / fpb.fx.exp.mir(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
-
 #plot sample output compared to observed AUCs ##########
-plot(mir.fpb$fpb, c(auc.mir.fpb0, auc.mir.fpb1760, auc.mir.fpb4500, 
-                     auc.mir.fpb9000, auc.mir.fpb17600)/auc.mir.fpb0,
+plot(mir.fpb$fpb, tant.fpb.piM.aucs/tant.fpb.piM.aucs[1],
      xlab = 'Fluazifop-p-butyl (ppb)', ylab = 'relative AUC (miracidia-hours)',
      pch = 16, ylim = c(0,1))
   points(seq(0, 18000,50), sapply(seq(0, 18000,50), piM.tant02_fpb.lin_unc, simplify = T),
          pch = 5, col = 4, cex = 0.5)
   points(seq(0, 18000,50), sapply(seq(0, 18000,50), piM.tant02_fpb.exp_unc, simplify = T),
          pch = 5, col = 2, cex = 0.5)
-
+  
+#keep vector for fluazifop-p-butyl toxicity to miracidia
+  keep.tant.fpb.piM = c('piM.tant02_fpb.lin_unc', 'piM.tant02_fpb.exp_unc', 
+                        'el.fpb.mir', 'el.fpb2.mir', 'bl.fpb.mir', 'L.3.fx', 'tant.fpb.piM.aucs')
+  
 #keep vector ##########
-  keep.tantawy.piM = c('bl.but.mir', 'el.but.mir', 'el.but2.mir', 'bl.fpb.mir', 'el.fpb.mir', 'el.fpb2.mir',
-                       'but.fx.exp.mir', 'but.fx.lin.mir', 'fpb.fx.exp.mir', 'fpb.fx.lin.mir',
-                       'piM.tant02_but.exp_unc', 'piM.tant02_but.lin_unc',
-                       'piM.tant02_fpb.exp_unc', 'piM.tant02_fpb.lin_unc', 
-                       'auc.mir.fpb0', 'auc.mir.fpb1760', 'auc.mir.fpb4500', 
-                       'auc.mir.fpb9000', 'auc.mir.fpb17600', 'auc.mir.but0', 'auc.mir.but650', 
-                       'auc.mir.but1500', 'auc.mir.but4500', 'auc.mir.but6500')    
+  keep.tantawy.piM = c(keep.tant.but.piM, keep.tant.fpb.piM)    
   
   
