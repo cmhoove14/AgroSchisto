@@ -63,7 +63,7 @@ require(drc)
            pch = 5, col = 4, cex = 0.5)
     
   #keep vector
-  keep.bak.mal = c('muNq_mal_Bakry11_uncertainty', 'fx.bak.mal',
+  keep.bak.mal = c('muNq_mal_Bakry11_uncertainty', 'fx.bak.mal', 'mun.mal',
                    'lc50.bak.mal', 'se.lc50.bak.mal', 'slp.bak.mal')    
     
 #Deltamethrin  #############    
@@ -115,7 +115,7 @@ plot(mun.del$conc, mun.del$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
          pch = 5, col = 4, cex = 0.5)
   
   #keep vector
-  keep.bak.del = c('muNq_del_Bakry11_uncertainty', 'fx.bak.del',
+  keep.bak.del = c('muNq_del_Bakry11_uncertainty', 'fx.bak.del', 'mun.del',
                    'lc50.bak.del', 'se.lc50.bak.del', 'slp.bak.del')    
   
 #The paper also provides info on longitudinal survival of snail cohorts exposed to LC10 of each insecticide ################
@@ -204,17 +204,19 @@ plot(fn.bak$mal*1000, fn.bak$mal.r / fn.bak$mal.r[1] , ylim = c(0,1), pch = 16,
   fN.mal.fx.uncertainty = function(In){
     if(In == 0) fn = 1 else{
       Ins = In/1000
-    init = predict(fn.bak.mal, newdata = data.frame(mal = Ins), se.fit = T)
-    fn = rnorm(1, init[1], init[2]) / fn.bak$mal.r[1]
-    while(fn < 0 || fn > 1.00000){
+      init = predict(fn.bak.mal, newdata = data.frame(mal = Ins), se.fit = T)
+    if(init[1] == 0) fn = 0 else{
       fn = rnorm(1, init[1], init[2]) / fn.bak$mal.r[1]
+    while(fn < 0 || fn > 1.00000){
+        fn = rnorm(1, init[1], init[2]) / fn.bak$mal.r[1]
+      }
     }
   }
      return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
   
   points(seq(0,4000,4), sapply(seq(0,4000,4), fN.mal.fx.uncertainty), pch = 5, cex = 0.5, col = 4)
-
+keep.bak.mal = c(keep.bak.mal, 'fn.bak', 'fn.bak.mal', 'fN.mal.fx.uncertainty')
 #deltamethrin reproduction ##########      
   fn.bak.del = drm(del.r ~ del, data = fn.bak, type = 'continuous',
                    fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
@@ -237,15 +239,18 @@ plot(fn.bak$mal*1000, fn.bak$mal.r / fn.bak$mal.r[1] , ylim = c(0,1), pch = 16,
     if(In == 0) fn = 1 else{
       Ins = In/1000
     init = predict(fn.bak.del, newdata = data.frame(del = Ins), se.fit = T)
-    fn = rnorm(1, init[1], init[2]) / fn.bak$del.r[1]
-    while(fn < 0 || fn > 1.00000){
+    if(init[1] == 0) fn = 0 else{
       fn = rnorm(1, init[1], init[2]) / fn.bak$del.r[1]
+    while(fn < 0 || fn > 1.00000){
+        fn = rnorm(1, init[1], init[2]) / fn.bak$del.r[1]
+      }
     }
   }
     return(fn)
 } 
   
   points(seq(0,7000,7), sapply(seq(0,7000,7), fNq_del_Bakry11_uncertainty), pch = 5, cex = 0.5, col = 4)
-  
-  keep.bak11.N = c('mun.mal', 'muNq_mal_Bakry11_uncertainty', 'bak11.mod', 'muNq_del_Bakry11_uncertainty', 'bak11.mod2',
-                   'fNq_mal_Bakry11_uncertainty', 'fn.bak.mal', 'fNq_del_Bakry11_uncertainty', 'fn.bak.del')
+keep.bak.del = c(keep.bak.del, 'fn.bak', 'fn.bak.del', 'fNq_del_Bakry11_uncertainty')  
+#full keep vector ###############  
+  keep.bak11.N = c('mun.mal', 'muNq_mal_Bakry11_uncertainty', 'muNq_del_Bakry11_uncertainty', 'fn.bak',
+                   'fN.mal.fx.uncertainty', 'fn.bak.mal', 'fNq_del_Bakry11_uncertainty', 'fn.bak.del')

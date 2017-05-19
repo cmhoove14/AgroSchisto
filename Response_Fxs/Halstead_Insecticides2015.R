@@ -278,5 +278,6 @@ par.esfen = c(coef(esfen.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Inte
 #Character vector of objects to keep from this script ###############
   keep.hal15.muP = c('mal.sum', 'chlor.sum', 'terb.sum', 'esfen.sum', 'lamcy.sum', 'perm.sum',
                      'mal.mod', 'chlor.mod', 'terb.mod', 'esfen.mod', 'lamcy.mod', 'perm.mod',
+                     'par.mal', 'par.chlor', 'par.terb', 'par.esfen', 'par.lamcy', 'par.perm',
                      'muPq_mal_Halstead_uncertainty', 'muPq_chlor_Halstead_uncertainty', 'muPq_terb_Halstead_uncertainty',
                      'muPq_esfen_Halstead_uncertainty', 'muPq_lamcy_Halstead_uncertainty', 'muPq_perm_Halstead_uncertainty')

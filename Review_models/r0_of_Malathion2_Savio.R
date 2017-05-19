@@ -10,16 +10,17 @@
 #and indicate changes that were made.###############
 
 #Load response and R0 functions #######
-source('Response_Fxs/tchounwou92_piC2_beq.R')
-source('Response_Fxs/tchounwou91_piM_beq.R')
-source('Response_Fxs/Halstead_Insecticides2015.R')
-source('Response_Fxs/bakry2011.R')
-source('Response_Fxs/tchounwou91_fN-muN.R')
+source('~/AgReview/ResponseFxs/tchounwou92_piC2_beq_Savio.R')
+source('~/AgReview/ResponseFxs/tchounwou91_piM_beq_Savio.R')
+source('~/AgReview/ResponseFxs/Halstead_Insecticides2015_Savio.R')
+source('~/AgReview/ResponseFxs/bakry2011_Savio.R')
+source('~/AgReview/ResponseFxs/tchounwou91_fN-muN_Savio.R')
 
-source('Review_models/r0_of_q.R')
+source('~/AgReview/r0_of_q.R')
 
 library(parallel)
 library(fBasics)
+library(drc)
 
 keep.fin.mal = c(keep.tch92.beq, keep.tch91.beq, keep.tch91.snail, 
                  keep.hal15.muP[c(1,7,13,19)], keep.bak.mal, 
@@ -92,7 +93,7 @@ r0.mal.fix.n0 = subset(r0.mal.fix, mal != 0)
 
 #Run simulations of malathion concentrations, start with individual functions then combine ################
 conc.mal = c(seq(0,2000,2), seq(2000, 200000, 200))  #Concentration range to test
-nsims = 30         #Number of simulations to run
+nsims = 1000         #Number of simulations to run
 parfx = c(piC.tch92_mal_unc, piM.tch91_mal_unc, #Functions corresponding to affected parameters
           fN.mal.fx.uncertainty, muNq_mal_Bakry11_uncertainty, muPq_mal_Halstead_uncertainty,
           muNq_mal_tch91_uncertainty, fNq_mal_tch91_uncertainty)  
@@ -208,24 +209,29 @@ conc.mal.means.r0 = matrix(nrow = length(conc.mal), ncol = length(parfx)+6)
   for(i in 1:(length(parfx)+6)){
     conc.mal.means.r0[,i] = rowMeans(r0.fill.mal[ , , i])
   }
+  save(conc.mal.means.r0, file = '~/AgReview/Results/Malathion/mal1000sims_r0mean.Rdata')
 
 #sd r0
 conc.mal.sds.r0 = matrix(nrow = length(conc.mal), ncol = length(parfx)+6)
   for(i in 1:(length(parfx)+6)){
     conc.mal.sds.r0[,i] = fBasics::rowSds(r0.fill.mal[ , , i])
   }
+  save(conc.mal.sds.r0, file = '~/AgReview/Results/Malathion/mal1000sims_r0sd.Rdata')
+
 
 #mean Neq
 conc.mal.means.Neq = matrix(nrow = length(conc.mal), ncol = length(parfx)+6)
   for(i in 1:(length(parfx)+6)){
     conc.mal.means.Neq[,i] = rowMeans(Neq.fill.mal[ , , i])
   }
+  save(conc.mal.means.Neq, file = '~/AgReview/Results/Malathion/mal1000sims_Neqmean.Rdata')
 
 #sd Neq
 conc.mal.sds.Neq = matrix(nrow = length(conc.mal), ncol = length(parfx)+6)
   for(i in 1:(length(parfx)+6)){
     conc.mal.sds.Neq[,i] = fBasics::rowSds(Neq.fill.mal[ , , i])
   }
+  save(conc.mal.sds.Neq, file = '~/AgReview/Results/Malathion/mal1000sims_Neqsd.Rdata')
 
 #mean parameter values
 conc.mal.means.par = matrix(nrow = length(conc.mal), ncol = length(parfx)+1)
@@ -235,8 +241,5 @@ conc.mal.means.par[,1] = conc.mal
   }
   colnames(conc.mal.means.par) = c('conc','piC_tch92', 'piM_tch92', 'f_Nq_bak11', 'mu_Nq_bak11', 'mu_Pq_hal15',
                                    'mu_Nq_tch91', 'f_Nq_tch91')
-#quick check on results based on parameter values across tested concentrations
-plot(conc.mal.means.par[,1], conc.mal.means.par[,2], type = 'l', lwd = 2, ylim = c(0,1))
-  for(i in 3:ncol(conc.mal.means.par)){
-    lines(conc.mal.means.par[,1], conc.mal.means.par[,i], lwd = 2, col = i-1)
-  }
+  save(conc.mal.means.par, file = '~/AgReview/Results/Malathion/mal1000sims_pars.Rdata')
+  
