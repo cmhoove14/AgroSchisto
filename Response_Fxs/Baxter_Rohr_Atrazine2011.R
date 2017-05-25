@@ -40,26 +40,26 @@ bax.mod.no30 = lm(growthrate ~ logatra, weights = st.err^-1, data = atra.df.no30
 
 
 phi_Nq_atr_baxrohr = function(He){
-  if(He == 0){phiNq = 1} else{
+  if(He == 0) phiNq = 1  else{
     u = predict(bax.mod, newdata = data.frame(logatra = log(He+1)), type = 'response',
                 se.fit = TRUE)[1:2]
     phiNq = rnorm(1, u$fit, u$se.fit) / predict(bax.mod, newdata = data.frame(logatra = 0), 
                                                 type = 'response')
   }
   
-  phiNq
+  return(phiNq)
   
 }
 
 phi_Nq_atr_baxrohr.no30 = function(He){
-  if(He == 0){phiNq = 1} else{
+  if(He == 0) phiNq = 1 else{
     u = predict(bax.mod.no30, newdata = data.frame(logatra = log(He+1)), type = 'response',
                 se.fit = TRUE)[1:2]
     phiNq = rnorm(1, u$fit, u$se.fit) / predict(bax.mod.no30, newdata = data.frame(logatra = 0), 
                                                 type = 'response')
   }
   
-  phiNq
+  return(phiNq)
   
 }
 
@@ -76,7 +76,7 @@ plot(atra.df$atra, atra.df$growthrate / atra.df$growthrate[1],
     points(c(0:200), sapply(c(0:200), phi_Nq_atr_baxrohr), pch = 17, col=4, cex=0.6)
     points(c(0:200), sapply(c(0:200), phi_Nq_atr_baxrohr.no30), pch = 17, col=2, cex=0.6)
 
-  legend('topleft', legend = c('30ppb included', '30ppb excluded'), pch = 17, col = c(4,2), cex = 0.7)
+  legend('topleft', legend = c('30ppb included', '30ppb excluded'), pch = 17, col = c(4,2), cex = 0.7, bty='n')
   
 
   keep.baxrohr = c('atra.df', 'phi_Nq_atr_baxrohr', 'bax.mod', 'phi_Nq_atr_baxrohr.no30', 'bax.mod.no30')

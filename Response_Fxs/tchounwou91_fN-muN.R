@@ -12,7 +12,7 @@
 require(drc)
 
 #direct mortality to snails #############
-sn = read.csv('C:/Users/chris_hoover/Google Drive/Remais_Group_Shared_Drive/EEID_Schisto/Data/Response_Functions/Extracted_Data/Snail Mortality/tchounwou1991.csv')
+sn = read.csv('~/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/tchounwou1991.csv')
   sn = subset(sn, conc > 0)
   sn$conc_ppb = sn$conc*1000
   sn$mort = 20 - sn$surv
@@ -48,15 +48,13 @@ muNq_mal_tch91_uncertainty = function(In){
   if(In == 0) mun = 0 else{
     ins = (In/1000)
     lc50 = 10^(rnorm(1, log10(lc50.tch91.mal), se.lc50.tch91.mal))
-    while(lc50 < 0){
+  while(lc50 < 0){
       lc50 = 10^(rnorm(1, log10(lc50.tch91.mal), se.lc50.tch91.mal))
     }  
     mun = pnorm((slp.tch91.mal) * log10(ins/lc50))
   }
-  while(mun < 0){
-    lc50 = 10^(rnorm(1, log10(lc50.tch91.mal), se.lc50.tch91.mal))
-    mun = pnorm((slp.tch91.mal) * log10(ins/lc50))
-  } 
+  if(mun < 0) mun = 0
+     
   return(mun)
 }
 
@@ -66,7 +64,7 @@ plot(sn$conc_ppb, sn$prop_dead, pch = 16, xlim = c(0, 1e6), ylim = c(0,1),
          pch = 5, col = 4, cex = 0.5)
   
 #egg viability ###########
-eg = read.csv('C:/Users/chris_hoover/Google Drive/Remais_Group_Shared_Drive/EEID_Schisto/Data/Response_Functions/Extracted_Data/Snail reproduction/tchounwou1991.csv')
+eg = read.csv('~/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/tchounwou1991.csv')
   eg = subset(eg, conc > 0)
   eg$conc_ppb = eg$conc*1000
   eg$log10ppm = log10(eg$conc)
@@ -100,19 +98,17 @@ plot(eg$log10ppm, eg$probit, pch = 16, ylim = c(2.5,7.5), xlim = c(0, log10(max(
   
 #Model of egg viability###########
   fNq_mal_tch91_uncertainty = function(In){
-    if(In == 0) mun = 0 else{
+    if(In == 0) fn = 1 else{
       ins = (In/1000)
       lc50 = 10^(rnorm(1, log10(lc50.tch91.mal.eg), se.lc50.tch91.mal.eg))
       while(lc50 < 0){
         lc50 = 10^(rnorm(1, log10(lc50.tch91.mal.eg), se.lc50.tch91.mal.eg))
       }  
-      mun = pnorm((-slp.tch91.mal.eg) * log10(ins/lc50))#neg. slope - normailize to 
+      fn = pnorm((-slp.tch91.mal.eg) * log10(ins/lc50))#neg. slope - normailize to 
     }
-    while(mun < 0){
-      lc50 = 10^(rnorm(1, log10(lc50.tch91.mal.eg), se.lc50.tch91.mal.eg))
-      mun = pnorm((-slp.tch91.mal.eg) * log10(ins/lc50)) 
-    } 
-    return(mun)
+    if(fn < 0) fn = 0
+      
+    return(fn)
   }
   
   plot(eg$conc_ppb, eg$prop_surv, pch = 16, xlim = c(0, 4e5), ylim = c(0,1),

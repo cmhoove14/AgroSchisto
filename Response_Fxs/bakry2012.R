@@ -49,19 +49,17 @@ muNq_atr_Bakry12_uncertainty = function(He){
   while(lc50 < 0){
     lc50 = 10^(rnorm(1, log10(lc50.bak.atr), se.lc50.bak.atr))
   }  
-    mun = pnorm((slp.bak.atr) * log10(heu/lc50)) - fx.bak.atr(0)
+    mun = pnorm((slp.bak.atr) * log10(heu/lc50))
   }
-  while(mun < 0){
-    lc50 = 10^(rnorm(1, log10(lc50.bak.atr), se.lc50.bak.atr))
-    mun = pnorm((slp.bak.atr) * log10(heu/lc50)) - fx.bak.atr(0)
-  } 
+  if(mun < 0) mun = 0
+
   return(mun)
 }
 points(seq(0,5000,10), sapply(seq(0,5000,10), muNq_atr_Bakry12_uncertainty), 
        pch = 5, col = 4, cex = 0.5)
 
 #keep vector
-keep.bak.atr = c('muNq_atr_Bakry12_uncertainty', 'fx.bak.atr',
+keep.bak.atr = c('muNq_atr_Bakry12_uncertainty', 'fx.bak.atr', 'mun.bak.atr',
                  'lc50.bak.atr', 'se.lc50.bak.atr', 'slp.bak.atr')    
 
 #direct snail toxicity from Glyphosate ############  
@@ -205,3 +203,5 @@ fN.atr.fx.uncertainty = function(He){
 } #normalized to 1, upper limit at 1, lower limit at 0
 
 points(seq(0,5000, 10), sapply(seq(0,5000, 10), fN.atr.fx.uncertainty), pch = 5, cex = 0.5, col = 4)
+
+keep.bak12 = c(keep.bak.atr, keep.bak.gly)

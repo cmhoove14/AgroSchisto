@@ -48,10 +48,9 @@ piM_ch_Hash11_uncertainty = function(In){
     lc50 = 10^(rnorm(1, log10(lc50.hash.pim.ch), se.lc50.hash.pim.ch))
     piM = pnorm(-slp.hash.pim.ch * (Ins - lc50)) / fx.piM.hsh.chlor(0)
   }
-  while(piM < 0 || piM > 1){
-    lc50 = 10^(rnorm(1, log10(lc50.hash.pim.ch), se.lc50.hash.pim.ch))
-    piM = pnorm(-slp.hash.pim.ch * (Ins - lc50)) / fx.piM.hsh.chlor(0)
-  }
+  if(piM > 1) piM = 1
+  if(piM < 0) piM = 0
+  
   return(piM)
 }
   points(seq(0,4000,10), sapply(seq(0,4000,10), piM_ch_Hash11_uncertainty, simplify = T), 
@@ -97,10 +96,9 @@ piM_pr_Hash11_uncertainty = function(In){
     lc50 = 10^(rnorm(1, log10(lc50.hash.pim.prof), se.lc50.hash.pim.prof))
     piM = pnorm(-slp.hash.pim.prof * (Ins - lc50)) / fx.piM.hsh.prof(0)
   }
-  while(piM < 0 || piM > 1){
-    lc50 = 10^(rnorm(1, log10(lc50.hash.pim.prof), se.lc50.hash.pim.prof))
-    piM = pnorm(-slp.hash.pim.prof * (Ins - lc50)) / fx.piM.hsh.prof(0)
-  }
+  if(piM > 1) piM = 1
+  if(piM < 0) piM = 0
+  
   return(piM)
 }
 
@@ -147,10 +145,9 @@ fx.piC.hsh.prof = function(In, lc = lc50.hash.pic.prof){
       lc50 = 10^(rnorm(1, log10(lc50.hash.pic.prof), se.lc50.hash.pic.prof))
       piC = pnorm(-slp.hash.pic.prof * (Ins - lc50)) / fx.piC.hsh.prof(0)
     }
-    while(piC < 0 || piC > 1){
-      lc50 = 10^(rnorm(1, log10(lc50.hash.pic.prof), se.lc50.hash.pic.prof))
-      piC = pnorm(-slp.hash.pic.prof * (Ins - lc50)) / fx.piC.hsh.prof(0)
-    }
+    if(piC > 1) piC = 1
+    if(piC < 0) piC = 0
+    
     return(piC)
   }
   
@@ -197,10 +194,9 @@ plot(piC.hsh.ch$conc, piC.hsh.ch$surv, pch = 16, ylim = c(0,1), xlim = c(0,3500)
       lc50 = 10^(rnorm(1, log10(lc50.hash.pic.ch), se.lc50.hash.pic.ch))
       piC = pnorm(-slp.hash.pic.ch * (Ins - lc50)) / fx.piC.hsh.chlor(0)
     }
-    while(piC < 0 || piC > 1){
-      lc50 = 10^(rnorm(1, log10(lc50.hash.pic.ch), se.lc50.hash.pic.ch))
-      piC = pnorm(-slp.hash.pic.ch * (Ins - lc50)) / fx.piC.hsh.chlor(0)
-    }
+    if(piC > 1) piC = 1
+    if(piC < 0) piC = 0
+    
     return(piC)
   }
   points(seq(0,4000,10), sapply(seq(0,4000,10), piC_ch_Hash11_uncertainty, simplify = T), 

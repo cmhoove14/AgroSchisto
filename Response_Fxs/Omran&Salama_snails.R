@@ -59,7 +59,7 @@ ons.munq.atr = function(He){
 points(seq(0,5e5,1000), sapply(seq(0,5e5,1000), ons.munq.atr),
        pch = 5, col = 4, cex = 0.5)
 
-keep.ons.atr = c('ons.munq.atr', 'lm.ons.atr')
+keep.ons.atr = c('ons.atr', 'ons.munq.atr', 'lm.ons.atr')
 #zoom just to check out low conc
 plot(ons.atr$conc, ons.atr$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
      xlab = 'atrazine (ppb)', ylab = c('mortality')) 

@@ -8,30 +8,34 @@ source('Response_fxs/griggs08_piC_beq.R')
 source('Response_fxs/koprivnikar06_piC_beq.R')
 
 #Griggs data
-plot(x = cerc.g0$time_hrs,y = cerc.g0$surv/100,
-     xlab = 'time (hrs)', ylab = 'prop alive', pch = 16, xlim = c(0,25), ylim = c(0,1))
-    lines(time, ll4(1,0,coef(grg.ctrl)[1], coef(grg.ctrl)[2], time), lty=2)
-  points(cerc.g15$time_hrs, cerc.g15$surv/100, pch = 17)
-    lines(time, ll4(1,0,coef(grg.15)[1], coef(grg.15)[2], time), lty=3)
-  points(cerc.g100$time_hrs, cerc.g100$surv/100, pch = 15)
-    lines(time, ll4(1,0,coef(grg.100)[1], coef(grg.100)[2], time), lty=4)
+plot(x = cerc.g0$time_hrs[cerc.g0$conc == 0], y = cerc.g0$prop_surv[cerc.g0$conc == 0],
+     xlab = 'time (hrs)', ylab = 'prop alive', pch = 16, cex = 1.2, xlim = c(0,25), ylim = c(0,1))
+  lines(time, predict(grg.mod, 
+                      data.frame(time_hrs=time, conc = 0)), lty = 2)
+  for(i in unique(cerc.g0$conc)[c(2:3)]){
+    points(cerc.g0$time_hrs[cerc.g0$conc == i], cerc.g0$prop_surv[cerc.g0$conc == i], 
+           pch = 17, col = i+1)
+    lines(time, predict(grg.mod, 
+                        data.frame(time_hrs=time, conc = i)), lty = 2, col = i+1)
+  } 
 #Koprivnikar data  
   points(x = kop.cc$time_hrs, y = kop.cc$surv, col=2, pch = 16)
-    lines(time, ll4(1,0,summary(kop.ctrl)$coefficients[1],
-                    summary(kop.ctrl)$coefficients[2], time), lty=2, col=2)
+    lines(time, L.3.fx(time, lc50 = summary(kop.ctrl)$coefficients[2],
+                       slp = summary(kop.ctrl)$coefficients[1]), lty=2, col = 2)
   points(x = kop.20$time_hrs, y = kop.20$surv, pch = 17, col=2)
-    lines(time, ll4(1,0,summary(kop.20mod)$coefficients[1],
-                    summary(kop.20mod)$coefficients[2], time), lty=3, col=2)
+    lines(time, L.3.fx(time, lc50 = summary(kop.20mod)$coefficients[2],
+                       slp = summary(kop.20mod)$coefficients[1]), lty=2, col = 2)
   points(x = kop.200$time_hrs, y = kop.200$surv, pch = 15, col=2)
-    lines(time, ll4(1,0,summary(kop.200mod)$coefficients[1],
-                    summary(kop.200mod)$coefficients[2], time), lty=4, col=2)
+    lines(time, L.3.fx(time, lc50 = summary(kop.200mod)$coefficients[2],
+                       slp = summary(kop.200mod)$coefficients[1]), lty=2, col = 2)
 #Rohr data  
   points(x = rohr$time_hrs[rohr$chem == 'control'], y = rohr$surv[rohr$chem == 'control']/100,
          pch = 16, col=4)
-    lines(time, ll4(1,0,coef(rohr.ctrl)[1], coef(rohr.ctrl)[2], time), lty=2, col=4)
+    lines(time, L.3.fx(time, coef(rohr.ctrl)[2], coef(rohr.ctrl)[1]), lty=2)
+  
   points(x = rohr.atr$time_hrs, y = rohr.atr$surv/100,
          col = 4, pch = 15)
-    lines(time, ll4(1,0,coef(rohr.atrmod)[1], coef(rohr.atrmod)[2], time), lty=2, col = 4)
+    lines(time, L.3.fx(time, coef(rohr.atrmod)[2], coef(rohr.atrmod)[1]), lty=2, col = 4)
 
   eb.meta = data.frame(atr = c(kopatr.df$atr, grgc.df$atr, rohr.fin$conc[1:2]),
                        study = c(rep('kop', length(kopatr.df$atr)), 
@@ -53,7 +57,7 @@ plot(x = cerc.g0$time_hrs,y = cerc.g0$surv/100,
                x1 = eb.meta$atr[i], y1 = eb.meta$b[i] - eb.meta$b.se[i], col=2)
     }
     
-    legend('right', legend = c('slp', 'lc50'), pch = c(17, 16), col=c(2,1), cex = 0.7)  
+    legend('topright', legend = c('slp', 'lc50'), pch = c(17, 16), col=c(2,1), cex = 0.7, bty = 'n')  
   
   #Model two-parameter log-logistic parameters as a function of atrazine concentration
     atrmeta.bme = lmer(b ~ atr + (1|study), weights = b.se^-1, data = eb.meta)
@@ -90,8 +94,8 @@ plot(x = cerc.g0$time_hrs,y = cerc.g0$surv/100,
     lines(atrmeta.df$atr, atrmeta.df$bme.pred, lty=2, col=4, lwd = 2)
     lines(atrmeta.df$atr, atrmeta.df$eme.pred, lty=2, col=4, lwd = 2)
  
-  legend('topright', legend = c('lm model slp', 'lm model lc50', 'ME model', '95% CIs'),
-         lty = c(2,2,2,3), lwd = c(1,1,2,1), col = c(1,2,4,1), cex = 0.6)  
+  legend(350, 20, legend = c('lm model slp', 'lm model lc50', 'ME model', '95% CIs'),
+         lty = c(2,2,2,3), lwd = c(1,1,2,1), col = c(1,2,4,1), cex = 0.6, bty = 'n')  
   title('Pooled cercarial survival (atrazine) parameters')
   
 #Create function to generate d-r function #####################
@@ -102,19 +106,20 @@ plot(x = cerc.g0$time_hrs,y = cerc.g0$surv/100,
     e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     
-    if(e.use <= 0){auc=0} else{
+    while(e.use <= 0)     e.use = rnorm(1, e[1], e[2])
       auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t / e.use)))))}, 
                     lower=0, upper=24, stop.on.error = FALSE)[1]$value
-    }
-    
-    auc
+    return(auc)
   }  
   
 #Final:generate relative cercariae-hrs function  
   piC.meta_atr_unc = function(He){
-    piC = meta.atr.piC.fx(He) / meta.atr.piC.fx(0)
+    if(He == 0) piC = 1 else{
+      piC = meta.atr.piC.fx(He) / meta.atr.piC.fx(0)
+    }
     if(piC > 1) piC = 1
-    else(return(piC))
+    
+    return(piC)
   }
   
   keep.meta.piC = c('piC.meta_atr_unc', 'meta.atr.piC.fx', 'atrmeta.e', 'atrmeta.b')  

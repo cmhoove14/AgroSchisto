@@ -50,4 +50,4 @@ rohr.atr.fx = function(He){
            pch = c(16,17), col = c(1,3), cex = 0.7, bty = 'n')
 
 #Vector of items to keep
-  keep.atr.rohr08 = c('atr', 'piC.atr.rohr08.uncertainty', 'atr.lin', 'piC.atr.rohr08.lin')
+  keep.atr.rohr08 = c('atr', 'atr.lin', 'piC.atr.rohr08.lin')

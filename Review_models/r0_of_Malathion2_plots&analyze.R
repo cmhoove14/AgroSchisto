@@ -9,7 +9,8 @@
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
 
-  load('Review_models/r0_of_malathion2_ws2.RData') #conc range = 0 - 2000 by 2s, 2000 - 2e5 by 200s
+load('Review_models/Savio/Malathion/r0_malathion_savio.Rdata')
+
   require(rootSolve)
 
 #Plot results of individual parameter functions ###################
@@ -200,7 +201,7 @@ legend('bottomleft', lwd=2, col = c(1:5), cex = 0.5, bty = 'n', title = 'Modeled
   }
   legend('bottomleft', lwd=2, col = c(3,5,6), cex = 0.7, bty = 'n',
          legend = c(expression(paste(mu[P], sep = '')),
-                    expression(paste(mu[P], ' & ', pi[C], ' & ', pi[C])),
+                    expression(paste(mu[P], ' & ', pi[C], ' & ', pi[M])),
                     expression(paste(mu[P], ' & f'[N], ' & ', mu[N]))))
   title('Malathion combined predator & snail/larval effects')
   

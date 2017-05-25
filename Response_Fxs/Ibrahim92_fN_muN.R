@@ -45,9 +45,8 @@ f_N_chlor_ibr92 = function(In){
     if(In == 0) fn = 1 else{
       init = predict(chlor.fN.predict, newdata = data.frame(mal = In), se.fit = T)
       fn = rnorm(1, init[1], init[2]) / snail.repro$juvs.sn.day[1]
-    }
-    while(1 < fn || fn < 0){
-        fn = rnorm(1, init[1], init[2]) / snail.repro$juvs.sn.day[1]
+      if(fn < 0) fn = 0
+      if(fn > 1) fn = 1
     }
     return(fn)
   }
@@ -100,11 +99,10 @@ par.tricks.ibr.muN = c(coef(ibr_muNq),
                        'Lower Limit:(Intercept)' = snail.mort$mort[1])[c(1,4,3,2)]  
     
   mu_N_chlor_ibr92_uncertainty<-function(In){
-    mun = rdrm(nosim = 1, fct = L.4(), mpar = par.tricks.ibr.muN, yerror = 'rbinom', xerror = In,
-               ypar = 30)$y / 30 - snail.mort$mort[1]
-    while(mun < 0){
+    if(In == 0) mun = 0 else{
       mun = rdrm(nosim = 1, fct = L.4(), mpar = par.tricks.ibr.muN, yerror = 'rbinom', xerror = In,
-                 ypar = 30)$y / 30 - snail.mort$mort[1]
+               ypar = 30)$y / 30 - snail.mort$mort[1]
+      if(mun < 0) mun = 0
     }
     return(mun)
   }

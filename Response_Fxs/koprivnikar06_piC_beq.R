@@ -16,7 +16,7 @@ L.3.fx = function(t, lc50 = lc50, slp = slp){
 }
 
 #Cercarial mortality (E. trivolvis) from Koprivnikar 2006 ##################
-kop.c = read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Cercarial Mortality/Koprivnikar2006.csv')
+kop.c = read.csv('~/RemaisWork/Schisto/Data/AgroData/Data/Cercarial Mortality/Koprivnikar2006.csv')
   kop.c[,5:8] = kop.c[,5:8]/100 #Convert survival measures to proportions
   time = c(0:25)
   
@@ -130,65 +130,36 @@ legend('topright', legend = c('slp', 'lc50'), pch = c(17, 16), col=c(2,1), cex =
 title('Koprivnikar 06 cercarial survival parameters') 
 
 #Create function to generate d-r function with linear b function#####################
-  predk.fx = function(He){
+  piC.kop_atr_unc = function(He){
     e = as.numeric(predict(ek.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
     b = as.numeric(predict(bk.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
     
-    e.use = rnorm(1, e[1], e[2])
-    b.use = rnorm(1, b[1], b[2])
-    
-    while(e.use < 0){
       e.use = rnorm(1, e[1], e[2])
-    }      #resample if negative
-    
-    auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use, 
-                    lower=0, upper=24)[1]$value
-    
-    auc
-  }  
-  
-#Final: generate relative cercariae-hrs function  
-  piC.kop_atr_unc = function(He){
-    if(He == 0) piC = 1 
-    else (piC = predk.fx(He) / auc.kop0)
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+      b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+      auc = integrate(L.3.fx, lc50 = e.use, slp = b.use, lower=0, upper=24, stop.on.error = FALSE)[1]$value
+      piC = auc/auc.kop0[1]
     if(piC > 1) piC = 1
+      
     return(piC)
-  }
+  }  
   
 #Create function to generate d-r function with exponential b function#####################
-  predk.fx2 = function(He){
+  piC.kop_atr_unc2 = function(He){
     e = as.numeric(predict(ek.mod2, newdata = data.frame(logatr = log(He+1)), se.fit = TRUE)[1:2])
     b = as.numeric(predict(bk.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
-    
-    e.use = rnorm(1, e[1], e[2])
-    b.use = rnorm(1, b[1], b[2])
-    
-    while(e.use < 0){
+   
       e.use = rnorm(1, e[1], e[2])
-    }      #resample if negative
-    
-    auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use, 
-                    lower=0, upper=24)[1]$value
-    
-    auc
-  }  
-  
-  #Final:generate relative cercariae-hrs function  
-  piC.kop_atr_unc2 = function(He){
-    if(He == 0) piC = 1 
-    else (piC = predk.fx2(He) / auc.kop0)
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+      b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+      auc = integrate(L.3.fx, lc50 = e.use, slp = b.use, lower=0, upper=24, stop.on.error = FALSE)[1]$value
+      piC = auc/auc.kop0[1]
     if(piC > 1) piC = 1
-    return(piC)
-  }
-
-#Compare the linear and exponential functions and store key items ##############
-  plot(c(0,20,200), c(auc.kop0, auc.kop20, auc.kop200)/auc.kop0, pch = 16, xlim = c(0,500), ylim = c(0,1),
-       xlab = 'Atrazine (ppb)', ylab = expression(paste(pi[C], 'estimate')))
-    points(seq(0,500,5), sapply(seq(0,500,5), piC.kop_atr_unc), pch = 5, col = 4, cex = 0.5)
-    points(seq(0,500,5), sapply(seq(0,500,5), piC.kop_atr_unc2), pch = 5, col = 2, cex = 0.5)
-    legend('bottomleft', legend = c('linear', 'exponential'), pch = 5, col = c(4,2), bty = 'n',
-           title = 'Function fit to lc50 parameter', cex = 0.7)
+    
+  return(piC)
+}
   
-  
-  keep.kop06.beq = c('kopatr.auc', 'piC.kop_atr_unc', 'predk.fx', 'piC.kop_atr_unc2', 'predk.fx2',
-                     'ek.mod', 'bk.mod', 'bk.mod2')
+  keep.kop06.beq = c('kopatr.auc', 'auc.kop0', 'piC.kop_atr_unc', 'piC.kop_atr_unc2',
+                     'ek.mod', 'ek.mod2', 'bk.mod')

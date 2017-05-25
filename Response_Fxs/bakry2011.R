@@ -53,10 +53,8 @@ require(drc)
       lc50 = 10^(rnorm(1, log10(lc50.bak.mal), se.lc50.bak.mal))
       mun = pnorm((slp.bak.mal) * (Ins-lc50)) - fx.bak.mal(0)
     }
-    while(mun < 0){
-      lc50 = 10^(rnorm(1, log10(lc50.bak.mal), se.lc50.bak.mal))
-      mun = pnorm((slp.bak.mal) * (Ins-lc50)) - fx.bak.mal(0)
-    } 
+    if(mun < 0) mun = 0
+ 
     return(mun)
   }
     points(seq(0,5000,25), sapply(seq(0,5000,25), muNq_mal_Bakry11_uncertainty), 
@@ -105,10 +103,8 @@ plot(mun.del$conc, mun.del$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
       lc50 = 10^(rnorm(1, log10(lc50.bak.del), se.lc50.bak.del))
       mun = pnorm((slp.bak.del) * (Ins-lc50)) - fx.bak.del(0)
     }
-    while(mun < 0){
-      lc50 = 10^(rnorm(1, log10(lc50.bak.del), se.lc50.bak.del))
-      mun = pnorm((slp.bak.del) * (Ins-lc50)) - fx.bak.del(0)
-    } 
+    if(mun < 0) mun = 0
+    
     return(mun)
   }
   points(seq(0,10000,50), sapply(seq(0,10000,50), muNq_del_Bakry11_uncertainty), 

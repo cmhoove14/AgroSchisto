@@ -25,13 +25,21 @@ require(drc)
     lines(seq(0,900,10), sapply(seq(0,900,10), muPq_zinc_satapornvanit09, simplify = T)[3,], lty=3, col=2)
     
   muPq_zinc_satapornvanit09_uncertainty<-function(In){
-    rdrm(1, L.4(), coef(sap.mupq)[c(1,5)], In, yerror = 'rbinom', ypar = 30)$y / 30
+    if(In == 0) mup = 0 else{
+      init = predict(sap.mupq, data.frame(conc=In, chem = 'zinc'), se.fit = T)
+      mup = rnorm(1, init[1], init[2]) - muPq_zinc_satapornvanit09(0)[1] #normalize to 0
+      if(mup < 0) mup = 0
+      if(mup > 1) mup = 1
+    }
+    
+    return(mup)
   }
     
   points(seq(0,900,10), sapply(seq(0,900,10), muPq_zinc_satapornvanit09_uncertainty, simplify = T), 
          pch=5, col=4, cex = 0.5)
   
-keep.zinc.sat09 = c('muPq_zinc_satapornvanit09_uncertainty', 'sap.mupq')    
+keep.zinc.sat09 = c('muPq_zinc_satapornvanit09_uncertainty', 'muPq_zinc_satapornvanit09', 'sap.mupq') 
+
 #Chlorpyrifos ###########    
   muPq_chlor_satapornvanit09<-function(In){
     predict(sap.mupq, data.frame(conc=In, chem = 'chlorpyrifos'), 
@@ -49,17 +57,18 @@ keep.zinc.sat09 = c('muPq_zinc_satapornvanit09_uncertainty', 'sap.mupq')
     if(In == 0) mup = 0 else{
       init = predict(sap.mupq, data.frame(conc=In, chem = 'chlorpyrifos'), se.fit = T)
       mup = rnorm(1, init[1], init[2]) - muPq_chlor_satapornvanit09(0)[1] #normalize to 0
+      if(mup < 0) mup = 0
+      if(mup > 1) mup = 1
     }
-    while(mup < 0 || mup > 1){
-      mup = rnorm(1, init[1], init[2]) - muPq_chlor_satapornvanit09(0)[1] #normalize to 0
-    }
+  
     return(mup)
   }
       
   points(seq(0,5,0.01), sapply(seq(0,5,0.01), muPq_chlor_satapornvanit09_uncertainty, simplify = T), 
           pch=5, col=4, cex = 0.5)    
       
-keep.chlor.sat09 = c('muPq_chlor_satapornvanit09_uncertainty', 'muPq_chlor_satapornvanit09','sap.mupq')  
+keep.chlor.sat09 = c('muPq_chlor_satapornvanit09_uncertainty', 'muPq_chlor_satapornvanit09','sap.mupq') 
+
 #Dimethoate ################        
   muPq_dim_satapornvanit09<-function(In){
     predict(sap.mupq, data.frame(conc=In, chem = 'dimethoate'), 
@@ -77,9 +86,8 @@ keep.chlor.sat09 = c('muPq_chlor_satapornvanit09_uncertainty', 'muPq_chlor_satap
     if(In == 0) mup = 0 else{
       init = predict(sap.mupq, data.frame(conc=In, chem = 'dimethoate'), se.fit = T)
       mup = rnorm(1, init[1], init[2]) - muPq_dim_satapornvanit09(0)[1] #normalize to 0
-    }
-    while(mup < 0 || mup > 1){
-      mup = rnorm(1, init[1], init[2]) - muPq_dim_satapornvanit09(0)[1] #normalize to 0
+      if(mup < 0) mup = 0
+      if(mup > 1) mup = 1
     }
     return(mup)
   }
@@ -87,6 +95,7 @@ keep.chlor.sat09 = c('muPq_chlor_satapornvanit09_uncertainty', 'muPq_chlor_satap
   points(seq(0,1300,10), sapply(seq(0,1300,10), muPq_dim_satapornvanit09_uncertainty, simplify = T), 
           pch=5, col=4, cex = 0.5)       
 keep.dim.sat09 = c('muPq_dim_satapornvanit09_uncertainty', 'muPq_dim_satapornvanit09','sap.mupq')
+
 #Profenofos ################      
   muPq_pr_satapornvanit09<-function(In){
     predict(sap.mupq, data.frame(conc=In, chem = 'profenofos'), interval = 'confidence', level = 0.95)
@@ -103,9 +112,8 @@ keep.dim.sat09 = c('muPq_dim_satapornvanit09_uncertainty', 'muPq_dim_satapornvan
     if(In == 0) mup = 0 else{
       init = predict(sap.mupq, data.frame(conc=In, chem = 'profenofos'), se.fit = T)
       mup = rnorm(1, init[1], init[2]) - muPq_pr_satapornvanit09(0)[1] #normalize to 0
-    }
-    while(mup < 0 || mup > 1){
-      mup = rnorm(1, init[1], init[2]) - muPq_pr_satapornvanit09(0)[1] #normalize to 0
+      if(mup < 0) mup = 0
+      if(mup > 1) mup = 1
     }
     return(mup)
   }
@@ -121,6 +129,7 @@ keep.prof.sat09 = c('muPq_prof_satapornvanit09_uncertainty', 'muPq_pr_satapornva
   }  
   
 keep.carb.sat09 = c('muPq_carb_satapornvanit09')
+
 #Reduced feeding rate from zinc and Chlorpyrifos from Satapornvanit et al chemosphere paper ########
 sap.fr<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Predator Mortality/satapornvanit2009_m.rosenbergii_feed_rate.csv")
   fr.z = subset(sap.fr, chem == 'zinc')
