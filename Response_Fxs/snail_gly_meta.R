@@ -15,6 +15,7 @@ source('Response_Fxs/Ghaffar2016_snails.R')
 source('Response_Fxs/bakry2012.R')
 source('Response_Fxs/Omran&Salama_snails.R')
 
+  dev.off()
 #mortality effects ########
 #plot different functions to compare
 plot(seq(0, 5000, 10), sapply(seq(0, 5000, 10), muNq_gly_Bakry12_uncertainty), 

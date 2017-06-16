@@ -16,114 +16,65 @@ require(drc)
   gly.vals = c(0, 1506, 3875, 9174, 15062, 26249)
   pen.vals = c(0, 214.8, 535, 1299, 2148, 3762)
   
-  L.3.fx = function(t, lc50 = lc50, slp = slp){
-    1 / (1+exp(slp*(t - lc50)))
+  ll4 = function(slp,lc,x){
+    1/(1+exp(slp*(log(x/lc))))
   }
+  
+  time = seq(0,25,0.1)
 
 #Cercarial (S. mansoni) toxicity ###############
   cer<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Cercarial Mortality/ghaffar2016_cercariae.csv')
+    cer$alive = 100*cer$surv
+    cer$dead = 100-cer$alive
+    cer$total = 100
+    
+  cer.ctrl = subset(cer, chem == 'control')  
+    
+    gaf.ctrl.drc.cer = drm(alive/total ~ time_hrs, weights = total, data = cer.ctrl, type = 'binomial', 
+                      fct = LL.4(names = c('b', 'c', 'd', 'e'),
+                                fixed = c(NA, 0, 1, NA)))
+    summary(gaf.ctrl.drc.cer)
 
 #butralin cercariae ###############
-  plot(cer$time_hrs[cer$conc==0], cer$surv[cer$conc==0], 
-       pch=16, xlab = 'time(hrs', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
-  for(i in 1:length(unique(cer$conc[cer$chem == 'butralin']))){
-      points(cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'butralin'])[i] & cer$chem == 'butralin'], 
-             cer$surv[cer$conc==unique(cer$conc[cer$chem == 'butralin'])[i] & cer$chem == 'butralin'], pch=17,
+  cer.but = subset(cer, chem == 'butralin')
+  
+  gaf.but.drc.cer = drm(alive/total ~ time_hrs, conc, weights = total, data = cer.but, type = 'binomial', 
+                    fct = LL.4(names = c('b', 'c', 'd', 'e'),
+                               fixed = c(NA, 0, 1, NA)))
+  summary(gaf.but.drc.cer)
+  plot(gaf.but.drc.cer) 
+  
+  plot(cer.ctrl$time_hrs, cer.ctrl$surv, ylim = c(0,1), xlim = c(0,24), pch=16, 
+       xlab = 'time(hrs)', ylab = 'prop surviving')
+    lines(time, ll4(lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], x = time), lty = 2)
+    
+    for(i in 1:length(unique(cer.but$conc))){
+      points(cer.but$time_hrs[cer.but$conc==unique(cer.but$conc)[i]], 
+             cer.but$surv[cer.but$conc==unique(cer.but$conc)[i]], pch=17,
              col = i+1)
+      lines(time, ll4(lc = gaf.but.drc.cer$coefficients[i+5], slp = gaf.but.drc.cer$coefficients[i], x = time), lty = 2, col = i+1)
+    }
+  legend('topright', title = 'Butralin (ppb)', legend = but.vals, pch = c(16,rep(17,5)),
+         col = c(1:6), cex=0.7, bty = 'n')
+  title('Ghaffar2016 butralin toxicity to cercariae')
+
+#Get estimate of cercariae-hrs for each concentration    
+gaf.but.aucs.cer = as.numeric()
+  gaf.but.aucs.cer[1] = integrate(f = ll4, lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], 
+                                  lower=0, upper=24)[1]$value  
+  
+  for(j in 1:length(unique(cer.but$conc))){
+    gaf.but.aucs.cer[j+1] = integrate(f = ll4, lc = gaf.but.drc.cer$coefficients[j+5], slp = gaf.but.drc.cer$coefficients[j],
+                                      lower=0, upper=24)[1]$value  
   }
   
-#fit to control points *****************************************************************
-gaf.cer.cont<-drm(cer$surv[cer$conc==0] ~ cer$time_hrs[cer$conc==0],
-                  type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.cer.cont, newdata = data.frame(conc = seq(0,24,0.1))), lty=2)
-
-  auc.cer.cont=integrate(f = L.3.fx, lc50 = coef(gaf.cer.cont)[2], slp = coef(gaf.cer.cont)[1],
-                         lower=0, upper=24)[1]$value    
-
-#556 ppb *********************************************************************************
-gaf.cer.but556<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'butralin'])[1] & cer$chem == 'butralin'] ~ 
-                    cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'butralin'])[1] & cer$chem == 'butralin'],
-                    type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.but556, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 2)
-
-auc.cer.but556=integrate(f = L.3.fx, lc50 = coef(gaf.cer.but556)[2], slp = coef(gaf.cer.but556)[1],
-                       lower=0, upper=24)[1]$value   
-    
-#2417 ppb *********************************************************************************
-gaf.cer.but2417<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'butralin'])[2] & cer$chem == 'butralin'] ~ 
-                     cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'butralin'])[2] & cer$chem == 'butralin'],
-                     type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.but2417, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 3)
-
-auc.cer.but2417=integrate(f = L.3.fx, lc50 = coef(gaf.cer.but2417)[2], slp = coef(gaf.cer.but2417)[1],
-                         lower=0, upper=24)[1]$value   
-
-#3906 ppb ***********************************************************************************
-gaf.cer.but3906<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'butralin'])[3] & cer$chem == 'butralin'] ~ 
-                     cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'butralin'])[3] & cer$chem == 'butralin'],
-                     type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.but3906, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 4)
-
-auc.cer.but3906=integrate(f = L.3.fx, lc50 = coef(gaf.cer.but3906)[2], slp = coef(gaf.cer.but3906)[1],
-                          lower=0, upper=24)[1]$value   
-
-#5560 ppb **********************************************************************************
-gaf.cer.but5560<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'butralin'])[4] & cer$chem == 'butralin'] ~ 
-                     cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'butralin'])[4] & cer$chem == 'butralin'],
-                     type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.but5560, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 5)
-
-auc.cer.but5560=integrate(f = L.3.fx, lc50 = coef(gaf.cer.but5560)[2], slp = coef(gaf.cer.but5560)[1],
-                          lower=0, upper=24)[1]$value   
-
-#8703 ppb **********************************************************************************
-gaf.cer.but8703<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'butralin'])[5] & cer$chem == 'butralin'] ~ 
-                     cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'butralin'])[5] & cer$chem == 'butralin'],
-                     type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.but8703, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 6)
-
-auc.cer.but8703=integrate(f = L.3.fx, lc50 = coef(gaf.cer.but8703)[2], slp = coef(gaf.cer.but8703)[1],
-                          lower=0, upper=24)[1]$value   
-
-    title('Ghaffar2016 butralin toxicity to cercariae')
-    legend('topright', legend = c('control', 556,2417,3906,5560,8703), pch = c(16,17,17,17,17,17), 
-           col = c(1:6), cex=0.8, bty = 'n')
-    
-  gaf.but.aucs.cer = c(auc.cer.cont,auc.cer.but556,auc.cer.but2417,
-                       auc.cer.but3906,auc.cer.but5560,auc.cer.but8703)/auc.cer.cont
-    
-    
-
 #Compile L.2 data for functional responses #############
-but.cer = data.frame(e = c(coef(gaf.cer.cont)[2], coef(gaf.cer.but556)[2], coef(gaf.cer.but2417)[2],
-                           coef(gaf.cer.but3906)[2], coef(gaf.cer.but5560)[2], coef(gaf.cer.but8703)[2]),
-                     e.se = c(summary(gaf.cer.cont)$coefficients[2,2], 
-                              summary(gaf.cer.but556)$coefficients[2,2],
-                              summary(gaf.cer.but2417)$coefficients[2,2], 
-                              summary(gaf.cer.but3906)$coefficients[2,2],
-                              summary(gaf.cer.but5560)$coefficients[2,2],
-                              summary(gaf.cer.but8703)$coefficients[2,2]),
-                     b = c(coef(gaf.cer.cont)[1], coef(gaf.cer.but556)[1], coef(gaf.cer.but2417)[1],
-                           coef(gaf.cer.but3906)[1], coef(gaf.cer.but5560)[1], coef(gaf.cer.but8703)[1]),
-                     b.se = c(summary(gaf.cer.cont)$coefficients[1,2], 
-                              summary(gaf.cer.but556)$coefficients[1,2],
-                              summary(gaf.cer.but2417)$coefficients[1,2], 
-                              summary(gaf.cer.but3906)$coefficients[1,2],
-                              summary(gaf.cer.but5560)$coefficients[1,2],
-                              summary(gaf.cer.but8703)$coefficients[1,2]),
-                     butralin = but.vals,
-                     logbutralin = log(but.vals+1))
+but.cer = data.frame(butralin = but.vals,
+                     logbutralin = log(but.vals+1),
+                     e = c(summary(gaf.ctrl.drc.cer)$coefficients[2,1], summary(gaf.but.drc.cer)$coefficients[c(6:10),1]),
+                     e.se = c(summary(gaf.ctrl.drc.cer)$coefficients[2,2], summary(gaf.but.drc.cer)$coefficients[c(6:10),2]),
+                     b = c(summary(gaf.ctrl.drc.cer)$coefficients[1,1], summary(gaf.but.drc.cer)$coefficients[c(1:5),1]),
+                     b.se = c(summary(gaf.ctrl.drc.cer)$coefficients[1,2], summary(gaf.but.drc.cer)$coefficients[c(1:5),2]))
 
 plot(but.cer$butralin, but.cer$e, pch = 16, xlab = 'butralin (ppb)', 
      ylab = 'L.2 Parameters (cercariae)', ylim = c(0,10))
@@ -158,7 +109,7 @@ but.cer.lm.e2 = lm(e ~ logbutralin, weights = e.se^-1, data = but.cer) #log-line
     lines(seq(0,9000,100), sapply(seq(0,9000,100), but.cer.pred2, simplify = T)[2,], lty = 3, col=3)
     lines(seq(0,9000,100), sapply(seq(0,9000,100), but.cer.pred2, simplify = T)[3,], lty = 3, col=3)
 
-  AIC(but.cer.lm.e, but.cer.lm.e2)  #Linear is a better fit    
+  AIC(but.cer.lm.e, but.cer.lm.e2)  #exponential is a better fit    
 
 but.cer.lm.b = lm(b ~ butralin, weights = b.se^-1, data = but.cer)   
   but.cer.pred.b = function(but){
@@ -177,56 +128,42 @@ legend('topleft', lty = c(2,2,2,3), col = c(1,3,2,1), bty = 'n', title = 'Fit mo
 legend('top', pch = c(16,17), col = c(1,2), legend = c('LC50', 'slp'),
        cex = 0.8, bty = 'n', title = 'Observed points')
 
-but.piC.pred = function(He){
-  e = as.numeric(predict(but.cer.lm.e, newdata = data.frame(butralin = He), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(but.cer.lm.b, newdata = data.frame(butralin = He), se.fit = TRUE)[1:2])
-  
-  e.use = rnorm(1, e[1], e[2])
-  
-  while(e.use < 0){
-    e.use = rnorm(1, e[1], e[2])
-  }      #resample if negative
-  
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use, 
-                  lower=0, upper=24)[1]$value
-  auc
-}  #function to estimate AUC 
-
 piC.ghaf_butr.lin_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = but.piC.pred(He) / but.piC.pred(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
-
-but.piC.pred2 = function(He){
-  e = as.numeric(predict(but.cer.lm.e2, newdata = data.frame(logbutralin = log(He+1)), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(but.cer.lm.b, newdata = data.frame(butralin = He), se.fit = TRUE)[1:2])
-  
-  e.use = rnorm(1, e[1], e[2])
-  
-  while(e.use < 0){
+  if(He == 0) piC = 1 else{
+    e = as.numeric(predict(but.cer.lm.e, newdata = data.frame(butralin = He), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(but.cer.lm.b, newdata = data.frame(butralin = He), se.fit = TRUE)[1:2])
+    
     e.use = rnorm(1, e[1], e[2])
-  }      #resample if negative
-  
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use, 
-                  lower=0, upper=24)[1]$value
-  auc
+      while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+      while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piC = auc/gaf.but.aucs.cer[1]
+    if(piC > 1) piC = 1
+  }
+  return(piC)
 }  #function to estimate AUC 
 
 piC.ghaf_butr.exp_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = but.piC.pred2(He) / but.piC.pred2(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
+  if(He == 0) piC = 1 else{
+    e = as.numeric(predict(but.cer.lm.e2, newdata = data.frame(logbutralin = log(He+1)), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(but.cer.lm.b, newdata = data.frame(butralin = He), se.fit = TRUE)[1:2])
+    
+    e.use = rnorm(1, e[1], e[2])
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piC = auc/gaf.but.aucs.cer[1]
+    if(piC > 1) piC = 1
+  }
+  return(piC)
+}  #function to estimate AUC 
 
+keep.gaf.but.cer = c('piC.ghaf_butr.lin_unc', 'but.cer.lm.e', 'but.cer.lm.b', 'll4', 'gaf.but.aucs.cer',
+                     'piC.ghaf_butr.exp_unc', 'but.cer.lm.e2')
 #plot to test function ########
-plot(but.cer$butralin, gaf.but.aucs.cer,
+plot(but.cer$butralin, gaf.but.aucs.cer/gaf.but.aucs.cer[1],
      xlab = 'Butralin (ppb)', ylab = 'relative AUC (cercariae-hours)',
      pch = 16, ylim = c(0,1))
   points(seq(0, 18000,50)/2, sapply(seq(0, 18000,50)/2, piC.ghaf_butr.lin_unc, simplify = T),
@@ -235,100 +172,49 @@ plot(but.cer$butralin, gaf.but.aucs.cer,
          pch = 5, col = 2, cex = 0.5)
 
 #glyphosate cercariae ###############
-plot(cer$time_hrs[cer$conc==0], cer$surv[cer$conc==0], 
-      pch=16, xlab = 'time(hrs', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
-    for(i in 1:length(unique(cer$conc[cer$chem == 'glyphosate']))){
-      points(cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'glyphosate'])[i] & cer$chem == 'glyphosate'], 
-             cer$surv[cer$conc==unique(cer$conc[cer$chem == 'glyphosate'])[i] & cer$chem == 'glyphosate'], pch=17,
-             col = i+1)
-    }
+cer.gly = subset(cer, chem == 'glyphosate')
   
-  lines(x=seq(0,24,0.1), y=predict(gaf.cer.cont, newdata = data.frame(conc = seq(0,24,0.1))), lty=2)
+  gaf.gly.drc.cer = drm(alive/total ~ time_hrs, conc, weights = total, data = cer.gly, type = 'binomial', 
+                    fct = LL.4(names = c('b', 'c', 'd', 'e'),
+                              fixed = c(NA, 0, 1, NA)))
+  summary(gaf.gly.drc.cer)
+  plot(gaf.gly.drc.cer) 
   
-#1506 ppb *********************************************************************************
-gaf.cer.gly1506<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'glyphosate'])[1] & cer$chem == 'glyphosate'] ~ 
-                     cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'glyphosate'])[1] & cer$chem == 'glyphosate'],
-                     type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.gly1506, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 2)
-
-auc.cer.gly1506=integrate(f = L.3.fx, lc50 = coef(gaf.cer.gly1506)[2], slp = coef(gaf.cer.gly1506)[1],
-                         lower=0, upper=24)[1]$value   
-
-#3875 ppb *********************************************************************************
-gaf.cer.gly3875<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'glyphosate'])[2] & cer$chem == 'glyphosate'] ~ 
-                     cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'glyphosate'])[2] & cer$chem == 'glyphosate'],
-                     type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.gly3875, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 3)
-
-auc.cer.gly3875=integrate(f = L.3.fx, lc50 = coef(gaf.cer.gly3875)[2], slp = coef(gaf.cer.gly3875)[1],
-                          lower=0, upper=24)[1]$value   
-
-#9174 ppb ***********************************************************************************
-gaf.cer.gly9174<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'glyphosate'])[3] & cer$chem == 'glyphosate'] ~ 
-                     cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'glyphosate'])[3] & cer$chem == 'glyphosate'],
-                     type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.gly9174, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 4)
-
-auc.cer.gly9174=integrate(f = L.3.fx, lc50 = coef(gaf.cer.gly9174)[2], slp = coef(gaf.cer.gly9174)[1],
-                          lower=0, upper=24)[1]$value   
-
-#15062 ppb **********************************************************************************
-gaf.cer.gly15062<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'glyphosate'])[4] & cer$chem == 'glyphosate'] ~ 
-                      cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'glyphosate'])[4] & cer$chem == 'glyphosate'],
-                      type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.gly15062, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 5)
-
-auc.cer.gly15062=integrate(f = L.3.fx, lc50 = coef(gaf.cer.gly15062)[2], slp = coef(gaf.cer.gly15062)[1],
-                          lower=0, upper=24)[1]$value   
-
-#26249 ppb **********************************************************************************
-gaf.cer.gly26249<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'glyphosate'])[5] & cer$chem == 'glyphosate'] ~ 
-                      cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'glyphosate'])[5] & cer$chem == 'glyphosate'],
-                      type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.gly26249, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 6)
-
-auc.cer.gly26249=integrate(f = L.3.fx, lc50 = coef(gaf.cer.gly26249)[2], slp = coef(gaf.cer.gly26249)[1],
-                           lower=0, upper=24)[1]$value   
-
-    title('Ghaffar2016 glyphosate toxicity to cercariae')
-    legend('topright', legend = c('control', 1506,3875,9174,15062,26249), pch = c(16,17,17,17,17,17), 
-           col = c(1:6), cex=0.8, bty = 'n') 
-    
-    gaf.gly.aucs.cer = c(auc.cer.cont, auc.cer.gly1506, auc.cer.gly3875, 
-                         auc.cer.gly9174, auc.cer.gly15062, auc.cer.gly26249)/auc.cer.cont
+  plot(cer$time_hrs[cer$conc==0], cer$surv[cer$conc==0], 
+       pch=16, xlab = 'time(hrs)', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
+    lines(time, ll4(lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], x = time), lty = 2)
+  
+  for(i in 1:length(unique(cer.gly$conc))){
+    points(cer.gly$time_hrs[cer.gly$conc==unique(cer.gly$conc)[i]], 
+           cer.gly$surv[cer.gly$conc==unique(cer.gly$conc)[i]], pch=17,
+           col = i+1)
+    lines(time, ll4(lc = gaf.gly.drc.cer$coefficients[i+5], slp = gaf.gly.drc.cer$coefficients[i], x = time), lty = 2, col = i+1)
+  }
+  legend('topright', title = 'Glyphosate (ppb)', legend = gly.vals, pch = c(16,rep(17,5)),
+         col = c(1:6), cex=0.7, bty = 'n')
+  title('Ghaffar2016 Glyphosate toxicity to cercariae')
+  
+#Get estimate of cercariae-hrs for each concentration    
+gaf.gly.aucs.cer = as.numeric()
+  gaf.gly.aucs.cer[1] = integrate(f = ll4, lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], 
+                                  lower=0, upper=24)[1]$value  
+  
+  for(j in 1:length(unique(cer.gly$conc))){
+    gaf.gly.aucs.cer[j+1] = integrate(f = ll4, lc = gaf.gly.drc.cer$coefficients[j+5], slp = gaf.gly.drc.cer$coefficients[j],
+                                      lower=0, upper=24)[1]$value  
+  }
+  
 
 #Compile L.2 parameters ######## 
-gly.cer = data.frame(e = c(coef(gaf.cer.cont)[2], coef(gaf.cer.gly1506)[2], coef(gaf.cer.gly3875)[2],
-                           coef(gaf.cer.gly9174)[2], coef(gaf.cer.gly15062)[2], coef(gaf.cer.gly26249)[2]),
-                     e.se = c(summary(gaf.cer.cont)$coefficients[2,2], 
-                              summary(gaf.cer.gly1506)$coefficients[2,2],
-                              summary(gaf.cer.gly3875)$coefficients[2,2], 
-                              summary(gaf.cer.gly9174)$coefficients[2,2],
-                              summary(gaf.cer.gly15062)$coefficients[2,2],
-                              summary(gaf.cer.gly26249)$coefficients[2,2]),
-                     b = c(coef(gaf.cer.cont)[1], coef(gaf.cer.gly1506)[1], coef(gaf.cer.gly3875)[1],
-                           coef(gaf.cer.gly9174)[1], coef(gaf.cer.gly15062)[1], coef(gaf.cer.gly26249)[1]),
-                     b.se = c(summary(gaf.cer.cont)$coefficients[1,2], 
-                              summary(gaf.cer.gly1506)$coefficients[1,2],
-                              summary(gaf.cer.gly3875)$coefficients[1,2], 
-                              summary(gaf.cer.gly9174)$coefficients[1,2],
-                              summary(gaf.cer.gly15062)$coefficients[1,2],
-                              summary(gaf.cer.gly26249)$coefficients[1,2]),
-                     glyphosate = gly.vals,
-                     logglyphosate = log(gly.vals+1))
+gly.cer = data.frame(glyphosate = gly.vals,
+                     logglyphosate = log(gly.vals+1),
+                     e = c(summary(gaf.ctrl.drc.cer)$coefficients[2,1], summary(gaf.gly.drc.cer)$coefficients[c(6:10),1]),
+                     e.se = c(summary(gaf.ctrl.drc.cer)$coefficients[2,2], summary(gaf.gly.drc.cer)$coefficients[c(6:10),2]),
+                     b = c(summary(gaf.ctrl.drc.cer)$coefficients[1,1], summary(gaf.gly.drc.cer)$coefficients[c(1:5),1]),
+                     b.se = c(summary(gaf.ctrl.drc.cer)$coefficients[1,2], summary(gaf.gly.drc.cer)$coefficients[c(1:5),2]))
 
 plot(gly.cer$glyphosate, gly.cer$e, pch = 16, xlab = 'glyphosate (ppb)', 
-     ylab = 'L.2 Parameters (cercariae)', ylim = c(0,10))
+     ylab = 'L.2 Parameters (cercariae)', ylim = c(0,6))
 
   points(gly.cer$glyphosate+200, gly.cer$b, pch = 17, col=2)
 
@@ -379,159 +265,95 @@ gly.cer.lm.b = lm(b ~ glyphosate, weights = b.se^-1, data = gly.cer)
   legend('topright', pch = c(16,17), col = c(1,2), legend = c('LC50', 'slp'),
          cex = 0.8, bty = 'n', title = 'Observed points')
 
-gly.piC.pred = function(He){
-  e = as.numeric(predict(gly.cer.lm.e, newdata = data.frame(glyphosate = He), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(gly.cer.lm.b, newdata = data.frame(glyphosate = He), se.fit = TRUE)[1:2])
-  
-  e.use = rnorm(1, e[1], e[2])
-  
-  while(e.use < 0){
-    e.use = rnorm(1, e[1], e[2])
-  }      #resample if negative
-  
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use, 
-                  lower=0, upper=24)[1]$value
-  auc
-}  #function to estimate AUC 
-
 piC.ghaf_gly.lin_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = gly.piC.pred(He) / gly.piC.pred(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
-
-gly.piC.pred2 = function(He){
-  e = as.numeric(predict(gly.cer.lm.e2, newdata = data.frame(logglyphosate = log(He+1)), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(gly.cer.lm.b, newdata = data.frame(glyphosate = He), se.fit = TRUE)[1:2])
-  
-  e.use = rnorm(1, e[1], e[2])
-  
-  while(e.use < 0){
+  if(He == 0) piC = 1 else{
+    e = as.numeric(predict(gly.cer.lm.e, newdata = data.frame(glyphosate = He), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(gly.cer.lm.b, newdata = data.frame(glyphosate = He), se.fit = TRUE)[1:2])
+    
     e.use = rnorm(1, e[1], e[2])
-  }      #resample if negative
-  
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use, 
-                  lower=0, upper=24)[1]$value
-  auc
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piC = auc/gaf.gly.aucs.cer[1]
+    if(piC > 1) piC = 1
+  }
+  return(piC)
 }  #function to estimate AUC 
 
 piC.ghaf_gly.exp_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = gly.piC.pred2(He) / gly.piC.pred2(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
+  if(He == 0) piC = 1 else{
+    e = as.numeric(predict(gly.cer.lm.e2, newdata = data.frame(logglyphosate = log(He+1)), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(gly.cer.lm.b, newdata = data.frame(glyphosate = He), se.fit = TRUE)[1:2])
+    
+    e.use = rnorm(1, e[1], e[2])
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piC = auc/gaf.gly.aucs.cer[1]
+    if(piC > 1) piC = 1
+  }
+  return(piC)
+}  #function to estimate AUC 
+
+keep.gaf.gly.cer = c('piC.ghaf_gly.lin_unc', 'gly.cer.lm.e', 'gly.cer.lm.b', 'll4', 'gaf.gly.aucs.cer',
+                     'piC.ghaf_gly.exp_unc', 'gly.cer.lm.e2')
 
 #plot to test function ########
-plot(gly.cer$glyphosate, gaf.gly.aucs.cer,
+plot(gly.cer$glyphosate, gaf.gly.aucs.cer/gaf.gly.aucs.cer[1],
      xlab = 'Glyphosate (ppb)', ylab = 'relative AUC (cercariae-hours)',
      pch = 16, ylim = c(0,1))
-  points(seq(0,9000,10)*3, sapply(seq(0,9000,10)*3, piC.ghaf_gly.lin_unc, simplify = T),
+  points(seq(0,9000,50)*3, sapply(seq(0,9000,50)*3, piC.ghaf_gly.lin_unc, simplify = T),
          pch = 5, col = 4, cex = 0.5)
-  points(seq(0,9000,10)*3, sapply(seq(0,9000,10)*3, piC.ghaf_gly.exp_unc, simplify = T),
+  points(seq(0,9000,50)*3, sapply(seq(0,9000,50)*3, piC.ghaf_gly.exp_unc, simplify = T),
          pch = 5, col = 2, cex = 0.5)
 
 
 
 #pendimethalin cercariae ###############
+cer.pen = subset(cer, chem == 'pendimethalin')
+
+  gaf.pen.drc.cer = drm(alive/total ~ time_hrs, conc, weights = total, data = cer.pen, type = 'binomial', 
+                    fct = LL.4(names = c('b', 'c', 'd', 'e'),
+                               fixed = c(NA, 0, 1, NA)))
+  summary(gaf.pen.drc.cer)
+  plot(gaf.pen.drc.cer) 
+
 plot(cer$time_hrs[cer$conc==0], cer$surv[cer$conc==0], 
-      pch=16, xlab = 'time(hrs', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
-    for(i in 1:length(unique(cer$conc[cer$chem == 'pendimethalin']))){
-      points(cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'pendimethalin'])[i] & cer$chem == 'pendimethalin'], 
-             cer$surv[cer$conc==unique(cer$conc[cer$chem == 'pendimethalin'])[i] & cer$chem == 'pendimethalin'], pch=17,
-             col = i+1)
-    }
-  lines(x=seq(0,24,0.1), y=predict(gaf.cer.cont, newdata = data.frame(conc = seq(0,24,0.1))), lty=2)
+     pch=16, xlab = 'time(hrs)', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
+  lines(time, ll4(lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], x = time), lty = 2)
   
-#215 ppb *********************************************************************************
-gaf.cer.pen215<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'pendimethalin'])[1] & cer$chem == 'pendimethalin'] ~ 
-                    cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'pendimethalin'])[1] & cer$chem == 'pendimethalin'],
-                    type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.pen215, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 2)
+  for(i in 1:length(unique(cer.pen$conc))){
+    points(cer.pen$time_hrs[cer.pen$conc==unique(cer.pen$conc)[i]], 
+           cer.pen$surv[cer.pen$conc==unique(cer.pen$conc)[i]], pch=17,
+           col = i+1)
+    lines(time, ll4(lc = gaf.pen.drc.cer$coefficients[i+5], slp = gaf.pen.drc.cer$coefficients[i], x = time), lty = 2, col = i+1)
+  }
+    legend('topright', title = 'Pendimethalin (ppb)', legend = pen.vals, pch = c(16,rep(17,5)),
+           col = c(1:6), cex=0.7, bty = 'n')
+    title('Ghaffar2016 Pendimethalin toxicity to cercariae')
 
-auc.cer.pen215=integrate(f = L.3.fx, lc50 = coef(gaf.cer.pen215)[2], slp = coef(gaf.cer.pen215)[1],
-                          lower=0, upper=24)[1]$value   
+#Get estimate of cercariae-hrs for each concentration    
+gaf.pen.aucs.cer = as.numeric()
+gaf.pen.aucs.cer[1] = integrate(f = ll4, lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], 
+                                lower=0, upper=24)[1]$value  
 
-#535 ppb *********************************************************************************
-gaf.cer.pen535<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'pendimethalin'])[2] & cer$chem == 'pendimethalin'] ~ 
-                    cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'pendimethalin'])[2] & cer$chem == 'pendimethalin'],
-                    type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.pen535, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 3)
-
-auc.cer.pen535=integrate(f = L.3.fx, lc50 = coef(gaf.cer.pen535)[2], slp = coef(gaf.cer.pen535)[1],
-                         lower=0, upper=24)[1]$value   
-
-#1299 ppb ***********************************************************************************
-gaf.cer.pen1299<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'pendimethalin'])[3] & cer$chem == 'pendimethalin'] ~ 
-                     cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'pendimethalin'])[3] & cer$chem == 'pendimethalin'],
-                     type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.pen1299, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 4)
-
-auc.cer.pen1299=integrate(f = L.3.fx, lc50 = coef(gaf.cer.pen1299)[2], slp = coef(gaf.cer.pen1299)[1],
-                         lower=0, upper=24)[1]$value   
-
-#2148 ppb **********************************************************************************
-gaf.cer.pen2148<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'pendimethalin'])[4] & cer$chem == 'pendimethalin'] ~ 
-                     cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'pendimethalin'])[4] & cer$chem == 'pendimethalin'],
-                     type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.pen2148, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 5)
-
-auc.cer.pen2148=integrate(f = L.3.fx, lc50 = coef(gaf.cer.pen2148)[2], slp = coef(gaf.cer.pen2148)[1],
-                          lower=0, upper=24)[1]$value   
-
-#3762 ppb **********************************************************************************
-gaf.cer.pen3762<-drm(cer$surv[cer$conc==unique(cer$conc[cer$chem == 'pendimethalin'])[5] & cer$chem == 'pendimethalin'] ~ 
-                     cer$time_hrs[cer$conc==unique(cer$conc[cer$chem == 'pendimethalin'])[5] & cer$chem == 'pendimethalin'],
-                     type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-    
-lines(x=seq(0,24,0.1), y=predict(gaf.cer.pen3762, newdata = data.frame(conc = seq(0,24,0.1))), 
-      lty=2, col = 6)
-
-auc.cer.pen3762=integrate(f = L.3.fx, lc50 = coef(gaf.cer.pen3762)[2], slp = coef(gaf.cer.pen3762)[1],
-                          lower=0, upper=24)[1]$value   
-
-    title('Ghaffar2016 pendimethalin toxicity to cercariae')
-    legend('topright', legend = c('control', 215,535,1299,2148,3762), pch = c(16,17,17,17,17,17),
-           col = c(1:6), cex=0.8, bty = 'n')  
-    
-    gaf.pen.aucs.cer = c(auc.cer.cont, auc.cer.pen215, auc.cer.pen535, auc.cer.pen1299, 
-                         auc.cer.pen2148, auc.cer.pen3762)/auc.cer.cont
+  for(j in 1:length(unique(cer.pen$conc))){
+    gaf.pen.aucs.cer[j+1] = integrate(f = ll4, lc = gaf.pen.drc.cer$coefficients[j+5], slp = gaf.pen.drc.cer$coefficients[j],
+                                      lower=0, upper=24)[1]$value  
+  }
 
 #Compile L.2 parameters ######## 
-pen.cer = data.frame(e = c(coef(gaf.cer.cont)[2], coef(gaf.cer.pen215)[2], coef(gaf.cer.pen535)[2],
-                           coef(gaf.cer.pen1299)[2], coef(gaf.cer.pen2148)[2], coef(gaf.cer.pen3762)[2]),
-                     e.se = c(summary(gaf.cer.cont)$coefficients[2,2], 
-                              summary(gaf.cer.pen215)$coefficients[2,2],
-                              summary(gaf.cer.pen535)$coefficients[2,2], 
-                              summary(gaf.cer.pen1299)$coefficients[2,2],
-                              summary(gaf.cer.pen2148)$coefficients[2,2],
-                              summary(gaf.cer.pen3762)$coefficients[2,2]),
-                     b = c(coef(gaf.cer.cont)[1], coef(gaf.cer.pen215)[1], coef(gaf.cer.pen535)[1],
-                           coef(gaf.cer.pen1299)[1], coef(gaf.cer.pen2148)[1], coef(gaf.cer.pen3762)[1]),
-                     b.se = c(summary(gaf.cer.cont)$coefficients[1,2], 
-                              summary(gaf.cer.pen215)$coefficients[1,2],
-                              summary(gaf.cer.pen535)$coefficients[1,2], 
-                              summary(gaf.cer.pen1299)$coefficients[1,2],
-                              summary(gaf.cer.pen2148)$coefficients[1,2],
-                              summary(gaf.cer.pen3762)$coefficients[1,2]),
-                     pendimethalin = pen.vals,
-                     logpendimethalin = log(pen.vals+1))
+pen.cer = data.frame(pendimethalin = pen.vals,
+                     logpendimethalin = log(pen.vals+1),
+                     e = c(summary(gaf.ctrl.drc.cer)$coefficients[2,1], summary(gaf.pen.drc.cer)$coefficients[c(6:10),1]),
+                     e.se = c(summary(gaf.ctrl.drc.cer)$coefficients[2,2], summary(gaf.pen.drc.cer)$coefficients[c(6:10),2]),
+                     b = c(summary(gaf.ctrl.drc.cer)$coefficients[1,1], summary(gaf.pen.drc.cer)$coefficients[c(1:5),1]),
+                     b.se = c(summary(gaf.ctrl.drc.cer)$coefficients[1,2], summary(gaf.pen.drc.cer)$coefficients[c(1:5),2]))
 
 plot(pen.cer$pendimethalin, pen.cer$e, pch = 16, xlab = 'Pendimethalin (ppb)', 
-     ylab = 'L.2 Parameters (cercariae)', ylim = c(0,12))
+     ylab = 'L.2 Parameters (cercariae)', ylim = c(0,6))
 
   points(pen.cer$pendimethalin+50, pen.cer$b, pch = 17, col=2)
 
@@ -582,56 +404,43 @@ pen.cer.lm.b = lm(b ~ pendimethalin, weights = b.se^-1, data = pen.cer)
   legend('topright', pch = c(16,17), col = c(1,2), legend = c('LC50', 'slp'),
          cex = 0.8, bty = 'n', title = 'Observed points')
 
-pen.piC.pred = function(He){
-  e = as.numeric(predict(pen.cer.lm.e, newdata = data.frame(pendimethalin = He), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(pen.cer.lm.b, newdata = data.frame(pendimethalin = He), se.fit = TRUE)[1:2])
-  
-  e.use = rnorm(1, e[1], e[2])
-  
-  while(e.use < 0){
-    e.use = rnorm(1, e[1], e[2])
-  }      #resample if negative
-  
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use, 
-                  lower=0, upper=24)[1]$value
-  auc
-}  #function to estimate AUC 
-
 piC.ghaf_pen.lin_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = pen.piC.pred(He) / pen.piC.pred(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
-
-pen.piC.pred2 = function(He){
-  e = as.numeric(predict(pen.cer.lm.e2, newdata = data.frame(logpendimethalin = log(He+1)), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(pen.cer.lm.b, newdata = data.frame(pendimethalin = He), se.fit = TRUE)[1:2])
-  
-  e.use = rnorm(1, e[1], e[2])
-  
-  while(e.use < 0){
+  if(He == 0) piC = 1 else{
+    e = as.numeric(predict(pen.cer.lm.e, newdata = data.frame(pendimethalin = He), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(pen.cer.lm.b, newdata = data.frame(pendimethalin = He), se.fit = TRUE)[1:2])
+    
     e.use = rnorm(1, e[1], e[2])
-  }      #resample if negative
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piC = auc/gaf.pen.aucs.cer[1]
+    if(piC > 1) piC = 1
+  }
+  return(piC)
+}  #function to estimate AUC 
   
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use, 
-                  lower=0, upper=24)[1]$value
-  auc
+piC.ghaf_pen.exp_unc = function(He){
+  if(He == 0) piC = 1 else{
+    e = as.numeric(predict(pen.cer.lm.e2, newdata = data.frame(logpendimethalin = log(He+1)), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(pen.cer.lm.b, newdata = data.frame(pendimethalin = He), se.fit = TRUE)[1:2])
+    
+    e.use = rnorm(1, e[1], e[2])
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piC = auc/gaf.pen.aucs.cer[1]
+    if(piC > 1) piC = 1
+  }
+  return(piC)
 }  #function to estimate AUC 
 
-piC.ghaf_pen.exp_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = pen.piC.pred2(He) / pen.piC.pred2(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
+keep.gaf.pen.cer = c('piC.ghaf_pen.lin_unc', 'pen.cer.lm.e', 'pen.cer.lm.b', 'll4', 'gaf.pen.aucs.cer',
+                     'piC.ghaf_pen.exp_unc', 'pen.cer.lm.e2')
 
 #plot to test function ########
-plot(pen.cer$pendimethalin, gaf.pen.aucs.cer,
+plot(pen.cer$pendimethalin, gaf.pen.aucs.cer/gaf.pen.aucs.cer[1],
      xlab = 'pendimethalin (ppb)', ylab = 'relative AUC (cercariae-hours)',
      pch = 16, ylim = c(0,1))
   points(seq(0,4000,25), sapply(seq(0,4000,25), piC.ghaf_pen.lin_unc, simplify = T),

@@ -203,10 +203,9 @@ plot(fn.bak$mal*1000, fn.bak$mal.r / fn.bak$mal.r[1] , ylim = c(0,1), pch = 16,
       init = predict(fn.bak.mal, newdata = data.frame(mal = Ins), se.fit = T)
     if(init[1] == 0) fn = 0 else{
       fn = rnorm(1, init[1], init[2]) / fn.bak$mal.r[1]
-    while(fn < 0 || fn > 1.00000){
-        fn = rnorm(1, init[1], init[2]) / fn.bak$mal.r[1]
       }
-    }
+    if(fn < 0) fn = 0
+    if(fn > 1) fn = 1  
   }
      return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0

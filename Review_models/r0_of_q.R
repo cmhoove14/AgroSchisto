@@ -18,13 +18,13 @@ area = 200
 parameters=c(
   # Location parameters
   A = area,          # Area of site of interest, m^2
-  H = 1.5*area,      # Human population at site of interest (based on 300 people at 200m^2 water contact site from Sokolow PNAS)
+  H = 300,      # Human population at site of interest (based on 300 people at 200m^2 water contact site from Sokolow PNAS)
   Om = 1,            # degree of overlap between water contamination, snail, and human habitats
   
   # Snail reproductive parameters
   f_N = 0.60,        # Birth rate of adult snails (snails/reproductive snail/day, including survival to detection - more like a recruitment rate); 
   #   from Woolhouse & Chandiwana et al. 1990 
-  phi_N = 50*area,   # Carrying capacity of snails (snails/m^2), from Sokolow et al. 2015
+  phi_N = 1e4,   # Carrying capacity of snails (snails/m^2), from Sokolow et al. 2015
   z = 0.7,           # Fraction of exposed snails that reproduce
   
   # Snail mortality parameters
@@ -33,7 +33,7 @@ parameters=c(
   
   # Predator pop dynamic parameters (from pred tweaking code)
   f_P = 0.02,          #Predator intrinsic recruitment rate
-  phi_P = 0.1*area,    #Predator carrying capacity (0.1/m^2)
+  phi_P = 25,  #Predator carrying capacity (0.125/m^2 from Sokolow et al realized predator density)
   mu_P = 0.0026,       #Predator mortality rate
   
   # Predation parameters
@@ -51,14 +51,18 @@ parameters=c(
   pi_C = 1,          # cercarial infectivity parameter
   
   # transmission parameters
-  beta = 2e-4/area,  # Human-to-snail infection probability in reference area (infected snails/miracidia/snail/day)
+  beta = 1.63e-6,    # Human-to-snail infection probability in reference area (infected snails/miracidia/snail/day)
   sigma = 1/40,      # Latent period for exposed snails (infectious snails/exposed snail/day))
-  lamda = 2e-4/area, # Snail-to-human infection probability per cercaria
-  k=0.2,             # Clumping parameter of negative binomial distribution of worms in humans
+  lamda = 1.16e-6,   # Snail-to-human infection probability per cercaria
+  k=0.17,            # Clumping parameter of negative binomial distribution of worms in humans
   
   # Schisto mortality parameters
   mu_W = 1/(3.3*365), # Natural mortality rate of adult worms in humans, assuming average lifespan of 3.3 years, from Sokolow et al. 2015
-  mu_H = 1/(60*365)   # Natural mortality of humans (contributing to worm mortality), assuming average lifespan of 60 years, from Sokolow et al. 2015
+  mu_H = 1/(60*365),   # Natural mortality of humans (contributing to worm mortality), assuming average lifespan of 60 years, from Sokolow et al. 2015
+  
+  #treatment parameters
+  cov=0.43, #coverage of treatment across the population, Lampsar I = 100/1000 =0.1 %, Lampsar II = 129/300 = 43%
+  eff=0.95 # efficiency of the drug
 )
 
 #Null (default) functional responses ##############
@@ -127,14 +131,12 @@ r0.In = function(In = 0,
   if(N.eq<0){N.eq = 0}
   
   #Equilibrium predation rate estimate
-  psi.eq = alpha_q/(1+alpha*Th*(N.eq/area))
+  psi.eq = alpha_q/(1+alpha*Th*N.eq)
   
   #R_0 of q estimate
-  e.hat = (theta_q*H*lamda*pi_Cq*omega) / (mu_Nq + mu_I + P.eq*psi.eq)
-  i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
-  w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
+  r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
+              (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
   
-  r0 = sqrt(e.hat * i.hat * w.hat)
   
   return(c(N.eq, P.eq, r0))
 
@@ -196,14 +198,11 @@ r0.He = function(He = 0,
     if(N.eq<0){N.eq = 0}
 
 #Equilibrium predation rate estimate
-  psi.eq = alpha_q/(1+alpha*Th*(N.eq/area))
+  psi.eq = alpha_q/(1+alpha*Th*N.eq)
 
 #R_0 of q estimate
-  e.hat = (theta_q*H*lamda*pi_Cq*omega) / (mu_Nq + mu_I + P.eq*psi.eq)
-  i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
-  w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
-
-    r0 = sqrt(e.hat * i.hat * w.hat)
+  r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
+              (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
 
 return(c(N.eq, P.eq, r0))
 
@@ -265,14 +264,11 @@ r0.Fe = function(Fe = 0,
     if(N.eq<0){N.eq = 0}
 
 #Equilibrium predation rate estimate
-  psi.eq = alpha_q/(1+alpha*Th*(N.eq/area))
+  psi.eq = alpha_q/(1+alpha*Th*N.eq)
 
 #R_0 of q estimate
-  e.hat = (theta_q*H*lamda*pi_Cq*omega) / (mu_Nq + mu_I + P.eq*psi.eq)
-  i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
-  w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
-
-  r0 = sqrt(e.hat * i.hat * w.hat)
+  r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
+              (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
 
 return(c(N.eq, P.eq, r0))
 
@@ -333,14 +329,59 @@ P.eq = phi_P*(1 - muPq/f_P)
   if(N.eq<0){N.eq = 0}
 
 #Equilibrium predation rate estimate
-  psi.eq = alpha_q/(1+alpha*Th*(N.eq/area))
+  psi.eq = alpha_q/(1+alpha*Th*N.eq)
 
 #R_0 of q estimate
-  e.hat = (theta_q*H*lamda*pi_Cq*omega) / (mu_Nq + mu_I + P.eq*psi.eq)
-  i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
-  w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
+  r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
+              (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
+  
+return(c(N.eq, P.eq, r0))
 
-r0 = sqrt(e.hat * i.hat * w.hat)
+}
+
+#r0 with variable beta & lambda
+r0.bl = function(beta, lambda)
+  
+{ area = parameters['A']
+sigma = parameters['sigma']
+lamda = lambda
+omega = parameters['Om']
+theta = parameters['theta']
+pi_C = parameters['pi_C']
+beta = beta
+H = parameters['H']
+m = parameters['m']
+v = parameters['v']
+pi_M = parameters['pi_M']
+mu_N = parameters['mu_N']
+mu_I = parameters['mu_I']
+mu_H = parameters['mu_H']
+mu_W = parameters['mu_W']
+mu_P = parameters['mu_P']
+f_P = parameters['f_P']
+phi_P = parameters['phi_P']
+alpha = parameters['alpha']
+Th = parameters['Th']
+f_N = parameters['f_N']
+phi_N = parameters['phi_N']
+
+#Equilibrium estimate of P given prawn predator parameters and q
+P.eq = phi_P*(1 - mu_P/f_P)         
+
+if(P.eq<0){P.eq = 0}
+
+#Equilibrium estimate of N given snail parameters
+N.eq = max(uniroot.all(f = function(N){(f_N)*(1 - N/phi_N) - mu_N - (P.eq*alpha)/(1+alpha*Th*N)},
+                       c(0, as.numeric(phi_N))))
+
+if(N.eq<0){N.eq = 0}
+
+#Equilibrium predation rate estimate
+psi.eq = alpha/(1+alpha*Th*N.eq)
+
+#R_0 of q estimate
+r0 = sqrt((theta*H*lamda*pi_C*omega*sigma*m*beta*N.eq*v*pi_M*omega) / 
+            (2*(mu_N + mu_I + P.eq*psi.eq)*(mu_N + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
 
 return(c(N.eq, P.eq, r0))
 
@@ -437,20 +478,18 @@ N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alp
 if(N.eq<0){N.eq = 0}
 
 #Equilibrium predation rate estimate
-psi.eq = alpha_q/(1+alpha*Th*(N.eq/area))
+psi.eq = alpha_q/(1+alpha*Th*N.eq)
 
 #R_0 of q estimate
-e.hat = (theta_q*H*lamda*pi_Cq*omega) / (mu_Nq + mu_I + P.eq*psi.eq)
-i.hat = sigma / (mu_Nq + P.eq*psi.eq + sigma)
-w.hat = (m*beta*N.eq*v_q*pi_Mq*omega) / (mu_H + mu_W)
-
-r0 = sqrt(e.hat * i.hat * w.hat)
+r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
+            (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
 
 return(c(N.eq, P.eq, r0))
 
 }
 
 #Do some tests #############  
+#Influence of variable predator densities on r0 #########
 pred.dens = seq(0,1,0.01)
   r0.pd = as.numeric()
 
@@ -461,6 +500,52 @@ for(i in 1:length(pred.dens)){
  
   plot(pred.dens, r0.pd, type = 'l', lwd = 2, xlab = 'pred density', ylab = 'R0')
   
-  parameters['phi_P'] = 0.1*area
+  parameters['phi_P'] = 0.125*area
   
 r0.In(In = 0)  #R0 = 4.01: coexistence of snail population, pred population, and disease @ pred density of 0.1/m^2
+
+#influence of various mortality rates on r0 ###############
+mup.dens = seq(0,1,0.01) - parameters['mu_P']
+r0.mup = as.numeric()
+
+for(i in 1:length(mup.dens)){
+  parameters['mu_P'] = mup.dens[i]+2.600000e-03
+  r0.mup[i] = r0.In(In = 0)[3]
+}
+
+plot(mup.dens, r0.mup, type = 'l', lwd = 2, xlab = 'pred mortality rate', ylab = 'R0')
+
+#What if we increase birth rate?
+  parameters['mu_P'] = 2.600000e-03
+  parameters['f_P'] = 0.2 #increase by an order of magnitude
+  
+r0.mup2 = as.numeric()
+
+for(i in 1:length(mup.dens)){
+  parameters['mu_P'] = mup.dens[i]+2.600000e-03
+  r0.mup2[i] = r0.In(In = 0)[3]
+}
+
+  parameters['mu_P'] = 2.600000e-03 #reset predator mortality rate, but keep increased fertility rate
+  
+plot(mup.dens, r0.mup2, type = 'l', lwd = 2, xlab = 'pred mortality rate', ylab = 'R0')
+
+#Influence of variable beta and lambda on r0 #################
+beta.vec = seq(1e-9, 1e-5, length.out = 1000)
+  r0.beta = as.numeric()
+  
+for(i in 1:length(beta.vec)){
+  r0.beta[i] = r0.bl(beta = beta.vec[i], lambda = 1e-6)[3] 
+}
+  
+  plot(beta.vec, r0.beta, type = 'l', lwd = 2, xlab = 'transmission parameter', ylab = 'R0')
+  
+lambda.vec = seq(1e-9, 1e-5, length.out = 1000)
+  r0.lambda = as.numeric()
+  
+for(i in 1:length(lambda.vec)){
+  r0.lambda[i] = r0.bl(lambda = lambda.vec[i], beta = 1e-6)[3] 
+}
+  
+  lines(lambda.vec, r0.lambda, type = 'l', lwd = 2, col = 2, lty = 2)
+  

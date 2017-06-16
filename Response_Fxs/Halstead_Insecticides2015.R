@@ -12,6 +12,7 @@
 
 require(ggplot2)
 require(drc)
+require(LW1949)
 
 #Insecticide toxicity to crustaceans from Halstead et al; 4-day mortality endpoints ################
   data<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Halstead_etal/Cray.LC50.2012.csv')
@@ -22,7 +23,7 @@ require(drc)
                          mal.total = 5,
                          mal.d = 0,
                          mort = 0)
-    
+  #DRC package analysis  
     for(i in 1:length(mal.sum$mal.d)){
       mal.sum$mal.d[i] = sum(mal$Dead[mal$Conc == mal.sum$mal.c[i]])
     }
@@ -41,7 +42,6 @@ require(drc)
           xlab = 'Malathion', ylab = 'Mortality', 
           main = expression(paste('Malathion toxicity to ', italic('P. clarkii')))) 
      
-     
       lines(seq(0, max(mal$Conc), 100), sapply(seq(0, max(mal$Conc), 100), muPq_mal_Halstead, simplify = T)[1,],
             lty = 2, col = 2)
       lines(seq(0, max(mal$Conc), 100), sapply(seq(0, max(mal$Conc), 100), muPq_mal_Halstead, simplify = T)[2,],
@@ -56,8 +56,12 @@ require(drc)
       }
         points(seq(0, 40000, 40), sapply(seq(0, 40000, 40), muPq_mal_Halstead_uncertainty),
              pch = 5, col=4, cex = 0.5)
+  #LW1949 analysis
+    mal.lw1949 = dataprep(dose = mal.sum$mal.c, ntot = mal.sum$mal.total, nfx = mal.sum$mal.d)
+    slp.mal = fitLWauto(mal.lw1949)
+    LW.mal = LWestimate(slp.mal, mal.lw1949)
+  #Doesn't work because of lack of doses that have an effect    
     
-      
 #Chlorpyrifos   *************************************************************************############
   chlor<-subset(data, Chem == 'Chlor')
     chlor.sum = data.frame(chlor.c = unique(chlor$Conc),
@@ -92,13 +96,40 @@ require(drc)
      
     par.chlor = c(coef(chlor.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Intercept)' = 1)[c(1,3,4,2)]  
      
-      muPq_chlor_Halstead_uncertainty<-function(In){
+      muPq_chlor_Halstead_uncertainty_DRC<-function(In){
         rdrm(1, L.4(), par.chlor, In, yerror = 'rbinom', ypar = 5)$y / 5
       } 
         
-      points(c(0:100), sapply(c(0:100), muPq_chlor_Halstead_uncertainty),
+      points(c(0:100), sapply(c(0:100), muPq_chlor_Halstead_uncertainty_DRC),
            pch = 5, col=4, cex = 0.5)
       
+    #LW1949 analysis
+      chlor.lw1949 = dataprep(dose = chlor.sum$chlor.c, ntot = chlor.sum$chlor.total, nfx = chlor.sum$chlor.d)
+        chlor.lw1949$cbitpfx <- constrain(chlor.lw1949$bitpfx, probit(c(5e-04, 0.9995)))
+        chlor.lwmod = lm(cbitpfx ~ log10dose, data = chlor.lw1949[chlor.lw1949$LWkeep, ])
+        
+      lines(seq(0, max(chlor$Conc), 1), 
+            pnorm(predict(chlor.lwmod, newdata = data.frame(log10dose = log10(seq(0, max(chlor$Conc), 1))), 
+            interval = 'confidence', level = 0.95)[,1]), lty = 2, col = 4)  
+
+      lines(seq(0, max(chlor$Conc), 1), 
+            pnorm(predict(chlor.lwmod, newdata = data.frame(log10dose = log10(seq(0, max(chlor$Conc), 1))), 
+                          interval = 'confidence', level = 0.95)[,2]), lty = 3, col = 4) 
+      lines(seq(0, max(chlor$Conc), 1), 
+            pnorm(predict(chlor.lwmod, newdata = data.frame(log10dose = log10(seq(0, max(chlor$Conc), 1))), 
+                          interval = 'confidence', level = 0.95)[,3]), lty = 3, col = 4) 
+      
+      muPq_chlor_Halstead_uncertainty = function(In){
+        if(In == 0) mup = 0 else{
+          init = predict(chlor.lwmod, newdata = data.frame(log10dose = log10(In)), se.fit = T)
+          mup = pnorm(rnorm(1, init$fit, init$se.fit))/4 #convert from 4-day endpoint to
+        }
+        return(mup)
+      }
+      
+      points(seq(0,70,0.5), sapply(seq(0,70,0.5), muPq_chlor_Halstead_uncertainty),
+             pch = 5, col=6, cex = 0.5)
+
 #Terbufos   *****************************************************************************########
   terb<-subset(data, Chem == 'Terb')
     terb.sum = data.frame(terb.c = unique(terb$Conc),
@@ -129,12 +160,40 @@ require(drc)
       
   par.terb = c(coef(terb.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Intercept)' = 1)[c(1,3,4,2)]  
       
-    muPq_terb_Halstead_uncertainty<-function(In){
+    muPq_terb_Halstead_uncertainty_DRC<-function(In){
       rdrm(1, L.4(), par.terb, In, yerror = 'rbinom', ypar = 5)$y / 5
     } 
     
-    points(c(0:170), sapply(c(0:170), muPq_terb_Halstead_uncertainty),
+    points(c(0:170), sapply(c(0:170), muPq_terb_Halstead_uncertainty_DRC),
            pch = 5, col=4, cex = 0.5)
+
+#LW1949 analysis
+terb.lw1949 = dataprep(dose = terb.sum$terb.c, ntot = terb.sum$terb.total, nfx = terb.sum$terb.d)
+  terb.lw1949$cbitpfx <- constrain(terb.lw1949$bitpfx, probit(c(5e-04, 0.9995)))
+  terb.lwmod = lm(cbitpfx ~ log10dose, data = terb.lw1949[terb.lw1949$LWkeep, ])
+
+  lines(seq(0, max(terb$Conc), 1), 
+        pnorm(predict(terb.lwmod, newdata = data.frame(log10dose = log10(seq(0, max(terb$Conc), 1))), 
+                      interval = 'confidence', level = 0.95)[,1]), lty = 2, col = 4)  
+  
+  lines(seq(0, max(terb$Conc), 1), 
+        pnorm(predict(terb.lwmod, newdata = data.frame(log10dose = log10(seq(0, max(terb$Conc), 1))), 
+                      interval = 'confidence', level = 0.95)[,2]), lty = 3, col = 4) 
+  lines(seq(0, max(terb$Conc), 1), 
+        pnorm(predict(terb.lwmod, newdata = data.frame(log10dose = log10(seq(0, max(terb$Conc), 1))), 
+                      interval = 'confidence', level = 0.95)[,3]), lty = 3, col = 4) 
+
+muPq_terb_Halstead_uncertainty = function(In){
+  if(In == 0) mup = 0 else{
+    init = predict(terb.lwmod, newdata = data.frame(log10dose = log10(In)), se.fit = T)
+    mup = pnorm(rnorm(1, init$fit, init$se.fit))/4 #convert from 4-day endpoint to daily
+  }
+  return(mup)
+}
+
+points(seq(0,170,0.5), sapply(seq(0,170,0.5), muPq_terb_Halstead_uncertainty),
+       pch = 5, col=6, cex = 0.5)
+
         
 #Lambda-cyhalothrin   *******************************************************************##########
   lamcy<-subset(data, Chem == 'Lambda')
@@ -167,13 +226,39 @@ require(drc)
   
   par.lamcy = c(coef(lamcy.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Intercept)' = 1)[c(1,3,4,2)]  
     
-  muPq_lamcy_Halstead_uncertainty<-function(In){
+  muPq_lamcy_Halstead_uncertainty_DRC<-function(In){
     rdrm(1, L.4(), par.lamcy, In, yerror = 'rbinom', ypar = 5)$y / 5
   } 
   
-  points(seq(0, 1, 0.001), sapply(seq(0, 1, 0.001), muPq_lamcy_Halstead_uncertainty),
+  points(seq(0, 3, 0.03), sapply(seq(0, 3, 0.03), muPq_lamcy_Halstead_uncertainty_DRC),
        pch = 5, col=4, cex = 0.5)
-    
+
+#LW1949 analysis
+lamcy.lw1949 = dataprep(dose = lamcy.sum$lamcy.c, ntot = lamcy.sum$lamcy.total, nfx = lamcy.sum$lamcy.d)
+lamcy.lw1949$cbitpfx <- constrain(lamcy.lw1949$bitpfx, probit(c(5e-04, 0.9995)))
+lamcy.lwmod = lm(cbitpfx ~ log10dose, data = lamcy.lw1949[lamcy.lw1949$LWkeep, ])
+
+  lines(seq(0,3,0.003), 
+        pnorm(predict(lamcy.lwmod, newdata = data.frame(log10dose = log10(seq(0,3,0.003))), 
+                      interval = 'confidence', level = 0.95)[,1]), lty = 2, col = 4)  
+  
+  lines(seq(0,3,0.003), 
+        pnorm(predict(lamcy.lwmod, newdata = data.frame(log10dose = log10(seq(0,3,0.003))), 
+                      interval = 'confidence', level = 0.95)[,2]), lty = 3, col = 4) 
+  lines(seq(0,3,0.003), 
+        pnorm(predict(lamcy.lwmod, newdata = data.frame(log10dose = log10(seq(0,3,0.003))), 
+                      interval = 'confidence', level = 0.95)[,3]), lty = 3, col = 4) 
+
+  muPq_lamcy_Halstead_uncertainty = function(In){
+    if(In == 0) mup = 0 else{
+      init = predict(lamcy.lwmod, newdata = data.frame(log10dose = log10(In)), se.fit = T)
+      mup = pnorm(rnorm(1, init$fit, init$se.fit))/4 #convert from 4-day endpoint to daily
+    }
+    return(mup)
+  }
+  
+    points(seq(0,3,0.03), sapply(seq(0,3,0.03), muPq_lamcy_Halstead_uncertainty),
+           pch = 5, col=6, cex = 0.5)
 #esfenvalerate  *************************************************************************#######
   esfen<-subset(data, Chem == 'Esfen')
     esfen.sum = data.frame(esfen.c = unique(esfen$Conc),
@@ -205,13 +290,40 @@ require(drc)
 par.esfen = c(coef(esfen.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Intercept)' = 1)[c(1,3,4,2)]  
     
     
-  muPq_esfen_Halstead_uncertainty<-function(In){
+  muPq_esfen_Halstead_uncertainty_DRC<-function(In){
     rdrm(1, L.4(), par.esfen, In, yerror = 'rbinom', ypar = 5)$y / 5 
   } 
   
-  points(seq(0, 25, 0.1), sapply(seq(0, 25, 0.1), muPq_esfen_Halstead_uncertainty),
+  points(seq(0, 25, 0.1), sapply(seq(0, 25, 0.1), muPq_esfen_Halstead_uncertainty_DRC),
          pch = 5, col=4, cex = 0.5)
+
+#LW1949 analysis
+esfen.lw1949 = dataprep(dose = esfen.sum$esfen.c, ntot = esfen.sum$esfen.total, nfx = esfen.sum$esfen.d)
+esfen.lw1949$cbitpfx <- constrain(esfen.lw1949$bitpfx, probit(c(5e-04, 0.9995)))
+esfen.lwmod = lm(cbitpfx ~ log10dose, data = esfen.lw1949[esfen.lw1949$LWkeep, ])
+
+  lines(seq(0, 25, 0.1), 
+        pnorm(predict(esfen.lwmod, newdata = data.frame(log10dose = log10(seq(0, 25, 0.1))), 
+                      interval = 'confidence', level = 0.95)[,1]), lty = 2, col = 4)  
   
+  lines(seq(0, 25, 0.1), 
+        pnorm(predict(esfen.lwmod, newdata = data.frame(log10dose = log10(seq(0, 25, 0.1))), 
+                      interval = 'confidence', level = 0.95)[,2]), lty = 3, col = 4) 
+  lines(seq(0, 25, 0.1), 
+        pnorm(predict(esfen.lwmod, newdata = data.frame(log10dose = log10(seq(0, 25, 0.1))), 
+                      interval = 'confidence', level = 0.95)[,3]), lty = 3, col = 4) 
+
+  muPq_esfen_Halstead_uncertainty = function(In){
+    if(In == 0) mup = 0 else{
+      init = predict(esfen.lwmod, newdata = data.frame(log10dose = log10(In)), se.fit = T)
+      mup = pnorm(rnorm(1, init$fit, init$se.fit))/4 #convert from 4-day endpoint to daily
+    }
+    return(mup)
+  }
+  
+    points(seq(0, 25, 0.1), sapply(seq(0, 25, 0.1), muPq_esfen_Halstead_uncertainty),
+           pch = 5, col=6, cex = 0.5)
+
 #Permethrin *****************************************************************************##########
   perm<-subset(data, Chem == 'Perm')
     perm.sum = data.frame(perm.c = unique(perm$Conc),
@@ -242,13 +354,40 @@ par.esfen = c(coef(esfen.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Inte
     
   par.perm = c(coef(perm.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Intercept)' = 1)[c(1,3,4,2)]
   
-  muPq_perm_Halstead_uncertainty<-function(In){
+  muPq_perm_Halstead_uncertainty_DRC<-function(In){
     rdrm(1, L.4(), par.perm, In, yerror = 'rbinom', ypar = 5)$y / 5
   }
   
-  points(seq(0, 6, 0.01), sapply(seq(0, 6, 0.01), muPq_perm_Halstead_uncertainty),
+  points(seq(0, 6, 0.01), sapply(seq(0, 6, 0.01), muPq_perm_Halstead_uncertainty_DRC),
          pch = 5, col=4, cex = 0.5)
+
+#LW1949 analysis
+perm.lw1949 = dataprep(dose = perm.sum$perm.c, ntot = perm.sum$perm.total, nfx = perm.sum$perm.d)
+perm.lw1949$cbitpfx <- constrain(perm.lw1949$bitpfx, probit(c(5e-04, 0.9995)))
+perm.lwmod = lm(cbitpfx ~ log10dose, data = perm.lw1949[perm.lw1949$LWkeep, ])
+
+  lines(seq(0, 6, 0.01), 
+        pnorm(predict(perm.lwmod, newdata = data.frame(log10dose = log10(seq(0, 6, 0.01))), 
+                      interval = 'confidence', level = 0.95)[,1]), lty = 2, col = 4)  
   
+  lines(seq(0, 6, 0.01), 
+        pnorm(predict(perm.lwmod, newdata = data.frame(log10dose = log10(seq(0, 6, 0.01))), 
+                      interval = 'confidence', level = 0.95)[,2]), lty = 3, col = 4) 
+  lines(seq(0, 6, 0.01), 
+        pnorm(predict(perm.lwmod, newdata = data.frame(log10dose = log10(seq(0, 6, 0.01))), 
+                      interval = 'confidence', level = 0.95)[,3]), lty = 3, col = 4) 
+
+muPq_perm_Halstead_uncertainty = function(In){
+  if(In == 0) mup = 0 else{
+    init = predict(perm.lwmod, newdata = data.frame(log10dose = log10(In)), se.fit = T)
+    mup = pnorm(rnorm(1, init$fit, init$se.fit))/4 #convert from 4-day endpoint to daily
+  }
+  return(mup)
+}
+
+points(seq(0, 6, 0.01), sapply(seq(0, 6, 0.01), muPq_perm_Halstead_uncertainty),
+       pch = 5, col=6, cex = 0.5)
+
 #Insecticide info from Halstead et al chemosphere paper ################
 #calculate decay rates (k) from hydrolysis half lives for each chemical in Halstead 2015 (from table S1 and pmep.cce.cornell.edu) 
   mal.k = -log(0.5)/6.2         #from table s1 and in agreement of "less than 1 week in raw river water" from Cornell
@@ -278,6 +417,7 @@ par.esfen = c(coef(esfen.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Inte
 #Character vector of objects to keep from this script ###############
   keep.hal15.muP = c('mal.sum', 'chlor.sum', 'terb.sum', 'esfen.sum', 'lamcy.sum', 'perm.sum',
                      'mal.mod', 'chlor.mod', 'terb.mod', 'esfen.mod', 'lamcy.mod', 'perm.mod',
+                     'chlor.lwmod', 'terb.lwmod', 'esfen.lwmod', 'lamcy.lwmod', 'perm.lwmod',
                      'par.mal', 'par.chlor', 'par.terb', 'par.esfen', 'par.lamcy', 'par.perm',
                      'muPq_mal_Halstead_uncertainty', 'muPq_chlor_Halstead_uncertainty', 'muPq_terb_Halstead_uncertainty',
                      'muPq_esfen_Halstead_uncertainty', 'muPq_lamcy_Halstead_uncertainty', 'muPq_perm_Halstead_uncertainty')

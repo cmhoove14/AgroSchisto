@@ -24,7 +24,7 @@ require(drc)
     lines(seq(0,900,10), sapply(seq(0,900,10), muPq_zinc_satapornvanit09, simplify = T)[2,], lty=3, col=2)
     lines(seq(0,900,10), sapply(seq(0,900,10), muPq_zinc_satapornvanit09, simplify = T)[3,], lty=3, col=2)
     
-  muPq_zinc_satapornvanit09_uncertainty<-function(In){
+  muPq_zinc_satapornvanit09_uncertainty_DRC<-function(In){
     if(In == 0) mup = 0 else{
       init = predict(sap.mupq, data.frame(conc=In, chem = 'zinc'), se.fit = T)
       mup = rnorm(1, init[1], init[2]) - muPq_zinc_satapornvanit09(0)[1] #normalize to 0
@@ -35,10 +35,40 @@ require(drc)
     return(mup)
   }
     
-  points(seq(0,900,10), sapply(seq(0,900,10), muPq_zinc_satapornvanit09_uncertainty, simplify = T), 
+  points(seq(0,900,10), sapply(seq(0,900,10), muPq_zinc_satapornvanit09_uncertainty_DRC, simplify = T), 
          pch=5, col=4, cex = 0.5)
+
+#LW1949 analysis
+zinc.lw1949 = dataprep(dose = sap.mort$conc[sap.mort$chem == 'zinc'], 
+                       ntot = sap.mort$total[sap.mort$chem == 'zinc'], 
+                       nfx = sap.mort$dead[sap.mort$chem == 'zinc'])
+zinc.lw1949$cbitpfx <- constrain(zinc.lw1949$bitpfx, probit(c(5e-04, 0.9995)))
+zinc.lwmod.sat09 = lm(cbitpfx ~ log10dose, data = zinc.lw1949[zinc.lw1949$LWkeep, ])
+
+  lines(seq(0, max(zinc.lw1949$dose), 1), 
+        pnorm(predict(zinc.lwmod.sat09, newdata = data.frame(log10dose = log10(seq(0, max(zinc.lw1949$dose), 1))), 
+                      interval = 'confidence', level = 0.95)[,1]), lty = 2, col = 4)  
   
-keep.zinc.sat09 = c('muPq_zinc_satapornvanit09_uncertainty', 'muPq_zinc_satapornvanit09', 'sap.mupq') 
+  lines(seq(0, max(zinc.lw1949$dose), 1), 
+        pnorm(predict(zinc.lwmod.sat09, newdata = data.frame(log10dose = log10(seq(0, max(zinc.lw1949$dose), 1))), 
+                      interval = 'confidence', level = 0.95)[,2]), lty = 3, col = 4) 
+  lines(seq(0, max(zinc.lw1949$dose), 1), 
+        pnorm(predict(zinc.lwmod.sat09, newdata = data.frame(log10dose = log10(seq(0, max(zinc.lw1949$dose), 1))), 
+                      interval = 'confidence', level = 0.95)[,3]), lty = 3, col = 4) 
+  
+  muPq_zinc_satapornvanit09_uncertainty = function(In){
+    if(In == 0) mup = 0 else{
+      init = predict(zinc.lwmod.sat09, newdata = data.frame(log10dose = log10(In)), se.fit = T)
+      mup = pnorm(rnorm(1, init$fit, init$se.fit))
+    }
+    return(mup)
+  }
+  
+    points(seq(0,800,2), sapply(seq(0,800,2), muPq_zinc_satapornvanit09_uncertainty),
+           pch = 5, col=6, cex = 0.5)
+
+keep.zinc.sat09 = c('muPq_zinc_satapornvanit09_uncertainty_DRC', 'muPq_zinc_satapornvanit09', 'sap.mupq',
+                    'muPq_zinc_satapornvanit09_uncertainty', 'zinc.lwmod.sat09') 
 
 #Chlorpyrifos ###########    
   muPq_chlor_satapornvanit09<-function(In){
@@ -53,7 +83,7 @@ keep.zinc.sat09 = c('muPq_zinc_satapornvanit09_uncertainty', 'muPq_zinc_sataporn
       lines(seq(0,5,0.01), sapply(seq(0,5,0.01), muPq_chlor_satapornvanit09, simplify = T)[2,], lty=3, col=2)
       lines(seq(0,5,0.01), sapply(seq(0,5,0.01), muPq_chlor_satapornvanit09, simplify = T)[3,], lty=3, col=2)
     
-  muPq_chlor_satapornvanit09_uncertainty<-function(In){
+  muPq_chlor_satapornvanit09_uncertainty_DRC<-function(In){
     if(In == 0) mup = 0 else{
       init = predict(sap.mupq, data.frame(conc=In, chem = 'chlorpyrifos'), se.fit = T)
       mup = rnorm(1, init[1], init[2]) - muPq_chlor_satapornvanit09(0)[1] #normalize to 0
@@ -64,10 +94,40 @@ keep.zinc.sat09 = c('muPq_zinc_satapornvanit09_uncertainty', 'muPq_zinc_sataporn
     return(mup)
   }
       
-  points(seq(0,5,0.01), sapply(seq(0,5,0.01), muPq_chlor_satapornvanit09_uncertainty, simplify = T), 
+  points(seq(0,5,0.05), sapply(seq(0,5,0.05), muPq_chlor_satapornvanit09_uncertainty_DRC, simplify = T), 
           pch=5, col=4, cex = 0.5)    
-      
-keep.chlor.sat09 = c('muPq_chlor_satapornvanit09_uncertainty', 'muPq_chlor_satapornvanit09','sap.mupq') 
+
+#LW1949 analysis
+chlor.lw1949 = dataprep(dose = sap.mort$conc[sap.mort$chem == 'chlorpyrifos'], 
+                       ntot = sap.mort$total[sap.mort$chem == 'chlorpyrifos'], 
+                       nfx = sap.mort$dead[sap.mort$chem == 'chlorpyrifos'])
+chlor.lw1949$cbitpfx <- constrain(chlor.lw1949$bitpfx, probit(c(5e-04, 0.9995)))
+chlor.lwmod.sat09 = lm(cbitpfx ~ log10dose, data = chlor.lw1949[chlor.lw1949$LWkeep, ])
+
+  lines(seq(0, 5,0.02), 
+        pnorm(predict(chlor.lwmod.sat09, newdata = data.frame(log10dose = log10(seq(0, 5,0.02))), 
+                      interval = 'confidence', level = 0.95)[,1]), lty = 2, col = 4)  
+  
+  lines(seq(0, 5,0.02), 
+        pnorm(predict(chlor.lwmod.sat09, newdata = data.frame(log10dose = log10(seq(0, 5,0.02))), 
+                      interval = 'confidence', level = 0.95)[,2]), lty = 3, col = 4) 
+  lines(seq(0, 5,0.02), 
+        pnorm(predict(chlor.lwmod.sat09, newdata = data.frame(log10dose = log10(seq(0, 5,0.02))), 
+                      interval = 'confidence', level = 0.95)[,3]), lty = 3, col = 4) 
+
+muPq_chlor_satapornvanit09_uncertainty = function(In){
+  if(In == 0) mup = 0 else{
+    init = predict(chlor.lwmod.sat09, newdata = data.frame(log10dose = log10(In)), se.fit = T)
+    mup = pnorm(rnorm(1, init$fit, init$se.fit))
+  }
+  return(mup)
+}
+
+  points(seq(0,5,0.02), sapply(seq(0,5,0.02), muPq_chlor_satapornvanit09_uncertainty),
+         pch = 5, col=6, cex = 0.5)
+
+keep.chlor.sat09 = c('muPq_chlor_satapornvanit09_uncertainty_DRC', 'muPq_chlor_satapornvanit09','sap.mupq',
+                     'muPq_chlor_satapornvanit09_uncertainty', 'chlor.lwmod.sat09') 
 
 #Dimethoate ################        
   muPq_dim_satapornvanit09<-function(In){
@@ -82,7 +142,7 @@ keep.chlor.sat09 = c('muPq_chlor_satapornvanit09_uncertainty', 'muPq_chlor_satap
     lines(seq(0,1300,10), sapply(seq(0,1300,10), muPq_dim_satapornvanit09, simplify = T)[2,], lty=3, col=2)
     lines(seq(0,1300,10), sapply(seq(0,1300,10), muPq_dim_satapornvanit09, simplify = T)[3,], lty=3, col=2)
       
-  muPq_dim_satapornvanit09_uncertainty<-function(In){
+  muPq_dim_satapornvanit09_uncertainty_DRC<-function(In){
     if(In == 0) mup = 0 else{
       init = predict(sap.mupq, data.frame(conc=In, chem = 'dimethoate'), se.fit = T)
       mup = rnorm(1, init[1], init[2]) - muPq_dim_satapornvanit09(0)[1] #normalize to 0
@@ -92,9 +152,40 @@ keep.chlor.sat09 = c('muPq_chlor_satapornvanit09_uncertainty', 'muPq_chlor_satap
     return(mup)
   }
     
-  points(seq(0,1300,10), sapply(seq(0,1300,10), muPq_dim_satapornvanit09_uncertainty, simplify = T), 
+  points(seq(0,1300,10), sapply(seq(0,1300,10), muPq_dim_satapornvanit09_uncertainty_DRC, simplify = T), 
           pch=5, col=4, cex = 0.5)       
-keep.dim.sat09 = c('muPq_dim_satapornvanit09_uncertainty', 'muPq_dim_satapornvanit09','sap.mupq')
+  
+#LW1949 analysis
+dim.lw1949 = dataprep(dose = sap.mort$conc[sap.mort$chem == 'dimethoate'], 
+                        ntot = sap.mort$total[sap.mort$chem == 'dimethoate'], 
+                        nfx = sap.mort$dead[sap.mort$chem == 'dimethoate'])
+dim.lw1949$cbitpfx <- constrain(dim.lw1949$bitpfx, probit(c(5e-04, 0.9995)))
+dim.lwmod.sat09 = lm(cbitpfx ~ log10dose, data = dim.lw1949[dim.lw1949$LWkeep, ])
+
+  lines(seq(0,1300,2), 
+        pnorm(predict(dim.lwmod.sat09, newdata = data.frame(log10dose = log10(seq(0,1300,2))), 
+                      interval = 'confidence', level = 0.95)[,1]), lty = 2, col = 4)  
+  
+  lines(seq(0,1300,2), 
+        pnorm(predict(dim.lwmod.sat09, newdata = data.frame(log10dose = log10(seq(0,1300,2))), 
+                      interval = 'confidence', level = 0.95)[,2]), lty = 3, col = 4) 
+  lines(seq(0,1300,2), 
+        pnorm(predict(dim.lwmod.sat09, newdata = data.frame(log10dose = log10(seq(0,1300,2))), 
+                      interval = 'confidence', level = 0.95)[,3]), lty = 3, col = 4) 
+
+  muPq_dim_satapornvanit09_uncertainty = function(In){
+    if(In == 0) mup = 0 else{
+      init = predict(dim.lwmod.sat09, newdata = data.frame(log10dose = log10(In)), se.fit = T)
+      mup = pnorm(rnorm(1, init$fit, init$se.fit))
+    }
+    return(mup)
+  }
+
+    points(seq(0,1300,2), sapply(seq(0,1300,2), muPq_dim_satapornvanit09_uncertainty),
+           pch = 5, col=6, cex = 0.5)
+
+keep.dim.sat09 = c('muPq_dim_satapornvanit09_uncertainty_DRC', 'muPq_dim_satapornvanit09','sap.mupq',
+                   'muPq_dim_satapornvanit09_uncertainty', 'dim.lwmod.sat09')
 
 #Profenofos ################      
   muPq_pr_satapornvanit09<-function(In){
@@ -108,7 +199,7 @@ keep.dim.sat09 = c('muPq_dim_satapornvanit09_uncertainty', 'muPq_dim_satapornvan
     lines(seq(0,60,0.1), sapply(seq(0,60,0.1), muPq_pr_satapornvanit09, simplify = T)[2,], lty=3, col=2)
     lines(seq(0,60,0.1), sapply(seq(0,60,0.1), muPq_pr_satapornvanit09, simplify = T)[3,], lty=3, col=2)
  
-  muPq_prof_satapornvanit09_uncertainty<-function(In){
+  muPq_prof_satapornvanit09_uncertainty_DRC<-function(In){
     if(In == 0) mup = 0 else{
       init = predict(sap.mupq, data.frame(conc=In, chem = 'profenofos'), se.fit = T)
       mup = rnorm(1, init[1], init[2]) - muPq_pr_satapornvanit09(0)[1] #normalize to 0
@@ -118,10 +209,40 @@ keep.dim.sat09 = c('muPq_dim_satapornvanit09_uncertainty', 'muPq_dim_satapornvan
     return(mup)
   }
     
-  points(seq(0,60,0.5), sapply(seq(0,60,0.5), muPq_prof_satapornvanit09_uncertainty, simplify = T), 
-          pch=5, col=4, cex = 0.5) 
+  points(seq(0,60,0.5), sapply(seq(0,60,0.5), muPq_prof_satapornvanit09_uncertainty_DRC, simplify = T), 
+          pch=5, col=4, cex = 0.5)
+
+#LW1949 analysis
+prof.lw1949 = dataprep(dose = sap.mort$conc[sap.mort$chem == 'profenofos'], 
+                      ntot = sap.mort$total[sap.mort$chem == 'profenofos'], 
+                      nfx = sap.mort$dead[sap.mort$chem == 'profenofos'])
+prof.lw1949$cbitpfx <- constrain(prof.lw1949$bitpfx, probit(c(5e-04, 0.9995)))
+prof.lwmod.sat09 = lm(cbitpfx ~ log10dose, data = prof.lw1949[prof.lw1949$LWkeep, ])
+
+  lines(seq(0,60,0.6), 
+        pnorm(predict(prof.lwmod.sat09, newdata = data.frame(log10dose = log10(seq(0,60,0.6))), 
+                      interval = 'confidence', level = 0.95)[,1]), lty = 2, col = 4)  
   
-keep.prof.sat09 = c('muPq_prof_satapornvanit09_uncertainty', 'muPq_pr_satapornvanit09','sap.mupq')
+  lines(seq(0,60,0.6), 
+        pnorm(predict(prof.lwmod.sat09, newdata = data.frame(log10dose = log10(seq(0,60,0.6))), 
+                      interval = 'confidence', level = 0.95)[,2]), lty = 3, col = 4) 
+  lines(seq(0,60,0.6), 
+        pnorm(predict(prof.lwmod.sat09, newdata = data.frame(log10dose = log10(seq(0,60,0.6))), 
+                      interval = 'confidence', level = 0.95)[,3]), lty = 3, col = 4) 
+
+muPq_prof_satapornvanit09_uncertainty = function(In){
+  if(In == 0) mup = 0 else{
+    init = predict(prof.lwmod.sat09, newdata = data.frame(log10dose = log10(In)), se.fit = T)
+    mup = pnorm(rnorm(1, init$fit, init$se.fit))
+  }
+  return(mup)
+}
+
+  points(seq(0,60,0.1), sapply(seq(0,60,0.1), muPq_prof_satapornvanit09_uncertainty),
+         pch = 5, col=6, cex = 0.5)
+  
+keep.prof.sat09 = c('muPq_prof_satapornvanit09_uncertainty_DRC', 'muPq_pr_satapornvanit09','sap.mupq',
+                    'muPq_prof_satapornvanit09_uncertainty', 'prof.lwmod.sat09')
   
 #Carbendazim ###########       
   muPq_carb_satapornvanit09<-function(In){ #Paper found no consistent effect of carbendazim on mortality, even
@@ -136,7 +257,7 @@ sap.fr<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroDa
   fr.ch = subset(sap.fr, chem == 'chlorpyrifos')
   
 #Zinc ###################
-  zinc.fr= drm(feed_rate ~ conc, data = fr.z, type = 'continuous',
+  zinc.fr= drm(feed_rate ~ conc, data = fr.z, type = 'continuous', weights = error,
                fct = LL.4(names = c("Slope", "Lower Limit", "Upper Limit", "ED50"),
                           fixed = c(NA, 0, max(fr.z$feed_rate), NA)))
     summary(zinc.fr)
@@ -168,7 +289,7 @@ sap.fr<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroDa
 keep.zinc.sat09 = c(keep.zinc.sat09, 'psi_q_zinc_satapornvanit09_uncertainty', 
                     'par.tricksz', 'zinc.fr', 'fr.z')    
 #Chlorpyrifos ###################
-  chlor.fr= drm(feed_rate ~ conc, data = fr.ch, type = 'continuous',
+  chlor.fr= drm(feed_rate ~ conc, data = fr.ch, type = 'continuous', weights = error,
                fct = LL.4(names = c("Slope", "Lower Limit", "Upper Limit", "ED50"),
                           fixed = c(NA, 0, max(fr.ch$feed_rate), NA)))
     summary(chlor.fr)

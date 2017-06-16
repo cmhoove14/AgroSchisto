@@ -49,10 +49,7 @@ muNq_ch_hash11_uncertainty = function(In){
     lc50 = 10^(rnorm(1, log10(lc50.ch.hash), se.lc50.ch.hash))
     mun = pnorm((slp.ch.hash) * (Ins-lc50)) - fx.hsh.ch(0)
   }
-  while(mun < 0){
-    lc50 = 10^(rnorm(1, log10(lc50.ch.hash), se.lc50.ch.hash))
-    mun = pnorm((slp.ch.hash) * (Ins-lc50)) - fx.hsh.ch(0)
-  } 
+  if(mun < 0) mun = 0
   return(mun)
 }
 points(seq(0,3500,10), sapply(seq(0,3500,10), muNq_ch_hash11_uncertainty), 
@@ -109,7 +106,7 @@ points(seq(0,5000,10), sapply(seq(0,5000,10), muNq_prof_hash11_uncertainty),
        pch = 5, col = 4, cex = 0.5)
 
 #keep vector
-keep.hsh.ch = c('muNq_prof_hash11_uncertainty', 'fx.hsh.prof',
+keep.hsh.prof = c('muNq_prof_hash11_uncertainty', 'fx.hsh.prof',
                 'lc50.prof.hash', 'se.lc50.prof.hash', 'slp.prof.hash')    
 
 #Direct toxicity to snails affecting reproduction (Table 2) #######
@@ -157,15 +154,16 @@ fN.hash.chlor.uncertainty = function(In){
   if(In == 0) fn = 1 else{
     init = predict(ch.fn.red.hash, newdata = data.frame(chlor.conc = In), se.fit = T)
   fn = rnorm(1, init[1], init[2]) / fn.hash$chlor.rep[1]
-  while(fn < 0 || fn > 1.00000){
-    fn = rnorm(1, init[1], init[2]) / fn.hash$chlor.rep[1]
-  }
 }
+  if(fn < 0) fn = 0 
+  if(fn > 1) fn = 1
+  
   return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
 
 points(seq(0,3000, 3), sapply(seq(0,3000, 3), fN.hash.chlor.uncertainty), pch = 5, cex = 0.5, col = 4)
 
+keep.hsh.ch = c(keep.hsh.ch, 'fN.hash.chlor.uncertainty', 'ch.fn.red.hash', 'fn.hash')
 #profenofos reductions measured in mean eggs/snail/day  ###########
 plot(fn.hash$prof.conc, fn.hash$prof.rep / fn.hash$prof.rep[1], ylim = c(0,1), 
      xlab = 'profenofos concentration (ppb)', ylab = 'relative decrease in fecundity', pch = 16)
@@ -197,3 +195,4 @@ fN.hash.prof.uncertainty = function(In){
 
 points(seq(0,4000, 4), sapply(seq(0,4000, 4), fN.hash.prof.uncertainty), pch = 5, cex = 0.5, col = 4)
 
+keep.hsh.prof = c(keep.hsh.prof, 'fN.hash.prof.uncertainty', 'pr.fn.red.hash', 'fn.hash')

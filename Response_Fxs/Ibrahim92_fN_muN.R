@@ -113,3 +113,5 @@ par.tricks.ibr.muN = c(coef(ibr_muNq),
                                   italic('Bi. alexandrina', sep = ''))))
       legend('bottomright', pch = c(16, 5), legend = c('Obs. points', 'Est. points'), col = c(1,4),
              cex = 0.7)
+      
+keep.ibr.ch = c(keep.ibr.fn.ch, 'mu_N_chlor_ibr92_uncertainty', 'par.tricks.ibr.muN', 'snail.mort')      

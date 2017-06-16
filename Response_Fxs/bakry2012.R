@@ -104,10 +104,7 @@ muNq_gly_Bakry12_uncertainty = function(He){
   }  
     mun = pnorm((slp.bak.gly) * log10(heu/lc50)) - fx.bak.gly(0)
   }
-  while(mun < 0){
-    lc50 = 10^(rnorm(1, log10(lc50.bak.gly), se.lc50.bak.gly))
-    mun = pnorm((slp.bak.gly) * log10(heu/lc50)) - fx.bak.gly(0)
-  } 
+  if(mun < 0) mun = 0
   return(mun)
 }
 points(seq(0,13000,25), sapply(seq(0,13000,25), muNq_gly_Bakry12_uncertainty), 
@@ -157,20 +154,21 @@ plot(bak.fn$gly*1000, bak.fn$gly.r / bak.fn$gly.r[1] , ylim = c(0,1), pch = 16,
   lines(seq(0,13000, 25), sapply(seq(0,13000, 25), fn.bak.gly.pred)[2,] / bak.fn$gly.r[1], col = 2, lty=3)
   lines(seq(0,13000, 25), sapply(seq(0,13000, 25), fn.bak.gly.pred)[3,] / bak.fn$gly.r[1], col = 2, lty=3)
 
-fN.gly.fx.uncertainty = function(He){
+fN.gly.bak.uncertainty = function(He){
   if(He == 0) fn = 1 else{
     heu = He/1000
-  init = predict(fn.bak.gly, newdata = data.frame(gly = heu), se.fit = T)
-  fn = rnorm(1, init[1], init[2]) / bak.fn$gly.r[1]
-  while(fn < 0 || fn > 1.00000){
+    init = predict(fn.bak.gly, newdata = data.frame(gly = heu), se.fit = T)
     fn = rnorm(1, init[1], init[2]) / bak.fn$gly.r[1]
   }
-}
+  if(fn > 1) fn = 1
+  if(fn < 0) fn = 0
+  
   return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
 
-  points(seq(0,13000, 13), sapply(seq(0,13000, 13), fN.gly.fx.uncertainty), pch = 5, cex = 0.5, col = 4)
+  points(seq(0,13000, 13), sapply(seq(0,13000, 13), fN.gly.bak.uncertainty), pch = 5, cex = 0.5, col = 4)
 
+  keep.bak.gly = c(keep.bak.gly, 'fN.gly.bak.uncertainty', 'fn.bak.gly', 'bak.fn')
 #atrazine influence on reproduction ############
 fn.bak.atr = drm(atr.r ~ atr, data = bak.fn, type = 'continuous',
                  fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
@@ -190,18 +188,18 @@ plot(bak.fn$atr*1000, bak.fn$atr.r / bak.fn$atr.r[1] , ylim = c(0,1), pch = 16,
   lines(seq(0,5000,25), sapply(seq(0,5000,25), fn.bak.atr.pred)[2,] / bak.fn$atr.r[1], col = 2, lty=3)
   lines(seq(0,5000,25), sapply(seq(0,5000,25), fn.bak.atr.pred)[3,] / bak.fn$atr.r[1], col = 2, lty=3)
 
-fN.atr.fx.uncertainty = function(He){
+fN.atr.bak.uncertainty = function(He){
   if(He == 0) fn = 1 else{
     heu = He/1000
-  init = predict(fn.bak.atr, newdata = data.frame(atr = heu), se.fit = T)
-  fn = rnorm(1, init[1], init[2]) / bak.fn$atr.r[1]
-  while(fn < 0 || fn > 1.00000){
+    init = predict(fn.bak.atr, newdata = data.frame(atr = heu), se.fit = T)
     fn = rnorm(1, init[1], init[2]) / bak.fn$atr.r[1]
   }
-}
+  if(fn > 1) fn = 1
+  if(fn < 0) fn = 0
+  
   return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
 
-points(seq(0,5000, 10), sapply(seq(0,5000, 10), fN.atr.fx.uncertainty), pch = 5, cex = 0.5, col = 4)
+points(seq(0,5000, 10), sapply(seq(0,5000, 10), fN.atr.bak.uncertainty), pch = 5, cex = 0.5, col = 4)
 
-keep.bak12 = c(keep.bak.atr, keep.bak.gly)
+keep.bak.atr = c(keep.bak.atr, 'fN.atr.bak.uncertainty', 'fn.bak.atr', 'bak.fn')

@@ -16,115 +16,69 @@ require(drc)
   gly.vals = c(0, 1506, 3875, 9174, 15062, 26249)
   pen.vals = c(0, 214.8, 535, 1299, 2148, 3762)
   
-  L.3.fx = function(t, lc50 = lc50, slp = slp){
-    1 / (1+exp(slp*(t - lc50)))
+  ll4 = function(slp,lc,x){
+    1/(1+exp(slp*(log(x/lc))))
   }
+  
+  time = seq(0,25,0.1)
 
 #Miracidial (S. mansoni) toxicity ###############
 mir<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Miracidial Mortality/ghaffar2016_miracidia.csv')
-
+  mir$alive = 100*mir$surv
+  mir$dead = 100-mir$alive
+  mir$total = 100
+  
+  mir.ctrl = subset(mir, chem == 'control')  
+  
+  gaf.ctrl.drc.mir = drm(alive/total ~ time_hrs, weights = total, data = mir.ctrl, type = 'binomial', 
+                     fct = LL.4(names = c('b', 'c', 'd', 'e'),
+                                fixed = c(NA, 0, 1, NA)))
+  summary(gaf.ctrl.drc.mir)
 #butralin ###############
-plot(mir$time_hrs[mir$conc==0], mir$surv[mir$conc==0], 
-     pch=16, xlab = 'time(hrs', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24),
+mir.but = subset(mir, chem == 'butralin')
+
+gaf.but.drc.mir = drm(alive/total ~ time_hrs, conc, weights = total, data = mir.but, type = 'binomial', 
+                  fct = LL.4(names = c('b', 'c', 'd', 'e'),
+                             fixed = c(NA, 0, 1, NA)))
+  summary(gaf.but.drc.mir)
+  plot(gaf.but.drc.mir) 
+
+plot(mir.ctrl$time_hrs, mir.ctrl$surv, ylim = c(0,1), xlim = c(0,24), pch=16, 
+     xlab = 'time(hrs)', ylab = 'prop surviving',
      main = 'Abdel-Ghaffar 2016: Butralin toxicity to miracidia')
-  for(i in 1:length(unique(mir$conc[mir$chem == 'butralin']))){
-    points(mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'butralin'])[i] & mir$chem == 'butralin'], 
-           mir$surv[mir$conc==unique(mir$conc[mir$chem == 'butralin'])[i] & mir$chem == 'butralin'], pch=17,
+  lines(time, ll4(lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], x = time), lty = 2)
+  
+  for(i in 1:length(unique(mir.but$conc))){
+    points(mir.but$time_hrs[mir.but$conc==unique(mir.but$conc)[i]], 
+           mir.but$surv[mir.but$conc==unique(mir.but$conc)[i]], pch=17,
            col = i+1)
+    lines(time, ll4(lc = gaf.but.drc.mir$coefficients[i+5], slp = gaf.but.drc.mir$coefficients[i], x = time), 
+          lty = 2, col = i+1)
   }
+  
+  legend('topright', title = 'Butralin (ppb)', legend = but.vals, pch = c(16,rep(17,5)),
+         col = c(1:6), cex=0.7, bty = 'n')
 
-#fit to control points *****************************************************************
-  gaf.mir.cont<-drm(mir$surv[mir$conc==0] ~ mir$time_hrs[mir$conc==0],
-                    type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
+#Get estimate of miracidia-hrs for each concentration    
+  gaf.but.aucs.mir = as.numeric()
+  gaf.but.aucs.mir[1] = integrate(f = ll4, lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], 
+                                  lower=0, upper=24)[1]$value  
   
+  for(j in 1:length(unique(mir.but$conc))){
+    gaf.but.aucs.mir[j+1] = integrate(f = ll4, lc = gaf.but.drc.mir$coefficients[j+5], slp = gaf.but.drc.mir$coefficients[j],
+                                      lower=0, upper=24)[1]$value  
+  }
   
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.cont, newdata = data.frame(conc = seq(0,24,0.1))), lty=2)
-  
-  auc.mir.cont=integrate(f = L.3.fx, lc50 = coef(gaf.mir.cont)[2], slp = coef(gaf.mir.cont)[1],
-                         lower=0, upper=24)[1]$value  
-
-#556 ppb *********************************************************************************
-  gaf.mir.but556<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'butralin'])[1] & mir$chem == 'butralin'] ~ 
-                        mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'butralin'])[1] & mir$chem == 'butralin'],
-                      type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.but556, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 2)
-  
-  auc.mir.but556=integrate(f = L.3.fx, lc50 = coef(gaf.mir.but556)[2], slp = coef(gaf.mir.but556)[1],
-                         lower=0, upper=24)[1]$value  
-  
-#2417 ppb *********************************************************************************
-  gaf.mir.but2417<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'butralin'])[2] & mir$chem == 'butralin'] ~ 
-                         mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'butralin'])[2] & mir$chem == 'butralin'],
-                       type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.but2417, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 3)
-  
-  auc.mir.but2417=integrate(f = L.3.fx, lc50 = coef(gaf.mir.but2417)[2], slp = coef(gaf.mir.but2417)[1],
-                           lower=0, upper=24)[1]$value    
-
-#3906 ppb ***********************************************************************************
-  gaf.mir.but3906<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'butralin'])[3] & mir$chem == 'butralin'] ~ 
-                         mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'butralin'])[3] & mir$chem == 'butralin'],
-                       type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.but3906, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 4)
-  
-  auc.mir.but3906=integrate(f = L.3.fx, lc50 = coef(gaf.mir.but3906)[2], slp = coef(gaf.mir.but3906)[1],
-                            lower=0, upper=24)[1]$value  
-
-#5560 ppb **********************************************************************************
-  gaf.mir.but5560<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'butralin'])[4] & mir$chem == 'butralin'] ~ 
-                         mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'butralin'])[4] & mir$chem == 'butralin'],
-                       type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.but5560, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 5)
-  
-  auc.mir.but5560=integrate(f = L.3.fx, lc50 = coef(gaf.mir.but5560)[2], slp = coef(gaf.mir.but5560)[1],
-                            lower=0, upper=24)[1]$value      
-
-#8703 ppb **********************************************************************************
-  gaf.mir.but8703<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'butralin'])[5] & mir$chem == 'butralin'] ~ 
-                         mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'butralin'])[5] & mir$chem == 'butralin'],
-                       type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.but8703, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 6)
-  
-  auc.mir.but8703=integrate(f = L.3.fx, lc50 = coef(gaf.mir.but8703)[2], slp = coef(gaf.mir.but8703)[1],
-                            lower=0, upper=24)[1]$value      
-  
-  legend('topright', legend = c('control', 556,2417,3906,5560,8703), pch = c(16,17,17,17,17,17), 
-         col = c(1:6), cex=0.8, bty = 'n')
-  
-  gaf.but.aucs.mir = c(auc.mir.cont,auc.mir.but556,auc.mir.but2417,auc.mir.but3906,auc.mir.but5560,auc.mir.but8703)/auc.mir.cont
-
 #Compile L.2 data for functional responses #############
-but.mir = data.frame(e = c(coef(gaf.mir.cont)[2], coef(gaf.mir.but556)[2], coef(gaf.mir.but2417)[2],
-                           coef(gaf.mir.but3906)[2], coef(gaf.mir.but5560)[2], coef(gaf.mir.but8703)[2]),
-                     e.se = c(summary(gaf.mir.cont)$coefficients[2,2], 
-                              summary(gaf.mir.but556)$coefficients[2,2],
-                              summary(gaf.mir.but2417)$coefficients[2,2], 
-                              summary(gaf.mir.but3906)$coefficients[2,2],
-                              summary(gaf.mir.but5560)$coefficients[2,2],
-                              summary(gaf.mir.but8703)$coefficients[2,2]),
-                     b = c(coef(gaf.mir.cont)[1], coef(gaf.mir.but556)[1], coef(gaf.mir.but2417)[1],
-                           coef(gaf.mir.but3906)[1], coef(gaf.mir.but5560)[1], coef(gaf.mir.but8703)[1]),
-                     b.se = c(summary(gaf.mir.cont)$coefficients[1,2], 
-                              summary(gaf.mir.but556)$coefficients[1,2],
-                              summary(gaf.mir.but2417)$coefficients[1,2], 
-                              summary(gaf.mir.but3906)$coefficients[1,2],
-                              summary(gaf.mir.but5560)$coefficients[1,2],
-                              summary(gaf.mir.but8703)$coefficients[1,2]),
-                     butralin = but.vals,
-                     logbutralin = log(but.vals+1))
-
+but.mir = data.frame(butralin = but.vals,
+                     logbutralin = log(but.vals+1),
+                     e = c(summary(gaf.ctrl.drc.mir)$coefficients[2,1], summary(gaf.but.drc.mir)$coefficients[c(6:10),1]),
+                     e.se = c(summary(gaf.ctrl.drc.mir)$coefficients[2,2], summary(gaf.but.drc.mir)$coefficients[c(6:10),2]),
+                     b = c(summary(gaf.ctrl.drc.mir)$coefficients[1,1], summary(gaf.but.drc.mir)$coefficients[c(1:5),1]),
+                     b.se = c(summary(gaf.ctrl.drc.mir)$coefficients[1,2], summary(gaf.but.drc.mir)$coefficients[c(1:5),2]))
+  
 plot(but.mir$butralin, but.mir$e, pch = 16, xlab = 'butralin (ppb)', 
-     ylab = 'L.2 Parameters (miracidia)', ylim = c(0,8))
+     ylab = 'L.2 Parameters (miracidia)', ylim = c(0,6))
 
   points(but.mir$butralin+100, but.mir$b, pch = 17, col=2)
 
@@ -156,7 +110,7 @@ but.mir.lm.e2 = lm(e ~ logbutralin, weights = e.se^-1, data = but.mir) #log-line
     lines(seq(0,9000,100), sapply(seq(0,9000,100), but.mir.pred2, simplify = T)[2,], lty = 3, col=3)
     lines(seq(0,9000,100), sapply(seq(0,9000,100), but.mir.pred2, simplify = T)[3,], lty = 3, col=3)
 
-AIC(but.mir.lm.e, but.mir.lm.e2)  #Linear is a better fit    
+AIC(but.mir.lm.e, but.mir.lm.e2)  #Exponential is a slightly better fit    
 
 but.mir.lm.b = lm(b ~ butralin, weights = b.se^-1, data = but.mir)   
   but.mir.pred.b = function(but){
@@ -167,7 +121,7 @@ but.mir.lm.b = lm(b ~ butralin, weights = b.se^-1, data = but.mir)
     lines(seq(0,9000,100), sapply(seq(0,9000,100), but.mir.pred.b, simplify = T)[2,], lty = 3, col = 2)
     lines(seq(0,9000,100), sapply(seq(0,9000,100), but.mir.pred.b, simplify = T)[3,], lty = 3, col = 2)
 
-legend('topleft', lty = c(2,2,2,3), col = c(1,3,2,1), bty = 'n', title = 'Fit models',
+legend('topright', lty = c(2,2,2,3), col = c(1,3,2,1), bty = 'n', title = 'Fit models',
        legend = c('LC50 - Linear',
                   'LC50 - Exponential',
                   'Slp - linear',
@@ -175,57 +129,43 @@ legend('topleft', lty = c(2,2,2,3), col = c(1,3,2,1), bty = 'n', title = 'Fit mo
 legend('top', pch = c(16,17), col = c(1,2), legend = c('LC50', 'slp'),
        cex = 0.8, bty = 'n', title = 'Observed points')
 
-but.piM.pred = function(He){
-  e = as.numeric(predict(but.mir.lm.e, newdata = data.frame(butralin = He), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(but.mir.lm.b, newdata = data.frame(butralin = He), se.fit = TRUE)[1:2])
-  
-  e.use = rnorm(1, e[1], e[2])
-  
-  while(e.use < 0){
-    e.use = rnorm(1, e[1], e[2])
-  }      #resample if negative
-  
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use,
-                  lower=0, upper=24)[1]$value
-  auc
-}  #function to estimate AUC 
-
 piM.ghaf_butr.lin_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = but.piM.pred(He) / but.piM.pred(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
-
-but.piM.pred2 = function(He){
-  e = as.numeric(predict(but.mir.lm.e2, newdata = data.frame(logbutralin = log(He+1)), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(but.mir.lm.b, newdata = data.frame(butralin = He), se.fit = TRUE)[1:2])
+  if(He == 0) piM = 1 else{
+    e = as.numeric(predict(but.mir.lm.e, newdata = data.frame(butralin = He), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(but.mir.lm.b, newdata = data.frame(butralin = He), se.fit = TRUE)[1:2])
   
-  e.use = rnorm(1, e[1], e[2])
-  
-  while(e.use < 0){
     e.use = rnorm(1, e[1], e[2])
-  }      #resample if negative
-  
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use,
-                  lower=0, upper=24)[1]$value
-  auc
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piM = auc/gaf.but.aucs.mir[1]
+    if(piM > 1) piM = 1
+  }
+  return(piM)
 }  #function to estimate AUC 
 
 piM.ghaf_butr.exp_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = but.piM.pred2(He) / but.piM.pred2(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
+  if(He == 0) piM = 1 else{
+    e = as.numeric(predict(but.mir.lm.e2, newdata = data.frame(logbutralin = log(He+1)), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(but.mir.lm.b, newdata = data.frame(butralin = He), se.fit = TRUE)[1:2])
+    
+    e.use = rnorm(1, e[1], e[2])
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piM = auc/gaf.but.aucs.mir[1]
+    if(piM > 1) piM = 1
+  }
+  return(piM)
+}  #function to estimate AUC 
+
+keep.gaf.but.mir = c('piM.ghaf_butr.lin_unc', 'but.mir.lm.e', 'but.mir.lm.b', 'll4', 'gaf.but.aucs.mir',
+                     'piM.ghaf_butr.exp_unc', 'but.mir.lm.e2')
 
 #plot to test function ########
-plot(but.mir$butralin, c(auc.mir.cont, auc.mir.but556, auc.mir.but2417, 
-                          auc.mir.but3906, auc.mir.but5560, auc.mir.but8703)/auc.mir.cont,
+plot(but.mir$butralin, gaf.but.aucs.mir/gaf.but.aucs.mir[1],
      xlab = 'Butralin (ppb)', ylab = 'relative AUC (miracidia-hours)',
      pch = 16, ylim = c(0,1))
   points(seq(0, 18000,50)/2, sapply(seq(0, 18000,50)/2, piM.ghaf_butr.lin_unc, simplify = T),
@@ -234,99 +174,50 @@ plot(but.mir$butralin, c(auc.mir.cont, auc.mir.but556, auc.mir.but2417,
          pch = 5, col = 2, cex = 0.5)
 
 #glyphosate ###############
-  plot(mir$time_hrs[mir$conc==0], mir$surv[mir$conc==0], 
-       pch=16, xlab = 'time(hrs', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
-  for(i in 1:length(unique(mir$conc[mir$chem == 'glyphosate']))){
-    points(mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'glyphosate'])[i] & mir$chem == 'glyphosate'], 
-           mir$surv[mir$conc==unique(mir$conc[mir$chem == 'glyphosate'])[i] & mir$chem == 'glyphosate'], pch=17,
+mir.gly = subset(mir, chem == 'glyphosate')
+
+gaf.gly.drc.mir = drm(alive/total ~ time_hrs, conc, weights = total, data = mir.gly, type = 'binomial', 
+                      fct = LL.4(names = c('b', 'c', 'd', 'e'),
+                                 fixed = c(NA, 0, 1, NA)))
+  summary(gaf.gly.drc.mir)
+  plot(gaf.gly.drc.mir) 
+
+plot(mir.ctrl$time_hrs, mir.ctrl$surv, ylim = c(0,1), xlim = c(0,24), pch=16, 
+     xlab = 'time(hrs)', ylab = 'prop surviving',
+     main = 'Abdel-Ghaffar 2016: Glyphosate toxicity to miracidia')
+  lines(time, ll4(lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], x = time), lty = 2)
+  
+  for(i in 1:length(unique(mir.gly$conc))){
+    points(mir.gly$time_hrs[mir.gly$conc==unique(mir.gly$conc)[i]], 
+           mir.gly$surv[mir.gly$conc==unique(mir.gly$conc)[i]], pch=17,
            col = i+1)
+    lines(time, ll4(lc = gaf.gly.drc.mir$coefficients[i+5], slp = gaf.gly.drc.mir$coefficients[i], x = time), 
+          lty = 2, col = i+1)
   }
-    
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.cont, newdata = data.frame(conc = seq(0,24,0.1))), lty=2)
-    
-#1506 ppb *********************************************************************************
-  gaf.mir.gly1506<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'glyphosate'])[1] & mir$chem == 'glyphosate'] ~ 
-                        mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'glyphosate'])[1] & mir$chem == 'glyphosate'],
-                      type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
+
+  legend('topright', title = 'Glyphosate (ppb)', legend = gly.vals, pch = c(16,rep(17,5)),
+         col = c(1:6), cex=0.7, bty = 'n')
+
+#Get estimate of miracidia-hrs for each concentration    
+  gaf.gly.aucs.mir = as.numeric()
+  gaf.gly.aucs.mir[1] = integrate(f = ll4, lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], 
+                                  lower=0, upper=24)[1]$value  
   
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.gly1506, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 2)
-  
-  auc.mir.gly1506=integrate(f = L.3.fx, lc50 = coef(gaf.mir.gly1506)[2], slp = coef(gaf.mir.gly1506)[1],
-                           lower=0, upper=24)[1]$value
-  
-#3875 ppb *********************************************************************************
-  gaf.mir.gly3875<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'glyphosate'])[2] & mir$chem == 'glyphosate'] ~ 
-                         mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'glyphosate'])[2] & mir$chem == 'glyphosate'],
-                       type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.gly3875, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 3)
-  
-  auc.mir.gly3875=integrate(f = L.3.fx, lc50 = coef(gaf.mir.gly3875)[2], slp = coef(gaf.mir.gly3875)[1],
-                            lower=0, upper=24)[1]$value
-  
-#9174 ppb ***********************************************************************************
-  gaf.mir.gly9174<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'glyphosate'])[3] & mir$chem == 'glyphosate'] ~ 
-                         mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'glyphosate'])[3] & mir$chem == 'glyphosate'],
-                       type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.gly9174, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 4)
-  
-  auc.mir.gly9174=integrate(f = L.3.fx, lc50 = coef(gaf.mir.gly9174)[2], slp = coef(gaf.mir.gly9174)[1],
-                            lower=0, upper=24)[1]$value
-  
-#15062 ppb **********************************************************************************
-  gaf.mir.gly15062<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'glyphosate'])[4] & mir$chem == 'glyphosate'] ~ 
-                         mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'glyphosate'])[4] & mir$chem == 'glyphosate'],
-                       type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.gly15062, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 5)
-  
-  auc.mir.gly15062=integrate(f = L.3.fx, lc50 = coef(gaf.mir.gly15062)[2], slp = coef(gaf.mir.gly15062)[1],
-                            lower=0, upper=24)[1]$value    
-  
-#26249 ppb **********************************************************************************
-  gaf.mir.gly26249<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'glyphosate'])[5] & mir$chem == 'glyphosate'] ~ 
-                         mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'glyphosate'])[5] & mir$chem == 'glyphosate'],
-                       type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.gly26249, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 6)
-  
-  auc.mir.gly26249=integrate(f = L.3.fx, lc50 = coef(gaf.mir.gly26249)[2], slp = coef(gaf.mir.gly26249)[1],
-                             lower=0, upper=24)[1]$value   
-  
-  title('Ghaffar2016 glyphosate toxicity to miracidia')
-  legend('topright', legend = c('control', 1506,3875,9174,15062,26249), pch = c(16,17,17,17,17,17), 
-         col = c(1:6), cex=0.8, bty = 'n') 
-  
-  gaf.gly.aucs.mir = c(auc.mir.cont, auc.mir.gly1506, auc.mir.gly3875, auc.mir.gly9174, auc.mir.gly15062, auc.mir.gly26249)/auc.mir.cont
+  for(j in 1:length(unique(mir.gly$conc))){
+    gaf.gly.aucs.mir[j+1] = integrate(f = ll4, lc = gaf.gly.drc.mir$coefficients[j+5], slp = gaf.gly.drc.mir$coefficients[j],
+                                      lower=0, upper=24)[1]$value  
+  }
 
 #Compile L.2 parameters ######## 
-gly.mir = data.frame(e = c(coef(gaf.mir.cont)[2], coef(gaf.mir.gly1506)[2], coef(gaf.mir.gly3875)[2],
-                           coef(gaf.mir.gly9174)[2], coef(gaf.mir.gly15062)[2], coef(gaf.mir.gly26249)[2]),
-                     e.se = c(summary(gaf.mir.cont)$coefficients[2,2], 
-                              summary(gaf.mir.gly1506)$coefficients[2,2],
-                              summary(gaf.mir.gly3875)$coefficients[2,2], 
-                              summary(gaf.mir.gly9174)$coefficients[2,2],
-                              summary(gaf.mir.gly15062)$coefficients[2,2],
-                              summary(gaf.mir.gly26249)$coefficients[2,2]),
-                     b = c(coef(gaf.mir.cont)[1], coef(gaf.mir.gly1506)[1], coef(gaf.mir.gly3875)[1],
-                           coef(gaf.mir.gly9174)[1], coef(gaf.mir.gly15062)[1], coef(gaf.mir.gly26249)[1]),
-                     b.se = c(summary(gaf.mir.cont)$coefficients[1,2], 
-                              summary(gaf.mir.gly1506)$coefficients[1,2],
-                              summary(gaf.mir.gly3875)$coefficients[1,2], 
-                              summary(gaf.mir.gly9174)$coefficients[1,2],
-                              summary(gaf.mir.gly15062)$coefficients[1,2],
-                              summary(gaf.mir.gly26249)$coefficients[1,2]),
-                     glyphosate = gly.vals,
-                     logglyphosate = log(gly.vals+1))
+gly.mir = data.frame(glyphosate = gly.vals,
+                     logglyphosate = log(gly.vals+1),
+                     e = c(summary(gaf.ctrl.drc.mir)$coefficients[2,1], summary(gaf.gly.drc.mir)$coefficients[c(6:10),1]),
+                     e.se = c(summary(gaf.ctrl.drc.mir)$coefficients[2,2], summary(gaf.gly.drc.mir)$coefficients[c(6:10),2]),
+                     b = c(summary(gaf.ctrl.drc.mir)$coefficients[1,1], summary(gaf.gly.drc.mir)$coefficients[c(1:5),1]),
+                     b.se = c(summary(gaf.ctrl.drc.mir)$coefficients[1,2], summary(gaf.gly.drc.mir)$coefficients[c(1:5),2]))
 
 plot(gly.mir$glyphosate, gly.mir$e, pch = 16, xlab = 'glyphosate (ppb)', 
-     ylab = 'LL.2 Parameters (miracidia)', ylim = c(0,10))
+     ylab = 'LL.2 Parameters (miracidia)', ylim = c(0,6))
 
   points(gly.mir$glyphosate+200, gly.mir$b, pch = 17, col=2)
 
@@ -374,59 +265,46 @@ gly.mir.lm.b = lm(b ~ glyphosate, weights = b.se^-1, data = gly.mir)
                     'LC50 - Exponential',
                     'Slp - linear',
                     '95% CI'), cex = 0.7)  
-  legend('topright', pch = c(16,17), col = c(1,2), legend = c('LC50', 'slp'),
+  legend('topleft', pch = c(16,17), col = c(1,2), legend = c('LC50', 'slp'),
          cex = 0.8, bty = 'n', title = 'Observed points')
 
-gly.piM.pred = function(He){
-  e = as.numeric(predict(gly.mir.lm.e, newdata = data.frame(glyphosate = He), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(gly.mir.lm.b, newdata = data.frame(glyphosate = He), se.fit = TRUE)[1:2])
-  
-  e.use = rnorm(1, e[1], e[2])
-  
-  while(e.use < 0){
-    e.use = rnorm(1, e[1], e[2])
-  }      #resample if negative
-  
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use, 
-                  lower=0, upper=24)[1]$value
-  auc
-}  #function to estimate AUC 
-
 piM.ghaf_gly.lin_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = gly.piM.pred(He) / gly.piM.pred(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
-
-gly.piM.pred2 = function(He){
-  e = as.numeric(predict(gly.mir.lm.e2, newdata = data.frame(logglyphosate = log(He+1)), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(gly.mir.lm.b, newdata = data.frame(glyphosate = He), se.fit = TRUE)[1:2])
-  
-  e.use = rnorm(1, e[1], e[2])
-  
-  while(e.use < 0){
+  if(He == 0) piM = 1 else{
+    e = as.numeric(predict(gly.mir.lm.e, newdata = data.frame(glyphosate = He), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(gly.mir.lm.b, newdata = data.frame(glyphosate = He), se.fit = TRUE)[1:2])
+    
     e.use = rnorm(1, e[1], e[2])
-  }      #resample if negative
-  
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use, 
-                  lower=0, upper=24)[1]$value
-  auc
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piM = auc/gaf.gly.aucs.mir[1]
+    if(piM > 1) piM = 1
+  }
+  return(piM)
 }  #function to estimate AUC 
 
 piM.ghaf_gly.exp_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = gly.piM.pred2(He) / gly.piM.pred2(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
+  if(He == 0) piM = 1 else{
+    e = as.numeric(predict(gly.mir.lm.e2, newdata = data.frame(logglyphosate = log(He+1)), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(gly.mir.lm.b, newdata = data.frame(glyphosate = He), se.fit = TRUE)[1:2])
+    
+    e.use = rnorm(1, e[1], e[2])
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piM = auc/gaf.gly.aucs.mir[1]
+    if(piM > 1) piM = 1
+  }
+  return(piM)
+}  #function to estimate AUC 
+
+keep.gaf.gly.mir = c('piM.ghaf_gly.lin_unc', 'gly.mir.lm.e', 'gly.mir.lm.b', 'll4', 'gaf.gly.aucs.mir',
+                     'piM.ghaf_gly.exp_unc', 'gly.mir.lm.e2')
 
 #plot to test function ########
-plot(gly.mir$glyphosate, gaf.gly.aucs.mir,
+plot(gly.mir$glyphosate, gaf.gly.aucs.mir/gaf.gly.aucs.mir[1],
      xlab = 'Glyphosate (ppb)', ylab = 'relative AUC (miracidia-hours)',
      pch = 16, ylim = c(0,1))
   points(seq(0,9000,50)*3, sapply(seq(0,9000,50)*3, piM.ghaf_gly.lin_unc, simplify = T),
@@ -435,99 +313,50 @@ plot(gly.mir$glyphosate, gaf.gly.aucs.mir,
          pch = 5, col = 2, cex = 0.5)
 
 #pendimethalin ###############
-  plot(mir$time_hrs[mir$conc==0], mir$surv[mir$conc==0], 
-       pch=16, xlab = 'time(hrs', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
-  for(i in 1:length(unique(mir$conc[mir$chem == 'pendimethalin']))){
-    points(mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'pendimethalin'])[i] & mir$chem == 'pendimethalin'], 
-           mir$surv[mir$conc==unique(mir$conc[mir$chem == 'pendimethalin'])[i] & mir$chem == 'pendimethalin'], pch=17,
+mir.pen = subset(mir, chem == 'pendimethalin')
+
+gaf.pen.drc.mir = drm(alive/total ~ time_hrs, conc, weights = total, data = mir.pen, type = 'binomial', 
+                      fct = LL.4(names = c('b', 'c', 'd', 'e'),
+                                 fixed = c(NA, 0, 1, NA)))
+  summary(gaf.pen.drc.mir)
+  plot(gaf.pen.drc.mir) 
+
+plot(mir.ctrl$time_hrs, mir.ctrl$surv, ylim = c(0,1), xlim = c(0,24), pch=16, 
+     xlab = 'time(hrs)', ylab = 'prop surviving',
+     main = 'Abdel-Ghaffar 2016: Pendimethalin toxicity to miracidia')
+  lines(time, ll4(lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], x = time), lty = 2)
+
+  for(i in 1:length(unique(mir.pen$conc))){
+    points(mir.pen$time_hrs[mir.pen$conc==unique(mir.pen$conc)[i]], 
+           mir.pen$surv[mir.pen$conc==unique(mir.pen$conc)[i]], pch=17,
            col = i+1)
+    lines(time, ll4(lc = gaf.pen.drc.mir$coefficients[i+5], slp = gaf.pen.drc.mir$coefficients[i], x = time), 
+          lty = 2, col = i+1)
+  }
+
+  legend('topright', title = 'pendimethalin (ppb)', legend = pen.vals, pch = c(16,rep(17,5)),
+         col = c(1:6), cex=0.7, bty = 'n')
+
+#Get estimate of miracidia-hrs for each concentration    
+gaf.pen.aucs.mir = as.numeric()
+  gaf.pen.aucs.mir[1] = integrate(f = ll4, lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], 
+                                  lower=0, upper=24)[1]$value  
+  
+  for(j in 1:length(unique(mir.pen$conc))){
+    gaf.pen.aucs.mir[j+1] = integrate(f = ll4, lc = gaf.pen.drc.mir$coefficients[j+5], slp = gaf.pen.drc.mir$coefficients[j],
+                                      lower=0, upper=24)[1]$value  
   }
   
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.cont, newdata = data.frame(conc = seq(0,24,0.1))), lty=2)
-  
-#215 ppb *********************************************************************************
-  gaf.mir.pen215<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'pendimethalin'])[1] & mir$chem == 'pendimethalin'] ~ 
-                         mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'pendimethalin'])[1] & mir$chem == 'pendimethalin'],
-                       type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.pen215, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 2)
-  
-  auc.mir.pen215=integrate(f = L.3.fx, lc50 = coef(gaf.mir.pen215)[2], slp = coef(gaf.mir.pen215)[1],
-                            lower=0, upper=24)[1]$value  
-  
-#535 ppb *********************************************************************************
-  gaf.mir.pen535<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'pendimethalin'])[2] & mir$chem == 'pendimethalin'] ~ 
-                         mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'pendimethalin'])[2] & mir$chem == 'pendimethalin'],
-                       type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.pen535, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 3)
-  
-  auc.mir.pen535=integrate(f = L.3.fx, lc50 = coef(gaf.mir.pen535)[2], slp = coef(gaf.mir.pen535)[1],
-                           lower=0, upper=24)[1]$value 
-  
-#1299 ppb ***********************************************************************************
-  gaf.mir.pen1299<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'pendimethalin'])[3] & mir$chem == 'pendimethalin'] ~ 
-                         mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'pendimethalin'])[3] & mir$chem == 'pendimethalin'],
-                       type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.pen1299, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 4)
-  
-  auc.mir.pen1299=integrate(f = L.3.fx, lc50 = coef(gaf.mir.pen1299)[2], slp = coef(gaf.mir.pen1299)[1],
-                           lower=0, upper=24)[1]$value 
-  
-#2148 ppb **********************************************************************************
-  gaf.mir.pen2148<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'pendimethalin'])[4] & mir$chem == 'pendimethalin'] ~ 
-                          mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'pendimethalin'])[4] & mir$chem == 'pendimethalin'],
-                        type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.pen2148, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 5)
-  
-  auc.mir.pen2148=integrate(f = L.3.fx, lc50 = coef(gaf.mir.pen2148)[2], slp = coef(gaf.mir.pen2148)[1],
-                            lower=0, upper=24)[1]$value   
-  
-#3762 ppb **********************************************************************************
-  gaf.mir.pen3762<-drm(mir$surv[mir$conc==unique(mir$conc[mir$chem == 'pendimethalin'])[5] & mir$chem == 'pendimethalin'] ~ 
-                          mir$time_hrs[mir$conc==unique(mir$conc[mir$chem == 'pendimethalin'])[5] & mir$chem == 'pendimethalin'],
-                        type = 'binomial', fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
-  
-  lines(x=seq(0,24,0.1), y=predict(gaf.mir.pen3762, newdata = data.frame(conc = seq(0,24,0.1))), 
-        lty=2, col = 6)
-  
-  auc.mir.pen3762=integrate(f = L.3.fx, lc50 = coef(gaf.mir.pen3762)[2], slp = coef(gaf.mir.pen3762)[1],
-                            lower=0, upper=24)[1]$value   
-  
-  title('Ghaffar2016 pendimethalin toxicity to miracidia')
-  legend('topright', legend = c('control', 215,535,1299,2148,3762), pch = c(16,17,17,17,17,17), 
-         col = c(1:6), cex=0.8, bty='n')  
-  
-  gaf.pen.aucs.mir = c(auc.mir.cont, auc.mir.pen215, auc.mir.pen535, auc.mir.pen1299, auc.mir.pen2148, auc.mir.pen3762)/auc.mir.cont
-  
 #Compile L.2 parameters ######## 
-pen.mir = data.frame(e = c(coef(gaf.mir.cont)[2], coef(gaf.mir.pen215)[2], coef(gaf.mir.pen535)[2],
-                           coef(gaf.mir.pen1299)[2], coef(gaf.mir.pen2148)[2], coef(gaf.mir.pen3762)[2]),
-                     e.se = c(summary(gaf.mir.cont)$coefficients[2,2], 
-                              summary(gaf.mir.pen215)$coefficients[2,2],
-                              summary(gaf.mir.pen535)$coefficients[2,2], 
-                              summary(gaf.mir.pen1299)$coefficients[2,2],
-                              summary(gaf.mir.pen2148)$coefficients[2,2],
-                              summary(gaf.mir.gly26249)$coefficients[2,2]),
-                     b = c(coef(gaf.mir.cont)[1], coef(gaf.mir.pen215)[1], coef(gaf.mir.pen535)[1],
-                           coef(gaf.mir.pen1299)[1], coef(gaf.mir.pen2148)[1], coef(gaf.mir.pen3762)[1]),
-                     b.se = c(summary(gaf.mir.cont)$coefficients[1,2], 
-                              summary(gaf.mir.pen215)$coefficients[1,2],
-                              summary(gaf.mir.pen535)$coefficients[1,2], 
-                              summary(gaf.mir.pen1299)$coefficients[1,2],
-                              summary(gaf.mir.pen2148)$coefficients[1,2],
-                              summary(gaf.mir.pen3762)$coefficients[1,2]),
-                     pendimethalin = pen.vals,
-                     logpendimethalin = log(pen.vals+1))
+pen.mir = data.frame(pendimethalin = pen.vals,
+                     logpendimethalin = log(pen.vals+1),
+                     e = c(summary(gaf.ctrl.drc.mir)$coefficients[2,1], summary(gaf.pen.drc.mir)$coefficients[c(6:10),1]),
+                     e.se = c(summary(gaf.ctrl.drc.mir)$coefficients[2,2], summary(gaf.pen.drc.mir)$coefficients[c(6:10),2]),
+                     b = c(summary(gaf.ctrl.drc.mir)$coefficients[1,1], summary(gaf.pen.drc.mir)$coefficients[c(1:5),1]),
+                     b.se = c(summary(gaf.ctrl.drc.mir)$coefficients[1,2], summary(gaf.pen.drc.mir)$coefficients[c(1:5),2]))
 
 plot(pen.mir$pendimethalin, pen.mir$e, pch = 16, xlab = 'Pendimethalin (ppb)', 
-     ylab = 'L.2 Parameters (miracidia)', ylim = c(0,12))
+     ylab = 'L.2 Parameters (miracidia)', ylim = c(0,5))
 
   points(pen.mir$pendimethalin+50, pen.mir$b, pch = 17, col=2)
 
@@ -575,60 +404,46 @@ pen.mir.lm.b = lm(b ~ pendimethalin, weights = b.se^-1, data = pen.mir)
                     'LC50 - Exponential',
                     'Slp - linear',
                     '95% CI'), cex = 0.7)  
-  legend('topright', pch = c(16,17), col = c(1,2), legend = c('LC50', 'slp'),
+  legend('topleft', pch = c(16,17), col = c(1,2), legend = c('LC50', 'slp'),
          cex = 0.8, bty = 'n', title = 'Observed points')
 
-pen.piM.pred = function(He){
-  e = as.numeric(predict(pen.mir.lm.e, newdata = data.frame(pendimethalin = He), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(pen.mir.lm.b, newdata = data.frame(pendimethalin = He), se.fit = TRUE)[1:2])
-  
-  e.use = rnorm(1, e[1], e[2])
-  
-  while(e.use < 0){
-    e.use = rnorm(1, e[1], e[2])
-  }      #resample if negative
-  
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use, 
-                  lower=0, upper=24)[1]$value
-  auc
-}  #function to estimate AUC 
-
 piM.ghaf_pen.lin_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = pen.piM.pred(He) / pen.piM.pred(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
-
-pen.piM.pred2 = function(He){
-  e = as.numeric(predict(pen.mir.lm.e2, newdata = data.frame(logpendimethalin = log(He+1)), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(pen.mir.lm.b, newdata = data.frame(pendimethalin = He), se.fit = TRUE)[1:2])
-  
-  e.use = rnorm(1, e[1], e[2])
-  
-  while(e.use < 0){
+  if(He == 0) piM = 1 else{
+    e = as.numeric(predict(pen.mir.lm.e, newdata = data.frame(pendimethalin = He), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(pen.mir.lm.b, newdata = data.frame(pendimethalin = He), se.fit = TRUE)[1:2])
+    
     e.use = rnorm(1, e[1], e[2])
-  }      #resample if negative
-  
-  b.use = rnorm(1, b[1], b[2])
-  
-  auc = integrate(f = L.3.fx, lc50 = e.use, slp = b.use, 
-                  lower=0, upper=24)[1]$value
-  auc
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piM = auc/gaf.pen.aucs.mir[1]
+    if(piM > 1) piM = 1
+  }
+  return(piM)
 }  #function to estimate AUC 
 
 piM.ghaf_pen.exp_unc = function(He){
-  if(He == 0) piC = 1
-  else(piC = pen.piM.pred2(He) / pen.piM.pred2(0))
-  if(piC > 1) piC = 1
-  else(return(piC))
-}  #Parameter estimate
+  if(He == 0) piM = 1 else{
+    e = as.numeric(predict(pen.mir.lm.e2, newdata = data.frame(logpendimethalin = log(He+1)), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(pen.mir.lm.b, newdata = data.frame(pendimethalin = He), se.fit = TRUE)[1:2])
+    
+    e.use = rnorm(1, e[1], e[2])
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piM = auc/gaf.pen.aucs.mir[1]
+    if(piM > 1) piM = 1
+  }
+  return(piM)
+}  #function to estimate AUC 
 
+keep.gaf.pen.cer = c('piM.ghaf_pen.lin_unc', 'pen.mir.lm.e', 'pen.mir.lm.b', 'll4', 'gaf.pen.aucs.mir',
+                     'piM.ghaf_pen.exp_unc', 'pen.mir.lm.e2')
 
 #plot to test function ########
-plot(pen.mir$pendimethalin, gaf.pen.aucs.mir,
+plot(pen.mir$pendimethalin, gaf.pen.aucs.mir/gaf.pen.aucs.mir[1],
      xlab = 'pendimethalin (ppb)', ylab = 'relative AUC (miracidia-hours)',
      pch = 16, ylim = c(0,1))
   points(seq(0,4000,10), sapply(seq(0,4000,10), piM.ghaf_pen.lin_unc, simplify = T),

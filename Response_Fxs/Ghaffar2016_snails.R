@@ -13,8 +13,6 @@
 require(drc)
 
 #Snail (30 B. alexandrina 6-8mm shell width) toxicity ##########
-  #Reported lc50/slope combinations did not fit provided data well therefore functions fit to the 
-    #reported lc0, lc10, lc25, lc50, and lc90 values were used to model excess daily per capita death rate
 #Butralin ##############
 but.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
                      butralin = c(0, 556, 2417, 3906, 5560, 8703))
@@ -59,10 +57,7 @@ plot(but.dat$butralin, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,1300
     lc50 = 10^(rnorm(1, log10(lc50.gaf.but), se.lc50.gaf.but))
     mun = pnorm((slp.gaf.but) * (heu-lc50)) - fx.mun.but(0)
     }
-    while(mun < 0){
-      lc50 = (rnorm(1, lc50.gaf.but, 10^se.lc50.gaf.but))
-      mun = pnorm((slp.gaf.but) * (heu-lc50)) - fx.mun.but(0)
-    } 
+    if(mun < 0) mun = 0
     return(mun)
   }
     points(seq(0,13000,50), sapply(seq(0,13000,50), mu_Nq_butr_gaf16_uncertainty, simplify = T), 
@@ -112,10 +107,8 @@ plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33
       lc50 = 10^(rnorm(1, log10(lc50.gaf.gly), se.lc50.gaf.gly))
       mun = pnorm((slp.gaf.gly) * (heu - lc50)) - fx.mun.gly(0) #mortality normalized to 0
     }
-    while(mun < 0){
-      lc50 = (rnorm(1, (lc50.gaf.gly), 10^se.lc50.gaf.gly))
-      mun = pnorm((slp.gaf.gly) * (heu - lc50)) - fx.mun.gly(0) #mortality normalized to 0
-    }
+    if(mun < 0) mun = 0
+      
     return(mun)
   }
 
@@ -163,13 +156,10 @@ plot(pen.dat$pendimethalin, pen.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0
 mu_Nq_pen_gaf16_uncertainty = function(He){
   if(He == 0) mun = 0 else{
     heu = He/1000
-  lc50 = (rnorm(1, (lc50.gaf.pen), 10^se.lc50.gaf.pen))
+  lc50 = 10^(rnorm(1, log10(lc50.gaf.pen), se.lc50.gaf.pen))
   mun = pnorm((slp.gaf.pen) * (heu - lc50)) - fx.mun.pen(0) #mortality normalized to 0
   }
-  while(mun < 0){
-    lc50 = 10^(rnorm(1, log10(lc50.gaf.pen), se.lc50.gaf.pen))
-    mun = pnorm((slp.gaf.pen) * (heu - lc50)) - fx.mun.pen(0) #mortality normalized to 0
-  }
+  if(mun < 0) mun = 0
   return(mun)
 }
   
@@ -427,11 +417,14 @@ plot(gafrep$but.conc, gafrep$but.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
           lty = 3, col = 2) 
   
  fN.butr.fx.uncertainty = function(He){
-   init = predict(but.r0, newdata = data.frame(but.conc = He), se.fit = T)
-   fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
-   while(fn < 0 || fn > 1.00000){
+   if(He == 0) fn = 1 else{
+     init = predict(but.r0, newdata = data.frame(but.conc = He), se.fit = T)
      fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
    }
+   
+   if(fn < 0) fn = 0
+   if(fn > 1) fn = 1
+     
    return(fn)
  } #normalized to 1
  
@@ -464,11 +457,13 @@ plot(gafrep$but.conc, gafrep$but.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
          lty = 3, col = 2) 
  
    fN.gly.fx.uncertainty = function(He){
-     init = predict(gly.r0, newdata = data.frame(gly.conc = He), se.fit = T)
-     fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
-     while(fn < 0 || fn > 1){
+     if(He == 0) fn = 1 else{
+       init = predict(gly.r0, newdata = data.frame(gly.conc = He), se.fit = T)
        fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
      }
+     if(fn < 0) fn = 0
+     if(fn > 1) fn = 1
+     
      return(fn)
    } #normalized to 1
  
@@ -498,11 +493,13 @@ plot(gafrep$pen.conc, gafrep$pen.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
            lty = 3, col = 2) 
      
   fN.pen.fx.uncertainty = function(He){
-    init = predict(pen.r0, newdata = data.frame(pen.conc = He), se.fit = T)
-    fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
-    while(fn < 0 || fn > 1){
+    if(He == 0) fn = 1 else{
+      init = predict(pen.r0, newdata = data.frame(pen.conc = He), se.fit = T)
       fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
     }
+    if(fn > 1) fn = 1
+    if(fn < 0) fn = 0
+    
     return(fn)  
   } #normalized to 1
      
