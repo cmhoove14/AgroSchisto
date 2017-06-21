@@ -122,7 +122,7 @@ require(LW1949)
       muPq_chlor_Halstead_uncertainty = function(In){
         if(In == 0) mup = 0 else{
           init = predict(chlor.lwmod, newdata = data.frame(log10dose = log10(In)), se.fit = T)
-          mup = pnorm(rnorm(1, init$fit, init$se.fit))/4 #convert from 4-day endpoint to
+          mup = pnorm(rnorm(1, init$fit, init$se.fit))#
         }
         return(mup)
       }
@@ -186,7 +186,7 @@ terb.lw1949 = dataprep(dose = terb.sum$terb.c, ntot = terb.sum$terb.total, nfx =
 muPq_terb_Halstead_uncertainty = function(In){
   if(In == 0) mup = 0 else{
     init = predict(terb.lwmod, newdata = data.frame(log10dose = log10(In)), se.fit = T)
-    mup = pnorm(rnorm(1, init$fit, init$se.fit))/4 #convert from 4-day endpoint to daily
+    mup = pnorm(rnorm(1, init$fit, init$se.fit))# daily
   }
   return(mup)
 }
@@ -252,7 +252,7 @@ lamcy.lwmod = lm(cbitpfx ~ log10dose, data = lamcy.lw1949[lamcy.lw1949$LWkeep, ]
   muPq_lamcy_Halstead_uncertainty = function(In){
     if(In == 0) mup = 0 else{
       init = predict(lamcy.lwmod, newdata = data.frame(log10dose = log10(In)), se.fit = T)
-      mup = pnorm(rnorm(1, init$fit, init$se.fit))/4 #convert from 4-day endpoint to daily
+      mup = pnorm(rnorm(1, init$fit, init$se.fit))# daily
     }
     return(mup)
   }
@@ -316,7 +316,7 @@ esfen.lwmod = lm(cbitpfx ~ log10dose, data = esfen.lw1949[esfen.lw1949$LWkeep, ]
   muPq_esfen_Halstead_uncertainty = function(In){
     if(In == 0) mup = 0 else{
       init = predict(esfen.lwmod, newdata = data.frame(log10dose = log10(In)), se.fit = T)
-      mup = pnorm(rnorm(1, init$fit, init$se.fit))/4 #convert from 4-day endpoint to daily
+      mup = pnorm(rnorm(1, init$fit, init$se.fit))# daily
     }
     return(mup)
   }
@@ -380,7 +380,7 @@ perm.lwmod = lm(cbitpfx ~ log10dose, data = perm.lw1949[perm.lw1949$LWkeep, ])
 muPq_perm_Halstead_uncertainty = function(In){
   if(In == 0) mup = 0 else{
     init = predict(perm.lwmod, newdata = data.frame(log10dose = log10(In)), se.fit = T)
-    mup = pnorm(rnorm(1, init$fit, init$se.fit))/4 #convert from 4-day endpoint to daily
+    mup = pnorm(rnorm(1, init$fit, init$se.fit))# daily
   }
   return(mup)
 }

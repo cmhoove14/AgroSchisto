@@ -59,16 +59,137 @@ load('Review_models/r0_EECs/mal.eec.df.RData')
     mal.eec.df$relr0.up = mal.eec.df$r0.up / r0.fix()[3]
     mal.eec.df$relr0.lo = mal.eec.df$r0.lo / r0.fix()[3]
 
+
+
+#Load the 50%eec data frames ##########
+load('Review_models/r0_EECs/atr.0.5eec.df.RData')
+  atr.0.5eec.df = subset(atr.0.5eec.df, study != 'piC meta')
+  atr.0.5eec.df = atr.0.5eec.df[c(order(as.character(atr.0.5eec.df$Parameter)[-nrow(atr.0.5eec.df)]),nrow(atr.0.5eec.df)),]
+  #Get raw change in R0
+    atr.0.5eec.df$deltar0 = atr.0.5eec.df$r0 - r0.fix()[3]
+    atr.0.5eec.df$deltar0.up = atr.0.5eec.df$r0.up - r0.fix()[3]
+    atr.0.5eec.df$deltar0.lo = atr.0.5eec.df$r0.lo - r0.fix()[3]
+  #Get relevant change in R0
+    atr.0.5eec.df$relr0 = atr.0.5eec.df$r0 / r0.fix()[3]
+    atr.0.5eec.df$relr0.up = atr.0.5eec.df$r0.up / r0.fix()[3]
+    atr.0.5eec.df$relr0.lo = atr.0.5eec.df$r0.lo / r0.fix()[3]
+
+load('Review_models/r0_EECs/ch.0.5eec.df.RData')
+  ch.0.5eec.df = ch.0.5eec.df[c(order(as.character(ch.0.5eec.df$Parameter)[-nrow(ch.0.5eec.df)]),nrow(ch.0.5eec.df)),]
+  #Get raw change in R0
+    ch.0.5eec.df$deltar0 = ch.0.5eec.df$r0 - r0.fix()[3]
+    ch.0.5eec.df$deltar0.up = ch.0.5eec.df$r0.up - r0.fix()[3]
+    ch.0.5eec.df$deltar0.lo = ch.0.5eec.df$r0.lo - r0.fix()[3]
+  #Get relevant change in R0
+    ch.0.5eec.df$relr0 = ch.0.5eec.df$r0 / r0.fix()[3]
+    ch.0.5eec.df$relr0.up = ch.0.5eec.df$r0.up / r0.fix()[3]
+    ch.0.5eec.df$relr0.lo = ch.0.5eec.df$r0.lo / r0.fix()[3]
+
+load('Review_models/r0_EECs/gly.0.5eec.df.RData')
+  gly.0.5eec.df = subset(gly.0.5eec.df, study != 'Combined2')
+  gly.0.5eec.df = gly.0.5eec.df[c(order(as.character(gly.0.5eec.df$Parameter)[-nrow(gly.0.5eec.df)]),nrow(gly.0.5eec.df)),]
+  #Get raw change in R0
+    gly.0.5eec.df$deltar0 = gly.0.5eec.df$r0 - r0.fix()[3]
+    gly.0.5eec.df$deltar0.up = gly.0.5eec.df$r0.up - r0.fix()[3]
+    gly.0.5eec.df$deltar0.lo = gly.0.5eec.df$r0.lo - r0.fix()[3]
+  #Get relative change in R0
+    gly.0.5eec.df$relr0 = gly.0.5eec.df$r0 / r0.fix()[3]
+    gly.0.5eec.df$relr0.up = gly.0.5eec.df$r0.up / r0.fix()[3]
+    gly.0.5eec.df$relr0.lo = gly.0.5eec.df$r0.lo / r0.fix()[3]
+
+load('Review_models/r0_EECs/mal.0.5eec.df.RData')
+  mal.0.5eec.df = mal.0.5eec.df[c(order(as.character(mal.0.5eec.df$Parameter)[-nrow(mal.0.5eec.df)]),nrow(mal.0.5eec.df)),]
+  #Get raw change in r0
+    mal.0.5eec.df$deltar0 = mal.0.5eec.df$r0 - r0.fix()[3]
+    mal.0.5eec.df$deltar0.up = mal.0.5eec.df$r0.up - r0.fix()[3]
+    mal.0.5eec.df$deltar0.lo = mal.0.5eec.df$r0.lo - r0.fix()[3]
+  #Get relative change in r0  
+    mal.0.5eec.df$relr0 = mal.0.5eec.df$r0 / r0.fix()[3]
+    mal.0.5eec.df$relr0.up = mal.0.5eec.df$r0.up / r0.fix()[3]
+    mal.0.5eec.df$relr0.lo = mal.0.5eec.df$r0.lo / r0.fix()[3]
+
+
+#Load the 10%eec data frames ##########
+load('Review_models/r0_EECs/atr.0.1eec.df.RData')
+  atr.0.1eec.df = subset(atr.0.1eec.df, study != 'piC meta')
+  atr.0.1eec.df = atr.0.1eec.df[c(order(as.character(atr.0.1eec.df$Parameter)[-nrow(atr.0.1eec.df)]),nrow(atr.0.1eec.df)),]
+    #Get raw change in R0
+      atr.0.1eec.df$deltar0 = atr.0.1eec.df$r0 - r0.fix()[3]
+      atr.0.1eec.df$deltar0.up = atr.0.1eec.df$r0.up - r0.fix()[3]
+      atr.0.1eec.df$deltar0.lo = atr.0.1eec.df$r0.lo - r0.fix()[3]
+    #Get relevant change in R0
+      atr.0.1eec.df$relr0 = atr.0.1eec.df$r0 / r0.fix()[3]
+      atr.0.1eec.df$relr0.up = atr.0.1eec.df$r0.up / r0.fix()[3]
+      atr.0.1eec.df$relr0.lo = atr.0.1eec.df$r0.lo / r0.fix()[3]
+
+load('Review_models/r0_EECs/ch.0.1eec.df.RData')
+  ch.0.1eec.df = ch.0.1eec.df[c(order(as.character(ch.0.1eec.df$Parameter)[-nrow(ch.0.1eec.df)]),nrow(ch.0.1eec.df)),]
+    #Get raw change in R0
+      ch.0.1eec.df$deltar0 = ch.0.1eec.df$r0 - r0.fix()[3]
+      ch.0.1eec.df$deltar0.up = ch.0.1eec.df$r0.up - r0.fix()[3]
+      ch.0.1eec.df$deltar0.lo = ch.0.1eec.df$r0.lo - r0.fix()[3]
+    #Get relevant change in R0
+      ch.0.1eec.df$relr0 = ch.0.1eec.df$r0 / r0.fix()[3]
+      ch.0.1eec.df$relr0.up = ch.0.1eec.df$r0.up / r0.fix()[3]
+      ch.0.1eec.df$relr0.lo = ch.0.1eec.df$r0.lo / r0.fix()[3]
+
+load('Review_models/r0_EECs/gly.0.1eec.df.RData')
+  gly.0.1eec.df = subset(gly.0.1eec.df, study != 'Combined2')
+  gly.0.1eec.df = gly.0.1eec.df[c(order(as.character(gly.0.1eec.df$Parameter)[-nrow(gly.0.1eec.df)]),nrow(gly.0.1eec.df)),]
+    #Get raw change in R0
+      gly.0.1eec.df$deltar0 = gly.0.1eec.df$r0 - r0.fix()[3]
+      gly.0.1eec.df$deltar0.up = gly.0.1eec.df$r0.up - r0.fix()[3]
+      gly.0.1eec.df$deltar0.lo = gly.0.1eec.df$r0.lo - r0.fix()[3]
+    #Get relative change in R0
+      gly.0.1eec.df$relr0 = gly.0.1eec.df$r0 / r0.fix()[3]
+      gly.0.1eec.df$relr0.up = gly.0.1eec.df$r0.up / r0.fix()[3]
+      gly.0.1eec.df$relr0.lo = gly.0.1eec.df$r0.lo / r0.fix()[3]
+
+load('Review_models/r0_EECs/mal.0.1eec.df.RData')
+  mal.0.1eec.df = mal.0.1eec.df[c(order(as.character(mal.0.1eec.df$Parameter)[-nrow(mal.0.1eec.df)]),nrow(mal.0.1eec.df)),]
+    #Get raw change in r0
+      mal.0.1eec.df$deltar0 = mal.0.1eec.df$r0 - r0.fix()[3]
+      mal.0.1eec.df$deltar0.up = mal.0.1eec.df$r0.up - r0.fix()[3]
+      mal.0.1eec.df$deltar0.lo = mal.0.1eec.df$r0.lo - r0.fix()[3]
+    #Get relative change in r0  
+      mal.0.1eec.df$relr0 = mal.0.1eec.df$r0 / r0.fix()[3]
+      mal.0.1eec.df$relr0.up = mal.0.1eec.df$r0.up / r0.fix()[3]
+      mal.0.1eec.df$relr0.lo = mal.0.1eec.df$r0.lo / r0.fix()[3]
+
+
 #Data frames of values for forest plot ##############  
 #Df for raw values plot     
-vals.raw = data.frame(coef = c(NA,NA, atr.eec.df$deltar0,   NA, NA,ch.eec.df$deltar0,   NA, NA, gly.eec.df$deltar0,   NA, NA,mal.eec.df$deltar0),
-                      low =  c(NA,NA, atr.eec.df$deltar0.lo,NA, NA,ch.eec.df$deltar0.lo,NA, NA, gly.eec.df$deltar0.lo,NA, NA,mal.eec.df$deltar0.lo),
-                      high = c(NA,NA, atr.eec.df$deltar0.up,NA, NA,ch.eec.df$deltar0.up,NA, NA, gly.eec.df$deltar0.up,NA, NA,mal.eec.df$deltar0.up))
+vals.raw = data.frame(coef = c(NA,NA, atr.eec.df$deltar0,   
+                               NA,NA, ch.eec.df$deltar0,   
+                               NA,NA, gly.eec.df$deltar0,   
+                               NA,NA, mal.eec.df$deltar0),
+                      low =  c(NA,NA, atr.eec.df$deltar0.lo,
+                               NA,NA, ch.eec.df$deltar0.lo,
+                               NA,NA, gly.eec.df$deltar0.lo,
+                               NA,NA, mal.eec.df$deltar0.lo),
+                      high = c(NA,NA, atr.eec.df$deltar0.up,
+                               NA,NA, ch.eec.df$deltar0.up,
+                               NA,NA, gly.eec.df$deltar0.up,
+                               NA,NA, mal.eec.df$deltar0.up))
+      
+  vals.raw[which(vals.raw$low < -r0.fix()[3]), 2] = -r0.fix()[3] #No changes in r0 that imply r0<0
 
 #Df for relative values
-vals.rel = data.frame(coef = c(NA,NA, atr.eec.df$relr0,   NA, NA,ch.eec.df$relr0,   NA, NA, gly.eec.df$relr0,   NA, NA,mal.eec.df$relr0),
-                      low =  c(NA,NA, atr.eec.df$relr0.lo,NA, NA,ch.eec.df$relr0.lo,NA, NA, gly.eec.df$relr0.lo,NA, NA,mal.eec.df$relr0.lo),
-                      high = c(NA,NA, atr.eec.df$relr0.up,NA, NA,ch.eec.df$relr0.up,NA, NA, gly.eec.df$relr0.up,NA, NA,mal.eec.df$relr0.up))
+vals.rel = data.frame(coef = c(NA,NA, atr.eec.df$relr0,   
+                               NA,NA, ch.eec.df$relr0,   
+                               NA,NA, gly.eec.df$relr0,   
+                               NA,NA, mal.eec.df$relr0),
+                      low =  c(NA,NA, atr.eec.df$relr0.lo,
+                               NA,NA, ch.eec.df$relr0.lo,
+                               NA,NA, gly.eec.df$relr0.lo,
+                               NA,NA, mal.eec.df$relr0.lo),
+                      high = c(NA,NA, atr.eec.df$relr0.up,
+                               NA,NA, ch.eec.df$relr0.up,
+                               NA,NA, gly.eec.df$relr0.up,
+                               NA,NA, mal.eec.df$relr0.up))
+
+  vals.rel[which(vals.rel$low < 0), 2] = 0 #No changes in r0 that imply r0<0
+
 
 #Text list for forest plot ########
 tabtext =list(list('Study', 
@@ -147,7 +268,7 @@ tabtext =list(list('Study',
 )
 
 #Forest plots #########
-#With raw change in r0
+#With raw change in r0 at EEC values ######
 windows(width = 24, height = 15)
 forestplot(tabtext, 
            vals.raw,
@@ -173,7 +294,109 @@ forestplot(tabtext,
            clip=c(-Inf,Inf),
            xlab = expression(paste(Delta, R['0'])))
 
-#With relative change in r0
+#With raw change in r0 at both EEC and 10% EEC values #########
+windows(width = 24, height = 15)
+forestplot(tabtext, 
+           fn.ci_norm = c(fpDrawNormalCI, fpDrawCircleCI),
+           line.margin = 0.1,
+           mean = cbind(c(NA,NA, atr.eec.df$deltar0,   
+                          NA,NA, ch.eec.df$deltar0,   
+                          NA,NA, gly.eec.df$deltar0,   
+                          NA,NA, mal.eec.df$deltar0), 
+                        c(NA,NA, atr.0.1eec.df$deltar0,   
+                          NA,NA, ch.0.1eec.df$deltar0,   
+                          NA,NA, gly.0.1eec.df$deltar0,   
+                          NA,NA, mal.0.1eec.df$deltar0)),
+           lower =cbind(c(NA,NA, atr.eec.df$deltar0.lo,
+                          NA,NA, ch.eec.df$deltar0.lo,
+                          NA,NA, gly.eec.df$deltar0.lo,
+                          NA,NA, mal.eec.df$deltar0.lo),
+                        c(NA,NA, atr.0.1eec.df$deltar0.lo,
+                          NA,NA, ch.0.1eec.df$deltar0.lo,
+                          NA,NA, gly.0.1eec.df$deltar0.lo,
+                          NA,NA, mal.0.1eec.df$deltar0.lo)),
+           upper =cbind(c(NA,NA, atr.eec.df$deltar0.up,
+                          NA,NA, ch.eec.df$deltar0.up,
+                          NA,NA, gly.eec.df$deltar0.up,
+                          NA,NA, mal.eec.df$deltar0.up),
+                        c(NA,NA, atr.0.1eec.df$deltar0.up,
+                          NA,NA, ch.0.1eec.df$deltar0.up,
+                          NA,NA, gly.0.1eec.df$deltar0.up,
+                          NA,NA, mal.0.1eec.df$deltar0.up)),
+           new_page = TRUE,
+           is.summary=c(TRUE,TRUE,
+                        rep(FALSE,nrow(atr.eec.df)+1),
+                        TRUE,
+                        rep(FALSE,nrow(ch.eec.df)+1),
+                        TRUE,
+                        rep(FALSE,nrow(gly.eec.df)+1),
+                        TRUE,
+                        rep(FALSE,nrow(mal.eec.df)+1)),
+           hrzl_lines = list('2'= gpar(lwd = 1, col="black", columns = 1:3),
+                             '3'= gpar(col = 'grey'),
+                             '12'= gpar(col = 'grey'),
+                             '24'= gpar(col = 'grey'),
+                             '34'= gpar(col = 'grey')),
+           txt_gp = fpTxtGp(xlab = gpar(cex = 1.2),
+                            ticks = gpar(cex = 1.1)),
+           vertices = TRUE,
+           boxsize = 0.25,
+           col = fpColors(box = c('black', 'blue'), lines = 'black'),
+           clip=c(-Inf,Inf),
+           xlab = expression(paste(Delta, R['0'])))
+
+#With raw change in r0 at both EEC and 50% EEC values #########
+windows(width = 24, height = 15)
+forestplot(tabtext, 
+           fn.ci_norm = c(fpDrawNormalCI, fpDrawCircleCI),
+           line.margin = 0.1,
+           mean = cbind(c(NA,NA, atr.eec.df$deltar0,   
+                          NA,NA, ch.eec.df$deltar0,   
+                          NA,NA, gly.eec.df$deltar0,   
+                          NA,NA, mal.eec.df$deltar0), 
+                        c(NA,NA, atr.0.5eec.df$deltar0,   
+                          NA,NA, ch.0.5eec.df$deltar0,   
+                          NA,NA, gly.0.5eec.df$deltar0,   
+                          NA,NA, mal.0.5eec.df$deltar0)),
+           lower =cbind(c(NA,NA, atr.eec.df$deltar0.lo,
+                          NA,NA, ch.eec.df$deltar0.lo,
+                          NA,NA, gly.eec.df$deltar0.lo,
+                          NA,NA, mal.eec.df$deltar0.lo),
+                        c(NA,NA, atr.0.5eec.df$deltar0.lo,
+                          NA,NA, ch.0.5eec.df$deltar0.lo,
+                          NA,NA, gly.0.5eec.df$deltar0.lo,
+                          NA,NA, mal.0.5eec.df$deltar0.lo)),
+           upper =cbind(c(NA,NA, atr.eec.df$deltar0.up,
+                          NA,NA, ch.eec.df$deltar0.up,
+                          NA,NA, gly.eec.df$deltar0.up,
+                          NA,NA, mal.eec.df$deltar0.up),
+                        c(NA,NA, atr.0.5eec.df$deltar0.up,
+                          NA,NA, ch.0.5eec.df$deltar0.up,
+                          NA,NA, gly.0.5eec.df$deltar0.up,
+                          NA,NA, mal.0.5eec.df$deltar0.up)),
+           new_page = TRUE,
+           is.summary=c(TRUE,TRUE,
+                        rep(FALSE,nrow(atr.eec.df)+1),
+                        TRUE,
+                        rep(FALSE,nrow(ch.eec.df)+1),
+                        TRUE,
+                        rep(FALSE,nrow(gly.eec.df)+1),
+                        TRUE,
+                        rep(FALSE,nrow(mal.eec.df)+1)),
+           hrzl_lines = list('2'= gpar(lwd = 1, col="black", columns = 1:3),
+                             '3'= gpar(col = 'grey'),
+                             '12'= gpar(col = 'grey'),
+                             '24'= gpar(col = 'grey'),
+                             '34'= gpar(col = 'grey')),
+           txt_gp = fpTxtGp(xlab = gpar(cex = 1.2),
+                            ticks = gpar(cex = 1.1)),
+           vertices = TRUE,
+           boxsize = 0.25,
+           col = fpColors(box = c('black', 'darkred'), lines = 'black'),
+           clip=c(-Inf,Inf),
+           xlab = expression(paste(Delta, R['0'])))
+
+#With relative change in r0 at EEC values #############
 windows(width = 24, height = 15)
 forestplot(tabtext, 
            vals.rel,

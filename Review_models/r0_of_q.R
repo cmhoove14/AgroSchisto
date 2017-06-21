@@ -18,13 +18,13 @@ area = 200
 parameters=c(
   # Location parameters
   A = area,          # Area of site of interest, m^2
-  H = 300,      # Human population at site of interest (based on 300 people at 200m^2 water contact site from Sokolow PNAS)
+  H = 1.5*area,      # Human population at site of interest (based on 300 people at 200m^2 water contact site from Sokolow PNAS)
   Om = 1,            # degree of overlap between water contamination, snail, and human habitats
   
   # Snail reproductive parameters
   f_N = 0.60,        # Birth rate of adult snails (snails/reproductive snail/day, including survival to detection - more like a recruitment rate); 
-  #   from Woolhouse & Chandiwana et al. 1990 
-  phi_N = 1e4,   # Carrying capacity of snails (snails/m^2), from Sokolow et al. 2015
+                     #   from Woolhouse & Chandiwana et al. 1990 
+  phi_N = 50*area,   # Carrying capacity of snails (snails/m^2), from Sokolow et al. 2015
   z = 0.7,           # Fraction of exposed snails that reproduce
   
   # Snail mortality parameters
@@ -32,18 +32,19 @@ parameters=c(
   mu_I = 1/10,        # Additional mortality rate of shedding snails as a result of infection, from Sokolow et al. 2015
   
   # Predator pop dynamic parameters (from pred tweaking code)
-  f_P = 0.02,          #Predator intrinsic recruitment rate
-  phi_P = 25,  #Predator carrying capacity (0.125/m^2 from Sokolow et al realized predator density)
-  mu_P = 0.0026,       #Predator mortality rate
+  f_P = 0.82,         #Predator intrinsic recruitment rate assuming 30000 eggs per year and 1% survival from eggs to repro maturity
+                      #   from Adha-Ar et al 2016
+  phi_P = 0.125*area,   #Predator CC (0.125/m^2 from Sokolow et al realized predator density, discounted here for natural pop)
+  mu_P = 0.038,       #Predator mortality rate from Halstead et al paper
   
   # Predation parameters
-  alpha = 0.003,     # predator attack rate on snails
-  Th = 1/14,         # Predator handling time
+  alpha = 8/area,    # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; discounted for large area
+  Th = 0.05,         # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
   nn = 1,            # exponent of the Holling's type III functional response
   
   # miracidia parameters
   m = 432,           # Miracidial shedding rate per adult female worm assuming 0.36 eggs/mL urine and 1200 mL urine per person per day
-  v = 0.084,         # Egg viability of S. haematobium (i.e. miracidia/egg)
+  v = 0.084,         # Egg viability of S. haematobium (i.e. miracidia/egg) from Halstead et al
   pi_M = 1,          # Miracidial infectivity parameter
   
   # cercariae parameters
@@ -131,7 +132,7 @@ r0.In = function(In = 0,
   if(N.eq<0){N.eq = 0}
   
   #Equilibrium predation rate estimate
-  psi.eq = alpha_q/(1+alpha*Th*N.eq)
+  psi.eq = (alpha_q)/(1+alpha*Th*N.eq)
   
   #R_0 of q estimate
   r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
@@ -191,14 +192,14 @@ r0.He = function(He = 0,
 
     if(P.eq<0){P.eq = 0}
 
-#Equilibrium estimate of N given snail parameters
+  #Equilibrium estimate of N given snail parameters
   N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
                          c(0, as.numeric(phi_Nq))))
-
-    if(N.eq<0){N.eq = 0}
-
-#Equilibrium predation rate estimate
-  psi.eq = alpha_q/(1+alpha*Th*N.eq)
+  
+  if(N.eq<0){N.eq = 0}
+  
+  #Equilibrium predation rate estimate
+  psi.eq = (alpha_q)/(1+alpha*Th*N.eq)
 
 #R_0 of q estimate
   r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
@@ -257,15 +258,15 @@ r0.Fe = function(Fe = 0,
 
     if(P.eq<0){P.eq = 0}
 
-#Equilibrium estimate of N given snail parameters
+  #Equilibrium estimate of N given snail parameters
   N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
                          c(0, as.numeric(phi_Nq))))
-
-    if(N.eq<0){N.eq = 0}
-
-#Equilibrium predation rate estimate
-  psi.eq = alpha_q/(1+alpha*Th*N.eq)
-
+  
+  if(N.eq<0){N.eq = 0}
+  
+  #Equilibrium predation rate estimate
+  psi.eq = (alpha_q)/(1+alpha*Th*N.eq)
+  
 #R_0 of q estimate
   r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
               (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
@@ -323,13 +324,13 @@ P.eq = phi_P*(1 - muPq/f_P)
   if(P.eq<0){P.eq = 0}
 
 #Equilibrium estimate of N given snail parameters
-  N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
-                         c(0, as.numeric(phi_Nq))))
+N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
+                       c(0, as.numeric(phi_Nq))))
 
-  if(N.eq<0){N.eq = 0}
+if(N.eq<0){N.eq = 0}
 
 #Equilibrium predation rate estimate
-  psi.eq = alpha_q/(1+alpha*Th*N.eq)
+psi.eq = (alpha_q)/(1+alpha*Th*N.eq)
 
 #R_0 of q estimate
   r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
@@ -478,7 +479,7 @@ N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alp
 if(N.eq<0){N.eq = 0}
 
 #Equilibrium predation rate estimate
-psi.eq = alpha_q/(1+alpha*Th*N.eq)
+psi.eq = (alpha_q)/(1+alpha*Th*N.eq)
 
 #R_0 of q estimate
 r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
@@ -502,33 +503,33 @@ for(i in 1:length(pred.dens)){
   
   parameters['phi_P'] = 0.125*area
   
-r0.In(In = 0)  #R0 = 4.01: coexistence of snail population, pred population, and disease @ pred density of 0.1/m^2
+r0.In(In = 0)  #R0 = 3.07: coexistence of snail population, pred population, and disease @ pred density of 0.1/m^2
 
 #influence of various mortality rates on r0 ###############
 mup.dens = seq(0,1,0.01) - parameters['mu_P']
 r0.mup = as.numeric()
 
 for(i in 1:length(mup.dens)){
-  parameters['mu_P'] = mup.dens[i]+2.600000e-03
+  parameters['mu_P'] = mup.dens[i]+0.038
   r0.mup[i] = r0.In(In = 0)[3]
 }
 
 plot(mup.dens, r0.mup, type = 'l', lwd = 2, xlab = 'pred mortality rate', ylab = 'R0')
 
-#What if we increase birth rate?
-  parameters['mu_P'] = 2.600000e-03
-  parameters['f_P'] = 0.2 #increase by an order of magnitude
-  
-r0.mup2 = as.numeric()
+parameters['mu_P'] = 0.038 #Reset mortality rate to original
 
-for(i in 1:length(mup.dens)){
-  parameters['mu_P'] = mup.dens[i]+2.600000e-03
-  r0.mup2[i] = r0.In(In = 0)[3]
+#influence of various snail carrying capacities on r0 ###############
+phin.dens = seq(1e4, 1e5, 1e2)
+r0.phin = as.numeric()
+
+for(i in 1:length(phin.dens)){
+  parameters['phi_N'] = phin.dens[i]
+  r0.phin[i] = r0.In(In = 0)[3]
 }
 
-  parameters['mu_P'] = 2.600000e-03 #reset predator mortality rate, but keep increased fertility rate
-  
-plot(mup.dens, r0.mup2, type = 'l', lwd = 2, xlab = 'pred mortality rate', ylab = 'R0')
+plot(phin.dens, r0.phin, type = 'l', lwd = 2, xlab = 'snail carrying capacity', ylab = 'R0')
+
+parameters['phi_N'] = 1e4 #Reset carrying capacity to original rate to original
 
 #Influence of variable beta and lambda on r0 #################
 beta.vec = seq(1e-9, 1e-5, length.out = 1000)

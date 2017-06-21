@@ -47,9 +47,15 @@ clusterExport(clus1, c(keep.fin.ch, 'uniroot.all', 'rdrm', 'LL.2', 'L.4', 'LL.3'
 r0.ch.eec = matrix(data = NA, nrow = nsims, ncol = length(parfx)+1)
 par.ch.eec = matrix(data = NA, nrow = nsims, ncol = length(parfx))
 
+r0.ch.0.5eec = matrix(data = NA, nrow = nsims, ncol = length(parfx)+1)
+par.ch.0.5eec = matrix(data = NA, nrow = nsims, ncol = length(parfx))
+
+r0.ch.0.1eec = matrix(data = NA, nrow = nsims, ncol = length(parfx)+1)
+par.ch.0.1eec = matrix(data = NA, nrow = nsims, ncol = length(parfx))
+
 set.seed(0)
 
-  #Fill r0 estimates   ########
+  #Fill r0 estimates for EEC runs   ########
     #individual parameters #########
       r0.ch.eec[, 1] = parSapply(clus1, conc.ch, r0.In, f.mu_Pq = muPq_chlor_Halstead_uncertainty)[3,]
       r0.ch.eec[, 2] = parSapply(clus1, conc.ch, r0.In, f.mu_Pq = muPq_chlor_satapornvanit09_uncertainty)[3,]
@@ -69,7 +75,7 @@ set.seed(0)
                                       f.pi_Cq = piC_ch_Hash11_uncertainty,
                                       f.mu_Pq = muPq_chlor_Halstead_uncertainty)[3,]
   
-  #fill parameter values #######
+  #fill parameter values at EEC#######
     par.ch.eec[, 1] = parSapply(clus1, conc.ch, muPq_chlor_Halstead_uncertainty)
     par.ch.eec[, 2] = parSapply(clus1, conc.ch, muPq_chlor_satapornvanit09_uncertainty)
     par.ch.eec[, 3] = parSapply(clus1, conc.ch, psi_q_chlor_satapornvanit09_uncertainty)
@@ -80,31 +86,149 @@ set.seed(0)
     par.ch.eec[, 8] = parSapply(clus1, conc.ch, fN.hash.chlor.uncertainty)
     par.ch.eec[, 9] = parSapply(clus1, conc.ch, f_N_chlor_ibr92_uncertainty)
     
+#Fill r0 estimates for 50% EEC runs   ########
+  #individual parameters #########
+    r0.ch.0.5eec[, 1] = parSapply(clus1, conc.ch*0.5, r0.In, f.mu_Pq = muPq_chlor_Halstead_uncertainty)[3,]
+    r0.ch.0.5eec[, 2] = parSapply(clus1, conc.ch*0.5, r0.In, f.mu_Pq = muPq_chlor_satapornvanit09_uncertainty)[3,]
+    r0.ch.0.5eec[, 3] = parSapply(clus1, conc.ch*0.5, r0.In, f.alpha_q = psi_q_chlor_satapornvanit09_uncertainty)[3,]
+    r0.ch.0.5eec[, 4] = parSapply(clus1, conc.ch*0.5, r0.In, f.pi_Cq = piC_ch_Hash11_uncertainty)[3,]
+    r0.ch.0.5eec[, 5] = parSapply(clus1, conc.ch*0.5, r0.In, f.pi_Mq = piM_ch_Hash11_uncertainty)[3,]
+    r0.ch.0.5eec[, 6] = parSapply(clus1, conc.ch*0.5, r0.In, f.mu_Nq = muNq_ch_hash11_uncertainty)[3,]
+    r0.ch.0.5eec[, 7] = parSapply(clus1, conc.ch*0.5, r0.In, f.mu_Nq = mu_N_chlor_ibr92_uncertainty)[3,]
+    r0.ch.0.5eec[, 8] = parSapply(clus1, conc.ch*0.5, r0.In, f.f_Nq = fN.hash.chlor.uncertainty)[3,]
+    r0.ch.0.5eec[, 9] = parSapply(clus1, conc.ch*0.5, r0.In, f.f_Nq = f_N_chlor_ibr92_uncertainty)[3,]
+
+  #final run with chosen parameters ######
+    r0.ch.0.5eec[, 10] = parSapply(clus1, conc.ch*0.5, r0.In,
+                                   f.mu_Nq = muNq_ch_hash11_uncertainty,
+                                   f.f_Nq = f_N_chlor_ibr92_uncertainty,
+                                   f.pi_Mq = piM_ch_Hash11_uncertainty,
+                                   f.pi_Cq = piC_ch_Hash11_uncertainty,
+                                   f.mu_Pq = muPq_chlor_Halstead_uncertainty)[3,]
+
+  #fill parameter values for 50% EEC runs #######
+    par.ch.0.5eec[, 1] = parSapply(clus1, conc.ch*0.5, muPq_chlor_Halstead_uncertainty)
+    par.ch.0.5eec[, 2] = parSapply(clus1, conc.ch*0.5, muPq_chlor_satapornvanit09_uncertainty)
+    par.ch.0.5eec[, 3] = parSapply(clus1, conc.ch*0.5, psi_q_chlor_satapornvanit09_uncertainty)
+    par.ch.0.5eec[, 4] = parSapply(clus1, conc.ch*0.5, piC_ch_Hash11_uncertainty)
+    par.ch.0.5eec[, 5] = parSapply(clus1, conc.ch*0.5, piM_ch_Hash11_uncertainty)
+    par.ch.0.5eec[, 6] = parSapply(clus1, conc.ch*0.5, muNq_ch_hash11_uncertainty)
+    par.ch.0.5eec[, 7] = parSapply(clus1, conc.ch*0.5, mu_N_chlor_ibr92_uncertainty)
+    par.ch.0.5eec[, 8] = parSapply(clus1, conc.ch*0.5, fN.hash.chlor.uncertainty)
+    par.ch.0.5eec[, 9] = parSapply(clus1, conc.ch*0.5, f_N_chlor_ibr92_uncertainty)
+
+
+      
+#Fill r0 estimates for 10% EEC runs   ########
+  #individual parameters #########
+    r0.ch.0.1eec[, 1] = parSapply(clus1, conc.ch*0.1, r0.In, f.mu_Pq = muPq_chlor_Halstead_uncertainty)[3,]
+    r0.ch.0.1eec[, 2] = parSapply(clus1, conc.ch*0.1, r0.In, f.mu_Pq = muPq_chlor_satapornvanit09_uncertainty)[3,]
+    r0.ch.0.1eec[, 3] = parSapply(clus1, conc.ch*0.1, r0.In, f.alpha_q = psi_q_chlor_satapornvanit09_uncertainty)[3,]
+    r0.ch.0.1eec[, 4] = parSapply(clus1, conc.ch*0.1, r0.In, f.pi_Cq = piC_ch_Hash11_uncertainty)[3,]
+    r0.ch.0.1eec[, 5] = parSapply(clus1, conc.ch*0.1, r0.In, f.pi_Mq = piM_ch_Hash11_uncertainty)[3,]
+    r0.ch.0.1eec[, 6] = parSapply(clus1, conc.ch*0.1, r0.In, f.mu_Nq = muNq_ch_hash11_uncertainty)[3,]
+    r0.ch.0.1eec[, 7] = parSapply(clus1, conc.ch*0.1, r0.In, f.mu_Nq = mu_N_chlor_ibr92_uncertainty)[3,]
+    r0.ch.0.1eec[, 8] = parSapply(clus1, conc.ch*0.1, r0.In, f.f_Nq = fN.hash.chlor.uncertainty)[3,]
+    r0.ch.0.1eec[, 9] = parSapply(clus1, conc.ch*0.1, r0.In, f.f_Nq = f_N_chlor_ibr92_uncertainty)[3,]
+  
+  #final run with chosen parameters ######
+    r0.ch.0.1eec[, 10] = parSapply(clus1, conc.ch*0.1, r0.In,
+                                f.mu_Nq = muNq_ch_hash11_uncertainty,
+                                f.f_Nq = f_N_chlor_ibr92_uncertainty,
+                                f.pi_Mq = piM_ch_Hash11_uncertainty,
+                                f.pi_Cq = piC_ch_Hash11_uncertainty,
+                                f.mu_Pq = muPq_chlor_Halstead_uncertainty)[3,]
+  
+  #fill parameter values for 10% EEC runs #######
+    par.ch.0.1eec[, 1] = parSapply(clus1, conc.ch*0.1, muPq_chlor_Halstead_uncertainty)
+    par.ch.0.1eec[, 2] = parSapply(clus1, conc.ch*0.1, muPq_chlor_satapornvanit09_uncertainty)
+    par.ch.0.1eec[, 3] = parSapply(clus1, conc.ch*0.1, psi_q_chlor_satapornvanit09_uncertainty)
+    par.ch.0.1eec[, 4] = parSapply(clus1, conc.ch*0.1, piC_ch_Hash11_uncertainty)
+    par.ch.0.1eec[, 5] = parSapply(clus1, conc.ch*0.1, piM_ch_Hash11_uncertainty)
+    par.ch.0.1eec[, 6] = parSapply(clus1, conc.ch*0.1, muNq_ch_hash11_uncertainty)
+    par.ch.0.1eec[, 7] = parSapply(clus1, conc.ch*0.1, mu_N_chlor_ibr92_uncertainty)
+    par.ch.0.1eec[, 8] = parSapply(clus1, conc.ch*0.1, fN.hash.chlor.uncertainty)
+    par.ch.0.1eec[, 9] = parSapply(clus1, conc.ch*0.1, f_N_chlor_ibr92_uncertainty)
   
 stopCluster(clus1)
 ########## Post process ############ 
+#EEC runs
 ch.eec.df = data.frame(chem = rep('Chlorpyrifos', length(parfx)+1),
-                       study = c('Halstead et al, 2015', 'Satapornvanit et al, 2009', 'Satapornvanit et al, 2009',
-                                  rep('Hasheesh & Mohamed, 2011', 3), 'Ibrahim et al, 1992', 
-                                  'Hasheesh & Mohamed, 2011', 'Ibrahim et al, 1992', 'Combined'),
+                       study = c('Halstead et al, 2015', rep('Satapornvanit et al, 2009', 2),
+                                 rep('Hasheesh & Mohamed, 2011', 3), 'Ibrahim et al, 1992', 
+                                 'Hasheesh & Mohamed, 2011', 'Ibrahim et al, 1992', 'Combined'),
                        Species = c('Procambarus clarkii', rep('Macrobrachium rosenbergii', 2), 
                                    rep('schistosoma haematobium', 2), 'Bulinus truncatus', 'Biomphalaria alexandrina',
                                    'Bulinus truncatus', 'Biomphalaria alexandrina', NA),
-                       Parameter = c('muP', 'muP', 'psiP', 'piC', 'piM',
+                       Parameter = c('muP',  'muP',  'psiP', 'piC', 'piM',
                                       'muN', 'muN', 'fN', 'fN', 'Combined'),
                        r0 = c(mean(r0.ch.eec[, 1]), mean(r0.ch.eec[, 2]), mean(r0.ch.eec[, 3]),
-                               mean(r0.ch.eec[, 4]), mean(r0.ch.eec[, 5]), mean(r0.ch.eec[, 6]),
-                               mean(r0.ch.eec[, 7]), mean(r0.ch.eec[, 8]), mean(r0.ch.eec[, 9]),
-                               mean(r0.ch.eec[, 10])),
+                              mean(r0.ch.eec[, 4]), mean(r0.ch.eec[, 5]), mean(r0.ch.eec[, 6]),
+                              mean(r0.ch.eec[, 7]), mean(r0.ch.eec[, 8]), mean(r0.ch.eec[, 9]),
+                              mean(r0.ch.eec[, 10])),
                        r0.sd = c(sd(r0.ch.eec[, 1]), sd(r0.ch.eec[, 2]), sd(r0.ch.eec[, 3]),
-                                  sd(r0.ch.eec[, 4]), sd(r0.ch.eec[, 5]), sd(r0.ch.eec[, 6]),
-                                  sd(r0.ch.eec[, 7]), sd(r0.ch.eec[, 8]), sd(r0.ch.eec[, 9]),
-                                  sd(r0.ch.eec[, 10])),
+                                 sd(r0.ch.eec[, 4]), sd(r0.ch.eec[, 5]), sd(r0.ch.eec[, 6]),
+                                 sd(r0.ch.eec[, 7]), sd(r0.ch.eec[, 8]), sd(r0.ch.eec[, 9]),
+                                 sd(r0.ch.eec[, 10])),
                        par.mean = c(mean(par.ch.eec[, 1]), mean(par.ch.eec[, 2]), mean(par.ch.eec[, 3]),
-                                     mean(par.ch.eec[, 4]), mean(par.ch.eec[, 5]), mean(par.ch.eec[, 6]),
-                                     mean(par.ch.eec[, 7]), mean(par.ch.eec[, 8]), mean(par.ch.eec[, 9]), 0))
+                                    mean(par.ch.eec[, 4]), mean(par.ch.eec[, 5]), mean(par.ch.eec[, 6]),
+                                    mean(par.ch.eec[, 7]), mean(par.ch.eec[, 8]), mean(par.ch.eec[, 9]),0))
 
 ch.eec.df$r0.up = ch.eec.df$r0 + ch.eec.df$r0.sd
 ch.eec.df$r0.lo = ch.eec.df$r0 - ch.eec.df$r0.sd
 
 save(ch.eec.df, file = 'Review_models/r0_EECs/ch.eec.df.RData')
+
+#10% EEC runs
+ch.0.5eec.df = data.frame(chem = rep('Chlorpyrifos', length(parfx)+1),
+                          study = c('Halstead et al, 2015', rep('Satapornvanit et al, 2009', 2),
+                                    rep('Hasheesh & Mohamed, 2011', 3), 'Ibrahim et al, 1992', 
+                                    'Hasheesh & Mohamed, 2011', 'Ibrahim et al, 1992', 'Combined'),
+                          Species = c('Procambarus clarkii', rep('Macrobrachium rosenbergii', 2), 
+                                      rep('schistosoma haematobium', 2), 'Bulinus truncatus', 'Biomphalaria alexandrina',
+                                      'Bulinus truncatus', 'Biomphalaria alexandrina', NA),
+                          Parameter = c('muP',  'muP',  'psiP', 'piC', 'piM',
+                                        'muN', 'muN', 'fN', 'fN', 'Combined'),
+                          r0 = c(mean(r0.ch.0.5eec[, 1]), mean(r0.ch.0.5eec[, 2]), mean(r0.ch.0.5eec[, 3]),
+                                 mean(r0.ch.0.5eec[, 4]), mean(r0.ch.0.5eec[, 5]), mean(r0.ch.0.5eec[, 6]),
+                                 mean(r0.ch.0.5eec[, 7]), mean(r0.ch.0.5eec[, 8]), mean(r0.ch.0.5eec[, 9]),
+                                 mean(r0.ch.0.5eec[, 10])),
+                          r0.sd = c(sd(r0.ch.0.5eec[, 1]), sd(r0.ch.0.5eec[, 2]), sd(r0.ch.0.5eec[, 3]),
+                                    sd(r0.ch.0.5eec[, 4]), sd(r0.ch.0.5eec[, 5]), sd(r0.ch.0.5eec[, 6]),
+                                    sd(r0.ch.0.5eec[, 7]), sd(r0.ch.0.5eec[, 8]), sd(r0.ch.0.5eec[, 9]),
+                                    sd(r0.ch.0.5eec[, 10])),
+                          par.mean = c(mean(par.ch.0.5eec[, 1]), mean(par.ch.0.5eec[, 2]), mean(par.ch.0.5eec[, 3]),
+                                       mean(par.ch.0.5eec[, 4]), mean(par.ch.0.5eec[, 5]), mean(par.ch.0.5eec[, 6]),
+                                       mean(par.ch.0.5eec[, 7]), mean(par.ch.0.5eec[, 8]), mean(par.ch.0.5eec[, 9]),0))
+
+ch.0.5eec.df$r0.up = ch.0.5eec.df$r0 + ch.0.5eec.df$r0.sd
+ch.0.5eec.df$r0.lo = ch.0.5eec.df$r0 - ch.0.5eec.df$r0.sd
+
+save(ch.0.5eec.df, file = 'Review_models/r0_EECs/ch.0.5eec.df.RData')
+
+#10% EEC runs
+ch.0.1eec.df = data.frame(chem = rep('Chlorpyrifos', length(parfx)+1),
+                       study = c('Halstead et al, 2015', rep('Satapornvanit et al, 2009', 2),
+                                 rep('Hasheesh & Mohamed, 2011', 3), 'Ibrahim et al, 1992', 
+                                 'Hasheesh & Mohamed, 2011', 'Ibrahim et al, 1992', 'Combined'),
+                       Species = c('Procambarus clarkii', rep('Macrobrachium rosenbergii', 2), 
+                                   rep('schistosoma haematobium', 2), 'Bulinus truncatus', 'Biomphalaria alexandrina',
+                                   'Bulinus truncatus', 'Biomphalaria alexandrina', NA),
+                       Parameter = c('muP',  'muP',  'psiP', 'piC', 'piM',
+                                     'muN', 'muN', 'fN', 'fN', 'Combined'),
+                       r0 = c(mean(r0.ch.0.1eec[, 1]), mean(r0.ch.0.1eec[, 2]), mean(r0.ch.0.1eec[, 3]),
+                              mean(r0.ch.0.1eec[, 4]), mean(r0.ch.0.1eec[, 5]), mean(r0.ch.0.1eec[, 6]),
+                              mean(r0.ch.0.1eec[, 7]), mean(r0.ch.0.1eec[, 8]), mean(r0.ch.0.1eec[, 9]),
+                              mean(r0.ch.0.1eec[, 10])),
+                       r0.sd = c(sd(r0.ch.0.1eec[, 1]), sd(r0.ch.0.1eec[, 2]), sd(r0.ch.0.1eec[, 3]),
+                                 sd(r0.ch.0.1eec[, 4]), sd(r0.ch.0.1eec[, 5]), sd(r0.ch.0.1eec[, 6]),
+                                 sd(r0.ch.0.1eec[, 7]), sd(r0.ch.0.1eec[, 8]), sd(r0.ch.0.1eec[, 9]),
+                                 sd(r0.ch.0.1eec[, 10])),
+                       par.mean = c(mean(par.ch.0.1eec[, 1]), mean(par.ch.0.1eec[, 2]), mean(par.ch.0.1eec[, 3]),
+                                    mean(par.ch.0.1eec[, 4]), mean(par.ch.0.1eec[, 5]), mean(par.ch.0.1eec[, 6]),
+                                    mean(par.ch.0.1eec[, 7]), mean(par.ch.0.1eec[, 8]), mean(par.ch.0.1eec[, 9]),0))
+
+ch.0.1eec.df$r0.up = ch.0.1eec.df$r0 + ch.0.1eec.df$r0.sd
+ch.0.1eec.df$r0.lo = ch.0.1eec.df$r0 - ch.0.1eec.df$r0.sd
+
+save(ch.0.1eec.df, file = 'Review_models/r0_EECs/ch.0.1eec.df.RData')

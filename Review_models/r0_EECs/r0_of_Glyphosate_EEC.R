@@ -43,9 +43,15 @@ clusterExport(clus1, c(keep.fin.gly, 'uniroot.all', 'rdrm', 'LL.2', 'LL.4'))
 r0.gly.eec = matrix(data = NA, nrow = nsims, ncol = length(parfx)+2)
 par.gly.eec = matrix(data = NA, nrow = nsims, ncol = length(parfx))
 
+r0.gly.0.5eec = matrix(data = NA, nrow = nsims, ncol = length(parfx)+2)
+par.gly.0.5eec = matrix(data = NA, nrow = nsims, ncol = length(parfx))
+
+r0.gly.0.1eec = matrix(data = NA, nrow = nsims, ncol = length(parfx)+2)
+par.gly.0.1eec = matrix(data = NA, nrow = nsims, ncol = length(parfx))
+
 set.seed(0)
 
-  #Fill r0 estimates ######
+  #Fill r0 estimates for EEC runs######
     #individual parameters
     r0.gly.eec[, 1] = parSapply(clus1, conc.gly, r0.He, f.pi_Mq = piM.ghaf_gly.exp_unc)[3,]
     r0.gly.eec[, 2] = parSapply(clus1, conc.gly, r0.He, f.pi_Cq = piC.ghaf_gly.exp_unc)[3,]
@@ -65,7 +71,7 @@ set.seed(0)
                                 f.pi_Cq = piC.ghaf_gly.exp_unc,
                                 f.mu_Nq = mu_Nq_gly_gaf16_uncertainty)[3,]
 
-  #Store parameter values   #######
+  #Store parameter values for EEC runs  #######
     par.gly.eec[, 1] = parSapply(clus1, conc.gly, piM.ghaf_gly.exp_unc)
     par.gly.eec[, 2] = parSapply(clus1, conc.gly, piC.ghaf_gly.exp_unc)
     par.gly.eec[, 3] = parSapply(clus1, conc.gly, mu_Nq_gly_gaf16_uncertainty)
@@ -73,10 +79,71 @@ set.seed(0)
     par.gly.eec[, 5] = parSapply(clus1, conc.gly, muNq_gly_Bakry12_uncertainty)
     par.gly.eec[, 6] = parSapply(clus1, conc.gly, fN.gly.bak.uncertainty)
     par.gly.eec[, 7] = parSapply(clus1, conc.gly, ons.munq.gly)
+    
+  
+  #Fill r0 estimates for 50% EEC runs######
+    #individual parameters
+    r0.gly.0.5eec[, 1] = parSapply(clus1, conc.gly*0.5, r0.He, f.pi_Mq = piM.ghaf_gly.exp_unc)[3,]
+    r0.gly.0.5eec[, 2] = parSapply(clus1, conc.gly*0.5, r0.He, f.pi_Cq = piC.ghaf_gly.exp_unc)[3,]
+    r0.gly.0.5eec[, 3] = parSapply(clus1, conc.gly*0.5, r0.He, f.mu_Nq = mu_Nq_gly_gaf16_uncertainty)[3,]
+    r0.gly.0.5eec[, 4] = parSapply(clus1, conc.gly*0.5, r0.He, f.f_Nq = fN.gly.fx.uncertainty)[3,]
+    r0.gly.0.5eec[, 5] = parSapply(clus1, conc.gly*0.5, r0.He, f.mu_Nq = muNq_gly_Bakry12_uncertainty)[3,]
+    r0.gly.0.5eec[, 6] = parSapply(clus1, conc.gly*0.5, r0.He, f.f_Nq = fN.gly.bak.uncertainty)[3,]
+    r0.gly.0.5eec[, 7] = parSapply(clus1, conc.gly*0.5, r0.He, f.mu_Nq = ons.munq.gly)[3,]
+    
+    r0.gly.0.5eec[, 8] = parSapply(clus1, conc.gly*0.5, r0.He,
+                                   f.pi_Mq = piM.ghaf_gly.exp_unc,
+                                   f.pi_Cq = piC.ghaf_gly.exp_unc,
+                                   f.mu_Nq = mu_Nq_gly_gaf16_uncertainty,
+                                   f.f_Nq = fN.gly.fx.uncertainty)[3,]
+    r0.gly.0.5eec[, 9] = parSapply(clus1, conc.gly*0.5, r0.He,
+                                   f.pi_Mq = piM.ghaf_gly.exp_unc,
+                                   f.pi_Cq = piC.ghaf_gly.exp_unc,
+                                   f.mu_Nq = mu_Nq_gly_gaf16_uncertainty)[3,]
+  
+  #Store parameter values for 50% EEC runs  #######
+    par.gly.0.5eec[, 1] = parSapply(clus1, conc.gly*0.5, piM.ghaf_gly.exp_unc)
+    par.gly.0.5eec[, 2] = parSapply(clus1, conc.gly*0.5, piC.ghaf_gly.exp_unc)
+    par.gly.0.5eec[, 3] = parSapply(clus1, conc.gly*0.5, mu_Nq_gly_gaf16_uncertainty)
+    par.gly.0.5eec[, 4] = parSapply(clus1, conc.gly*0.5, fN.gly.fx.uncertainty)
+    par.gly.0.5eec[, 5] = parSapply(clus1, conc.gly*0.5, muNq_gly_Bakry12_uncertainty)
+    par.gly.0.5eec[, 6] = parSapply(clus1, conc.gly*0.5, fN.gly.bak.uncertainty)
+    par.gly.0.5eec[, 7] = parSapply(clus1, conc.gly*0.5, ons.munq.gly)
+  
+    
+  #Fill r0 estimates for 10% EEC runs######
+    #individual parameters
+    r0.gly.0.1eec[, 1] = parSapply(clus1, conc.gly*0.1, r0.He, f.pi_Mq = piM.ghaf_gly.exp_unc)[3,]
+    r0.gly.0.1eec[, 2] = parSapply(clus1, conc.gly*0.1, r0.He, f.pi_Cq = piC.ghaf_gly.exp_unc)[3,]
+    r0.gly.0.1eec[, 3] = parSapply(clus1, conc.gly*0.1, r0.He, f.mu_Nq = mu_Nq_gly_gaf16_uncertainty)[3,]
+    r0.gly.0.1eec[, 4] = parSapply(clus1, conc.gly*0.1, r0.He, f.f_Nq = fN.gly.fx.uncertainty)[3,]
+    r0.gly.0.1eec[, 5] = parSapply(clus1, conc.gly*0.1, r0.He, f.mu_Nq = muNq_gly_Bakry12_uncertainty)[3,]
+    r0.gly.0.1eec[, 6] = parSapply(clus1, conc.gly*0.1, r0.He, f.f_Nq = fN.gly.bak.uncertainty)[3,]
+    r0.gly.0.1eec[, 7] = parSapply(clus1, conc.gly*0.1, r0.He, f.mu_Nq = ons.munq.gly)[3,]
+    
+    r0.gly.0.1eec[, 8] = parSapply(clus1, conc.gly*0.1, r0.He,
+                                f.pi_Mq = piM.ghaf_gly.exp_unc,
+                                f.pi_Cq = piC.ghaf_gly.exp_unc,
+                                f.mu_Nq = mu_Nq_gly_gaf16_uncertainty,
+                                f.f_Nq = fN.gly.fx.uncertainty)[3,]
+    r0.gly.0.1eec[, 9] = parSapply(clus1, conc.gly*0.1, r0.He,
+                                f.pi_Mq = piM.ghaf_gly.exp_unc,
+                                f.pi_Cq = piC.ghaf_gly.exp_unc,
+                                f.mu_Nq = mu_Nq_gly_gaf16_uncertainty)[3,]
+    
+  #Store parameter values for 10% EEC runs  #######
+    par.gly.0.1eec[, 1] = parSapply(clus1, conc.gly*0.1, piM.ghaf_gly.exp_unc)
+    par.gly.0.1eec[, 2] = parSapply(clus1, conc.gly*0.1, piC.ghaf_gly.exp_unc)
+    par.gly.0.1eec[, 3] = parSapply(clus1, conc.gly*0.1, mu_Nq_gly_gaf16_uncertainty)
+    par.gly.0.1eec[, 4] = parSapply(clus1, conc.gly*0.1, fN.gly.fx.uncertainty)
+    par.gly.0.1eec[, 5] = parSapply(clus1, conc.gly*0.1, muNq_gly_Bakry12_uncertainty)
+    par.gly.0.1eec[, 6] = parSapply(clus1, conc.gly*0.1, fN.gly.bak.uncertainty)
+    par.gly.0.1eec[, 7] = parSapply(clus1, conc.gly*0.1, ons.munq.gly)
 
 stopCluster(clus1)
  
 ########## Post process ############
+#EEC runs
 gly.eec.df = data.frame(chem = rep('Glyphosate', length(parfx)+2),
                         study = c(rep('Abdel-Ghaffar et al, 2016',4), rep('Bakry et al, 2012',2),
                                   'Omran & Salama 2013', 'Combined', 'Combined2'),
@@ -96,3 +163,45 @@ gly.eec.df$r0.up = gly.eec.df$r0 + gly.eec.df$r0.sd
 gly.eec.df$r0.lo = gly.eec.df$r0 - gly.eec.df$r0.sd
 
 save(gly.eec.df, file = 'Review_models/r0_EECs/gly.eec.df.RData')
+
+#50% EEC runs
+gly.0.5eec.df = data.frame(chem = rep('Glyphosate', length(parfx)+2),
+                           study = c(rep('Abdel-Ghaffar et al, 2016',4), rep('Bakry et al, 2012',2),
+                                     'Omran & Salama 2013', 'Combined', 'Combined2'),
+                           Species = c(rep('Schistosoma mansoni',2), rep('Biomphalaria alexandrina',5), NA, NA),
+                           Parameter = c('piM', 'piC', 'muN', 'fN', 'muN', 'fN', 'muN', 'Combined', 'Combined2'),
+                           r0 = c(mean(r0.gly.0.5eec[, 1]), mean(r0.gly.0.5eec[, 2]), mean(r0.gly.0.5eec[, 3]),
+                                  mean(r0.gly.0.5eec[, 4]), mean(r0.gly.0.5eec[, 5]), mean(r0.gly.0.5eec[, 6]),
+                                  mean(r0.gly.0.5eec[, 7]), mean(r0.gly.0.5eec[, 8]), mean(r0.gly.0.5eec[, 9])),
+                           r0.sd = c(sd(r0.gly.0.5eec[, 1]), sd(r0.gly.0.5eec[, 2]), sd(r0.gly.0.5eec[, 3]),
+                                     sd(r0.gly.0.5eec[, 4]), sd(r0.gly.0.5eec[, 5]), sd(r0.gly.0.5eec[, 6]),
+                                     sd(r0.gly.0.5eec[, 7]), sd(r0.gly.0.5eec[, 8]), sd(r0.gly.0.5eec[, 9])),
+                           par.mean = c(mean(par.gly.0.5eec[, 1]), mean(par.gly.0.5eec[, 2]), mean(par.gly.0.5eec[, 3]),
+                                        mean(par.gly.0.5eec[, 4]), mean(par.gly.0.5eec[, 5]), mean(par.gly.0.5eec[, 6]),
+                                        mean(par.gly.0.5eec[, 7]), 0, 0))
+
+gly.0.5eec.df$r0.up = gly.0.5eec.df$r0 + gly.0.5eec.df$r0.sd
+gly.0.5eec.df$r0.lo = gly.0.5eec.df$r0 - gly.0.5eec.df$r0.sd
+
+save(gly.0.5eec.df, file = 'Review_models/r0_EECs/gly.0.5eec.df.RData')
+
+#10% EEC runs
+gly.0.1eec.df = data.frame(chem = rep('Glyphosate', length(parfx)+2),
+                        study = c(rep('Abdel-Ghaffar et al, 2016',4), rep('Bakry et al, 2012',2),
+                                  'Omran & Salama 2013', 'Combined', 'Combined2'),
+                        Species = c(rep('Schistosoma mansoni',2), rep('Biomphalaria alexandrina',5), NA, NA),
+                        Parameter = c('piM', 'piC', 'muN', 'fN', 'muN', 'fN', 'muN', 'Combined', 'Combined2'),
+                        r0 = c(mean(r0.gly.0.1eec[, 1]), mean(r0.gly.0.1eec[, 2]), mean(r0.gly.0.1eec[, 3]),
+                               mean(r0.gly.0.1eec[, 4]), mean(r0.gly.0.1eec[, 5]), mean(r0.gly.0.1eec[, 6]),
+                               mean(r0.gly.0.1eec[, 7]), mean(r0.gly.0.1eec[, 8]), mean(r0.gly.0.1eec[, 9])),
+                        r0.sd = c(sd(r0.gly.0.1eec[, 1]), sd(r0.gly.0.1eec[, 2]), sd(r0.gly.0.1eec[, 3]),
+                                  sd(r0.gly.0.1eec[, 4]), sd(r0.gly.0.1eec[, 5]), sd(r0.gly.0.1eec[, 6]),
+                                  sd(r0.gly.0.1eec[, 7]), sd(r0.gly.0.1eec[, 8]), sd(r0.gly.0.1eec[, 9])),
+                        par.mean = c(mean(par.gly.0.1eec[, 1]), mean(par.gly.0.1eec[, 2]), mean(par.gly.0.1eec[, 3]),
+                                     mean(par.gly.0.1eec[, 4]), mean(par.gly.0.1eec[, 5]), mean(par.gly.0.1eec[, 6]),
+                                     mean(par.gly.0.1eec[, 7]), 0, 0))
+
+gly.0.1eec.df$r0.up = gly.0.1eec.df$r0 + gly.0.1eec.df$r0.sd
+gly.0.1eec.df$r0.lo = gly.0.1eec.df$r0 - gly.0.1eec.df$r0.sd
+
+save(gly.0.1eec.df, file = 'Review_models/r0_EECs/gly.0.1eec.df.RData')

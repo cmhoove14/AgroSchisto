@@ -36,7 +36,7 @@ Th.use = 0.067
 
 for(i in 1:length(dens)){
   N = dens[i]
-  psis1[i] = (alpha*(N^1)) / (1+alpha*Th.use*(N^1))
+  psis1[i] = (alpha*((N/200)^1)) / (1+alpha*Th.use*((N/200)^1))
 }
 
 for(i in 1:length(dens)){

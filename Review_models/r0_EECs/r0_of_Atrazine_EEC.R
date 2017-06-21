@@ -44,9 +44,15 @@ clusterExport(clus1, c(keep.fin.atr, 'uniroot.all', 'rdrm', 'LL.2'))
 r0.atr.eec = matrix(data = NA, nrow = nsims, ncol = length(parfx)+1)
 par.atr.eec = matrix(data = NA, nrow = nsims, ncol = length(parfx))
 
+r0.atr.0.5eec = matrix(data = NA, nrow = nsims, ncol = length(parfx)+1)
+par.atr.0.5eec = matrix(data = NA, nrow = nsims, ncol = length(parfx))
+
+r0.atr.0.1eec = matrix(data = NA, nrow = nsims, ncol = length(parfx)+1)
+par.atr.0.1eec = matrix(data = NA, nrow = nsims, ncol = length(parfx))
+
 set.seed(0)
 
-   #Fill r0 estimates ######
+   #Fill r0 estimates for EEC runs ######
     #individual parameters
     r0.atr.eec[, 1] = parSapply(clus1, conc.atr, r0.He, f.pi_Cq = piC.meta_atr_unc)[3,]
     r0.atr.eec[, 2] = parSapply(clus1, conc.atr, r0.He, f.pi_Cq = piC.grg08_atr_unc)[3,]
@@ -60,7 +66,7 @@ set.seed(0)
                                      f.mu_Nq = ons.munq.atr,
                                      f.pi_Cq = piC.atr.rohr08.lin,
                                      f.phi_Nq = phi_Nq_atr_baxrohr.no30)[3,]
-  #Store parameter values   #######
+  #Store parameter values for EEC runs  #######
     par.atr.eec[, 1] = parSapply(clus1, conc.atr, piC.meta_atr_unc)
     par.atr.eec[, 2] = parSapply(clus1, conc.atr, piC.grg08_atr_unc)
     par.atr.eec[, 3] = parSapply(clus1, conc.atr, piC.kop_atr_unc2)
@@ -69,10 +75,58 @@ set.seed(0)
     par.atr.eec[, 6] = parSapply(clus1, conc.atr, phi_Nq_atr_baxrohr.no30)
     par.atr.eec[, 7] = parSapply(clus1, conc.atr, ons.munq.atr)
     
-
+  #Fill r0 estimates for 50%EEC runs ######
+    #individual parameters
+    r0.atr.0.5eec[, 1] = parSapply(clus1, conc.atr*0.5, r0.He, f.pi_Cq = piC.meta_atr_unc)[3,]
+    r0.atr.0.5eec[, 2] = parSapply(clus1, conc.atr*0.5, r0.He, f.pi_Cq = piC.grg08_atr_unc)[3,]
+    r0.atr.0.5eec[, 3] = parSapply(clus1, conc.atr*0.5, r0.He, f.pi_Cq = piC.kop_atr_unc2)[3,]
+    r0.atr.0.5eec[, 4] = parSapply(clus1, conc.atr*0.5, r0.He, f.pi_Cq = piC.atr.rohr08.lin)[3,]
+    r0.atr.0.5eec[, 5] = parSapply(clus1, conc.atr*0.5, r0.He, f.mu_Nq = muNq_atr_Bakry12_uncertainty)[3,]
+    r0.atr.0.5eec[, 6] = parSapply(clus1, conc.atr*0.5, r0.He, f.phi_Nq = phi_Nq_atr_baxrohr.no30)[3,]
+    r0.atr.0.5eec[, 7] = parSapply(clus1, conc.atr*0.5, r0.He, f.mu_Nq = ons.munq.atr)[3,]
+    
+    r0.atr.0.5eec[, 8] = parSapply(clus1, conc.atr*0.5, r0.He,
+                                   f.mu_Nq = ons.munq.atr,
+                                   f.pi_Cq = piC.atr.rohr08.lin,
+                                   f.phi_Nq = phi_Nq_atr_baxrohr.no30)[3,]
+  
+  #Store parameter values for 50%EEC runs  #######
+    par.atr.0.5eec[, 1] = parSapply(clus1, conc.atr*0.5, piC.meta_atr_unc)
+    par.atr.0.5eec[, 2] = parSapply(clus1, conc.atr*0.5, piC.grg08_atr_unc)
+    par.atr.0.5eec[, 3] = parSapply(clus1, conc.atr*0.5, piC.kop_atr_unc2)
+    par.atr.0.5eec[, 4] = parSapply(clus1, conc.atr*0.5, piC.atr.rohr08.lin)
+    par.atr.0.5eec[, 5] = parSapply(clus1, conc.atr*0.5, muNq_atr_Bakry12_uncertainty)
+    par.atr.0.5eec[, 6] = parSapply(clus1, conc.atr*0.5, phi_Nq_atr_baxrohr.no30)
+    par.atr.0.5eec[, 7] = parSapply(clus1, conc.atr*0.5, ons.munq.atr)
+    
+  #Fill r0 estimates for 10%EEC runs ######
+    #individual parameters
+    r0.atr.0.1eec[, 1] = parSapply(clus1, conc.atr*0.1, r0.He, f.pi_Cq = piC.meta_atr_unc)[3,]
+    r0.atr.0.1eec[, 2] = parSapply(clus1, conc.atr*0.1, r0.He, f.pi_Cq = piC.grg08_atr_unc)[3,]
+    r0.atr.0.1eec[, 3] = parSapply(clus1, conc.atr*0.1, r0.He, f.pi_Cq = piC.kop_atr_unc2)[3,]
+    r0.atr.0.1eec[, 4] = parSapply(clus1, conc.atr*0.1, r0.He, f.pi_Cq = piC.atr.rohr08.lin)[3,]
+    r0.atr.0.1eec[, 5] = parSapply(clus1, conc.atr*0.1, r0.He, f.mu_Nq = muNq_atr_Bakry12_uncertainty)[3,]
+    r0.atr.0.1eec[, 6] = parSapply(clus1, conc.atr*0.1, r0.He, f.phi_Nq = phi_Nq_atr_baxrohr.no30)[3,]
+    r0.atr.0.1eec[, 7] = parSapply(clus1, conc.atr*0.1, r0.He, f.mu_Nq = ons.munq.atr)[3,]
+    
+    r0.atr.0.1eec[, 8] = parSapply(clus1, conc.atr*0.1, r0.He,
+                                f.mu_Nq = ons.munq.atr,
+                                f.pi_Cq = piC.atr.rohr08.lin,
+                                f.phi_Nq = phi_Nq_atr_baxrohr.no30)[3,]
+    
+  #Store parameter values for 10%EEC runs  #######
+    par.atr.0.1eec[, 1] = parSapply(clus1, conc.atr*0.1, piC.meta_atr_unc)
+    par.atr.0.1eec[, 2] = parSapply(clus1, conc.atr*0.1, piC.grg08_atr_unc)
+    par.atr.0.1eec[, 3] = parSapply(clus1, conc.atr*0.1, piC.kop_atr_unc2)
+    par.atr.0.1eec[, 4] = parSapply(clus1, conc.atr*0.1, piC.atr.rohr08.lin)
+    par.atr.0.1eec[, 5] = parSapply(clus1, conc.atr*0.1, muNq_atr_Bakry12_uncertainty)
+    par.atr.0.1eec[, 6] = parSapply(clus1, conc.atr*0.1, phi_Nq_atr_baxrohr.no30)
+    par.atr.0.1eec[, 7] = parSapply(clus1, conc.atr*0.1, ons.munq.atr)
+    
 stopCluster(clus1)
  
 ########## Post process ############
+#EEC data frame of results
 atr.eec.df = data.frame(chem = rep('Atrazine', length(parfx)+1),
                         study = c('piC meta', 'Griggs & Belden, 2008', 'Koprivnikar et al, 2007',
                                   'Rohr et al, 2008', 'Bakry et al, 2012', 'Rohr et al, 2012',
@@ -95,3 +149,51 @@ atr.eec.df$r0.up = atr.eec.df$r0 + atr.eec.df$r0.sd
 atr.eec.df$r0.lo = atr.eec.df$r0 - atr.eec.df$r0.sd
 
 save(atr.eec.df, file = 'Review_models/r0_EECs/atr.eec.df.RData')
+
+#50% EEC data frame of results
+atr.0.5eec.df = data.frame(chem = rep('Atrazine', length(parfx)+1),
+                           study = c('piC meta', 'Griggs & Belden, 2008', 'Koprivnikar et al, 2007',
+                                     'Rohr et al, 2008', 'Bakry et al, 2012', 'Rohr et al, 2012',
+                                     'Omran & Salama, 2013', 'Combined'),
+                           Species = c(rep('Echinistoma trivolvis', 4), 'Biomphalaria alexandrina',
+                                       'Physella spp.', 'Biomphalaria alexandrina', NA), 
+                           Parameter = c('piC', 'piC', 'piC', 'piC',
+                                         'muN', 'phiN', 'muN', 'Combined'),
+                           r0 = c(mean(r0.atr.0.5eec[, 1]), mean(r0.atr.0.5eec[, 2]), mean(r0.atr.0.5eec[, 3]),
+                                  mean(r0.atr.0.5eec[, 4]), mean(r0.atr.0.5eec[, 5]), mean(r0.atr.0.5eec[, 6]),
+                                  mean(r0.atr.0.5eec[, 7]), mean(r0.atr.0.5eec[, 8])),
+                           r0.sd = c(sd(r0.atr.0.5eec[, 1]), sd(r0.atr.0.5eec[, 2]), sd(r0.atr.0.5eec[, 3]),
+                                     sd(r0.atr.0.5eec[, 4]), sd(r0.atr.0.5eec[, 5]), sd(r0.atr.0.5eec[, 6]),
+                                     sd(r0.atr.0.5eec[, 7]), sd(r0.atr.0.5eec[, 8])),
+                           par.mean = c(mean(par.atr.0.5eec[, 1]), mean(par.atr.0.5eec[, 2]), mean(par.atr.0.5eec[, 3]),
+                                        mean(par.atr.0.5eec[, 4]), mean(par.atr.0.5eec[, 5]), mean(par.atr.0.5eec[, 6]),
+                                        mean(par.atr.0.5eec[, 7]), 0))
+
+atr.0.5eec.df$r0.up = atr.0.5eec.df$r0 + atr.0.5eec.df$r0.sd
+atr.0.5eec.df$r0.lo = atr.0.5eec.df$r0 - atr.0.5eec.df$r0.sd
+
+save(atr.0.5eec.df, file = 'Review_models/r0_EECs/atr.0.5eec.df.RData')
+
+#10% EEC data frame of results
+atr.0.1eec.df = data.frame(chem = rep('Atrazine', length(parfx)+1),
+                        study = c('piC meta', 'Griggs & Belden, 2008', 'Koprivnikar et al, 2007',
+                                  'Rohr et al, 2008', 'Bakry et al, 2012', 'Rohr et al, 2012',
+                                  'Omran & Salama, 2013', 'Combined'),
+                        Species = c(rep('Echinistoma trivolvis', 4), 'Biomphalaria alexandrina',
+                                    'Physella spp.', 'Biomphalaria alexandrina', NA), 
+                        Parameter = c('piC', 'piC', 'piC', 'piC',
+                                      'muN', 'phiN', 'muN', 'Combined'),
+                        r0 = c(mean(r0.atr.0.1eec[, 1]), mean(r0.atr.0.1eec[, 2]), mean(r0.atr.0.1eec[, 3]),
+                               mean(r0.atr.0.1eec[, 4]), mean(r0.atr.0.1eec[, 5]), mean(r0.atr.0.1eec[, 6]),
+                               mean(r0.atr.0.1eec[, 7]), mean(r0.atr.0.1eec[, 8])),
+                        r0.sd = c(sd(r0.atr.0.1eec[, 1]), sd(r0.atr.0.1eec[, 2]), sd(r0.atr.0.1eec[, 3]),
+                                  sd(r0.atr.0.1eec[, 4]), sd(r0.atr.0.1eec[, 5]), sd(r0.atr.0.1eec[, 6]),
+                                  sd(r0.atr.0.1eec[, 7]), sd(r0.atr.0.1eec[, 8])),
+                        par.mean = c(mean(par.atr.0.1eec[, 1]), mean(par.atr.0.1eec[, 2]), mean(par.atr.0.1eec[, 3]),
+                                     mean(par.atr.0.1eec[, 4]), mean(par.atr.0.1eec[, 5]), mean(par.atr.0.1eec[, 6]),
+                                     mean(par.atr.0.1eec[, 7]), 0))
+
+atr.0.1eec.df$r0.up = atr.0.1eec.df$r0 + atr.0.1eec.df$r0.sd
+atr.0.1eec.df$r0.lo = atr.0.1eec.df$r0 - atr.0.1eec.df$r0.sd
+
+save(atr.0.1eec.df, file = 'Review_models/r0_EECs/atr.0.1eec.df.RData')
