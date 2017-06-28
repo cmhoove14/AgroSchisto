@@ -1,5 +1,6 @@
 require(ggplot2)
 require(drc)
+require(LW1949)
 
 #24-hr mortality functions for predator (macrobrachium) populations from Satapornvanit et al chemosphere paper ########
   sap.mort<-read.csv("C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Predator Mortality/satapornvanit2009_m.rosenbergii_mort.csv")

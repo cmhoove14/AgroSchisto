@@ -78,7 +78,7 @@ par.labs = c(expression(paste('Snail mortality rate (', italic(mu[N]),')')), #ax
              expression(paste('Predator attack rate (', italic(alpha),')')),
              expression(paste('Miracidial survival (', italic(pi[M]),')')),
              expression(paste('Cercarial survival (', italic(pi[C]),')')),
-             expression(paste('Cercarial shedding rate of infected snails (', italic(theta),')')))
+             expression(paste('Cercarial shedding rate (', italic(theta),')')))
 
 sens.bar = ggplot(r0.sens, aes(x = var, y = rel.hi)) +
             theme_bw()+
@@ -92,3 +92,11 @@ sens.bar = ggplot(r0.sens, aes(x = var, y = rel.hi)) +
             labs(title = expression(paste('Sensitivity of R'[0], ' to Agrochemically Influenced Parameters')), 
                  y = expression(paste(Delta, 'R'[0], ' (%)'), sep = ''), 
                  x = 'Parameter')
+
+windows(width = 20, height = 12)
+sens.bar
+
+#plot to get legend
+plot(r0.sens$high, r0.sens$rel.hi)
+  legend('right', legend = c('Doubled', 'Halved'), title = 'Parameter Value',
+         lwd = 25, lty = 2, col = c(4,2), bty = 'n', cex = 3)

@@ -9,13 +9,15 @@
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
 
-load('Review_models/Savio/Atrazine/r0_atrazine_savio.RData')
-load('Review_models/Savio/Malathion/r0_malathion_savio.RData')
-load('Review_models/Savio/Chlorpyrifos/r0_chlorpyrifos_savio.RData')
+load('Review_models/Savio/Atrazine/r0_Atr_6-26-17.RData')
+load('Review_models/Savio/Malathion/r0_Mal_6-26-17.RData')
+load('Review_models/Savio/Chlorpyrifos/r0_Chlor_6-26-17.RData')
+load('Review_models/Savio/Glyphosate/r0_Gly_6-26-17.RData')
 
   keepers = c('conc.atr','conc.atr.means.r0', 'conc.atr.sds.r0','r0.atr.fix.n0',  
               'conc.ch', 'conc.ch.means.r0', 'conc.ch.sds.r0',
               'conc.mal', 'conc.mal.means.r0', 'conc.mal.sds.r0','r0.mal.fix.n0', 
+              'conc.gly', 'conc.gly.means.r0', 'conc.gly.sds.r0',
               'parameters','r0.He', 'r0.In','nil1', 'nil0')
   
   rm(list = setdiff(ls(), keepers))
@@ -23,8 +25,9 @@ load('Review_models/Savio/Chlorpyrifos/r0_chlorpyrifos_savio.RData')
 require(rootSolve)
 require(ggplot2)
   rec.atr = 102*2   #From Halstead et al Nature Comm 2017 table S6
-  rec.mal = 28*2    #From Halstead et al Chemosphere 2015 table S1
+  rec.mal = 583*2    #From Halstead et al Chemosphere 2015 table S1
   rec.ch = 64*2   #From Halstead et al Nature Comm 2017 table S6
+  rec.gly = 3700*2
 
 #Make gg compatible df for atrazine results #############
 atrm = matrix(ncol = 5, nrow = length(conc.atr)*4)
@@ -77,8 +80,8 @@ atrm = matrix(ncol = 5, nrow = length(conc.atr)*4)
 gatr<-ggplot(atr.ggpars) +
       theme_bw() +
       theme(legend.position = 'bottom', legend.direction = 'vertical') +
-      xlim(0,2000) +
-      ylim(-4,4) +
+      xlim(0,1000) +
+      ylim(-4,5) +
       labs(title = expression(paste('Component effects of Atrazine on ', 'R'[0])),
            x = 'Atrazine (ppb)',
            y = expression(paste(Delta, R[0]))) +
@@ -255,8 +258,82 @@ gch
 #gch + geom_point(data = r0.ch.gg, aes(x = ch, y = r0 - r0.In(0)[3], shape = Observed), size = 2)
 
 
-#Plot atrazine, malathion, and chlorpyrifos component effects as facets ################
-  comp = rbind(atr.ggpars, mal.ggpars, ch.ggpars)
+#Make gg compatible df for chlorpyrifos results #############     
+glym = matrix(ncol = 5, nrow = length(conc.gly)*8)
+colnames(glym) = c('conc','Modeled','val','UL', 'LL')
+
+glym[,1] = rep(conc.gly, 8)
+glym[,2] = c(rep('Miracidial mortality', length(conc.gly)),   #from Halstead 2015
+            rep('Cercarial mortality', length(conc.gly)),   #from Satapornvanit
+            rep('Snail mortality (Abdel-Ghaffar)', length(conc.gly)), #from Satapornvanit 
+            rep('Snail reproduction (Abdel-Ghaffar)', length(conc.gly)),  #from Hasheesh 2011
+            rep('Snail mortality (Bakry)', length(conc.gly)), #from Hasheesh 2011
+            rep('Snail reproduction (Bakry)', length(conc.gly)),      #from Hasheesh 2011
+            rep('Snail mortality (Omran & Salama)', length(conc.gly)),   #From Ibrahim 1992
+            rep('all', length(conc.gly)))                  #combined
+
+#fill miracidial mortality from Abdel Ghaffar  *******************************************************************************
+glym[c(1:length(conc.gly)),3] = conc.gly.means.r0[,1] - r0.In(0)[3]
+glym[c(1:length(conc.gly)),4] = conc.gly.means.r0[,1] - r0.In(0)[3] + conc.gly.sds.r0[,1]
+glym[c(1:length(conc.gly)),5] = conc.gly.means.r0[,1] - r0.In(0)[3] - conc.gly.sds.r0[,1]
+#fill cercarial mortality from Abdel Ghaffar  ******************************************************************************
+glym[c((length(conc.gly)+1):(length(conc.gly)*2)),3] = conc.gly.means.r0[,2] - r0.In(0)[3]
+glym[c((length(conc.gly)+1):(length(conc.gly)*2)),4] = conc.gly.means.r0[,2] - r0.In(0)[3] + conc.gly.sds.r0[,2]
+glym[c((length(conc.gly)+1):(length(conc.gly)*2)),5] = conc.gly.means.r0[,2] - r0.In(0)[3] - conc.gly.sds.r0[,2]
+#fill snail mortality from Abdel Ghaffar ******************************************************************************
+glym[c((2*length(conc.gly)+1):(length(conc.gly)*3)),3] = conc.gly.means.r0[,3] - r0.In(0)[3]
+glym[c((2*length(conc.gly)+1):(length(conc.gly)*3)),4] = conc.gly.means.r0[,3] - r0.In(0)[3] + conc.gly.sds.r0[,3]
+glym[c((2*length(conc.gly)+1):(length(conc.gly)*3)),5] = conc.gly.means.r0[,3] - r0.In(0)[3] - conc.gly.sds.r0[,3]
+#fill snail reproduction reduction from Abdel Ghaffar ******************************************************************************
+glym[c((3*length(conc.gly)+1):(length(conc.gly)*4)),3] = conc.gly.means.r0[,4] - r0.In(0)[3]
+glym[c((3*length(conc.gly)+1):(length(conc.gly)*4)),4] = conc.gly.means.r0[,4] - r0.In(0)[3] + conc.gly.sds.r0[,4]
+glym[c((3*length(conc.gly)+1):(length(conc.gly)*4)),5] = conc.gly.means.r0[,4] - r0.In(0)[3] - conc.gly.sds.r0[,4]
+#fill snail mortality from Bakry ******************************************************************************
+glym[c((4*length(conc.gly)+1):(length(conc.gly)*5)),3] = conc.gly.means.r0[,5] - r0.In(0)[3]
+glym[c((4*length(conc.gly)+1):(length(conc.gly)*5)),4] = conc.gly.means.r0[,5] - r0.In(0)[3] + conc.gly.sds.r0[,5]
+glym[c((4*length(conc.gly)+1):(length(conc.gly)*5)),5] = conc.gly.means.r0[,5] - r0.In(0)[3] - conc.gly.sds.r0[,5]
+#fill snail reproduction reduction from Bakry  ******************************************************************************
+glym[c((5*length(conc.gly)+1):(length(conc.gly)*6)),3] = conc.gly.means.r0[,6] - r0.In(0)[3]
+glym[c((5*length(conc.gly)+1):(length(conc.gly)*6)),4] = conc.gly.means.r0[,6] - r0.In(0)[3] + conc.gly.sds.r0[,6]
+glym[c((5*length(conc.gly)+1):(length(conc.gly)*6)),5] = conc.gly.means.r0[,6] - r0.In(0)[3] - conc.gly.sds.r0[,6]
+#fill snail mortality from Omran & Salama  ******************************************************************************
+glym[c((6*length(conc.gly)+1):(length(conc.gly)*7)),3] = conc.gly.means.r0[,9] - r0.In(0)[3]
+glym[c((6*length(conc.gly)+1):(length(conc.gly)*7)),4] = conc.gly.means.r0[,9] - r0.In(0)[3] + conc.gly.sds.r0[,9]
+glym[c((6*length(conc.gly)+1):(length(conc.gly)*7)),5] = conc.gly.means.r0[,9] - r0.In(0)[3] - conc.gly.sds.r0[,9]
+#fill combo of all  ******************************************************************************  
+glym[c((7*length(conc.gly)+1):(length(conc.gly)*8)),3] = conc.gly.means.r0[,19] - r0.In(0)[3]
+glym[c((7*length(conc.gly)+1):(length(conc.gly)*8)),4] = conc.gly.means.r0[,19] - r0.In(0)[3] + conc.gly.sds.r0[,19]
+glym[c((7*length(conc.gly)+1):(length(conc.gly)*8)),5] = conc.gly.means.r0[,19] - r0.In(0)[3] - conc.gly.sds.r0[,19]
+
+gly.gg<-as.data.frame(glym, stringsAsFactors = FALSE)
+gly.gg$conc<-as.numeric(gly.gg$conc)
+gly.gg$val<-as.numeric(gly.gg$val)
+gly.gg$UL<-as.numeric(gly.gg$UL)
+gly.gg$LL<-as.numeric(gly.gg$LL)
+
+gly.ggpars = subset(gly.gg, Modeled != 'all') 
+gly.ggpars$Chemical = 'Glyphosate'
+gly.ggall = subset(gly.gg, Modeled == 'all')
+gly.ggall$Chemical = 'Glyphosate'
+gly.ggall$rec = gly.ggall$conc / rec.gly
+
+#Plot glyphosate component effects############        
+ggly<-ggplot(gly.ggpars) +
+  theme_bw() +
+  theme(legend.position = 'bottom', legend.direction = 'horizontal', legend.title = element_blank()) +
+  xlim(0,4000) +
+  ylim(-5,5) +
+  labs(title = expression(paste('Component effects of Glyphosate on ', 'R'[0])),
+       x = 'Glyphosate (ppb)',
+       y = expression(paste(Delta, R[0]))) +
+  geom_hline(yintercept = 0, lty=2) + 
+  geom_ribbon(aes(x = conc, ymin = LL, ymax = UL, fill = Modeled), alpha = 0.4) +
+  geom_line(aes(x = conc, y = val, col = Modeled), size = 1)
+
+ggly    
+
+#Plot atrazine, malathion, chlorpyrifos, and glyphosate component effects as facets ################
+comp = rbind(atr.ggpars, mal.ggpars, ch.ggpars, gly.ggpars)
   gcomp = ggplot(data = comp) +
     facet_grid(. ~ Chemical, scales = 'free_x') +
     theme_bw() +
@@ -272,13 +349,13 @@ gch
   
   gcomp
     
-#Plot atrazine, malathion, and chlorpyrifos combined effects together ###########
-  comb = rbind(atr.ggall, mal.ggall, ch.ggall)
+#Plot atrazine, malathion, chlorpyrifos, and glyphosate combined effects together ###########
+comb = rbind(atr.ggall, mal.ggall, ch.ggall, gly.ggall)
   gall<-ggplot(comb) +
     theme_bw() +
     theme(legend.position = 'bottom', legend.direction = 'horizontal', legend.title = element_blank(),
           plot.title = element_text(hjust = 0.5)) +
-    scale_x_continuous(breaks = c(0,1,2), labels = c('0', 'REC','2REC'), limits = c(0,2.1)) +
+    scale_x_continuous(breaks = c(0,1,2), labels = c('0', 'EEC','2x EEC'), limits = c(0,2.0)) +
     ylim(-4,4) +
     labs(title = expression(paste('Combined agrochemical effects on ', 'R'[0])),
          x = 'Normalized Agrochemical Concentration',

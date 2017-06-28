@@ -297,6 +297,8 @@ forestplot(tabtext,
 #With raw change in r0 at both EEC and 10% EEC values #########
 windows(width = 24, height = 15)
 forestplot(tabtext, 
+           legend_args = fpLegend(pos = list(x = 0.5, y = 0.98)),
+           legend = c('EEC', '10% EEC'),
            fn.ci_norm = c(fpDrawNormalCI, fpDrawCircleCI),
            line.margin = 0.1,
            mean = cbind(c(NA,NA, atr.eec.df$deltar0,   
@@ -340,7 +342,7 @@ forestplot(tabtext,
            txt_gp = fpTxtGp(xlab = gpar(cex = 1.2),
                             ticks = gpar(cex = 1.1)),
            vertices = TRUE,
-           boxsize = 0.25,
+           boxsize = 0.3,
            col = fpColors(box = c('black', 'blue'), lines = 'black'),
            clip=c(-Inf,Inf),
            xlab = expression(paste(Delta, R['0'])))
