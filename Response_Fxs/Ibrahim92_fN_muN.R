@@ -100,9 +100,8 @@ par.tricks.ibr.muN = c(coef(ibr_muNq),
     
   mu_N_chlor_ibr92_uncertainty<-function(In){
     if(In == 0) mun = 0 else{
-      mun = rdrm(nosim = 1, fct = L.4(), mpar = par.tricks.ibr.muN, yerror = 'rbinom', xerror = In,
-               ypar = 30)$y / 30 - snail.mort$mort[1]
-      if(mun < 0) mun = 0
+      init = predict(ibr_muNq, data.frame(dose = In), se.fit = T)
+      mun = rnorm(1, init[1], init[2]) - snail.mort$mort[1]
     }
     return(mun)
   }
@@ -114,4 +113,4 @@ par.tricks.ibr.muN = c(coef(ibr_muNq),
       legend('bottomright', pch = c(16, 5), legend = c('Obs. points', 'Est. points'), col = c(1,4),
              cex = 0.7)
       
-keep.ibr.ch = c(keep.ibr.fn.ch, 'mu_N_chlor_ibr92_uncertainty', 'par.tricks.ibr.muN', 'snail.mort')      
+keep.ibr.ch = c(keep.ibr.fn.ch, 'mu_N_chlor_ibr92_uncertainty', 'ibr_muNq', 'par.tricks.ibr.muN', 'snail.mort')      

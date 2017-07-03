@@ -96,10 +96,6 @@ muNq_prof_hash11_uncertainty = function(In){
     lc50 = 10^(rnorm(1, log10(lc50.prof.hash), se.lc50.prof.hash))
     mun = pnorm((slp.prof.hash) * (Ins-lc50)) - fx.hsh.prof(0)
   }
-  while(mun < 0){
-    lc50 = 10^(rnorm(1, log10(lc50.prof.hash), se.lc50.prof.hash))
-    mun = pnorm((slp.prof.hash) * (Ins-lc50)) - fx.hsh.prof(0)
-  } 
   return(mun)
 }
 points(seq(0,5000,10), sapply(seq(0,5000,10), muNq_prof_hash11_uncertainty), 

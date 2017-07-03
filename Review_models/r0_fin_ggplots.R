@@ -9,10 +9,10 @@
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
 
-load('Review_models/Savio/Atrazine/r0_Atr_6-26-17.RData')
-load('Review_models/Savio/Malathion/r0_Mal_6-26-17.RData')
-load('Review_models/Savio/Chlorpyrifos/r0_Chlor_6-26-17.RData')
-load('Review_models/Savio/Glyphosate/r0_Gly_6-26-17.RData')
+load('Review_models/Savio/Atrazine/r0_Atr_6-30-17.RData')
+load('Review_models/Savio/Malathion/r0_Mal_6-30-17.RData')
+load('Review_models/Savio/Chlorpyrifos/r0_Ch_6-30-17.RData')
+load('Review_models/Savio/Glyphosate/r0_Gly_6-30-17.RData')
 
   keepers = c('conc.atr','conc.atr.means.r0', 'conc.atr.sds.r0','r0.atr.fix.n0',  
               'conc.ch', 'conc.ch.means.r0', 'conc.ch.sds.r0',
@@ -24,10 +24,10 @@ load('Review_models/Savio/Glyphosate/r0_Gly_6-26-17.RData')
 
 require(rootSolve)
 require(ggplot2)
-  rec.atr = 102*2   #From Halstead et al Nature Comm 2017 table S6
-  rec.mal = 583*2    #From Halstead et al Chemosphere 2015 table S1
-  rec.ch = 64*2   #From Halstead et al Nature Comm 2017 table S6
-  rec.gly = 3700*2
+  rec.atr = 102   #From Halstead et al Nature Comm 2017 table S6
+  rec.mal = 583    #From Halstead et al Chemosphere 2015 table S1
+  rec.ch = 64   #From Halstead et al Nature Comm 2017 table S6
+  rec.gly = 3700
 
 #Make gg compatible df for atrazine results #############
 atrm = matrix(ncol = 5, nrow = length(conc.atr)*4)
@@ -79,7 +79,7 @@ atrm = matrix(ncol = 5, nrow = length(conc.atr)*4)
 #Plot atrazine component effects############        
 gatr<-ggplot(atr.ggpars) +
       theme_bw() +
-      theme(legend.position = 'bottom', legend.direction = 'vertical') +
+      theme(legend.position = 'bottom', legend.direction = 'horizontal') +
       xlim(0,1000) +
       ylim(-4,5) +
       labs(title = expression(paste('Component effects of Atrazine on ', 'R'[0])),
@@ -155,7 +155,7 @@ r0.mal.gg = subset(r0.mal.fix.n0, study != 'Bakry11')
   gmal<-ggplot(mal.ggpars) +
     theme_bw() +
     theme(legend.position = 'bottom', legend.direction = 'horizontal', legend.title = element_blank()) +
-    xlim(0,150000) +
+    xlim(0,50000) +
     ylim(-4,4) +
     labs(title = expression(paste('Component effects of Malathion on ', 'R'[0])),
          x = 'Malathion (ppb)',
@@ -170,17 +170,19 @@ gmal
   
   
 #Make gg compatible df for chlorpyrifos results #############     
-chm = matrix(ncol = 5, nrow = length(conc.ch)*8)
+chm = matrix(ncol = 5, nrow = length(conc.ch)*10)
 colnames(chm) = c('conc','Modeled','val','UL', 'LL')
 
-chm[,1] = rep(conc.ch, 8)
+chm[,1] = rep(conc.ch, 10)
 chm[,2] = c(rep('Predator mortality (Halstead)', length(conc.ch)),   #from Halstead 2015
             rep('Predator mortality (Satapornvanit)', length(conc.ch)),   #from Satapornvanit
             rep('Predator attack rate', length(conc.ch)), #from Satapornvanit 
             rep('Cercarial mortality', length(conc.ch)),  #from Hasheesh 2011
             rep('Miracidial mortality', length(conc.ch)), #from Hasheesh 2011
-            rep('Snail mortality', length(conc.ch)),      #from Hasheesh 2011
-            rep('Snail reproduction', length(conc.ch)),   #From Ibrahim 1992
+            rep('Snail mortality (Hasheesh)', length(conc.ch)),      #from Hasheesh 2011
+            rep('Snail mortality (Ibrahim)', length(conc.ch)),      #from Hasheesh 2011
+            rep('Snail reproduction (Hasheesh)', length(conc.ch)),      #from Hasheesh 2011
+            rep('Snail reproduction (Ibrahim)', length(conc.ch)),   #From Ibrahim 1992
             rep('all', length(conc.ch)))                  #all of the above combined
 
 #fill predator mortality from Halstead 2015 *******************************************************************************
@@ -207,14 +209,22 @@ chm[,2] = c(rep('Predator mortality (Halstead)', length(conc.ch)),   #from Halst
   chm[c((5*length(conc.ch)+1):(length(conc.ch)*6)),3] = conc.ch.means.r0[,6] - r0.In(0)[3]
   chm[c((5*length(conc.ch)+1):(length(conc.ch)*6)),4] = conc.ch.means.r0[,6] - r0.In(0)[3] + conc.ch.sds.r0[,6]
   chm[c((5*length(conc.ch)+1):(length(conc.ch)*6)),5] = conc.ch.means.r0[,6] - r0.In(0)[3] - conc.ch.sds.r0[,6]
+#fill snail mortality from Ibrahim 1992  ******************************************************************************
+  chm[c((6*length(conc.ch)+1):(length(conc.ch)*7)),3] = conc.ch.means.r0[,7] - r0.In(0)[3]
+  chm[c((6*length(conc.ch)+1):(length(conc.ch)*7)),4] = conc.ch.means.r0[,7] - r0.In(0)[3] + conc.ch.sds.r0[,7]
+  chm[c((6*length(conc.ch)+1):(length(conc.ch)*7)),5] = conc.ch.means.r0[,7] - r0.In(0)[3] - conc.ch.sds.r0[,7]
+#fill snail reproduction reduction from Hasheesh 2011  ******************************************************************************
+  chm[c((7*length(conc.ch)+1):(length(conc.ch)*8)),3] = conc.ch.means.r0[,8] - r0.In(0)[3]
+  chm[c((7*length(conc.ch)+1):(length(conc.ch)*8)),4] = conc.ch.means.r0[,8] - r0.In(0)[3] + conc.ch.sds.r0[,8]
+  chm[c((7*length(conc.ch)+1):(length(conc.ch)*8)),5] = conc.ch.means.r0[,8] - r0.In(0)[3] - conc.ch.sds.r0[,8]
 #fill snail reproduction reduction from Ibrahim 1992  ******************************************************************************
-  chm[c((6*length(conc.ch)+1):(length(conc.ch)*7)),3] = conc.ch.means.r0[,9] - r0.In(0)[3]
-  chm[c((6*length(conc.ch)+1):(length(conc.ch)*7)),4] = conc.ch.means.r0[,9] - r0.In(0)[3] + conc.ch.sds.r0[,9]
-  chm[c((6*length(conc.ch)+1):(length(conc.ch)*7)),5] = conc.ch.means.r0[,9] - r0.In(0)[3] - conc.ch.sds.r0[,9]
+  chm[c((8*length(conc.ch)+1):(length(conc.ch)*9)),3] = conc.ch.means.r0[,9] - r0.In(0)[3]
+  chm[c((8*length(conc.ch)+1):(length(conc.ch)*9)),4] = conc.ch.means.r0[,9] - r0.In(0)[3] + conc.ch.sds.r0[,9]
+  chm[c((8*length(conc.ch)+1):(length(conc.ch)*9)),5] = conc.ch.means.r0[,9] - r0.In(0)[3] - conc.ch.sds.r0[,9]
 #fill combo of all  ******************************************************************************  
-  chm[c((7*length(conc.ch)+1):(length(conc.ch)*8)),3] = conc.ch.means.r0[,19] - r0.In(0)[3]
-  chm[c((7*length(conc.ch)+1):(length(conc.ch)*8)),4] = conc.ch.means.r0[,19] - r0.In(0)[3] + conc.ch.sds.r0[,19]
-  chm[c((7*length(conc.ch)+1):(length(conc.ch)*8)),5] = conc.ch.means.r0[,19] - r0.In(0)[3] - conc.ch.sds.r0[,19]
+  chm[c((9*length(conc.ch)+1):(length(conc.ch)*10)),3] = conc.ch.means.r0[,19] - r0.In(0)[3]
+  chm[c((9*length(conc.ch)+1):(length(conc.ch)*10)),4] = conc.ch.means.r0[,19] - r0.In(0)[3] + conc.ch.sds.r0[,19]
+  chm[c((9*length(conc.ch)+1):(length(conc.ch)*10)),5] = conc.ch.means.r0[,19] - r0.In(0)[3] - conc.ch.sds.r0[,19]
 
 ch.gg<-as.data.frame(chm, stringsAsFactors = FALSE)
   ch.gg$conc<-as.numeric(ch.gg$conc)
@@ -244,7 +254,7 @@ ch.ggall = subset(ch.gg, Modeled == 'all' & conc <=150000)
 gch<-ggplot(ch.ggpars) +
   theme_bw() +
   theme(legend.position = 'bottom', legend.direction = 'horizontal', legend.title = element_blank()) +
-  xlim(0,4000) +
+  xlim(0,200) +
   ylim(-5,5) +
   labs(title = expression(paste('Component effects of Chlorpyrifos on ', 'R'[0])),
        x = 'Chlorpyrifos (ppb)',
@@ -297,13 +307,13 @@ glym[c((5*length(conc.gly)+1):(length(conc.gly)*6)),3] = conc.gly.means.r0[,6] -
 glym[c((5*length(conc.gly)+1):(length(conc.gly)*6)),4] = conc.gly.means.r0[,6] - r0.In(0)[3] + conc.gly.sds.r0[,6]
 glym[c((5*length(conc.gly)+1):(length(conc.gly)*6)),5] = conc.gly.means.r0[,6] - r0.In(0)[3] - conc.gly.sds.r0[,6]
 #fill snail mortality from Omran & Salama  ******************************************************************************
-glym[c((6*length(conc.gly)+1):(length(conc.gly)*7)),3] = conc.gly.means.r0[,9] - r0.In(0)[3]
-glym[c((6*length(conc.gly)+1):(length(conc.gly)*7)),4] = conc.gly.means.r0[,9] - r0.In(0)[3] + conc.gly.sds.r0[,9]
-glym[c((6*length(conc.gly)+1):(length(conc.gly)*7)),5] = conc.gly.means.r0[,9] - r0.In(0)[3] - conc.gly.sds.r0[,9]
+glym[c((6*length(conc.gly)+1):(length(conc.gly)*7)),3] = conc.gly.means.r0[,7] - r0.In(0)[3]
+glym[c((6*length(conc.gly)+1):(length(conc.gly)*7)),4] = conc.gly.means.r0[,7] - r0.In(0)[3] + conc.gly.sds.r0[,7]
+glym[c((6*length(conc.gly)+1):(length(conc.gly)*7)),5] = conc.gly.means.r0[,7] - r0.In(0)[3] - conc.gly.sds.r0[,7]
 #fill combo of all  ******************************************************************************  
-glym[c((7*length(conc.gly)+1):(length(conc.gly)*8)),3] = conc.gly.means.r0[,19] - r0.In(0)[3]
-glym[c((7*length(conc.gly)+1):(length(conc.gly)*8)),4] = conc.gly.means.r0[,19] - r0.In(0)[3] + conc.gly.sds.r0[,19]
-glym[c((7*length(conc.gly)+1):(length(conc.gly)*8)),5] = conc.gly.means.r0[,19] - r0.In(0)[3] - conc.gly.sds.r0[,19]
+glym[c((7*length(conc.gly)+1):(length(conc.gly)*8)),3] = conc.gly.means.r0[,8] - r0.In(0)[3]
+glym[c((7*length(conc.gly)+1):(length(conc.gly)*8)),4] = conc.gly.means.r0[,8] - r0.In(0)[3] + conc.gly.sds.r0[,8]
+glym[c((7*length(conc.gly)+1):(length(conc.gly)*8)),5] = conc.gly.means.r0[,8] - r0.In(0)[3] - conc.gly.sds.r0[,8]
 
 gly.gg<-as.data.frame(glym, stringsAsFactors = FALSE)
 gly.gg$conc<-as.numeric(gly.gg$conc)
@@ -339,13 +349,15 @@ comp = rbind(atr.ggpars, mal.ggpars, ch.ggpars, gly.ggpars)
     theme_bw() +
     theme(legend.position = 'bottom', legend.direction = 'horizontal', legend.title = element_blank(),
           plot.title = element_text(hjust = 0.5)) +
-    ylim(-3.3,3.3) +
+    ylim(-5,5) +
     labs(x = 'Agrochemical conc (ppb)',
          y = expression(paste(Delta, R[0]))) +
     ggtitle(label = expression(paste('Component agrochemical effects on ', 'R'[0]))) +
     geom_hline(yintercept = 0, lty=2) + 
     geom_ribbon(aes(x = conc, ymin = LL, ymax = UL, fill = Modeled), alpha = 0.4) +
     geom_line(aes(x = conc, y = val, col = Modeled), size = 1)
+  
+  windows(width = 30, height = 15)
   
   gcomp
     
@@ -364,4 +376,5 @@ comb = rbind(atr.ggall, mal.ggall, ch.ggall, gly.ggall)
     geom_ribbon(aes(x = rec, ymin = LL, ymax = UL, fill = Chemical), alpha = 0.4) +
     geom_line(aes(x = rec, y = val, col = Chemical), size = 1)
   
+  windows(width = 30, height = 15)
   gall

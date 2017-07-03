@@ -67,6 +67,21 @@ r0.sens$rel.hi = c(r0.fix(f_Nqx = 2)[3] / r0.sens$point[1] - 1,
                    r0.fix(pi_Cqx = 2)[3] / r0.sens$point[1] - 1,
                    r0.fix(v_qx = 2)[3] / r0.sens$point[1] - 1)
 
+r0.pred2 = data.frame(var = c('Predator mortality rate'),
+                     high = NA,
+                     point = r0.fix()[3],
+                     low = NA,
+                     rel.hi = NA,
+                     rel.pt = 0,
+                     rel.lo = NA)
+
+r0.pred2$high = c(r0.fix(mu_Pqx = (1-parameters['mu_P']))[3])
+
+r0.pred2$low = c(r0.fix(mu_Pqx = 0)[3])
+
+r0.pred2$rel.lo = c(r0.fix(mu_Pqx = (1-parameters['mu_P']))[3] / r0.sens$point[1] - 1)
+
+r0.pred2$rel.hi = c(r0.fix(mu_Pqx = 0)[3] / r0.sens$point[1] - 1)
 #reorder data frame for compatibility with axis labels
 r0.sens$var = factor(r0.sens$var, levels = as.character(r0.sens$var[c(order(r0.sens$var, decreasing = T))])) 
 
@@ -82,18 +97,25 @@ par.labs = c(expression(paste('Snail mortality rate (', italic(mu[N]),')')), #ax
 
 sens.bar = ggplot(r0.sens, aes(x = var, y = rel.hi)) +
             theme_bw()+
+            theme(axis.text = element_text(size = 15), axis.title = element_text(size = 18, face = 'bold'),
+                  plot.title = element_text(size = 20, face = 'bold'))+
             scale_y_continuous(limits = c(-1,1), breaks = seq(-1, 1, 0.25))+
             scale_x_discrete(labels = par.labs) +
             coord_flip()+
             geom_bar(fill = 'blue', stat = 'identity', width = 0.25)+
+            geom_bar(data = r0.pred2, aes(x = var, y = rel.lo, alpha = 0.6), 
+                     fill = 'darkblue', stat = 'identity', width = 0.25, show.legend = F)+
+            geom_bar(data = r0.pred2, aes(x = var, y = rel.hi), 
+                     fill = 'darkred', stat = 'identity', width = 0.25)+
             geom_bar(data = r0.sens, aes(x = var, y = rel.lo), 
                      fill = 'red', stat = 'identity', width = 0.25)+
-            #geom_hline(xintercept = 0, lty = 2)+
+            geom_bar(fill = 'blue', stat = 'identity', width = 0.25)+
+                        #geom_hline(xintercept = 0, lty = 2)+
             labs(title = expression(paste('Sensitivity of R'[0], ' to Agrochemically Influenced Parameters')), 
                  y = expression(paste(Delta, 'R'[0], ' (%)'), sep = ''), 
-                 x = 'Parameter')
+                 x = '    Parameter')
 
-windows(width = 20, height = 12)
+windows(width = 25, height = 12)
 sens.bar
 
 #plot to get legend

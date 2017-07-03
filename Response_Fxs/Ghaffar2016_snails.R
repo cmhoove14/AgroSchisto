@@ -57,7 +57,6 @@ plot(but.dat$butralin, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,1300
     lc50 = 10^(rnorm(1, log10(lc50.gaf.but), se.lc50.gaf.but))
     mun = pnorm((slp.gaf.but) * (heu-lc50)) - fx.mun.but(0)
     }
-    if(mun < 0) mun = 0
     return(mun)
   }
     points(seq(0,13000,50), sapply(seq(0,13000,50), mu_Nq_butr_gaf16_uncertainty, simplify = T), 
@@ -107,8 +106,6 @@ plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33
       lc50 = 10^(rnorm(1, log10(lc50.gaf.gly), se.lc50.gaf.gly))
       mun = pnorm((slp.gaf.gly) * (heu - lc50)) - fx.mun.gly(0) #mortality normalized to 0
     }
-    if(mun < 0) mun = 0
-      
     return(mun)
   }
 
@@ -159,7 +156,6 @@ mu_Nq_pen_gaf16_uncertainty = function(He){
   lc50 = 10^(rnorm(1, log10(lc50.gaf.pen), se.lc50.gaf.pen))
   mun = pnorm((slp.gaf.pen) * (heu - lc50)) - fx.mun.pen(0) #mortality normalized to 0
   }
-  if(mun < 0) mun = 0
   return(mun)
 }
   

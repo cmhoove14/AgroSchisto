@@ -45,17 +45,17 @@ parameters=c(
   # miracidia parameters
   m = 432,           # Miracidial shedding rate per adult female worm assuming 0.36 eggs/mL urine and 1200 mL urine per person per day
   v = 0.084,         # Egg viability of S. haematobium (i.e. miracidia/egg) from Halstead et al
-  pi_M = 1,          # Miracidial infectivity parameter
+  pi_M = 6.22,          # Miracidia-hrs per day
   
   # cercariae parameters
   theta = 109,       # cercarial shedding rate in snails (cercariae/I-snail/day); Pfluger 1984
-  pi_C = 1,          # cercarial infectivity parameter
+  pi_C = 14.21,          # cercarial infectivity parameter
   
   # transmission parameters
-  beta = 1.63e-6,    # Human-to-snail infection probability in reference area (infected snails/miracidia/snail/day)
-  sigma = 1/40,      # Latent period for exposed snails (infectious snails/exposed snail/day))
-  lamda = 1.16e-6,   # Snail-to-human infection probability per cercaria
-  k=0.17,            # Clumping parameter of negative binomial distribution of worms in humans
+  beta = 1.34e-5/24,    # Human-to-snail infection probability in reference area (infected snails/miracidia/snail/day); divided by 24 to account for hourly scale of miracidial survival
+  sigma = 1/40,         # Latent period for exposed snails (infectious snails/exposed snail/day))
+  lamda = 4.72e-5/24,   # Snail-to-human infection probability per cercaria; divided by 24 to account for hourly scale of miracidial survival
+  k=0.17,               # Clumping parameter of negative binomial distribution of worms in humans
   
   # Schisto mortality parameters
   mu_W = 1/(3.3*365), # Natural mortality rate of adult worms in humans, assuming average lifespan of 3.3 years, from Sokolow et al. 2015

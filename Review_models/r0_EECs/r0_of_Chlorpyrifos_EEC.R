@@ -69,7 +69,7 @@ set.seed(0)
       
     #final run with chosen parameters ######
       r0.ch.eec[, 10] = parSapply(clus1, conc.ch, r0.In,
-                                      f.mu_Nq = muNq_ch_hash11_uncertainty,
+                                      f.mu_Nq = mu_N_chlor_ibr92_uncertainty,
                                       f.f_Nq = f_N_chlor_ibr92_uncertainty,
                                       f.pi_Mq = piM_ch_Hash11_uncertainty,
                                       f.pi_Cq = piC_ch_Hash11_uncertainty,
@@ -100,7 +100,7 @@ set.seed(0)
 
   #final run with chosen parameters ######
     r0.ch.0.5eec[, 10] = parSapply(clus1, conc.ch*0.5, r0.In,
-                                   f.mu_Nq = muNq_ch_hash11_uncertainty,
+                                   f.mu_Nq = mu_N_chlor_ibr92_uncertainty,
                                    f.f_Nq = f_N_chlor_ibr92_uncertainty,
                                    f.pi_Mq = piM_ch_Hash11_uncertainty,
                                    f.pi_Cq = piC_ch_Hash11_uncertainty,
@@ -133,7 +133,7 @@ set.seed(0)
   
   #final run with chosen parameters ######
     r0.ch.0.1eec[, 10] = parSapply(clus1, conc.ch*0.1, r0.In,
-                                f.mu_Nq = muNq_ch_hash11_uncertainty,
+                                f.mu_Nq = mu_N_chlor_ibr92_uncertainty,
                                 f.f_Nq = f_N_chlor_ibr92_uncertainty,
                                 f.pi_Mq = piM_ch_Hash11_uncertainty,
                                 f.pi_Cq = piC_ch_Hash11_uncertainty,
