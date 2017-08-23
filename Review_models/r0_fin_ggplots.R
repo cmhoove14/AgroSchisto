@@ -368,7 +368,7 @@ comb = rbind(atr.ggall, mal.ggall, ch.ggall, gly.ggall)
     theme(legend.position = 'bottom', legend.direction = 'horizontal', legend.title = element_blank(),
           plot.title = element_text(hjust = 0.5)) +
     scale_x_continuous(breaks = c(0,1,2), labels = c('0', 'EEC','2x EEC'), limits = c(0,2.0)) +
-    ylim(-4,4) +
+    ylim(-3,3) +
     labs(title = expression(paste('Combined agrochemical effects on ', 'R'[0])),
          x = 'Normalized Agrochemical Concentration',
          y = expression(paste(Delta, R[0]))) +
