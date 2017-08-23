@@ -14,14 +14,27 @@
 #50 simulations with 0<kap<2 and 1.2e-4<lam<3.7e-4 #############
 load('Elimination_Feasibility/eps_surface_lam1.2-3.7_kap0-2.RData')
 
-windows()
+windows(width = 13, height = 13.2)
 
 persp(y = lam.range, ylim = range(lam.range), x = kap.range, xlim = range(kap.range),
       z = eps.fill, zlim = c(-0.05, 0.05), ticktype = 'detailed', nticks = 4, 
       xlab = 'Pos. Density Dependence',
       ylab = 'Transmission Intensity',
       zlab = 'Elimination Feasibility Estimator',
-      phi = 18, theta = 45, shade = 0.4)
+      phi = 18, theta = 45, shade = 0.4, cex.lab = 1.1)
+
+#Save as tiff ###########
+tiff("Elimination_Feasibility/plots/PLoS_Figs/Fig5.tiff", height = 13.2, width = 13.2, units = 'cm', 
+     compression = "lzw", res = 300) 
+
+persp(y = lam.range, ylim = range(lam.range), x = kap.range, xlim = range(kap.range),
+      z = eps.fill, zlim = c(-0.05, 0.05), ticktype = 'detailed', nticks = 4, 
+      xlab = 'Pos. Density Dependence',
+      ylab = 'Transmission Intensity',
+      zlab = 'Elimination Feasibility Estimator',
+      phi = 18, theta = 45, shade = 0.4, cex.lab = 0.75, cex.axis = 0.5)
+
+dev.off()
 
 rm(list = ls())
 

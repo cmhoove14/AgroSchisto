@@ -15,6 +15,43 @@ require(graphics)
 require(ggplot2)
 require(Rmisc)
 
+#Define multiplot function ################
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
 #Simulations with 100 transmission parameter sets, k=2, double round of MDA annually #####
 load("Elimination_Feasibility/det_sim_k200_mda1&2.RData")
 
@@ -324,14 +361,14 @@ w.gg = rbind(lowest[,c(1,7)], lowest.pdd[,c(1,7)])
 
 w.ggp = ggplot(w.gg, aes(x = time, y = W, color = Model)) +
           theme_bw(base_size = 15) +
-          theme(plot.margin = unit(c(1.5,0.5,1,1), 'cm')) +
+          theme(axis.title.y = element_text(size = 12)) +
           xlim(0,60) +
           ylim(0,80) +
           labs(x = 'time (yrs)',
                y = expression(paste('Mean Worm Burden (', italic('W'), ')',sep = ''))) +
           scale_color_manual(values = c('black', 'red')) +
-          geom_line(size = 1) +
-          annotate('text', x = 60, y = 80, label = 'a', size = 8)
+          geom_line() +
+          annotate('text', x = 60, y = 80, label = 'a', size = 5)
 
 #Bounce back rates  
 bbr.gg = rbind(bbr.df, bbr.pdd.df)
@@ -339,7 +376,8 @@ bbr.gg = rbind(bbr.df, bbr.pdd.df)
 
 bbr.ggp = ggplot(bbr.gg, aes(x = time, y = bbr, color = pdd)) +
             theme_bw(base_size = 15) +
-            theme(plot.margin = unit(c(1.5,0.5,1,1), 'cm'), legend.position = 'none') +
+            #theme(plot.margin = unit(c(1.5,0.5,1,1), 'cm'), legend.position = 'none') +
+            theme(legend.position = 'none', axis.title.y = element_text(size = 12)) +
             xlim(0,20) +
             ylim(-0.05,0.35) +
             labs(x = 'time (yrs)',
@@ -347,8 +385,8 @@ bbr.ggp = ggplot(bbr.gg, aes(x = time, y = bbr, color = pdd)) +
             scale_color_manual(values = alpha(c('red', 'black'), .9)) +
             geom_point() +
             geom_errorbar(aes(x = time, ymin = (bbr - bbr.sd), ymax = (bbr + bbr.sd)), 
-                          width = 0.25) +
-            annotate('text', x = 0, y = 0.34, label = 'b', size = 8)
+                          width = 0.1) +
+            annotate('text', x = 0, y = 0.34, label = 'b', size = 5)
 
 #epsilon estimates
   eps.gg = data.frame(eps = c(eps.mean, eps.pdd.mean),
@@ -358,22 +396,31 @@ bbr.ggp = ggplot(bbr.gg, aes(x = time, y = bbr, color = pdd)) +
   
 eps.ggp = ggplot(eps.gg, aes(x = time, y = eps, fill = Model)) +
             theme_bw(base_size = 15) +
-            theme(plot.margin = unit(c(1.5,0.5,1,1), 'cm'), legend.position = 'none') +
+            #theme(plot.margin = unit(c(1.5,0.5,1,1), 'cm'), legend.position = 'none') +
+            theme(legend.position = 'none', axis.title.y = element_text(size = 10)) +
             xlim(0,20) +
             ylim(-0.035,0.01) +
             labs(x = 'time (yrs)',
-                 y = expression(paste('Elimination Feasibility Coefficient ( ', epsilon, ')',sep = ''))) +
+                 y = expression(paste('Elimination Feasibility Coefficient (',epsilon, ')', sep = ''))) +
             geom_bar(position = 'dodge', stat = 'identity', width = 0.8) +
             scale_fill_manual(values = alpha(c('black', 'red'), .6)) +
             geom_errorbar(aes(x = time, ymin = (eps - eps.sd), ymax = (eps + eps.sd)), 
-                          width = 0.25, position = position_dodge(width = 0.8)) +
+                          width = 0.1, position = position_dodge(width = 0.8)) +
             geom_vline(xintercept = 5.5, lty=2) +
-            annotate('text', x = 0, y = 0.009, label = 'c', size = 8)
+            annotate('text', x = 0, y = 0.009, label = 'c', size = 5)
 
 
 #combine plots with multiplot
 windows(width = 14, height = 9)
   multiplot(w.ggp, bbr.ggp, eps.ggp, layout = matrix(c(1,1,2,3), nrow = 2, byrow = T))
+graphics.off()  
+  
+#Save as tiff
+tiff("Elimination_Feasibility/plots/PLoS_Figs/Fig3.tiff", height = 14, width = 19.05, units = 'cm', 
+     compression = "lzw", res = 300) 
+  multiplot(w.ggp, bbr.ggp, eps.ggp, layout = matrix(c(1,1,2,3), nrow = 2, byrow = T))
+  
+dev.off()
   
 
 #BELOW IS DEPRECATED #########

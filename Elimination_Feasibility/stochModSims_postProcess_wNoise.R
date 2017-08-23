@@ -127,6 +127,18 @@ plot(par.mat$eps, par.mat$pe, pch = 18, cex = 0.6, ylim = c(0,1),
   legend('bottomleft', legend = c(expression(paste(kappa, ' = 0', sep = '')),
                                 expression(paste(kappa, ' > 0', sep = ''))),
          pch = c(17,18), col = c(2,1), bty = 'n', cex = 0.8)
+  
+#scatterP for publication according to PLos guidelines
+tiff("Elimination_Feasibility/plots/PLoS_Figs/Fig4.tiff", height = 11, width = 19.05, units = 'cm', 
+      compression = "lzw", res = 300) 
+
+plot(par.mat$eps, par.mat$pe, pch = 18, cex = 0.6, ylim = c(0,1),
+     xlab = '', ylab = '', cex.lab = 1.25, mar = c(4.6,6.6,1.1,0.6))
+  mtext(side = 2, text = expression(italic('P(e)')), line = 2.4, cex = 1.5)
+  mtext(side = 1, text = expression(italic(epsilon)), line = 2.4, cex = 1.5)
+  
+dev.off()
+
 
 #st. dev of epsilon
 plot(par.mat$eps, par.mat$eps.sd, pch = 18, cex = 0.6, ylim = range(par.mat$eps.sd),# col = 4,
