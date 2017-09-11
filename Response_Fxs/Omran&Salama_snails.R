@@ -119,4 +119,5 @@ plot(ons.gly$conc, ons.gly$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
 
   points(seq(0,10000,50), sapply(seq(0,10000,50), ons.munq.gly),
          pch = 5, col = 4, cex = 0.5)
-  
+ 
+keep.ons.all = c(keep.ons.atr, keep.ons.gly)   

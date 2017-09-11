@@ -36,11 +36,10 @@ rag06_mun_amm = function(Fe){
     feu = (Fe/1000)
     lc50 = 10^(rnorm(1, log10(lc50.amm.rag), (se.lc50.amm.rag)))
     mun = pnorm((slp.amm.rag) * log10(feu / lc50))
+    if(mun < 0) mun = 0
+    if(mun > 1) mun = 1
   }
-  while(mun < 0){
-    lc50 = (rnorm(1, log10(lc50.amm.rag), se.lc50.amm.rag))
-    mun = pnorm((slp.amm.rag) * log10(feu / lc50))
-  } 
+  
   return(mun)
 }
 
@@ -83,11 +82,10 @@ rag06_mun_pot = function(Fe){
     feu = Fe/1000
     lc50 = 10^(rnorm(1, log10(lc50.pot.rag), se.lc50.pot.rag))
     mun = pnorm((slp.pot.rag) * log10(feu / lc50))
+    if(mun < 0) mun = 0
+    if(mun > 1) mun = 1
   }
-  while(mun < 0){
-    lc50 = 10^(rnorm(1, log10(lc50.pot.rag), se.lc50.pot.rag))
-    mun = pnorm((slp.pot.rag) * log10(feu / lc50))
-  } 
+  
   return(mun)
 }
 
@@ -130,14 +128,18 @@ rag06_mun_urea = function(Fe){
     feu = Fe/1000
     lc50 = 10^(rnorm(1, log10(lc50.urea.rag), se.lc50.urea.rag))
     mun = pnorm((slp.urea.rag) * log10(feu / lc50))
+    if(mun < 0) mun = 0
+    if(mun > 1) mun = 1
   }
-  while(mun < 0){
-    lc50 = 10^(rnorm(1, log10(lc50.urea.rag), se.lc50.urea.rag))
-    mun = pnorm((slp.urea.rag) * log10(feu / lc50))
-  } 
+  
   return(mun)
 }
 
 points(seq(0, (lc90.urea.rag+100)*1000, 20000),
        sapply(seq(0, (lc90.urea.rag+100)*1000, 20000), rag06_mun_urea),
        pch = 5, col = 4, cex = 0.5)
+
+#Keep vector #################
+keep.ragab.mun = c('rag06_mun_urea', 'lc50.urea.rag', 'se.lc50.urea.rag', 'slp.urea.rag',
+                   'rag06_mun_pot', 'lc50.pot.rag', 'se.lc50.pot.rag', 'slp.pot.rag',
+                   'rag06_mun_amm', 'lc50.amm.rag', 'se.lc50.amm.rag', 'slp.amm.rag')

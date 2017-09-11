@@ -321,4 +321,6 @@ keep.zinc.sat09 = c(keep.zinc.sat09, 'psi_q_zinc_satapornvanit09_uncertainty',
 
 keep.chlor.sat09 = c(keep.chlor.sat09, 'psi_q_chlor_satapornvanit09_uncertainty', 
                     'par.tricksc', 'chlor.fr', 'fr.ch')    
+
+keep.all.sat09 = c(keep.carb.sat09, keep.chlor.sat09, keep.dim.sat09, keep.prof.sat09, keep.zinc.sat09)
 #*Note: checked that this produced the desired relationship on predator feeding rate and it does

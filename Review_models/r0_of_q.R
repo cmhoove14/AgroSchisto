@@ -52,9 +52,9 @@ parameters=c(
   pi_C = 14.21,          # cercarial infectivity parameter
   
   # transmission parameters
-  beta = 1.34e-5/24,    # Human-to-snail infection probability in reference area (infected snails/miracidia/snail/day); divided by 24 to account for hourly scale of miracidial survival
+  beta = 2.28e-5/24,    # Human-to-snail infection probability in reference area (infected snails/miracidia/snail/day); divided by 24 to account for hourly scale of miracidial survival
   sigma = 1/40,         # Latent period for exposed snails (infectious snails/exposed snail/day))
-  lamda = 4.72e-5/24,   # Snail-to-human infection probability per cercaria; divided by 24 to account for hourly scale of miracidial survival
+  lamda = 4.11e-5/24,   # Snail-to-human infection probability per cercaria; divided by 24 to account for hourly scale of miracidial survival
   k=0.17,               # Clumping parameter of negative binomial distribution of worms in humans
   
   # Schisto mortality parameters

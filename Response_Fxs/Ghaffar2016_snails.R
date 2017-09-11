@@ -503,4 +503,6 @@ plot(gafrep$pen.conc, gafrep$pen.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
             sapply(seq(0,1300, 10), fN.pen.fx.uncertainty, simplify = T),
             pch = 5, col = 4, cex = 0.5) #plot with reference back to raw control value
   
-    keep.gaf.pen.fn = c('fN.pen.fx.uncertainty', 'pen.r0', 'gafrep')   
+    keep.gaf.pen.fn = c('fN.pen.fx.uncertainty', 'pen.r0', 'gafrep') 
+    
+keep.gaf.all = c(keep.gaf.but, keep.gaf.but.fn, keep.gaf.gly, keep.gaf.gly.fn, keep.gaf.pen, keep.gaf.pen.fn)    

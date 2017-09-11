@@ -182,13 +182,14 @@ fN.hash.prof.uncertainty = function(In){
   if(In == 0) fn = 1 else{
     init = predict(pr.fn.red.hash, newdata = data.frame(prof.conc = In), se.fit = T)
     fn = rnorm(1, init[1], init[2]) / fn.hash$prof.rep[1]
-    while(fn < 0 || fn > 1.00000){
-      fn = rnorm(1, init[1], init[2]) / fn.hash$prof.rep[1]
-    }
   }
+    if(fn < 0) fn = 0 
+    if(fn > 1) fn = 1
+  
   return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
 
 points(seq(0,4000, 4), sapply(seq(0,4000, 4), fN.hash.prof.uncertainty), pch = 5, cex = 0.5, col = 4)
 
 keep.hsh.prof = c(keep.hsh.prof, 'fN.hash.prof.uncertainty', 'pr.fn.red.hash', 'fn.hash')
+keep.hsh.all = c(keep.hsh.ch, keep.hsh.prof)

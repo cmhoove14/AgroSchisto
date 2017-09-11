@@ -16,7 +16,7 @@ require(drc)
   gly.vals = c(0, 1506, 3875, 9174, 15062, 26249)
   pen.vals = c(0, 214.8, 535, 1299, 2148, 3762)
   
-  ll4 = function(slp,lc,x){
+  ll3 = function(slp,lc,x){
     1/(1+exp(slp*(log(x/lc))))
   }
   
@@ -46,13 +46,13 @@ require(drc)
   
   plot(cer.ctrl$time_hrs, cer.ctrl$surv, ylim = c(0,1), xlim = c(0,24), pch=16, 
        xlab = 'time(hrs)', ylab = 'prop surviving')
-    lines(time, ll4(lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], x = time), lty = 2)
+    lines(time, ll3(lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], x = time), lty = 2)
     
     for(i in 1:length(unique(cer.but$conc))){
       points(cer.but$time_hrs[cer.but$conc==unique(cer.but$conc)[i]], 
              cer.but$surv[cer.but$conc==unique(cer.but$conc)[i]], pch=17,
              col = i+1)
-      lines(time, ll4(lc = gaf.but.drc.cer$coefficients[i+5], slp = gaf.but.drc.cer$coefficients[i], x = time), lty = 2, col = i+1)
+      lines(time, ll3(lc = gaf.but.drc.cer$coefficients[i+5], slp = gaf.but.drc.cer$coefficients[i], x = time), lty = 2, col = i+1)
     }
   legend('topright', title = 'Butralin (ppb)', legend = but.vals, pch = c(16,rep(17,5)),
          col = c(1:6), cex=0.7, bty = 'n')
@@ -60,11 +60,11 @@ require(drc)
 
 #Get estimate of cercariae-hrs for each concentration    
 gaf.but.aucs.cer = as.numeric()
-  gaf.but.aucs.cer[1] = integrate(f = ll4, lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], 
+  gaf.but.aucs.cer[1] = integrate(f = ll3, lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], 
                                   lower=0, upper=24)[1]$value  
   
   for(j in 1:length(unique(cer.but$conc))){
-    gaf.but.aucs.cer[j+1] = integrate(f = ll4, lc = gaf.but.drc.cer$coefficients[j+5], slp = gaf.but.drc.cer$coefficients[j],
+    gaf.but.aucs.cer[j+1] = integrate(f = ll3, lc = gaf.but.drc.cer$coefficients[j+5], slp = gaf.but.drc.cer$coefficients[j],
                                       lower=0, upper=24)[1]$value  
   }
   
@@ -137,7 +137,7 @@ piC.ghaf_butr.lin_unc = function(He){
       while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
       while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    auc = integrate(ll3, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
     piC = auc/gaf.but.aucs.cer[1]
     if(piC > 1) piC = 1
   }
@@ -153,14 +153,14 @@ piC.ghaf_butr.exp_unc = function(He){
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    auc = integrate(ll3, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
     piC = auc/gaf.but.aucs.cer[1]
     if(piC > 1) piC = 1
   }
   return(piC)
 }  #function to estimate AUC 
 
-keep.gaf.but.cer = c('piC.ghaf_butr.lin_unc', 'but.cer.lm.e', 'but.cer.lm.b', 'll4', 'gaf.but.aucs.cer',
+keep.gaf.but.cer = c('piC.ghaf_butr.lin_unc', 'but.cer.lm.e', 'but.cer.lm.b', 'll3', 'gaf.but.aucs.cer',
                      'piC.ghaf_butr.exp_unc', 'but.cer.lm.e2')
 #plot to test function ########
 plot(but.cer$butralin, gaf.but.aucs.cer/gaf.but.aucs.cer[1],
@@ -182,13 +182,13 @@ cer.gly = subset(cer, chem == 'glyphosate')
   
   plot(cer$time_hrs[cer$conc==0], cer$surv[cer$conc==0], 
        pch=16, xlab = 'time(hrs)', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
-    lines(time, ll4(lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], x = time), lty = 2)
+    lines(time, ll3(lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], x = time), lty = 2)
   
   for(i in 1:length(unique(cer.gly$conc))){
     points(cer.gly$time_hrs[cer.gly$conc==unique(cer.gly$conc)[i]], 
            cer.gly$surv[cer.gly$conc==unique(cer.gly$conc)[i]], pch=17,
            col = i+1)
-    lines(time, ll4(lc = gaf.gly.drc.cer$coefficients[i+5], slp = gaf.gly.drc.cer$coefficients[i], x = time), lty = 2, col = i+1)
+    lines(time, ll3(lc = gaf.gly.drc.cer$coefficients[i+5], slp = gaf.gly.drc.cer$coefficients[i], x = time), lty = 2, col = i+1)
   }
   legend('topright', title = 'Glyphosate (ppb)', legend = gly.vals, pch = c(16,rep(17,5)),
          col = c(1:6), cex=0.7, bty = 'n')
@@ -196,11 +196,11 @@ cer.gly = subset(cer, chem == 'glyphosate')
   
 #Get estimate of cercariae-hrs for each concentration    
 gaf.gly.aucs.cer = as.numeric()
-  gaf.gly.aucs.cer[1] = integrate(f = ll4, lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], 
+  gaf.gly.aucs.cer[1] = integrate(f = ll3, lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], 
                                   lower=0, upper=24)[1]$value  
   
   for(j in 1:length(unique(cer.gly$conc))){
-    gaf.gly.aucs.cer[j+1] = integrate(f = ll4, lc = gaf.gly.drc.cer$coefficients[j+5], slp = gaf.gly.drc.cer$coefficients[j],
+    gaf.gly.aucs.cer[j+1] = integrate(f = ll3, lc = gaf.gly.drc.cer$coefficients[j+5], slp = gaf.gly.drc.cer$coefficients[j],
                                       lower=0, upper=24)[1]$value  
   }
   
@@ -274,7 +274,7 @@ piC.ghaf_gly.lin_unc = function(He){
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    auc = integrate(ll3, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
     piC = auc/gaf.gly.aucs.cer[1]
     if(piC > 1) piC = 1
   }
@@ -290,14 +290,14 @@ piC.ghaf_gly.exp_unc = function(He){
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    auc = integrate(ll3, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
     piC = auc/gaf.gly.aucs.cer[1]
     if(piC > 1) piC = 1
   }
   return(piC)
 }  #function to estimate AUC 
 
-keep.gaf.gly.cer = c('piC.ghaf_gly.lin_unc', 'gly.cer.lm.e', 'gly.cer.lm.b', 'll4', 'gaf.gly.aucs.cer',
+keep.gaf.gly.cer = c('piC.ghaf_gly.lin_unc', 'gly.cer.lm.e', 'gly.cer.lm.b', 'll3', 'gaf.gly.aucs.cer',
                      'piC.ghaf_gly.exp_unc', 'gly.cer.lm.e2')
 
 #plot to test function ########
@@ -322,13 +322,13 @@ cer.pen = subset(cer, chem == 'pendimethalin')
 
 plot(cer$time_hrs[cer$conc==0], cer$surv[cer$conc==0], 
      pch=16, xlab = 'time(hrs)', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
-  lines(time, ll4(lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], x = time), lty = 2)
+  lines(time, ll3(lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], x = time), lty = 2)
   
   for(i in 1:length(unique(cer.pen$conc))){
     points(cer.pen$time_hrs[cer.pen$conc==unique(cer.pen$conc)[i]], 
            cer.pen$surv[cer.pen$conc==unique(cer.pen$conc)[i]], pch=17,
            col = i+1)
-    lines(time, ll4(lc = gaf.pen.drc.cer$coefficients[i+5], slp = gaf.pen.drc.cer$coefficients[i], x = time), lty = 2, col = i+1)
+    lines(time, ll3(lc = gaf.pen.drc.cer$coefficients[i+5], slp = gaf.pen.drc.cer$coefficients[i], x = time), lty = 2, col = i+1)
   }
     legend('topright', title = 'Pendimethalin (ppb)', legend = pen.vals, pch = c(16,rep(17,5)),
            col = c(1:6), cex=0.7, bty = 'n')
@@ -336,11 +336,11 @@ plot(cer$time_hrs[cer$conc==0], cer$surv[cer$conc==0],
 
 #Get estimate of cercariae-hrs for each concentration    
 gaf.pen.aucs.cer = as.numeric()
-gaf.pen.aucs.cer[1] = integrate(f = ll4, lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], 
+gaf.pen.aucs.cer[1] = integrate(f = ll3, lc = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], 
                                 lower=0, upper=24)[1]$value  
 
   for(j in 1:length(unique(cer.pen$conc))){
-    gaf.pen.aucs.cer[j+1] = integrate(f = ll4, lc = gaf.pen.drc.cer$coefficients[j+5], slp = gaf.pen.drc.cer$coefficients[j],
+    gaf.pen.aucs.cer[j+1] = integrate(f = ll3, lc = gaf.pen.drc.cer$coefficients[j+5], slp = gaf.pen.drc.cer$coefficients[j],
                                       lower=0, upper=24)[1]$value  
   }
 
@@ -413,7 +413,7 @@ piC.ghaf_pen.lin_unc = function(He){
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    auc = integrate(ll3, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
     piC = auc/gaf.pen.aucs.cer[1]
     if(piC > 1) piC = 1
   }
@@ -429,14 +429,14 @@ piC.ghaf_pen.exp_unc = function(He){
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    auc = integrate(ll3, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
     piC = auc/gaf.pen.aucs.cer[1]
     if(piC > 1) piC = 1
   }
   return(piC)
 }  #function to estimate AUC 
 
-keep.gaf.pen.cer = c('piC.ghaf_pen.lin_unc', 'pen.cer.lm.e', 'pen.cer.lm.b', 'll4', 'gaf.pen.aucs.cer',
+keep.gaf.pen.cer = c('piC.ghaf_pen.lin_unc', 'pen.cer.lm.e', 'pen.cer.lm.b', 'll3', 'gaf.pen.aucs.cer',
                      'piC.ghaf_pen.exp_unc', 'pen.cer.lm.e2')
 
 #plot to test function ########
@@ -449,3 +449,6 @@ plot(pen.cer$pendimethalin, gaf.pen.aucs.cer/gaf.pen.aucs.cer[1],
          pch = 5, col = 2, cex = 0.5)
 
 
+
+#Final keep vector
+keep.gaf.piC = c(keep.gaf.pen.cer, keep.gaf.gly.cer, keep.gaf.but.cer)  

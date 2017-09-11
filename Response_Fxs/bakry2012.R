@@ -203,3 +203,4 @@ fN.atr.bak.uncertainty = function(He){
 points(seq(0,5000, 10), sapply(seq(0,5000, 10), fN.atr.bak.uncertainty), pch = 5, cex = 0.5, col = 4)
 
 keep.bak.atr = c(keep.bak.atr, 'fN.atr.bak.uncertainty', 'fn.bak.atr', 'bak.fn')
+keep.bak.all = c(keep.bak.atr, keep.bak.gly)

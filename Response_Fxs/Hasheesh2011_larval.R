@@ -107,6 +107,9 @@ piM_pr_Hash11_uncertainty = function(In){
   
 keep.hsh.pim.prof = c('piM_pr_Hash11_uncertainty', 'slp.hash.pim.prof', 'lc50.hash.pim.prof',
                       'se.lc50.hash.pim.prof', 'fx.piM.hsh.prof')  
+#miracidia keep vector #########
+keep.hsh.pim = c(keep.hsh.ch.pim, keep.hsh.pim.prof)  
+
 #profenofos cercariae #######
 piC.hsh.prof = data.frame(conc = c(1.85, 2.85)*1000,
                           mort = c(.50 , .90),
@@ -205,3 +208,5 @@ plot(piC.hsh.ch$conc, piC.hsh.ch$surv, pch = 16, ylim = c(0,1), xlim = c(0,3500)
   keep.hsh.ch.pic = c('piC_ch_Hash11_uncertainty', 'fx.piC.hsh.chlor', 'slp.hash.pic.ch',
                       'lc50.hash.pic.ch', 'se.lc50.hash.pic.ch')  
   
+#cercariae keep vector #########
+keep.hsh.pic = c(keep.hsh.ch.pic, keep.hsh.pic.prof)  

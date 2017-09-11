@@ -197,7 +197,7 @@ plot(fn.bak$mal*1000, fn.bak$mal.r / fn.bak$mal.r[1] , ylim = c(0,1), pch = 16,
   lines(seq(0,4000,10), sapply(seq(0,4000,10), fn.bak.mal.pred)[2,] / fn.bak$mal.r[1], col = 2, lty=3)
   lines(seq(0,4000,10), sapply(seq(0,4000,10), fn.bak.mal.pred)[3,] / fn.bak$mal.r[1], col = 2, lty=3)
     
-  fN.mal.fx.uncertainty = function(In){
+  fNq_mal_Bakry11_uncertainty = function(In){
     if(In == 0) fn = 1 else{
       Ins = In/1000
       init = predict(fn.bak.mal, newdata = data.frame(mal = Ins), se.fit = T)
@@ -210,8 +210,8 @@ plot(fn.bak$mal*1000, fn.bak$mal.r / fn.bak$mal.r[1] , ylim = c(0,1), pch = 16,
      return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
   
-  points(seq(0,4000,4), sapply(seq(0,4000,4), fN.mal.fx.uncertainty), pch = 5, cex = 0.5, col = 4)
-keep.bak.mal = c(keep.bak.mal, 'fn.bak', 'fn.bak.mal', 'fN.mal.fx.uncertainty')
+  points(seq(0,4000,4), sapply(seq(0,4000,4), fNq_mal_Bakry11_uncertainty), pch = 5, cex = 0.5, col = 4)
+keep.bak.mal = c(keep.bak.mal, 'fn.bak', 'fn.bak.mal', 'fNq_mal_Bakry11_uncertainty')
 #deltamethrin reproduction ##########      
   fn.bak.del = drm(del.r ~ del, data = fn.bak, type = 'continuous',
                    fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
@@ -236,16 +236,14 @@ keep.bak.mal = c(keep.bak.mal, 'fn.bak', 'fn.bak.mal', 'fN.mal.fx.uncertainty')
     init = predict(fn.bak.del, newdata = data.frame(del = Ins), se.fit = T)
     if(init[1] == 0) fn = 0 else{
       fn = rnorm(1, init[1], init[2]) / fn.bak$del.r[1]
-    while(fn < 0 || fn > 1.00000){
-        fn = rnorm(1, init[1], init[2]) / fn.bak$del.r[1]
-      }
-    }
+    }  
+    if(fn < 0) fn = 0
+    if(fn > 1) fn = 1  
   }
     return(fn)
 } 
   
   points(seq(0,7000,7), sapply(seq(0,7000,7), fNq_del_Bakry11_uncertainty), pch = 5, cex = 0.5, col = 4)
-keep.bak.del = c(keep.bak.del, 'fn.bak', 'fn.bak.del', 'fNq_del_Bakry11_uncertainty')  
+  keep.bak.del = c(keep.bak.del, 'fn.bak', 'fn.bak.del', 'fNq_del_Bakry11_uncertainty')  
 #full keep vector ###############  
-  keep.bak11.N = c('mun.mal', 'muNq_mal_Bakry11_uncertainty', 'muNq_del_Bakry11_uncertainty', 'fn.bak',
-                   'fN.mal.fx.uncertainty', 'fn.bak.mal', 'fNq_del_Bakry11_uncertainty', 'fn.bak.del')
+  keep.bak11.N = c(keep.bak.mal, keep.bak.del)

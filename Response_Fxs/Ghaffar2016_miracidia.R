@@ -16,7 +16,7 @@ require(drc)
   gly.vals = c(0, 1506, 3875, 9174, 15062, 26249)
   pen.vals = c(0, 214.8, 535, 1299, 2148, 3762)
   
-  ll4 = function(slp,lc,x){
+  ll3 = function(slp,lc,x){
     1/(1+exp(slp*(log(x/lc))))
   }
   
@@ -46,13 +46,13 @@ gaf.but.drc.mir = drm(alive/total ~ time_hrs, conc, weights = total, data = mir.
 plot(mir.ctrl$time_hrs, mir.ctrl$surv, ylim = c(0,1), xlim = c(0,24), pch=16, 
      xlab = 'time(hrs)', ylab = 'prop surviving',
      main = 'Abdel-Ghaffar 2016: Butralin toxicity to miracidia')
-  lines(time, ll4(lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], x = time), lty = 2)
+  lines(time, ll3(lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], x = time), lty = 2)
   
   for(i in 1:length(unique(mir.but$conc))){
     points(mir.but$time_hrs[mir.but$conc==unique(mir.but$conc)[i]], 
            mir.but$surv[mir.but$conc==unique(mir.but$conc)[i]], pch=17,
            col = i+1)
-    lines(time, ll4(lc = gaf.but.drc.mir$coefficients[i+5], slp = gaf.but.drc.mir$coefficients[i], x = time), 
+    lines(time, ll3(lc = gaf.but.drc.mir$coefficients[i+5], slp = gaf.but.drc.mir$coefficients[i], x = time), 
           lty = 2, col = i+1)
   }
   
@@ -61,11 +61,11 @@ plot(mir.ctrl$time_hrs, mir.ctrl$surv, ylim = c(0,1), xlim = c(0,24), pch=16,
 
 #Get estimate of miracidia-hrs for each concentration    
   gaf.but.aucs.mir = as.numeric()
-  gaf.but.aucs.mir[1] = integrate(f = ll4, lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], 
+  gaf.but.aucs.mir[1] = integrate(f = ll3, lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], 
                                   lower=0, upper=24)[1]$value  
   
   for(j in 1:length(unique(mir.but$conc))){
-    gaf.but.aucs.mir[j+1] = integrate(f = ll4, lc = gaf.but.drc.mir$coefficients[j+5], slp = gaf.but.drc.mir$coefficients[j],
+    gaf.but.aucs.mir[j+1] = integrate(f = ll3, lc = gaf.but.drc.mir$coefficients[j+5], slp = gaf.but.drc.mir$coefficients[j],
                                       lower=0, upper=24)[1]$value  
   }
   
@@ -138,7 +138,7 @@ piM.ghaf_butr.lin_unc = function(He){
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    auc = integrate(ll3, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
     piM = auc/gaf.but.aucs.mir[1]
     if(piM > 1) piM = 1
   }
@@ -154,14 +154,14 @@ piM.ghaf_butr.exp_unc = function(He){
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    auc = integrate(ll3, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
     piM = auc/gaf.but.aucs.mir[1]
     if(piM > 1) piM = 1
   }
   return(piM)
 }  #function to estimate AUC 
 
-keep.gaf.but.mir = c('piM.ghaf_butr.lin_unc', 'but.mir.lm.e', 'but.mir.lm.b', 'll4', 'gaf.but.aucs.mir',
+keep.gaf.but.mir = c('piM.ghaf_butr.lin_unc', 'but.mir.lm.e', 'but.mir.lm.b', 'll3', 'gaf.but.aucs.mir',
                      'piM.ghaf_butr.exp_unc', 'but.mir.lm.e2')
 
 #plot to test function ########
@@ -185,13 +185,13 @@ gaf.gly.drc.mir = drm(alive/total ~ time_hrs, conc, weights = total, data = mir.
 plot(mir.ctrl$time_hrs, mir.ctrl$surv, ylim = c(0,1), xlim = c(0,24), pch=16, 
      xlab = 'time(hrs)', ylab = 'prop surviving',
      main = 'Abdel-Ghaffar 2016: Glyphosate toxicity to miracidia')
-  lines(time, ll4(lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], x = time), lty = 2)
+  lines(time, ll3(lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], x = time), lty = 2)
   
   for(i in 1:length(unique(mir.gly$conc))){
     points(mir.gly$time_hrs[mir.gly$conc==unique(mir.gly$conc)[i]], 
            mir.gly$surv[mir.gly$conc==unique(mir.gly$conc)[i]], pch=17,
            col = i+1)
-    lines(time, ll4(lc = gaf.gly.drc.mir$coefficients[i+5], slp = gaf.gly.drc.mir$coefficients[i], x = time), 
+    lines(time, ll3(lc = gaf.gly.drc.mir$coefficients[i+5], slp = gaf.gly.drc.mir$coefficients[i], x = time), 
           lty = 2, col = i+1)
   }
 
@@ -200,11 +200,11 @@ plot(mir.ctrl$time_hrs, mir.ctrl$surv, ylim = c(0,1), xlim = c(0,24), pch=16,
 
 #Get estimate of miracidia-hrs for each concentration    
   gaf.gly.aucs.mir = as.numeric()
-  gaf.gly.aucs.mir[1] = integrate(f = ll4, lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], 
+  gaf.gly.aucs.mir[1] = integrate(f = ll3, lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], 
                                   lower=0, upper=24)[1]$value  
   
   for(j in 1:length(unique(mir.gly$conc))){
-    gaf.gly.aucs.mir[j+1] = integrate(f = ll4, lc = gaf.gly.drc.mir$coefficients[j+5], slp = gaf.gly.drc.mir$coefficients[j],
+    gaf.gly.aucs.mir[j+1] = integrate(f = ll3, lc = gaf.gly.drc.mir$coefficients[j+5], slp = gaf.gly.drc.mir$coefficients[j],
                                       lower=0, upper=24)[1]$value  
   }
 
@@ -277,7 +277,7 @@ piM.ghaf_gly.lin_unc = function(He){
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    auc = integrate(ll3, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
     piM = auc/gaf.gly.aucs.mir[1]
     if(piM > 1) piM = 1
   }
@@ -293,14 +293,14 @@ piM.ghaf_gly.exp_unc = function(He){
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    auc = integrate(ll3, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
     piM = auc/gaf.gly.aucs.mir[1]
     if(piM > 1) piM = 1
   }
   return(piM)
 }  #function to estimate AUC 
 
-keep.gaf.gly.mir = c('piM.ghaf_gly.lin_unc', 'gly.mir.lm.e', 'gly.mir.lm.b', 'll4', 'gaf.gly.aucs.mir',
+keep.gaf.gly.mir = c('piM.ghaf_gly.lin_unc', 'gly.mir.lm.e', 'gly.mir.lm.b', 'll3', 'gaf.gly.aucs.mir',
                      'piM.ghaf_gly.exp_unc', 'gly.mir.lm.e2')
 
 #plot to test function ########
@@ -324,13 +324,13 @@ gaf.pen.drc.mir = drm(alive/total ~ time_hrs, conc, weights = total, data = mir.
 plot(mir.ctrl$time_hrs, mir.ctrl$surv, ylim = c(0,1), xlim = c(0,24), pch=16, 
      xlab = 'time(hrs)', ylab = 'prop surviving',
      main = 'Abdel-Ghaffar 2016: Pendimethalin toxicity to miracidia')
-  lines(time, ll4(lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], x = time), lty = 2)
+  lines(time, ll3(lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], x = time), lty = 2)
 
   for(i in 1:length(unique(mir.pen$conc))){
     points(mir.pen$time_hrs[mir.pen$conc==unique(mir.pen$conc)[i]], 
            mir.pen$surv[mir.pen$conc==unique(mir.pen$conc)[i]], pch=17,
            col = i+1)
-    lines(time, ll4(lc = gaf.pen.drc.mir$coefficients[i+5], slp = gaf.pen.drc.mir$coefficients[i], x = time), 
+    lines(time, ll3(lc = gaf.pen.drc.mir$coefficients[i+5], slp = gaf.pen.drc.mir$coefficients[i], x = time), 
           lty = 2, col = i+1)
   }
 
@@ -339,11 +339,11 @@ plot(mir.ctrl$time_hrs, mir.ctrl$surv, ylim = c(0,1), xlim = c(0,24), pch=16,
 
 #Get estimate of miracidia-hrs for each concentration    
 gaf.pen.aucs.mir = as.numeric()
-  gaf.pen.aucs.mir[1] = integrate(f = ll4, lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], 
+  gaf.pen.aucs.mir[1] = integrate(f = ll3, lc = gaf.ctrl.drc.mir$coefficients[2], slp = gaf.ctrl.drc.mir$coefficients[1], 
                                   lower=0, upper=24)[1]$value  
   
   for(j in 1:length(unique(mir.pen$conc))){
-    gaf.pen.aucs.mir[j+1] = integrate(f = ll4, lc = gaf.pen.drc.mir$coefficients[j+5], slp = gaf.pen.drc.mir$coefficients[j],
+    gaf.pen.aucs.mir[j+1] = integrate(f = ll3, lc = gaf.pen.drc.mir$coefficients[j+5], slp = gaf.pen.drc.mir$coefficients[j],
                                       lower=0, upper=24)[1]$value  
   }
   
@@ -416,7 +416,7 @@ piM.ghaf_pen.lin_unc = function(He){
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    auc = integrate(ll3, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
     piM = auc/gaf.pen.aucs.mir[1]
     if(piM > 1) piM = 1
   }
@@ -432,14 +432,14 @@ piM.ghaf_pen.exp_unc = function(He){
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
     while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-    auc = integrate(ll4, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    auc = integrate(ll3, lc = e.use, slp = b.use, lower=0, upper=24)[1]$value
     piM = auc/gaf.pen.aucs.mir[1]
     if(piM > 1) piM = 1
   }
   return(piM)
 }  #function to estimate AUC 
 
-keep.gaf.pen.cer = c('piM.ghaf_pen.lin_unc', 'pen.mir.lm.e', 'pen.mir.lm.b', 'll4', 'gaf.pen.aucs.mir',
+keep.gaf.pen.mir = c('piM.ghaf_pen.lin_unc', 'pen.mir.lm.e', 'pen.mir.lm.b', 'll3', 'gaf.pen.aucs.mir',
                      'piM.ghaf_pen.exp_unc', 'pen.mir.lm.e2')
 
 #plot to test function ########
@@ -450,3 +450,6 @@ plot(pen.mir$pendimethalin, gaf.pen.aucs.mir/gaf.pen.aucs.mir[1],
          pch = 5, col = 4, cex = 0.5)
   points(seq(0,4000,10), sapply(seq(0,4000,10), piM.ghaf_pen.exp_unc, simplify = T),
          pch = 5, col = 2, cex = 0.5)
+
+#final keep vector #############
+keep.gaf.piM = c(keep.gaf.but.mir, keep.gaf.gly.mir, keep.gaf.pen.mir)  
