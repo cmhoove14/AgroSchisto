@@ -13,12 +13,14 @@ require(drc)
 
 #miracidial mortality (S. mansoni) from Tchounwou 1991 ####################################
 eggv = read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/tchounwou91_urea_ammP_schistosome_egg_viability.csv')
+eggv$conc = eggv$conc/1000
   eggv.amm = subset(eggv, chem == 'amm_sulph')
   eggv.ure = subset(eggv, chem == 'urea')
 
 #Amm. sulphate model    
 tch91.egv.amm<-drm(hatch/total ~ conc, weights = total, data = eggv.amm, type = 'binomial', 
-                   fct = LL.2())
+                   fct = LL.3(names = c('b', 'd', 'e'),
+                              fixed = c(NA, 1, NA)))
   summary(tch91.egv.amm)
   plot(tch91.egv.amm) 
   
@@ -29,7 +31,7 @@ tch91.egv.amm_unc = function(Fe){
   v
 }  
 
-points(seq(0,1e7,1e4), sapply(seq(0,1e7,1e4), tch91.egv.amm_unc), pch = 5, col = 2, cex = 0.6)
+points(seq(0,1e4,1e2), sapply(seq(0,1e4,1e2), tch91.egv.amm_unc), pch = 5, col = 2, cex = 0.6)
 
 #Urea model    
 tch91.egv.ure<-drm(hatch/total ~ conc, weights = total, data = eggv.ure, type = 'binomial', 
@@ -44,7 +46,7 @@ tch91.egv.ure_unc = function(Fe){
   v
 }  
 
-points(seq(0,5e7,5e4), sapply(seq(0,5e7,5e4), tch91.egv.ure_unc), pch = 5, col = 2, cex = 0.6)
+points(seq(0,5e4,5e2), sapply(seq(0,5e4,5e2), tch91.egv.ure_unc), pch = 5, col = 2, cex = 0.6)
 
 
 keep.tch91.egv = c('tch91.egv.amm_unc', 'tch91.egv.amm', 'eggv.amm', 

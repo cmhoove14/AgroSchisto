@@ -12,7 +12,7 @@
 require(drc)
 
 L.3.fx = function(t, lc50 = lc50, slp = slp){
-  1 / (1+exp(slp*(t - lc50)))
+  1 / (1+exp(slp*log(t / lc50)))
 }
 
 rohr = read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/cercarial Mortality/rohr2008.csv')
@@ -23,7 +23,7 @@ plot(x = rohr$time_hrs[rohr$chem == 'control'], y = rohr$surv[rohr$chem == 'cont
      xlab = 'time (hrs)', ylab = 'prop dead', pch = 16)
 
 rohr.ctrl = drm(alive/total ~ time_hrs, total, data = rohr, 
-                type = 'binomial', fct = L.4(names = c('b', 'c', 'd', 'e'),
+                type = 'binomial', fct = LL.4(names = c('b', 'c', 'd', 'e'),
                                                         fixed = c(NA, 0, 1, NA)))
 
 lines(time, L.3.fx(time, coef(rohr.ctrl)[2], coef(rohr.ctrl)[1]), lty=2)
@@ -34,7 +34,7 @@ points(x = rohr.atr$time_hrs, y = rohr.atr$surv/100,
        col = 'gold', pch = 16)
 
   rohr.atrmod = drm(alive/total ~ time_hrs, total, data = rohr.atr, 
-                    type = 'binomial', fct = L.4(names = c('b', 'c', 'd', 'e'),
+                    type = 'binomial', fct = LL.4(names = c('b', 'c', 'd', 'e'),
                                                  fixed = c(NA, 0, 1, NA)))
   
   lines(time, L.3.fx(time, coef(rohr.atrmod)[2], coef(rohr.atrmod)[1]), lty=2, col = 'gold')
@@ -45,7 +45,7 @@ points(x = rohr.atr$time_hrs, y = rohr.atr$surv/100,
          col = 2, pch = 16)
   
   rohr.malmod = drm(alive/total ~ time_hrs, total, data = rohr.mal, 
-                    type = 'binomial', fct = L.4(names = c('b', 'c', 'd', 'e'),
+                    type = 'binomial', fct = LL.4(names = c('b', 'c', 'd', 'e'),
                                                  fixed = c(NA, 0, 1, NA)))
   
   lines(time, L.3.fx(time, coef(rohr.malmod)[2], coef(rohr.malmod)[1]), lty=2, col = 2)
@@ -56,7 +56,7 @@ points(x = rohr.atr$time_hrs, y = rohr.atr$surv/100,
          col = 'purple', pch = 16)
   
   rohr.carmod = drm(alive/total ~ time_hrs, total, data = rohr.car, 
-                    type = 'binomial', fct = L.4(names = c('b', 'c', 'd', 'e'),
+                    type = 'binomial', fct = LL.4(names = c('b', 'c', 'd', 'e'),
                                                  fixed = c(NA, 0, 1, NA)))
   
   lines(time, L.3.fx(time, coef(rohr.carmod)[2], coef(rohr.carmod)[1]), lty=2, col = 'purple')
@@ -67,7 +67,7 @@ rohr.gly = subset(rohr, chem == 'glyphosate')
          col = 3, pch = 16)
   
   rohr.glymod = drm(alive/total ~ time_hrs, total, data = rohr.gly, 
-                    type = 'binomial', fct = L.4(names = c('b', 'c', 'd', 'e'),
+                    type = 'binomial', fct = LL.4(names = c('b', 'c', 'd', 'e'),
                                                  fixed = c(NA, 0, 1, NA)))
   
   lines(time, L.3.fx(time, coef(rohr.glymod)[2], coef(rohr.glymod)[1]), lty=2, col = 3)

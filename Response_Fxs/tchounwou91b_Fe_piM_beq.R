@@ -11,9 +11,6 @@
 
 require(drc)
 
-ll4 = function(hi,lo,slp,lc,x){
-  lo + ((hi-lo)/(1+exp(slp*(log(x/lc)))))
-}
 L.3.fx = function(t, lc50 = lc50, slp = slp){
   1 / (1+exp(slp*log(t / lc50)))
 }
@@ -21,13 +18,14 @@ L.3.fx = function(t, lc50 = lc50, slp = slp){
 
 #miracidial mortality (S. mansoni) from Tchounwou 1991 ####################################
 mir2 = read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Miracidial Mortality/tchounwou91_urea_ammP_miracidial_mortality.csv')
+  mir2$conc = mir2$conc/1000
   mir.amm = subset(mir2, chem == 'amm_sulph')
   mir.ure = subset(mir2, chem == 'urea')
 
 #Ammonium Sulphate concentration ############
 tch91.piM.amm<-drm(alive/total ~ time_hrs, conc, weights = total, data = mir.amm, type = 'binomial', 
-                   fct = LL.4(names = c('b', 'c', 'd', 'e'),
-                              fixed = c(NA, 0, 1, NA)))
+                   fct = LL.3(names = c('b', 'd', 'e'),
+                              fixed = c(NA, 1, NA)))
   summary(tch91.piM.amm)
   plot(tch91.piM.amm) 
 
@@ -68,7 +66,7 @@ miramm.df = data.frame(amm = unique(mir.amm$conc),
                      b = summary(tch91.piM.amm)$coefficients[c(1:6), 1],
                      b.se = summary(tch91.piM.amm)$coefficients[c(1:6), 2])
 
-plot(miramm.df$amm, miramm.df$e, pch = 16, xlab = 'amm. sulphate (ppb)', ylab = 'LL.2 Parameters',
+plot(miramm.df$amm, miramm.df$e, pch = 16, xlab = 'amm. sulphate (ppm)', ylab = 'LL.2 Parameters',
      ylim = c(0, 7))
   points(miramm.df$amm, miramm.df$b, pch = 17, col=2)
     for(i in 1:length(miramm.df$amm)){
@@ -82,45 +80,47 @@ tch91.e.amm.lin = lm(e ~ amm, weights = e.se^-1, data = miramm.df)
   tch91.e.amm.lin.pred = function(amm){
     predict(tch91.e.amm.lin, newdata = data.frame(amm = amm), interval = 'confidence', level = 0.95)
   }
-    lines(seq(0,max(miramm.df$amm)+1000,5000), sapply(seq(0,max(miramm.df$amm)+1000,5000), tch91.e.amm.lin.pred)[1,],
+    lines(seq(0,max(miramm.df$amm)+1,50), sapply(seq(0,max(miramm.df$amm)+1,50), tch91.e.amm.lin.pred)[1,],
           lty = 2)
-    lines(seq(0,max(miramm.df$amm)+1000,5000), sapply(seq(0,max(miramm.df$amm)+1000,5000), tch91.e.amm.lin.pred)[2,],
+    lines(seq(0,max(miramm.df$amm)+1,50), sapply(seq(0,max(miramm.df$amm)+1,50), tch91.e.amm.lin.pred)[2,],
           lty = 3)
-    lines(seq(0,max(miramm.df$amm)+1000,5000), sapply(seq(0,max(miramm.df$amm)+1000,5000), tch91.e.amm.lin.pred)[3,],
+    lines(seq(0,max(miramm.df$amm)+1,50), sapply(seq(0,max(miramm.df$amm)+1,50), tch91.e.amm.lin.pred)[3,],
           lty = 3)
+    
 #exponential fit
 tch91.e.amm.exp = lm(e ~ logamm, weights = e.se^-1, data = miramm.df) 
   tch91.e.amm.exp.pred = function(amm){
       predict(tch91.e.amm.exp, newdata = data.frame(logamm = log(amm+1)), interval = 'confidence', level = 0.95)
     }
-    lines(seq(0,max(miramm.df$amm)+1000,5000), sapply(seq(0,max(miramm.df$amm)+1000,5000), tch91.e.amm.exp.pred)[1,],
+    lines(seq(0,max(miramm.df$amm)+1,50), sapply(seq(0,max(miramm.df$amm)+1,50), tch91.e.amm.exp.pred)[1,],
           lty = 2, col = 3)
-    lines(seq(0,max(miramm.df$amm)+1000,5000), sapply(seq(0,max(miramm.df$amm)+1000,5000), tch91.e.amm.exp.pred)[2,],
+    lines(seq(0,max(miramm.df$amm)+1,50), sapply(seq(0,max(miramm.df$amm)+1,50), tch91.e.amm.exp.pred)[2,],
           lty = 3, col = 3)
-    lines(seq(0,max(miramm.df$amm)+1000,5000), sapply(seq(0,max(miramm.df$amm)+1000,5000), tch91.e.amm.exp.pred)[3,],
+    lines(seq(0,max(miramm.df$amm)+1,50), sapply(seq(0,max(miramm.df$amm)+1,50), tch91.e.amm.exp.pred)[3,],
           lty = 3, col = 3)    
     
-AIC(tch91.e.amm.lin, tch91.e.amm.exp) #Linear is a better fit
+AIC(tch91.e.amm.lin, tch91.e.amm.exp) #exponential is a better fit
     
 tch91.b.amm = lm(b ~ amm, weights = b.se^-1, data = miramm.df) 
   tch91.b.amm.pred = function(amm){
     predict(tch91.b.amm, newdata = data.frame(amm = amm), interval = 'confidence', level = 0.95)
   }
-    lines(seq(0,max(miramm.df$amm)+1000,5000), sapply(seq(0,max(miramm.df$amm)+1000,5000), tch91.b.amm.pred)[1,],
+    lines(seq(0,max(miramm.df$amm)+1,50), sapply(seq(0,max(miramm.df$amm)+1,50), tch91.b.amm.pred)[1,],
           lty = 2, col = 2)
-    lines(seq(0,max(miramm.df$amm)+1000,5000), sapply(seq(0,max(miramm.df$amm)+1000,5000), tch91.b.amm.pred)[2,],
+    lines(seq(0,max(miramm.df$amm)+1,50), sapply(seq(0,max(miramm.df$amm)+1,50), tch91.b.amm.pred)[2,],
           lty = 3, col = 2)
-    lines(seq(0,max(miramm.df$amm)+1000,5000), sapply(seq(0,max(miramm.df$amm)+1000,5000), tch91.b.amm.pred)[3,],
+    lines(seq(0,max(miramm.df$amm)+1,50), sapply(seq(0,max(miramm.df$amm)+1,50), tch91.b.amm.pred)[3,],
           lty = 3, col = 2)
 
 mir.auc.amm = data.frame(amm = miramm.df$amm,
                          piM = c(tch91.amm.pim.aucs)/tch91.amm.pim.aucs[1])
 
 #Create function to generate d-r function #####################
-piM.tch91_amm_unc = function(In){
+piM.tch91_amm_unc2 = function(In){
   if(In == 0) piM = 1 else{
-  e = as.numeric(predict(tch91.e.amm.lin, newdata = data.frame(amm = In), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(tch91.b.amm, newdata = data.frame(amm = In), se.fit = TRUE)[1:2])
+    Ins = In/1000
+  e = as.numeric(predict(tch91.e.amm.exp, newdata = data.frame(logamm = log(Ins+1)), se.fit = TRUE)[1:2])
+  b = as.numeric(predict(tch91.b.amm, newdata = data.frame(amm = Ins), se.fit = TRUE)[1:2])
   
   e.use = rnorm(1, e[1], e[2])
   while(e.use < 0) e.use = rnorm(1, e[1], e[2])
@@ -133,8 +133,26 @@ piM.tch91_amm_unc = function(In){
   }
   return(piM)
 }  
+
+piM.tch91_amm_unc = function(In){
+  if(In == 0) piM = 1 else{
+    Ins = In/1000
+    e = as.numeric(predict(tch91.e.amm.lin, newdata = data.frame(amm = Ins), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(tch91.b.amm, newdata = data.frame(amm = Ins), se.fit = TRUE)[1:2])
+    
+    e.use = rnorm(1, e[1], e[2])
+    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+    b.use = rnorm(1, b[1], b[2])
+    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+    
+    auc = integrate(L.3.fx, lc50 = e.use, slp = b.use, lower=0, upper=24)[1]$value
+    piM = auc/tch91.amm.pim.aucs[1]
+    if(piM > 1) piM = 1
+  }
+  return(piM)
+}  
   
-keep.tch91.amm = c('tch91.amm.pim.aucs', 'piM.tch91_amm_unc', 'L.3.fx', 'miramm.df',
+keep.tch91.amm = c('tch91.amm.pim.aucs', 'piM.tch91_amm_unc', 'piM.tch91_amm_unc2', 'L.3.fx', 'miramm.df',
                    'tch91.e.amm.lin', 'tch91.b.amm', 'mir.auc.amm')
 
 #Qualitative model validation ###############
@@ -152,30 +170,35 @@ plot(mir.amm$time_hrs[mir.amm$conc==0], mir.amm$surv[mir.amm$conc==0], pch=17, x
 
 #function to plot model predictions
 predm.amm.plot = function(In, clr){
-  e = as.numeric(predict(tch91.e.amm.lin, newdata = data.frame(amm = In), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(tch91.b.amm, newdata = data.frame(amm = In), se.fit = TRUE)[1:2])
+  Ins = In/1000
+  e = as.numeric(predict(tch91.e.amm.lin, newdata = data.frame(amm = Ins), se.fit = TRUE)[1:2])
+  b = as.numeric(predict(tch91.b.amm, newdata = data.frame(amm = Ins), se.fit = TRUE)[1:2])
   
   e.use = rnorm(1, e[1], e[2])
   while(e.use < 0) e.use = rnorm(1, e[1], e[2])
   b.use = rnorm(1, b[1], b[2])
   while(b.use < 0) b.use = rnorm(1, e[1], e[2])
   
-  lines(time, ll4(1,0, b.use, e.use, time), lty=2, col = clr)
+  lines(time, L.3.fx(time, slp = b.use, lc50 = e.use), lty=2, col = clr)
 }   
 
 #plot model predictions
-for(i in c(unique(mir.amm$conc))){
+for(i in c(unique(mir.amm$conc)*1000)){
   c = i/1000000 + 1
   print(c)
   replicate(10, predm.amm.plot(In = i, clr = c))
 }
 
-
-
+#plot AUC predictions
+plot(mir.auc.amm[,1], mir.auc.amm[,2], pch = 16, cex = 1.2)
+  points(seq(0,max(miramm.df$amm)+1,5), sapply(seq(0,max(miramm.df$amm)*1000,5000) , piM.tch91_amm_unc),
+         pch = 17, cex = 0.5, col=4)
+  points(seq(0,max(miramm.df$amm)+1,5), sapply(seq(0,max(miramm.df$amm)*1000,5000) , piM.tch91_amm_unc2),
+         pch = 17, cex = 0.5, col=2)
 #Urea concentration ############
 tch91.piM.ure<-drm(alive/total ~ time_hrs, conc, weights = total, data = mir.ure, type = 'binomial', 
-                   fct = LL.4(names = c('b', 'c', 'd', 'e'),
-                              fixed = c(NA, 0, 1, NA)))
+                   fct = LL.3(names = c('b', 'd', 'e'),
+                              fixed = c(NA, 1, NA)))
 summary(tch91.piM.ure)
 plot(tch91.piM.ure) 
 
@@ -230,11 +253,11 @@ tch91.e.ure.lin = lm(e ~ ure, weights = e.se^-1, data = mirure.df)
   tch91.e.ure.lin.pred = function(ure){
     predict(tch91.e.ure.lin, newdata = data.frame(ure = ure), interval = 'confidence', level = 0.95)
   }
-    lines(seq(0,max(mirure.df$ure)+1000,5000), sapply(seq(0,max(mirure.df$ure)+1000,5000), tch91.e.ure.lin.pred)[1,],
+    lines(seq(0,max(mirure.df$ure)+1,50), sapply(seq(0,max(mirure.df$ure)+1,50), tch91.e.ure.lin.pred)[1,],
           lty = 2)
-    lines(seq(0,max(mirure.df$ure)+1000,5000), sapply(seq(0,max(mirure.df$ure)+1000,5000), tch91.e.ure.lin.pred)[2,],
+    lines(seq(0,max(mirure.df$ure)+1,50), sapply(seq(0,max(mirure.df$ure)+1,50), tch91.e.ure.lin.pred)[2,],
           lty = 3)
-    lines(seq(0,max(mirure.df$ure)+1000,5000), sapply(seq(0,max(mirure.df$ure)+1000,5000), tch91.e.ure.lin.pred)[3,],
+    lines(seq(0,max(mirure.df$ure)+1,50), sapply(seq(0,max(mirure.df$ure)+1,50), tch91.e.ure.lin.pred)[3,],
           lty = 3)
   
 #exponential fit
@@ -242,11 +265,11 @@ tch91.e.ure.exp = lm(e ~ logure, weights = e.se^-1, data = mirure.df)
   tch91.e.ure.exp.pred = function(ure){
     predict(tch91.e.ure.exp, newdata = data.frame(logure = log(ure+1)), interval = 'confidence', level = 0.95)
   }
-    lines(seq(0,max(mirure.df$ure)+1000,5000), sapply(seq(0,max(mirure.df$ure)+1000,5000), tch91.e.ure.exp.pred)[1,],
+    lines(seq(0,max(mirure.df$ure)+1,50), sapply(seq(0,max(mirure.df$ure)+1,50), tch91.e.ure.exp.pred)[1,],
           lty = 2, col = 3)
-    lines(seq(0,max(mirure.df$ure)+1000,5000), sapply(seq(0,max(mirure.df$ure)+1000,5000), tch91.e.ure.exp.pred)[2,],
+    lines(seq(0,max(mirure.df$ure)+1,50), sapply(seq(0,max(mirure.df$ure)+1,50), tch91.e.ure.exp.pred)[2,],
           lty = 3, col = 3)
-    lines(seq(0,max(mirure.df$ure)+1000,5000), sapply(seq(0,max(mirure.df$ure)+1000,5000), tch91.e.ure.exp.pred)[3,],
+    lines(seq(0,max(mirure.df$ure)+1,50), sapply(seq(0,max(mirure.df$ure)+1,50), tch91.e.ure.exp.pred)[3,],
           lty = 3, col = 3)    
 
 AIC(tch91.e.ure.lin, tch91.e.ure.exp) #Linear is a better fit
@@ -255,11 +278,11 @@ AIC(tch91.e.ure.lin, tch91.e.ure.exp) #Linear is a better fit
     tch91.b.ure.pred = function(ure){
       predict(tch91.b.ure, newdata = data.frame(ure = ure), interval = 'confidence', level = 0.95)
     }
-    lines(seq(0,max(mirure.df$ure)+1000,5000), sapply(seq(0,max(mirure.df$ure)+1000,5000), tch91.b.ure.pred)[1,],
+    lines(seq(0,max(mirure.df$ure)+1,50), sapply(seq(0,max(mirure.df$ure)+1,50), tch91.b.ure.pred)[1,],
           lty = 2, col = 2)
-    lines(seq(0,max(mirure.df$ure)+1000,5000), sapply(seq(0,max(mirure.df$ure)+1000,5000), tch91.b.ure.pred)[2,],
+    lines(seq(0,max(mirure.df$ure)+1,50), sapply(seq(0,max(mirure.df$ure)+1,50), tch91.b.ure.pred)[2,],
           lty = 3, col = 2)
-    lines(seq(0,max(mirure.df$ure)+1000,5000), sapply(seq(0,max(mirure.df$ure)+1000,5000), tch91.b.ure.pred)[3,],
+    lines(seq(0,max(mirure.df$ure)+1,50), sapply(seq(0,max(mirure.df$ure)+1,50), tch91.b.ure.pred)[3,],
           lty = 3, col = 2)
 
 mir.auc.ure = data.frame(ure = mirure.df$ure,
@@ -268,8 +291,9 @@ mir.auc.ure = data.frame(ure = mirure.df$ure,
 #Create function to generate d-r function #####################
 piM.tch91_ure_unc = function(In){
   if(In == 0) piM = 1 else{
-    e = as.numeric(predict(tch91.e.ure.lin, newdata = data.frame(ure = In), se.fit = TRUE)[1:2])
-    b = as.numeric(predict(tch91.b.ure, newdata = data.frame(ure = In), se.fit = TRUE)[1:2])
+    Ins = In/1000
+    e = as.numeric(predict(tch91.e.ure.lin, newdata = data.frame(ure = Ins), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(tch91.b.ure, newdata = data.frame(ure = Ins), se.fit = TRUE)[1:2])
     
     e.use = rnorm(1, e[1], e[2])
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
@@ -301,19 +325,20 @@ legend('topright', legend = c('control', unique(mir.ure$conc)[-1]),
 
 #function to plot model predictions
 predm.ure.plot = function(In, clr){
-  e = as.numeric(predict(tch91.e.ure.lin, newdata = data.frame(ure = In), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(tch91.b.ure, newdata = data.frame(ure = In), se.fit = TRUE)[1:2])
+  Ins = In/1000
+  e = as.numeric(predict(tch91.e.ure.lin, newdata = data.frame(ure = Ins), se.fit = TRUE)[1:2])
+  b = as.numeric(predict(tch91.b.ure, newdata = data.frame(ure = Ins), se.fit = TRUE)[1:2])
   
   e.use = rnorm(1, e[1], e[2])
   while(e.use < 0) e.use = rnorm(1, e[1], e[2])
   b.use = rnorm(1, b[1], b[2])
   while(b.use < 0) b.use = rnorm(1, e[1], e[2])
   
-  lines(time, ll4(1,0, b.use, e.use, time), lty=2, col = clr)
+  lines(time, L.3.fx(time, slp = b.use, lc50 = e.use), lty=2, col = clr)
 }   
 
 #plot model predictions
-for(i in c(unique(mir.ure$conc))){
+for(i in c(unique(mir.ure$conc)*1000)){
   c = i/2000000 + 1
   print(c)
   replicate(10, predm.ure.plot(In = i, clr = c))

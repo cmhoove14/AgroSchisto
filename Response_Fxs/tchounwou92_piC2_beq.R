@@ -11,22 +11,20 @@
 
 require(drc)
 
-ll4 = function(hi,lo,slp,lc,x){
-  lo + ((hi-lo)/(1+exp(slp*(log(x/lc)))))
-}
 L.3.fx = function(t, lc50 = lc50, slp = slp){
   1 / (1+exp(slp*log(t / lc50)))
 }
 #Cercarial mortality (S. mansoni) from Tchounwou 1992 ##################
 cerc = read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Cercarial Mortality/tchounwou92.csv')
+cerc$conc = cerc$conc/1000
   cerc.mal = subset(cerc, chem == 'malathion')
   cerc.mal$dead = round(cerc.mal$dead)
   time = seq(0,25,0.1)
 
 #Tchounwou Data plotted ############
   tch92.piC.mal<-drm(alive/total ~ time_hrs, conc, weights = total, data = cerc.mal, type = 'binomial', 
-                     fct = LL.4(names = c('b', 'c', 'd', 'e'),
-                                fixed = c(NA, 0, 1, NA)))
+                     fct = LL.3(names = c('b', 'd', 'e'),
+                                fixed = c(NA, 1, NA)))
   summary(tch92.piC.mal)
   plot(tch92.piC.mal) 
   
@@ -57,8 +55,8 @@ for(j in 1:length(unique(cerc.mal$conc))){
 
 
 #Data frame of LL.2 parameters across maltahion concentrations ##################    
-parms.df = data.frame(mal = c(0,50,100,150,200,250)*1000,
-                      logmal = log((c(0,50,100,150,200,250)+1)*1000),
+parms.df = data.frame(mal = c(0,50,100,150,200,250),
+                      logmal = log(c(0,50,100,150,200,250)+1),
                       e = summary(tch92.piC.mal)$coefficients[c(7:12), 1],
                       e.se = summary(tch92.piC.mal)$coefficients[c(7:12), 2],
                       b = summary(tch92.piC.mal)$coefficients[c(1:6), 1],
@@ -66,7 +64,7 @@ parms.df = data.frame(mal = c(0,50,100,150,200,250)*1000,
 
   plot(parms.df$mal, parms.df$e, pch = 16, xlab = 'malathion (ppm)', ylab = 'LL.2 Parameters',
        ylim = c(0, 15))
-    points(parms.df$mal+1000, parms.df$b, pch = 17, col=2)
+    points(parms.df$mal, parms.df$b, pch = 17, col=2)
     for(i in 1:length(parms.df$mal)){
       segments(x0 = parms.df$mal[i], y0 = parms.df$e[i] + parms.df$e.se[i],
                x1 = parms.df$mal[i], y1 = parms.df$e[i] - parms.df$e.se[i])
@@ -80,27 +78,27 @@ parms.df = data.frame(mal = c(0,50,100,150,200,250)*1000,
     fx.e.mod = function(In){
       predict(tch92.mal.e.mod, newdata = data.frame(mal = In), interval = 'confidence', level = 0.95)
     }
-    lines(seq(0,3e5, 3e3),sapply(seq(0,3e5, 3e3), fx.e.mod)[1,], lty = 2)
-    lines(seq(0,3e5, 3e3),sapply(seq(0,3e5, 3e3), fx.e.mod)[2,], lty = 3)
-    lines(seq(0,3e5, 3e3),sapply(seq(0,3e5, 3e3), fx.e.mod)[3,], lty = 3)
+    lines(seq(0,300, 3),sapply(seq(0,300, 3), fx.e.mod)[1,], lty = 2)
+    lines(seq(0,300, 3),sapply(seq(0,300, 3), fx.e.mod)[2,], lty = 3)
+    lines(seq(0,300, 3),sapply(seq(0,300, 3), fx.e.mod)[3,], lty = 3)
     
   tch92.mal.e.mod2 = lm(e ~ logmal, weights = e.se^-1, data = parms.df)
     fx.e.mod2 = function(In){
       predict(tch92.mal.e.mod2, newdata = data.frame(logmal = log(In+1)), interval = 'confidence', level = 0.95)
     }
-    lines(seq(0,3e5, 3e3),sapply(seq(0,3e5, 3e3), fx.e.mod2)[1,], lty = 2, col = 3)
-    lines(seq(0,3e5, 3e3),sapply(seq(0,3e5, 3e3), fx.e.mod2)[2,], lty = 3, col = 3)
-    lines(seq(0,3e5, 3e3),sapply(seq(0,3e5, 3e3), fx.e.mod2)[3,], lty = 3, col = 3)
+    lines(seq(0,300, 3),sapply(seq(0,300, 3), fx.e.mod2)[1,], lty = 2, col = 3)
+    lines(seq(0,300, 3),sapply(seq(0,300, 3), fx.e.mod2)[2,], lty = 3, col = 3)
+    lines(seq(0,300, 3),sapply(seq(0,300, 3), fx.e.mod2)[3,], lty = 3, col = 3)
   
-    AIC(tch92.mal.e.mod, tch92.mal.e.mod2) #exponential is much better
+    AIC(tch92.mal.e.mod, tch92.mal.e.mod2) #exponential is better
   
   tch92.mal.b.mod = lm(b ~ mal, weights = b.se^-1, data = parms.df) 
     fx.b.mod = function(In){
       predict(tch92.mal.b.mod, newdata = data.frame(mal = In), interval = 'confidence', level = 0.95)
     }
-    lines(seq(0,3e5, 3e3),sapply(seq(0,3e5, 3e3), fx.b.mod)[1,], lty = 2, col = 2)
-    lines(seq(0,3e5, 3e3),sapply(seq(0,3e5, 3e3), fx.b.mod)[2,], lty = 3, col = 2)
-    lines(seq(0,3e5, 3e3),sapply(seq(0,3e5, 3e3), fx.b.mod)[3,], lty = 3, col = 2)
+    lines(seq(0,300, 3),sapply(seq(0,300, 3), fx.b.mod)[1,], lty = 2, col = 2)
+    lines(seq(0,300, 3),sapply(seq(0,300, 3), fx.b.mod)[2,], lty = 3, col = 2)
+    lines(seq(0,300, 3),sapply(seq(0,300, 3), fx.b.mod)[3,], lty = 3, col = 2)
   
     
   legend('top', lty = c(2,2,2,3), col = c(1,3,2,1), bty = 'n', title = 'Fit models',
@@ -113,8 +111,9 @@ cerc.auc.mal = data.frame(mal = c(parms.df$mal),
 #Function to estimate survival curve as function of malathion conc #####################################
 piC.tch92_mal_unc = function(In){
   if(In == 0) piC = 1 else{
-  e = as.numeric(predict(tch92.mal.e.mod2, newdata = data.frame(logmal = log(In+1)), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(tch92.mal.b.mod, newdata = data.frame(mal = In), se.fit = TRUE)[1:2])
+    Ins = In/1000
+  e = as.numeric(predict(tch92.mal.e.mod2, newdata = data.frame(logmal = log(Ins+1)), se.fit = TRUE)[1:2])
+  b = as.numeric(predict(tch92.mal.b.mod, newdata = data.frame(mal = Ins), se.fit = TRUE)[1:2])
   
   e.use = rnorm(1, e[1], e[2])
   while(e.use < 0.005) e.use = rnorm(1, e[1], e[2])
@@ -145,15 +144,15 @@ legend('topright', title = 'Mal(ppm)', legend = c(0,50,100,150,200,250), pch = c
 
 #function to plot model predictions
 pred.fx.plot = function(In, clr){
-  e = as.numeric(predict(tch92.mal.e.mod2, newdata = data.frame(logmal = log(In+1)), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(tch92.mal.b.mod, newdata = data.frame(mal = In), se.fit = TRUE)[1:2])
+  e = as.numeric(predict(tch92.mal.e.mod2, newdata = data.frame(logmal = log((In/1000)+1)), se.fit = TRUE)[1:2])
+  b = as.numeric(predict(tch92.mal.b.mod, newdata = data.frame(mal = (In/1000)), se.fit = TRUE)[1:2])
   
   e.use = rnorm(1, e[1], e[2])
   while(e.use < 0) e.use = rnorm(1, e[1], e[2])
   b.use = rnorm(1, b[1], b[2])
   while(b.use < 0) b.use = rnorm(1, e[1], e[2])
   
-  lines(time, ll4(1,0, b.use, e.use, time), lty=2, col = clr)
+  lines(time, L.3.fx(time, slp = b.use, lc50 = e.use), lty=2, col = clr)
 }   
 
 #plot model predictions
@@ -167,8 +166,5 @@ for(i in c(0,50,100,150,200,250)*1000){
 set.seed = 0
 plot(parms.df$mal, tch92.mal.piC.aucs/tch92.mal.piC.aucs[1], pch = 16, ylim = c(0,1),
      xlab = 'Malathion (ppb)', ylab = expression(paste(pi[C], 'estimate', sep = ' ')))
-  points(seq(0, 3e5, 1e3), sapply(seq(0, 3e5, 1e3), piC.tch92_mal_unc), pch = 5, col=4, cex = 0.5)
+  points(seq(0, 300, 3), sapply(seq(0, 300, 3)*1000, piC.tch92_mal_unc), pch = 5, col=4, cex = 0.5)
   
-  for(i in seq(0, 3e5, 1e3)){
-    piC.tch92_mal_unc(i)
-  }

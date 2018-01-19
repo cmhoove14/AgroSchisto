@@ -250,7 +250,7 @@ require(rootSolve)
         N_eq = 0
       }
       
-      print(N_eq)
+      #print(N_eq)
       
       pred<-(alpha*P_eq*(N_eq/200)^(nn-1))/(1+(alpha*(N_eq/200)^nn*Th))#death rate of snails due to predators given equilibrium estimates of P and N
       
@@ -297,6 +297,8 @@ require(rootSolve)
 
 #MC for control: regular predator mortality, no bottom up effects, transmission parameters      
   control<-as.numeric()
+  set.seed(043017)
+  
     for(i in 1:1000){
       trans = fin[sample(nrow(fin), size = 1, prob = fin$prob),]
 
@@ -313,6 +315,8 @@ require(rootSolve)
         
 #MC for atrazine only: regular predator mortality, bottom up effects from atrazine, transmission parameters              
   At.MC<-as.numeric()
+  set.seed(043017)
+  
         for(i in 1:1000){
           trans = fin[sample(nrow(fin), size = 1, prob = fin$prob),]
 
@@ -329,6 +333,8 @@ require(rootSolve)
       
 #MC for fertilizer only: regular predator mortality, bottom up effects from fertilizer, transmission parameters              
   Fe.MC<-as.numeric()
+  set.seed(043017)
+  
         for(i in 1:1000){
           trans = fin[sample(nrow(fin), size = 1, prob = fin$prob),]
 
@@ -345,6 +351,8 @@ require(rootSolve)
         
 #MC for fertilizer/atrazine: regular predator mortality, bottom up effects from atrazine and fertilizer, transmission parameters              
   FeAt.MC<-as.numeric()
+  set.seed(043017)
+  
         for(i in 1:1000){
           trans = fin[sample(nrow(fin), size = 1, prob = fin$prob),]
 
@@ -361,6 +369,8 @@ require(rootSolve)
         
 #MC for chlorpyrifos only: chlorP predator mortality, no bottom-up effects, transmission parameters              
   Ch.MC<-as.numeric()
+  set.seed(043017)
+  
         for(i in 1:1000){
           trans = fin[sample(nrow(fin), size = 1, prob = fin$prob),]
 
@@ -377,6 +387,8 @@ require(rootSolve)
         
 #MC for atrazine/chlorpyrifos: chlorP predator mortality, atrazine bottom-up effects, transmission parameters              
   At.Ch.MC<-as.numeric()
+  set.seed(043017)
+  
         for(i in 1:1000){
           trans = fin[sample(nrow(fin), size = 1, prob = fin$prob),]
 
@@ -393,6 +405,8 @@ require(rootSolve)
      
 #MC for fertilizer/chlorpyrifos: chlorP predator mortality, fertilizer bottom-up effects, transmission parameters              
   Fe.Ch.MC<-as.numeric()
+  set.seed(043017)
+  
         for(i in 1:1000){
           trans = fin[sample(nrow(fin), size = 1, prob = fin$prob),]
 
@@ -409,6 +423,8 @@ require(rootSolve)
         
 #MC for triplets: chlorP predator mortality, fertilizer/atrazine bottom-up effects, transmission parameters              
   Tre.MC<-as.numeric()
+  set.seed(043017)
+  
         for(i in 1:1000){
           trans = fin[sample(nrow(fin), size = 1, prob = fin$prob),]
           
@@ -471,6 +487,40 @@ require(rootSolve)
                    label='bottom-up & top-down effects', size=5, colour='grey40')+
        #Add plot label
          geom_text(label='A', x=0.75, y=max(MC.df$R0)+1.4, size=6)
+
+#Boxplot export in .eps format for nature pub ##############    
+  gg1export<-ggplot(MC.df, aes(x=treat, y=R0, group = treat))+
+    #Theme formatting
+    theme_bw()+
+    theme(axis.title=element_text(size=14),
+          axis.text=element_text(size=10))+
+    scale_y_continuous(breaks = c(0,1,3,5,7), limits=c(0,max(MC.df$R0)+1.5))+
+    xlab("")+
+    ylab(expression('R'[0]))+
+    #Adding data from data frame
+    geom_boxplot(width = 0.25, outlier.colour = 'grey60', outlier.shape = 1)+
+    #Add treatment labels
+    geom_segment(x=1.7, xend=4.3, y=max(MC.df$R0)+0.5, yend=max(MC.df$R0)+0.5, 
+                 colour='grey40', lineend='square')+
+    #geom_text(x=3, y=max(MC.df$R0)+0.85, 
+    #          label='bottom-up effects', size=5, colour='grey40')+
+    geom_segment(x=4.7, xend=5.3, y=max(MC.df$R0)+0.5, yend=max(MC.df$R0)+0.5, 
+                 colour='grey40', lineend='square')+
+    #geom_text(x=5, y=max(MC.df$R0)+1.3, 
+    #          label='top-down', size=5, colour='grey40')+
+    #geom_text(x=5, y=max(MC.df$R0)+0.85, 
+    #          label='effects', size=5, colour='grey40')+
+    geom_segment(x=5.7, xend=8.3, y=max(MC.df$R0)+0.5, yend=max(MC.df$R0)+0.5, 
+                 colour='grey40', lineend='square')#+
+    #geom_text(x=7, y=max(MC.df$R0)+0.85, 
+    #          label='bottom-up & top-down effects', size=5, colour='grey40')+
+    #Add plot label
+    #geom_text(label='A', x=0.75, y=max(MC.df$R0)+1.4, size=6)
+  
+  postscript('Panel_A_Boxplot.eps', width = 7.5, height = 4, horizontal = FALSE)
+    gg1export
+    dev.off()
+    
 #R0 monte carlo simulations agrochemical uncertainty only #######################
   for(i in 1:length(MC.df)){
     MC.df$Uncertainty = 'Total'
@@ -834,15 +884,21 @@ gg1.1<-ggplot(MC.df.all, aes(x=treat, y=R0))+
      parameters['mu_P']=muP #Treat as additional mortality to observed daily rate
      
   #Calculate R0 with ChlorP only  
+     set.seed(043017)
+     
      for (i in 1:nrow(p.ecotox_mod10)){
        p.ecotox_mod10$R0[i] <- get_Ro_beta_lamda(muPq = (p.ecotox_mod10$mortality[i]/10), phi_Nq = 1, 
                                                  beta = beta.use, lamda = lamda.use)[3]
      }
      
+     set.seed(043017)
+     
      for (i in 1:nrow(p.ecotox_mod10)){
        p.ecotox_mod10$R0_lo[i] <- get_Ro_beta_lamda(muPq = (p.ecotox_mod10[i,2]/10 - 1.96*p.ecotox_mod10[i,3]/10), 
                                                     phi_Nq = 1, beta = beta.use, lamda = lamda.use)[3]
      }
+     
+     set.seed(043017)
      
      for (i in 1:nrow(p.ecotox_mod10)){
        p.ecotox_mod10$R0_up[i] <- get_Ro_beta_lamda(muPq = (p.ecotox_mod10[i,2]/10 + 1.96*p.ecotox_mod10[i,3]/10), 
@@ -850,17 +906,23 @@ gg1.1<-ggplot(MC.df.all, aes(x=treat, y=R0))+
      }
      
   #Calculate equilibrium P estimates  
+     set.seed(043017)
+     
      for (i in 1:nrow(p.ecotox_mod10)){
        p.ecotox_mod10$P_eq[i] <- get_Ro_beta_lamda(muPq = (p.ecotox_mod10[i,2]/10),phi_Nq = 1, 
                                                    beta = beta.use, lamda = lamda.use)[2]
      }
       p.ecotox_mod10$P_eq = p.ecotox_mod10$P_eq/200 #convert numbers to densities
      
+      set.seed(043017)
+      
      for (i in 1:nrow(p.ecotox_mod10)){
        p.ecotox_mod10$P_eq_up[i] <- get_Ro_beta_lamda(muPq = (p.ecotox_mod10[i,2]/10 + 1.96*p.ecotox_mod10[i,3]/10), 
                                                       phi_Nq = 1, beta = beta.use, lamda = lamda.use)[2]
      }
       p.ecotox_mod10$P_eq_up = p.ecotox_mod10$P_eq_up/200 #convert numbers to densities
+      
+      set.seed(043017)
       
      for (i in 1:nrow(p.ecotox_mod10)){
        p.ecotox_mod10$P_eq_lo[i] <- get_Ro_beta_lamda(muPq = (p.ecotox_mod10[i,2]/10 - 1.96*p.ecotox_mod10[i,3]/10), 
@@ -870,17 +932,23 @@ gg1.1<-ggplot(MC.df.all, aes(x=treat, y=R0))+
       
      
   #Calculate equilibrium N estimates 
+      set.seed(043017)
+      
      for (i in 1:nrow(p.ecotox_mod10)){
        p.ecotox_mod10$N_eq[i] <- get_Ro_beta_lamda(muPq = (p.ecotox_mod10[i,2]/10), phi_Nq = 1, 
                                                    beta = beta.use, lamda = lamda.use)[1]
      }
       p.ecotox_mod10$N_eq = p.ecotox_mod10$N_eq/200 #convert numbers to densities
       
+      set.seed(043017)
+      
      for (i in 1:nrow(p.ecotox_mod10)){
        p.ecotox_mod10$N_eq_up[i] <- get_Ro_beta_lamda(muPq = (p.ecotox_mod10[i,2]/10 + 1.96*p.ecotox_mod10[i,3]/10), 
                                                       phi_Nq = 1, beta = beta.use, lamda = lamda.use)[1]
      }
       p.ecotox_mod10$N_eq_up = p.ecotox_mod10$N_eq_up/200 #convert numbers to densities
+      
+      set.seed(043017)
       
      for (i in 1:nrow(p.ecotox_mod10)){
        p.ecotox_mod10$N_eq_lo[i] <- get_Ro_beta_lamda(muPq = (p.ecotox_mod10[i,2]/10 - 1.96*p.ecotox_mod10[i,3]/10), 
@@ -910,9 +978,35 @@ gg2.0<-ggplot(p.ecotox_mod10, aes(x=dose, y=R0))+
                     col = 'black', linetype = 3, size=1)+
        geom_segment(y = 3.6, yend = round(max(p.ecotox_mod10$R0), digits = 2), x = 34, xend = 35, 
                      col = 'black', size=1)+
-       geom_text(label='B', x=0, y=3.75, size=6)
+       geom_text(label='B', x=0, y=3.6, size=6)
 
-     
+  #Panel B export in .eps format for Nature pub    
+      gg2export<-ggplot(p.ecotox_mod10, aes(x=dose, y=R0))+
+        theme_bw()+
+        theme(axis.text=element_text(size=10), axis.title=element_text(size=14))+
+        scale_x_continuous(breaks=c(0,15,30,35), labels = c('0','15','30','64'), 
+                           limits=c(0,35))+
+        geom_vline(aes(xintercept = 35), colour = 'grey90') + 
+        scale_y_continuous(breaks=c(0,1,
+                                    round(max(p.ecotox_mod10$R0), digits = 2)), 
+                           limits=c(0,max(p.ecotox_mod10$R0+0.2)))+
+        ylab(expression('R'[0]))+
+        xlab(expression(paste('Chlorpyrifos concentration (', mu, 'g/L)', sep = '')))+
+        geom_line(aes(y=R0_lo), linetype=2, col = 'grey70')+
+        geom_line(aes(y=R0_up), linetype=2, col = 'grey70')+
+        geom_line(size=1)+
+        geom_segment(y = 3.6, yend = round(max(p.ecotox_mod10$R0), digits = 2), x = 31.5, xend = 35, 
+                     col = 'white', size=2)+
+        geom_segment(y = 3.6, yend = round(max(p.ecotox_mod10$R0), digits = 2), x = 31.5, xend = 35, 
+                     col = 'black', linetype = 3, size=1)+
+        geom_segment(y = 3.6, yend = round(max(p.ecotox_mod10$R0), digits = 2), x = 34, xend = 35, 
+                     col = 'black', size=1)#+
+        #geom_text(label='B', x=0, y=3.75, size=6)
+      
+      postscript('Panel_B_ChlorP_R0.eps', width = 6, height = 3, horizontal = FALSE)
+      gg2export
+      dev.off()     
+      
 #Predator population response to chlorP concentration
 gg2.1<-ggplot(p.ecotox_mod10, aes(x=dose, y=P_eq))+
        theme_bw()+
@@ -930,22 +1024,64 @@ gg2.1<-ggplot(p.ecotox_mod10, aes(x=dose, y=P_eq))+
        geom_line(aes(y=P_eq_up), linetype=2, colour = 'red', alpha = 0.5)+
        geom_text(label='A', x=-0.5, y=0.43, size=6)
 
+#Predator pop by chlorP in .eps format for Nature pub
+  gg2.1export<-ggplot(p.ecotox_mod10, aes(x=dose, y=P_eq))+
+    theme_bw()+
+    theme(axis.text=element_text(size=8.5), axis.title=element_text(size=14))+
+    scale_x_continuous(breaks=c(0, 10,
+                                min(p.ecotox_mod10$dose[p.ecotox_mod10$R0 > 1]), #min concentration required for disease elimination
+                                round(min(p.ecotox_mod10$dose[p.ecotox_mod10$P_eq == 0])), #min concentration for predator extirpation
+                                64), 
+                       limits=c(0,round(min(p.ecotox_mod10$dose[p.ecotox_mod10$P_eq_lo == 0]))+0.25))+
+    scale_y_continuous(breaks=c(0,0.2,0.4), limits=c(0,0.425))+
+    xlab('')+
+    ylab(expression(paste('Predator density (P/m'^'2',')', sep = '')))+
+    geom_line(size=1, colour = 'red')+
+    geom_line(aes(y=P_eq_lo), linetype=2, colour = 'red')+
+    geom_line(aes(y=P_eq_up), linetype=2, colour = 'red')#+
+    #geom_text(label='A', x=-0.5, y=0.43, size=6)
+
+  postscript('Supp_FigA_Pred_Dens_ChlorP.eps', width = 6, height = 3, horizontal = FALSE)
+    gg2.1export
+    dev.off()     
+  
 #Snail population response to chlorP concentration (through predator population)
 gg2.2<-ggplot(p.ecotox_mod10, aes(x=dose, y=N_eq))+
-       theme_bw()+
-       theme(axis.text=element_text(size=8.5), axis.title=element_text(size=14))+
-       scale_x_continuous(breaks=c(0, 10,
-                                   min(p.ecotox_mod10$dose[p.ecotox_mod10$R0 > 1]), #min concentration required for disease elimination
-                                   round(min(p.ecotox_mod10$dose[p.ecotox_mod10$P_eq == 0])), #min concentration for predator extirpation
-                                 64), 
-                          limits=c(0,round(min(p.ecotox_mod10$dose[p.ecotox_mod10$P_eq_lo == 0]))+0.25))+
-       scale_y_continuous(breaks=c(0,20,40), limits=c(0,45))+
-       xlab(expression(paste('Chlorpyrifos concentration (', mu, 'g/L)', sep = '')))+
-       ylab(expression(paste('Snail density (N/m'^'2',')', sep = '')))+
-       geom_line(size=1, colour = 'blue')+
-       geom_line(aes(y=N_eq_lo), linetype=2, colour = 'blue', alpha = 0.5)+
-       geom_line(aes(y=N_eq_up), linetype=2, colour = 'blue', alpha = 0.5)+
-       geom_text(label='B', x=-0.5, y=44.5, size=6)
+         theme_bw()+
+         theme(axis.text=element_text(size=8.5), axis.title=element_text(size=14))+
+         scale_x_continuous(breaks=c(0, 10,
+                                     min(p.ecotox_mod10$dose[p.ecotox_mod10$R0 > 1]), #min concentration required for disease elimination
+                                     round(min(p.ecotox_mod10$dose[p.ecotox_mod10$P_eq == 0])), #min concentration for predator extirpation
+                                   64), 
+                            limits=c(0,round(min(p.ecotox_mod10$dose[p.ecotox_mod10$P_eq_lo == 0]))+0.25))+
+         scale_y_continuous(breaks=c(0,20,40), limits=c(0,45))+
+         xlab(expression(paste('Chlorpyrifos concentration (', mu, 'g/L)', sep = '')))+
+         ylab(expression(paste('Snail density (N/m'^'2',')', sep = '')))+
+         geom_line(size=1, colour = 'blue')+
+         geom_line(aes(y=N_eq_lo), linetype=2, colour = 'blue', alpha = 0.5)+
+         geom_line(aes(y=N_eq_up), linetype=2, colour = 'blue', alpha = 0.5)+
+         geom_text(label='B', x=-0.5, y=44.5, size=6)
+
+#Snail pop by chlorP in .eps format for Nature pub
+gg2.2export<-ggplot(p.ecotox_mod10, aes(x=dose, y=N_eq))+
+  theme_bw()+
+  theme(axis.text=element_text(size=8.5), axis.title=element_text(size=14))+
+  scale_x_continuous(breaks=c(0, 10,
+                              min(p.ecotox_mod10$dose[p.ecotox_mod10$R0 > 1]), #min concentration required for disease elimination
+                              round(min(p.ecotox_mod10$dose[p.ecotox_mod10$P_eq == 0])), #min concentration for predator extirpation
+                              64), 
+                     limits=c(0,round(min(p.ecotox_mod10$dose[p.ecotox_mod10$P_eq_lo == 0]))+0.25))+
+  scale_y_continuous(breaks=c(0,20,40), limits=c(0,45))+
+  xlab(expression(paste('Chlorpyrifos concentration (', mu, 'g/L)', sep = '')))+
+  ylab(expression(paste('Snail density (N/m'^'2',')', sep = '')))+
+  geom_line(size=1, colour = 'blue')+
+  geom_line(aes(y=N_eq_lo), linetype=2, colour = 'blue')+
+  geom_line(aes(y=N_eq_up), linetype=2, colour = 'blue')#+
+  #geom_text(label='B', x=-0.5, y=44.5, size=6)
+
+  postscript('Supp_FigB_Snail_Dens_ChlorP.eps', width = 6, height = 3, horizontal = FALSE)
+  gg2.2export
+  dev.off()     
 
      
 #Step 3.2 Enhanced snail pop dynamics from Atrazine from Baxter data ##############
@@ -969,17 +1105,23 @@ gg2.2<-ggplot(p.ecotox_mod10, aes(x=dose, y=N_eq))+
     
     atra.predict$phiNq<-atra.predict$phiNq + (1 - atra.predict[1,3]) #Normalize to 1
     
+    set.seed(043017)
+    
     for (i in 1:nrow(atra.predict)){
       atra.predict$R0[i] <- get_Ro_beta_lamda(muPq = p.dead, 
                                               phi_Nq = atra.predict[i,3], 
                                               beta = beta.use, lamda = lamda.use)[3]
     }
     
+    set.seed(043017)
+    
     for (i in 1:nrow(atra.predict)){
       atra.predict$R0_lo[i] <- get_Ro_beta_lamda(muPq = p.dead, 
                                                  phi_Nq = atra.predict[i,3] - 1.96*atra.predict[i,4], 
                                                  beta = beta.use, lamda = lamda.use)[3]
     }
+    
+    set.seed(043017)
     
     for (i in 1:nrow(atra.predict)){
       atra.predict$R0_up[i] <- get_Ro_beta_lamda(muPq = p.dead, 
@@ -1015,8 +1157,29 @@ gg2.5.1<-ggplot(atra.predict, aes(x=logatra, y=R0))+
           geom_line(aes(y=R0_lo), linetype=2, alpha = 0.5)+
           geom_line(aes(y=R0_up), linetype=2, alpha = 0.5)+
           #geom_vline(xintercept = round(log(100+1), digits = 1), lty=4, col = 'red')+
-          geom_text(label='C', x=0, y=6, size=6)
+          geom_text(label='C', x=0, y=5.9, size=6)
     
+#Panel C export in .eps for nature pub 
+gg2.5export<-ggplot(atra.predict, aes(x=logatra, y=R0))+
+  theme_bw()+
+  theme(axis.text=element_text(size=10), axis.title=element_text(size=14))+
+  scale_x_continuous(breaks=log(c(0,1,10,100)+1),
+                     limits = log(c(0,100)+1),
+                     labels = c('0', '1', '10', '100'))+
+  scale_y_continuous(breaks=c(3,4,5,6), 
+                     limits=c(3,6))+
+  ylab(expression('R'[0]))+
+  xlab(expression(paste('log+1 Atrazine concentration (', mu, 'g/L)', sep = '')))+
+  geom_line(aes(y=R0_lo), linetype=2, colour = 'grey60')+
+  geom_line(aes(y=R0_up), linetype=2, colour = 'grey60')+
+  geom_line(size=1)#+
+  #geom_vline(xintercept = round(log(100+1), digits = 1), lty=4, col = 'red')+
+  #geom_text(label='C', x=0, y=6, size=6)
+
+  postscript('Panel_C_Atr_R0.eps', width = 6, height = 3, horizontal = FALSE)
+  gg2.5export
+  dev.off()     
+
 #Step 3.3 combine chlorpyrifos and atrazine d/r data in heat map ##############
   r0.atra.chlor<-data.frame("Atra" = rep(seq(from=0, to=100, by=0.1), times = 641),
                             "logatra" = rep(log(seq(from=0, to=100, by=0.1)+1), times = 641),
@@ -1024,7 +1187,9 @@ gg2.5.1<-ggplot(atra.predict, aes(x=logatra, y=R0))+
                             "logdose" = rep(log(seq(0,64,0.1)+1), each = 1001),
                             "phi_Nq" = 0,
                             "rate" = 0,
-                            "R0" =0)
+                            "R0" =0,
+                            'P_eq'=0,
+                            'N_eq' = 0)
 
      
      r0.atra.chlor$rate<-(predict(ecotox10_mod, r0.atra.chlor, 
@@ -1037,22 +1202,10 @@ gg2.5.1<-ggplot(atra.predict, aes(x=logatra, y=R0))+
      
      r0.atra.chlor$phi_Nq<-r0.atra.chlor$phi_Nq + (1 - r0.atra.chlor[1,5]) #Normalize to 1
      
-     for(i in 1:nrow(r0.atra.chlor)){
-       r0.atra.chlor[i,7] = get_Ro_beta_lamda(muPq = r0.atra.chlor[i,6],
-                                              beta = beta.use,
-                                              lamda = lamda.use,
-                                              phi_Nq = r0.atra.chlor[i,5])[3]
-       r0.atra.chlor[i,8] = get_Ro_beta_lamda(muPq = r0.atra.chlor[i,6],
-                                              beta = beta.use,
-                                              lamda = lamda.use,
-                                              phi_Nq = r0.atra.chlor[i,5])[2]
-       r0.atra.chlor[i,9] = get_Ro_beta_lamda(muPq = r0.atra.chlor[i,6],
-                                              beta = beta.use,
-                                              lamda = lamda.use,
-                                              phi_Nq = r0.atra.chlor[i,5])[1]
-     }
+     set.seed(043017)
      
-     colnames(r0.atra.chlor)[c(8,9)]<-c('P_eq', 'N_eq')
+      r0.atra.chlor[ ,c(9,8,7)] = t(mapply(FUN = get_Ro_beta_lamda, muPq = r0.atra.chlor[,6], phi_Nq = r0.atra.chlor[,5],
+                                       MoreArgs = list(beta = beta.use, lamda = lamda.use), SIMPLIFY = T))
      
      plot(x = r0.atra.chlor$logatra[r0.atra.chlor$dose == 64],
           y = r0.atra.chlor$R0[r0.atra.chlor$dose == 64],
@@ -1079,6 +1232,28 @@ gg2.5.1<-ggplot(atra.predict, aes(x=logatra, y=R0))+
              legend.title=element_text(size=15), legend.text=element_text(size=12))+
        geom_text(label='D', x=-3, y=65, size=6, alpha=.50)    
      
+#Plot in .eps format for nature pub
+     gg3export<-ggplot(r0.atra.chlor, aes(x=Atra, y=dose, fill=R0))+
+       theme_bw()+
+       #scale_fill_brewer(type = 'div', palette = 'RdYlGn', direction = -1)+
+       scale_fill_distiller(palette = "Spectral")+
+       scale_x_continuous(breaks = c(0,25,50,75,100), limits = c(0,100))+
+       scale_y_continuous(breaks = c(0,20,40,60), limits = c(0,64))+
+       #scale_y_continuous(breaks = c(0,10,20), limits = c(0,25))+
+       geom_tile(size=0.01)+
+       coord_equal()+
+       geom_vline(xintercept = c(0,25,50,75,100), col = 'grey10')+
+       geom_hline(yintercept = c(0,20,40,60), col = 'grey10')+
+       labs(y=expression(paste('Chlorpyrifos concentration (', mu, 'g/L)', sep = '')), 
+            #(x=expression(paste('Predator mortality rate (', mu[P][,][q], ')', sep = '')), axis label for predator mortality rate
+            x=expression(paste('Atrazine concentration (', mu, 'g/L)', sep = '')))+
+       theme(axis.ticks=element_blank(), axis.text=element_text(size=10), axis.title=element_text(size=14),
+             legend.title=element_text(size=15), legend.text=element_text(size=12))#+
+       #geom_text(label='D', x=-3, y=65, size=6, alpha=.50)    
+     
+     postscript('Panel_D_HeatMap.eps', width = 6, height = 5, horizontal = FALSE)
+     gg3export
+     dev.off()     
      
 #Plot heat map with log atrazine scale ##############
      r0.atra.chlor<-data.frame("Atra" = 0,
@@ -1101,69 +1276,35 @@ gg2.5.1<-ggplot(atra.predict, aes(x=logatra, y=R0))+
      
      r0.atra.chlor$phi_Nq<-r0.atra.chlor$phi_Nq + (1 - r0.atra.chlor[1,5]) #Normalize to 1
      
+     #r0.atra.chlor[ ,c(9,8,7)] = t(mapply(FUN = get_Ro_beta_lamda, muPq = r0.atra.chlor[,6], phi_Nq = r0.atra.chlor[,5],
+     #                                     MoreArgs = list(beta = beta.use, lamda = lamda.use), SIMPLIFY = T))
+     
      for(i in 1:nrow(r0.atra.chlor)){
        r0.atra.chlor[i,7] = get_Ro_beta_lamda(muPq = r0.atra.chlor[i,6],
                                               beta = beta.use,
                                               lamda = lamda.use,
                                               phi_Nq = r0.atra.chlor[i,5])[3]
+       if(i %% 1000==0) print(i)
      }
      
-  gg3.1<-ggplot(r0.atra.chlor, aes(x=logatra, y=dose, fill=R0))+
-    theme_bw()+
-    #scale_fill_brewer(type = 'div', palette = 'RdYlGn', direction = -1)+
-    scale_fill_distiller(palette = "Spectral")+
-    scale_x_continuous(breaks = log(c(0,1,10,100)+1), 
-                       limits = log(c(0,100)+1),
-                       labels = c('0','1','10','100'))+
-    scale_y_continuous(breaks = c(0,20,40,60), limits = c(0,64))+
-    geom_raster(interpolate = TRUE)+
-    coord_equal(ratio = 1/20)+
-    #geom_vline(xintercept = c(unique(r0.atra.chlor$logatra)), col = 'black', alpha = 0.5)+
-    geom_hline(yintercept = c(0,20,40,60), col = 'lightgrey', alpha = 0.25)+
-    labs(y=expression(paste('Chlorpyrifos concentration (', mu, 'g/L)', sep = '')), 
-         x=expression(paste('log+1 Atrazine concentration (', mu, 'g/L)', sep = '')))+
-    theme(axis.ticks=element_blank(), axis.text=element_text(size=10), axis.title=element_text(size=14),
-          legend.title=element_text(size=15), legend.text=element_text(size=12))+
-    geom_text(label='D', x=-3, y=65, size=6, alpha=.50)   
+     gg3.1<-ggplot(r0.atra.chlor, aes(x=logatra, y=dose, fill=R0))+
+       theme_bw()+
+       #scale_fill_brewer(type = 'div', palette = 'RdYlGn', direction = -1)+
+       scale_fill_distiller(palette = "Spectral")+
+       scale_x_continuous(breaks = log(c(0,1,10,100)+1), 
+                          limits = log(c(0,100)+1),
+                          labels = c('0','1','10','100'))+
+       scale_y_continuous(breaks = c(0,20,40,60), limits = c(0,64))+
+       geom_raster(interpolate = TRUE)+
+       coord_equal(ratio = 1/20)+
+       #geom_vline(xintercept = c(unique(r0.atra.chlor$logatra)), col = 'black', alpha = 0.5)+
+       geom_hline(yintercept = c(0,20,40,60), col = 'lightgrey', alpha = 0.25)+
+       labs(y=expression(paste('Chlorpyrifos concentration (', mu, 'g/L)', sep = '')), 
+            x=expression(paste('log+1 Atrazine concentration (', mu, 'g/L)', sep = '')))+
+       theme(axis.ticks=element_blank(), axis.text=element_text(size=10), axis.title=element_text(size=14),
+             legend.title=element_text(size=15), legend.text=element_text(size=12))+
+       geom_text(label='D', x=-3, y=65, size=6, alpha=.50)     
 #Plot heat map with both axes log transformed ################
-  r0.atra.chlor<-data.frame("Atra" = 0,
-                            "logatra" = rep(seq(from=0, to=log(101), by=0.01), times = 418),
-                            "dose" = 0, #Chlorpyrifos concentration
-                            "logdose" = rep(seq(0,log(65),0.01), each = 462),
-                            "phi_Nq" = 0,
-                            "rate" = 0,
-                            "R0" =0)
-  
-  r0.atra.chlor$Atra<-exp(r0.atra.chlor$logatra)
-  r0.atra.chlor$dose<-exp(r0.atra.chlor$logdose)
-  
-  r0.atra.chlor$rate<-(predict(ecotox10_mod, r0.atra.chlor, 
-                               type = "response", se.fit=TRUE)$fit)/10 #fill mortality rate data from model
-  
-  r0.atra.chlor$rate = r0.atra.chlor$rate - r0.atra.chlor[1,6] #normalize to 0; no excess death with no concentration
-  
-  r0.atra.chlor$phi_Nq<-(predict(atra_mod, r0.atra.chlor, 
-                                 type = "response", se.fit=TRUE)$fit) #fill bottom-up effect data from model
-  
-  r0.atra.chlor$phi_Nq<-r0.atra.chlor$phi_Nq + (1 - r0.atra.chlor[1,5]) #Normalize to 1
-  
-  for(i in 1:nrow(r0.atra.chlor)){
-    r0.atra.chlor[i,7] = get_Ro_beta_lamda(muPq = r0.atra.chlor[i,6],
-                                           beta = beta.use,
-                                           lamda = lamda.use,
-                                           phi_N = r0.atra.chlor[i,5])[3]
-    r0.atra.chlor[i,8] = get_Ro_beta_lamda(muPq = r0.atra.chlor[i,6],
-                                           beta = beta.use,
-                                           lamda = lamda.use,
-                                           phi_N = r0.atra.chlor[i,5])[2]
-    r0.atra.chlor[i,9] = get_Ro_beta_lamda(muPq = r0.atra.chlor[i,6],
-                                           beta = beta.use,
-                                           lamda = lamda.use,
-                                           phi_N = r0.atra.chlor[i,5])[1]
-  }
-  
-  colnames(r0.atra.chlor)[c(8,9)]<-c('P_eq', 'N_eq')
-  
   gg3.2<-ggplot(r0.atra.chlor, aes(x=logatra, y=logdose, fill=R0))+
     theme_bw()+
     #scale_fill_brewer(type = 'div', palette = 'RdYlGn', direction = -1)+
@@ -1183,6 +1324,7 @@ gg2.5.1<-ggplot(atra.predict, aes(x=logatra, y=R0))+
     theme(axis.ticks=element_blank(), axis.text=element_text(size=10), axis.title=element_text(size=14),
           legend.title=element_text(size=15), legend.text=element_text(size=12))+
     geom_text(label='D', x=-3, y=65, size=6, alpha=.50)   
+     
 #Step 4 put panels together for final figure ###########################
   grid.arrange(gg1, gg2.0, gg2.1, gg2.2, gg2.5, gg3, ncol=7, nrow=6, 
                layout_matrix=rbind(c(1,1,1,1,1,1,1), 
@@ -1204,9 +1346,11 @@ gg2.5.1<-ggplot(atra.predict, aes(x=logatra, y=R0))+
                layout_matrix=rbind(c(1),
                                    c(2)))
 #Plots with log atrazine scale in panels C&D ###################
+  pdf('Fig3.pdf', height = 11, width = 8)
   grid.arrange(gg1, gg2.0, gg2.5.1, gg3.1, ncol=2, nrow=5, 
                layout_matrix=rbind(c(1,1),
                                    c(1,1),
                                    c(2,3),
                                    c(4,4),
                                    c(4,4)))
+  dev.off()

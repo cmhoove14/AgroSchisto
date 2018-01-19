@@ -10,10 +10,21 @@
 #and indicate changes that were made.###############
 
 #Rohr '08 nature paper comparison of control to atrazine treated mesocosms
-#snail reproduction parameter from table 1; snail egg masses/m^2
+#snail reproduction parameter from table 1
 
-rohr08_fN_uncertainty = function(seed){
-  set.seed(seed)
-  fN = rnorm(1, 30.45, 3.03) / rnorm(1, 12.37, 4.34)
+rohr08_fN_uncertainty = function(waste){ #function based on snail egg masses
+  wst = waste
+fN = rnorm(1, 30.45, 3.03) / 12.37
+  while(fN < 0) fN = rnorm(1, 30.45, 3.03) / 12.37
   fN
 }
+
+rohr08_fN_uncertainty2 = function(waste){ #function based on snail hatchlings
+  wst = waste
+  fN = rnorm(1, 468.09, 205.85) / 110.64
+  while(fN < 0) fN = rnorm(1, 468.09, 205.85) / 110.64
+  fN
+}
+
+#mean(sapply(runif(1000, 0, 1000), rohr08_fN_uncertainty))
+#mean(sapply(runif(1000, 0, 1000), rohr08_fN_uncertainty2))

@@ -23,8 +23,8 @@ snail.repro = data.frame(dose = c(0,125,250,500), #chlorpyrifos in ppb
 
 #model with juveniles/snail/day as outcome  
 chlor.fN.predict = drm(juvs.sn.day ~ dose, data = snail.repro, type = 'continuous',
-                       fct = LL.4(names = c("Slope", "Lower Limit", "Upper Limit", "ED50"),
-                                  fixed = c(NA, 0, max(snail.repro$juvs.sn.day), NA)))
+                       fct = LL.3(names = c("b", "d", "e"),
+                                  fixed = c(NA, max(snail.repro$juvs.sn.day), NA)))
   summary(chlor.fN.predict)
   
 plot(snail.repro$dose, snail.repro$juvs.sn.day/snail.repro$juvs.sn.day[1], pch = 16, ylim = c(0,1),
@@ -65,52 +65,54 @@ keep.ibr.fn.ch = c('snail.repro', 'chlor.fN.predict', 'f_N_chlor_ibr92_uncertain
       #though authors note that all snails died within the first week @ 500ppb
   snail.mort = data.frame(dose = c(0,125,250,500),
                           total = rep(30,4),
-                          dead = c(5,7,8,30))
+                          dead = c(5,7,8,30),
+                          live = c(25,23,22,0))
   
   snail.mort$mort = snail.mort$dead / snail.mort$total
+  snail.mort$surv = 1 - snail.mort$mort
+  
   snail.mort$mean.daily.rate = snail.mort$mort / 84
   
   
-  ibr_muNq<-drm(dead/total ~ dose, weights = total, data = snail.mort,
-                type = 'binomial', fct = L.4(names = c('b', 'd', 'c', 'e'),
-                                              fixed = c(NA, snail.mort$mort[1], 1, NA)))
+  ibr_muNq<-drm(live/total ~ dose, weights = total, data = snail.mort,
+                type = 'binomial', fct = LL.3(names = c('b', 'd', 'e'),
+                                              fixed = c(NA, 1, NA)))
   
     summary(ibr_muNq)
 
-  plot(snail.mort$dose, snail.mort$mort - snail.mort$mort[1], pch = 16, ylim = c(0,1),
-       xlab = 'Chlorpyrifos (ppb)', ylab = 'relative mortality')  
+  plot(snail.mort$dose, snail.mort$surv, pch = 16, ylim = c(0,1),
+       xlab = 'Chlorpyrifos (ppb)', ylab = 'relative survival')  
   
   mu_N_chlor_ibr92 = function(In){
       predict(ibr_muNq, data.frame(dose = In), interval = 'confidence', level = 0.95)
   }
   
     lines(seq(0, 1000, 10), 
-          sapply(seq(0, 1000, 10), mu_N_chlor_ibr92, simplify = T)[1,] - snail.mort$mort[1],
+          sapply(seq(0, 1000, 10), mu_N_chlor_ibr92, simplify = T)[1,],
           lty = 2, col = 2)
     lines(seq(0, 1000, 10), 
-          sapply(seq(0, 1000, 10), mu_N_chlor_ibr92, simplify = T)[2,] - snail.mort$mort[1],
+          sapply(seq(0, 1000, 10), mu_N_chlor_ibr92, simplify = T)[2,],
           lty = 3, col = 2)
     lines(seq(0, 1000, 10), 
-          sapply(seq(0, 1000, 10), mu_N_chlor_ibr92, simplify = T)[3,] - snail.mort$mort[1],
+          sapply(seq(0, 1000, 10), mu_N_chlor_ibr92, simplify = T)[3,],
           lty = 3, col = 2)
   
-par.tricks.ibr.muN = c(coef(ibr_muNq), 
-                       'Upper Limit:(Intercept)' = 1, 
-                       'Lower Limit:(Intercept)' = snail.mort$mort[1])[c(1,4,3,2)]  
-    
   mu_N_chlor_ibr92_uncertainty<-function(In){
     if(In == 0) mun = 0 else{
       init = predict(ibr_muNq, data.frame(dose = In), se.fit = T)
-      mun = rnorm(1, init[1], init[2]) - snail.mort$mort[1]
+      mun = 1 - rnorm(1, init[1], init[2])# / snail.mort$mort[1]
     }
     return(mun)
   }
+  
+  plot(snail.mort$dose, snail.mort$mort, pch = 16, ylim = c(0,1),
+       xlab = 'Chlorpyrifos (ppb)', ylab = 'relative mortality')  
   
     points(seq(0, 1000, 2), sapply(seq(0, 1000, 2), mu_N_chlor_ibr92_uncertainty, simplify = T),
                pch = 5, cex = 0.5, col = 4)
     title(main = expression(paste('Ibrahim1992 - Chlorpyrifos direct snail toxicity ',
                                   italic('Bi. alexandrina', sep = ''))))
-      legend('bottomright', pch = c(16, 5), legend = c('Obs. points', 'Est. points'), col = c(1,4),
+      legend('bottomright', pch = c(16, 5), legend = c('Obs. points', 'Est. points'), col = c(1,4), bty = 'n',
              cex = 0.7)
       
-keep.ibr.ch = c(keep.ibr.fn.ch, 'mu_N_chlor_ibr92_uncertainty', 'ibr_muNq', 'par.tricks.ibr.muN', 'snail.mort')      
+keep.ibr.ch = c(keep.ibr.fn.ch, 'mu_N_chlor_ibr92_uncertainty', 'ibr_muNq', 'snail.mort')      

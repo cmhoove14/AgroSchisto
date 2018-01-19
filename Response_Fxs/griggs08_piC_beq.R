@@ -10,10 +10,10 @@
 #and indicate changes that were made.###############
 
 require(drc)
-
 L.3.fx = function(t, lc50 = lc50, slp = slp){
-  1 / (1+exp(slp*(t - lc50)))
+  1 / (1+exp(slp*log(t / lc50)))
 }
+
 
 cerc.g = read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Cercarial Mortality/Griggs2008.csv')
   cerc.g$prop_surv = cerc.g$alive / cerc.g$total
@@ -22,7 +22,7 @@ cerc.g0 = subset(cerc.g, chem != 'control')
 
 #Plot control survival curve, estimate time-dependent die-off function, and get auc from 0-24 hours ########
 grg.mod = drm(prop_surv ~ time_hrs, conc, weights = total, data = cerc.g0, type = 'binomial', 
-                 fct = L.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
+                 fct = LL.3(names = c('b', 'd', 'e'), fixed = c(NA, 1, NA)))
   summary(grg.mod)
   plot(grg.mod)
 
@@ -102,25 +102,51 @@ lines(modgdf$atr, modgdf$pred.b, lty = 2, col=2)
 legend('topright', legend = c('slp', 'lc50'), pch = c(17, 16), col=c(2,1), cex = 0.7, bty='n')  
 title('Griggs 08 cercarial survival parameters')  
 #Create function to generate d-r function with linear fit to lc50 parameter#####################
+auc.grg.lin.atr0 = function(He){
+  e0 = as.numeric(predict(eg.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
+  b0 = as.numeric(predict(bg.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
+  
+  e0.use = rnorm(1, e0[1], e0[2])
+    while(e0.use < 0) e0.use = rnorm(1, e0[1], e0[2])
+  b0.use = rnorm(1, b0[1], b0[2])
+    while(b0.use < 0) b0.use = rnorm(1, b0[1], b0[2])
+  auc0 = integrate(L.3.fx, lc50 = e0.use, slp = b0.use, lower=0, upper=24,
+                   stop.on.error = FALSE)[1]$value
+  auc0
+}
+
 piC.grg08_atr_unc = function(He){
-  if(He == 0) piC = 1 else{
+  #if(He == 0) piC = 1 else{
     e = as.numeric(predict(eg.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
     b = as.numeric(predict(bg.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
     
     e.use = rnorm(1, e[1], e[2])
-    while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+      while(e.use < 0) e.use = rnorm(1, e[1], e[2])
     b.use = rnorm(1, b[1], b[2])
-    while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+      while(b.use < 0) b.use = rnorm(1, e[1], e[2])
     auc = integrate(L.3.fx, lc50 = e.use, slp = b.use, lower=0, upper=24, stop.on.error = FALSE)[1]$value
-    piC = auc/grg08_atr_aucs[1]
-    if(piC > 1) piC = 1
-  }
+    piC = auc/auc.grg.lin.atr0(0) #grg08_atr_aucs[1]
+  #  if(piC > 1) piC = 1
+  #}
   return(piC)
   }  
   
 #Create function to generate d-r function with exponential fit to lc50 parameter#####################
+auc.grg.exp.atr0 = function(He){
+  e0 = as.numeric(predict(eg.mod2, newdata = data.frame(logatr = log(He+1)), se.fit = TRUE)[1:2])
+  b0 = as.numeric(predict(bg.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
+  
+  e0.use = rnorm(1, e0[1], e0[2])
+    while(e0.use < 0) e0.use = rnorm(1, e0[1], e0[2])
+  b0.use = rnorm(1, b0[1], b0[2])
+    while(b0.use < 0) b0.use = rnorm(1, b0[1], b0[2])
+  auc0 = integrate(L.3.fx, lc50 = e0.use, slp = b0.use, lower=0, upper=24,
+                   stop.on.error = FALSE)[1]$value
+  auc0
+}
+
 piC.grg08_atr_unc2 = function(He){
-    if(He == 0) piC = 1 else{
+    #if(He == 0) piC = 1 else{
       e = as.numeric(predict(eg.mod2, newdata = data.frame(logatr = log(He+1)), se.fit = TRUE)[1:2])
       b = as.numeric(predict(bg.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
       
@@ -128,10 +154,11 @@ piC.grg08_atr_unc2 = function(He){
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
       b.use = rnorm(1, b[1], b[2])
     while(b.use < 0) b.use = rnorm(1, e[1], e[2])
-      auc = integrate(L.3.fx, lc50 = e.use, slp = b.use, lower=0, upper=24, stop.on.error = FALSE)[1]$value
-      piC = auc/grg08_atr_aucs[1]
-      if(piC > 1) piC = 1
-    }
+      auc = integrate(L.3.fx, lc50 = e.use, slp = b.use, lower=0, upper=24, 
+                      stop.on.error = FALSE)[1]$value
+      piC = auc/auc.grg.exp.atr0(0) #grg08_atr_aucs[1]
+    #  if(piC > 1) piC = 1
+    #}
     return(piC)
     
   }  

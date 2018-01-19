@@ -1,0 +1,121 @@
+#This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License#########
+#<http://creativecommons.org/licenses/by-nc/4.0/> by Christopher Hoover, Arathi Arakala, Manoj Gambhir 
+#and Justin Remais. This work was supported in part by the National Institutes of Health/National Science 
+#Foundation Ecology of Infectious Disease program funded by the Fogarty International Center 
+#(grant R01TW010286), the National Institute of Allergy and Infectious Diseases (grant K01AI091864), 
+#and the National Science Foundation Water Sustainability and Climate Program (grant 1360330).
+
+#Per the terms of this license, if you are making derivative use of this work, you must identify that 
+#your work is a derivative work, give credit to the original work, provide a link to the license, 
+#and indicate changes that were made.###############
+
+#Data extraction and model fitting to Bakry 2012 data
+require(drc)
+
+#direct snail toxicity from Atrazine ############  
+mun.bak.atr = data.frame(conc = c(0, .330, 1.250, 4.750)*1000,
+                         mort = c(0, 0.1, 0.5, 0.9)) 
+  mun.bak.atr$ppm = mun.bak.atr$conc/1000
+  mun.bak.atr$log10 = log10(mun.bak.atr$ppm)
+  mun.bak.atr$probit = qnorm(mun.bak.atr$mort, mean = 5)
+
+  lc50.bak.atr.report = 1.25
+  slp.bak.atr.report = 2.48
+  se.lc50.bak.atr = mean(c(log10(1.88 / lc50.bak.atr.report), log10(lc50.bak.atr.report / 0.83))) / 1.96
+  
+  
+  plot(mun.bak.atr$conc, mun.bak.atr$mort, ylim = c(0,1), xlim = c(0,5000),
+       pch = 16, xlab = 'atrazine (ppb)', ylab = 'snail mortality',
+       main = 'D-R function based on reported values')
+  segments(y0 = 0.5, x0 = 830, y1 = 0.5, x1 = 1880)
+  
+  muNq_atr_Bakry12_uncertainty = function(He){
+    #if(He == 0) mun = 0 else{
+    heu = (He/1000)
+    lc50 = 10^(rnorm(1, log10(lc50.bak.atr.report), se.lc50.bak.atr))
+      mun = pnorm((slp.bak.atr.report) * log10(heu/lc50))
+    # }
+    # if(mun < 0) mun = 0
+    
+    return(mun)
+  }
+  
+  points(seq(0,5000,10), sapply(seq(0,5000,10), muNq_atr_Bakry12_uncertainty), 
+         pch = 5, col = 4, cex = 0.5)
+  
+#keep vector
+keep.bak.atr = c('muNq_atr_Bakry12_uncertainty', 
+                 'lc50.bak.atr.report', 'se.lc50.bak.atr', 'slp.bak.atr.report')    
+
+#direct snail toxicity from Glyphosate ############  
+mun.bak.gly = data.frame(conc = c(0, .840, 3.150, 12.600)*1000,
+                         mort = c(0, 0.1, 0.5, 0.9))
+  mun.bak.gly$ppm = mun.bak.gly$conc/1000
+  mun.bak.gly$log10 = log10(mun.bak.gly$ppm)
+  mun.bak.gly$probit = qnorm(mun.bak.gly$mort, mean = 5)
+  
+  lc50.bak.gly.report = 3.15
+  slp.bak.gly.report = 2.16
+  se.lc50.bak.gly = log10(4.82 / lc50.bak.gly.report) / 1.96
+
+  plot(mun.bak.gly$conc, mun.bak.gly$mort, ylim = c(0,1), xlim = c(0,13000),
+       pch = 16, xlab = 'glyphosate (ppb)', ylab = 'snail mortality',
+       main = 'D-R function based on reported values')  
+  
+  segments(y0 = 0.5, x0 = 890, y1 = 0.5, x1 = 4820)
+  
+  muNq_gly_Bakry12_uncertainty = function(He){
+    #if(He == 0) mun = 0 else{
+    heu = (He/1000)
+    lc50 = 10^(rnorm(1, log10(lc50.bak.gly.report), se.lc50.bak.gly))
+    mun = pnorm((slp.bak.gly.report) * log10(heu/lc50))
+    #}
+    #if(mun < 0) mun = 0
+    return(mun)
+  }
+  points(seq(0,13000,25), sapply(seq(0,13000,25), muNq_gly_Bakry12_uncertainty), 
+         pch = 5, col = 4, cex = 0.5)
+  
+#keep vector
+keep.bak.gly = c('muNq_gly_Bakry12_uncertainty', 
+                 'lc50.bak.gly.report', 'se.lc50.bak.gly', 'slp.bak.gly.report')    
+
+#Now lets look at reproduction over time ###########
+bakry12<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/bakry2012.csv')
+  bak12 = subset(bakry12, time != 0)
+
+#get estimates of hatchlings/snail/day across all weeks for each treatment   
+fn.ctrl = mean(bak12$hatch_per[bak12$chem == 'control' & bak12$surv != 0] / 7)  
+  fn.ctrl.sd = sd(bak12$hatch_per[bak12$chem == 'control' & bak12$surv != 0] / 7)
+  
+fn.atr = mean(bak12$hatch_per[bak12$chem == 'atrazine' & bak12$surv != 0] / 7)  
+  fn.atr.sd = sd(bak12$hatch_per[bak12$chem == 'atrazine' & bak12$surv != 0] / 7)
+
+fn.gly = mean(bak12$hatch_per[bak12$chem == 'glyphosate' & bak12$surv != 0] / 7)  
+  fn.gly.sd = sd(bak12$hatch_per[bak12$chem == 'glyphosate' & bak12$surv != 0] / 7)
+ 
+#Functions that estimate parameter value in single concentration group #########
+  fN.gly.bak.uncertainty = function(waste){ #function based on snail egg masses
+    wst = waste
+    fN = rnorm(1, fn.gly, fn.gly.sd) / fn.ctrl
+    while(fN < 0) fN = rnorm(1, fn.gly, fn.gly.sd) / fn.ctrl
+    fN
+  }
+  
+    #hist(sapply(rep(1,10000), fN.gly.bak.uncertainty, simplify = T))
+  
+  fN.atr.bak.uncertainty = function(waste){ #function based on snail hatchlings
+    wst = waste
+    fN = rnorm(1, fn.atr, fn.atr.sd) / fn.ctrl
+    while(fN < 0) fN = rnorm(1, fn.atr, fn.atr.sd) / fn.ctrl
+    fN
+  }  
+  
+    #hist(sapply(rep(1,10000), fN.atr.bak.uncertainty, simplify = T))
+
+keep.bak.gly = c(keep.bak.gly, 'fN.gly.bak.uncertainty', 'fn.gly', 'fn.gly.sd', 'fn.ctrl')
+  
+
+keep.bak.atr = c(keep.bak.atr, 'fN.atr.bak.uncertainty', 'fn.atr', 'fn.atr.sd', 'fn.ctrl')
+
+keep.bak.all = c(keep.bak.atr, keep.bak.gly)

@@ -11,9 +11,6 @@
 
 require(drc)
 
-ll4 = function(hi,lo,slp,lc,x){
-  lo + ((hi-lo)/(1+exp(slp*(log(x/lc)))))
-}
 L.3.fx = function(t, lc50 = lc50, slp = slp){
   1 / (1+exp(slp*log(t / lc50)))
 }
@@ -21,12 +18,13 @@ L.3.fx = function(t, lc50 = lc50, slp = slp){
 
 #miracidial mortality (S. mansoni) from Tchounwou 1991 ####################################
 mir = read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Miracidial Mortality/tchounwou08_miracidia.csv')
+  mir$conc = mir$conc/1000
   mir.mal = subset(mir, chem == 'mal')
 
 #Tchounwou Data plotted ############
 tch91.piM.mal<-drm(alive/total ~ time_hrs, conc, weights = total, data = mir.mal, type = 'binomial', 
-                   fct = LL.4(names = c('b', 'c', 'd', 'e'),
-                              fixed = c(NA, 0, 1, NA)))
+                   fct = LL.3(names = c('b', 'd', 'e'),
+                              fixed = c(NA, 1, NA)))
   summary(tch91.piM.mal)
   plot(tch91.piM.mal) 
 
@@ -45,7 +43,7 @@ plot(mir.mal$time_hrs[mir.mal$conc==0], mir.mal$alive[mir.mal$conc==0]/mir.mal$t
   }
 
 title('malathion toxicity to cercariae')
-legend('topright', legend = c('control', unique(mir.mal$conc)[-1]), 
+legend('topright', title = 'Mal(ppm)', legend = c('control', unique(mir.mal$conc)[-1]), 
        pch = c(17,16,16,16,16,16), col = c(1:6), cex=0.8, bty = 'n')  
 
 #Get estimate of miracidia-hrs for each concentration    
@@ -60,8 +58,8 @@ tch91.mal.pim.aucs = as.numeric()
 
 
 #Create data frame with parameter values and malathion concentrations #######################
-mirp.df = data.frame(mal = c(0,30,60,90,120,150)*1000,
-                     logmal = log(c(0,30,60,90,120,150)+1*1000),
+mirp.df = data.frame(mal = c(0,30,60,90,120,150),
+                     logmal = log(c(0,30,60,90,120,150)+1),
                      e = summary(tch91.piM.mal)$coefficients[c(7:12), 1],
                      e.se = summary(tch91.piM.mal)$coefficients[c(7:12), 2],
                      b = summary(tch91.piM.mal)$coefficients[c(1:6), 1],
@@ -81,23 +79,35 @@ tch91.em.mod = lm(e ~ mal, weights = e.se^-1, data = mirp.df)
   tch91.em.fx = function(mal){
     predict(tch91.em.mod, newdata = data.frame(mal = mal), interval = 'confidence', level = 0.95)
   }
-    lines(seq(0,max(mirp.df$mal)+1000,100), sapply(seq(0,max(mirp.df$mal)+1000,100), tch91.em.fx)[1,],
+    lines(seq(0,150,0.5), sapply(seq(0,150,0.5), tch91.em.fx)[1,],
           lty = 2)
-    lines(seq(0,max(mirp.df$mal)+1000,100), sapply(seq(0,max(mirp.df$mal)+1000,100), tch91.em.fx)[2,],
+    lines(seq(0,150,0.5), sapply(seq(0,150,0.5), tch91.em.fx)[2,],
           lty = 3)
-    lines(seq(0,max(mirp.df$mal)+1000,100), sapply(seq(0,max(mirp.df$mal)+1000,100), tch91.em.fx)[3,],
+    lines(seq(0,150,0.5), sapply(seq(0,150,0.5), tch91.em.fx)[3,],
           lty = 3)
-#not trying exponential because linear is clearly the best fit
-    
+
+tch91.em.mod2 = lm(e ~ logmal, weights = e.se^-1, data = mirp.df) 
+  tch91.em.fx2 = function(mal){
+      predict(tch91.em.mod2, newdata = data.frame(logmal = log(mal+1)), interval = 'confidence', level = 0.95)
+    }
+    lines(seq(0,150,0.5), sapply(seq(0,150,0.5), tch91.em.fx2)[1,],
+          lty = 2, col = 3)
+    lines(seq(0,150,0.5), sapply(seq(0,150,0.5), tch91.em.fx2)[2,],
+          lty = 3, col = 3)
+    lines(seq(0,150,0.5), sapply(seq(0,150,0.5), tch91.em.fx2)[3,],
+          lty = 3, col = 3)
+  
+AIC(tch91.em.mod, tch91.em.mod2)  #linear is a better fit  
+              
 tch91.bm.mod = lm(b ~ mal, weights = b.se^-1, data = mirp.df) 
   tch91.bm.fx = function(mal){
     predict(tch91.bm.mod, newdata = data.frame(mal = mal), interval = 'confidence', level = 0.95)
   }
-    lines(seq(0,max(mirp.df$mal)+1000,100), sapply(seq(0,max(mirp.df$mal)+1000,100), tch91.bm.fx)[1,],
+    lines(seq(0,150,0.5), sapply(seq(0,150,0.5), tch91.bm.fx)[1,],
           lty = 2, col = 2)
-    lines(seq(0,max(mirp.df$mal)+1000,100), sapply(seq(0,max(mirp.df$mal)+1000,100), tch91.bm.fx)[2,],
+    lines(seq(0,150,0.5), sapply(seq(0,150,0.5), tch91.bm.fx)[2,],
           lty = 3, col = 2)
-    lines(seq(0,max(mirp.df$mal)+1000,100), sapply(seq(0,max(mirp.df$mal)+1000,100), tch91.bm.fx)[3,],
+    lines(seq(0,150,0.5), sapply(seq(0,150,0.5), tch91.bm.fx)[3,],
           lty = 3, col = 2)
 
 mir.auc.mal = data.frame(mal = mirp.df$mal,
@@ -105,8 +115,9 @@ mir.auc.mal = data.frame(mal = mirp.df$mal,
 #Create function to generate d-r function #####################
 piM.tch91_mal_unc = function(In){
   if(In == 0) piM = 1 else{
-  e = as.numeric(predict(tch91.em.mod, newdata = data.frame(mal = In), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(tch91.bm.mod, newdata = data.frame(mal = In), se.fit = TRUE)[1:2])
+    Ins = In/1000
+  e = as.numeric(predict(tch91.em.mod, newdata = data.frame(mal = Ins), se.fit = TRUE)[1:2])
+  b = as.numeric(predict(tch91.bm.mod, newdata = data.frame(mal = Ins), se.fit = TRUE)[1:2])
   
   e.use = rnorm(1, e[1], e[2])
   while(e.use < 0) e.use = rnorm(1, e[1], e[2])
@@ -137,17 +148,17 @@ plot(mir.mal$time_hrs[mir.mal$conc==0], mir.mal$surv[mir.mal$conc==0], pch=17, x
 
 #function to plot model predictions
 predm.fx.plot = function(In, clr){
-  e = as.numeric(predict(tch91.em.mod, newdata = data.frame(mal = In), se.fit = TRUE)[1:2])
-  b = as.numeric(predict(tch91.bm.mod, newdata = data.frame(mal = In), se.fit = TRUE)[1:2])
+  Ins = In/1000
+  e = as.numeric(predict(tch91.em.mod, newdata = data.frame(mal = Ins), se.fit = TRUE)[1:2])
+  b = as.numeric(predict(tch91.bm.mod, newdata = data.frame(mal = Ins), se.fit = TRUE)[1:2])
   
   e.use = rnorm(1, e[1], e[2])
   while(e.use < 0) e.use = rnorm(1, e[1], e[2])
   b.use = rnorm(1, b[1], b[2])
   while(b.use < 0) b.use = rnorm(1, e[1], e[2])
   
-  lines(time, ll4(1,0, b.use, e.use, time), lty=2, col = clr)
-}   
-
+  lines(time, L.3.fx(time, lc50 = e.use, slp = b.use), lty=2, col = clr)
+}
 #plot model predictions
 for(i in c(0,30,60,90,120,150)*1000){
   c = i/30000 + 1
@@ -157,7 +168,7 @@ for(i in c(0,30,60,90,120,150)*1000){
 
 #plot model output compared to observed points
 plot(mirp.df$mal, tch91.mal.pim.aucs/tch91.mal.pim.aucs[1], pch = 16, ylim = c(0,1),
-     xlab = 'Malathion (ppb)', ylab = expression(paste(pi[M])),
+     xlab = 'Malathion (ppm)', ylab = expression(paste(pi[M])),
      main = 'Sample Output of miracidial mortality function')
-  points(seq(0,max(mirp.df$mal)+1000,250), sapply(seq(0,max(mirp.df$mal)+1000,250), piM.tch91_mal_unc), 
+  points(seq(0,max(mirp.df$mal)*1000,500)/1000, sapply(seq(0,max(mirp.df$mal)*1000,500), piM.tch91_mal_unc), 
          pch = 5, col=4, cex = 0.5)

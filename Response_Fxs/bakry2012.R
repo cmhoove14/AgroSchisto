@@ -43,15 +43,15 @@ plot(mun.bak.atr$conc, mun.bak.atr$mort, ylim = c(0,1), xlim = c(0,5000),
     lines(seq(0,5000,10), sapply(seq(0,5000,10), fx.bak.atr, lc = 1.88), lty = 2, col = 2)
     
 muNq_atr_Bakry12_uncertainty = function(He){
-  if(He == 0) mun = 0 else{
+  #if(He == 0) mun = 0 else{
     heu = (He/1000)
     lc50 = 10^(rnorm(1, log10(lc50.bak.atr), se.lc50.bak.atr))
   while(lc50 < 0){
     lc50 = 10^(rnorm(1, log10(lc50.bak.atr), se.lc50.bak.atr))
   }  
     mun = pnorm((slp.bak.atr) * log10(heu/lc50))
-  }
-  if(mun < 0) mun = 0
+ # }
+ # if(mun < 0) mun = 0
 
   return(mun)
 }
@@ -96,15 +96,15 @@ fx.bak.gly = function(He, lc = lc50.bak.gly){
   lines(seq(0,13000,13), sapply(seq(0,13000,13), fx.bak.gly, lc = 4.82), lty = 2, col = 2)
 
 muNq_gly_Bakry12_uncertainty = function(He){
-  if(He == 0) mun = 0 else{
+  #if(He == 0) mun = 0 else{
     heu = (He/1000)
     lc50 = 10^(rnorm(1, log10(lc50.bak.gly), se.lc50.bak.gly))
   while(lc50 < 0){
     lc50 = 10^(rnorm(1, log10(lc50.bak.gly), se.lc50.bak.gly))
   }  
     mun = pnorm((slp.bak.gly) * log10(heu/lc50)) - fx.bak.gly(0)
-  }
-  if(mun < 0) mun = 0
+  #}
+  #if(mun < 0) mun = 0
   return(mun)
 }
 points(seq(0,13000,25), sapply(seq(0,13000,25), muNq_gly_Bakry12_uncertainty), 
@@ -127,9 +127,28 @@ fn.atr = mean(bak12$hatch_per[bak12$chem == 'atrazine' & bak12$surv != 0] / 7)
 
 fn.gly = mean(bak12$hatch_per[bak12$chem == 'glyphosate' & bak12$surv != 0] / 7)  
   fn.gly.sd = sd(bak12$hatch_per[bak12$chem == 'glyphosate' & bak12$surv != 0] / 7)
+ 
+#Functions that estimate parameter value in single concentration group #########
+  fN.gly.bak.uncertainty = function(waste){ #function based on snail egg masses
+    wst = waste
+    fN = rnorm(1, fn.gly, fn.gly.sd) / fn.ctrl
+    while(fN < 0) fN = rnorm(1, fn.gly, fn.gly.sd) / fn.ctrl
+    fN
+  }
+  
+    #hist(sapply(rep(1,10000), fN.gly.bak.uncertainty, simplify = T))
+  
+  fN.atr.bak.uncertainty = function(waste){ #function based on snail hatchlings
+    wst = waste
+    fN = rnorm(1, fn.atr, fn.atr.sd) / fn.ctrl
+    while(fN < 0) fN = rnorm(1, fn.atr, fn.atr.sd) / fn.ctrl
+    fN
+  }  
+  
+    #hist(sapply(rep(1,10000), fN.atr.bak.uncertainty, simplify = T))
   
 
-#assume lc90 halts all reproduction to provide third data point
+#assume lc90 halts all reproduction to provide third data point #########
 bak.fn = data.frame(gly = c(0, .840, 12.600),
                     atr = c(0, .330, 4.750),
                     gly.r = c(fn.ctrl, fn.atr, 0),
@@ -137,8 +156,8 @@ bak.fn = data.frame(gly = c(0, .840, 12.600),
 
 #glyphosate influence on reproduction ############
 fn.bak.gly = drm(gly.r ~ gly, data = bak.fn, type = 'continuous',
-                 fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
-                           fixed = c(NA, 0, bak.fn$gly.r[1], NA)))
+                 fct = LL.3(names = c('b', 'd', 'e'),
+                           fixed = c(NA, bak.fn$gly.r[1], NA)))
 
   summary(fn.bak.gly)
 
@@ -154,25 +173,27 @@ plot(bak.fn$gly*1000, bak.fn$gly.r / bak.fn$gly.r[1] , ylim = c(0,1), pch = 16,
   lines(seq(0,13000, 25), sapply(seq(0,13000, 25), fn.bak.gly.pred)[2,] / bak.fn$gly.r[1], col = 2, lty=3)
   lines(seq(0,13000, 25), sapply(seq(0,13000, 25), fn.bak.gly.pred)[3,] / bak.fn$gly.r[1], col = 2, lty=3)
 
-fN.gly.bak.uncertainty = function(He){
-  if(He == 0) fn = 1 else{
+fN.gly.bak.uncertainty3pts = function(He){
+  #if(He == 0) fn = 1 else{
     heu = He/1000
     init = predict(fn.bak.gly, newdata = data.frame(gly = heu), se.fit = T)
     fn = rnorm(1, init[1], init[2]) / bak.fn$gly.r[1]
-  }
-  if(fn > 1) fn = 1
-  if(fn < 0) fn = 0
+ # }
+ # if(fn > 1) fn = 1
+ # if(fn < 0) fn = 0
   
   return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
 
-  points(seq(0,13000, 13), sapply(seq(0,13000, 13), fN.gly.bak.uncertainty), pch = 5, cex = 0.5, col = 4)
+  points(seq(0,13000, 13), sapply(seq(0,13000, 13), fN.gly.bak.uncertainty3pts), pch = 5, cex = 0.5, col = 4)
 
-  keep.bak.gly = c(keep.bak.gly, 'fN.gly.bak.uncertainty', 'fn.bak.gly', 'bak.fn')
+  keep.bak.gly = c(keep.bak.gly, 'fN.gly.bak.uncertainty', 'fn.gly', 'fn.gly.sd', 'fn.ctrl',
+                   'fN.gly.bak.uncertainty3pts', 'fn.bak.gly', 'bak.fn')
+  
 #atrazine influence on reproduction ############
 fn.bak.atr = drm(atr.r ~ atr, data = bak.fn, type = 'continuous',
-                 fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
-                           fixed = c(NA, 0, bak.fn$atr.r[1], NA)))
+                 fct = LL.3(names = c('b', 'd', 'e'),
+                           fixed = c(NA, bak.fn$atr.r[1], NA)))
 
 summary(fn.bak.atr)
 
@@ -188,19 +209,21 @@ plot(bak.fn$atr*1000, bak.fn$atr.r / bak.fn$atr.r[1] , ylim = c(0,1), pch = 16,
   lines(seq(0,5000,25), sapply(seq(0,5000,25), fn.bak.atr.pred)[2,] / bak.fn$atr.r[1], col = 2, lty=3)
   lines(seq(0,5000,25), sapply(seq(0,5000,25), fn.bak.atr.pred)[3,] / bak.fn$atr.r[1], col = 2, lty=3)
 
-fN.atr.bak.uncertainty = function(He){
-  if(He == 0) fn = 1 else{
+fN.atr.bak.uncertainty3pts = function(He){
+ # if(He == 0) fn = 1 else{
     heu = He/1000
     init = predict(fn.bak.atr, newdata = data.frame(atr = heu), se.fit = T)
     fn = rnorm(1, init[1], init[2]) / bak.fn$atr.r[1]
-  }
-  if(fn > 1) fn = 1
-  if(fn < 0) fn = 0
+ # }
+ # if(fn > 1) fn = 1
+ # if(fn < 0) fn = 0
   
   return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
 
-points(seq(0,5000, 10), sapply(seq(0,5000, 10), fN.atr.bak.uncertainty), pch = 5, cex = 0.5, col = 4)
+points(seq(0,5000, 10), sapply(seq(0,5000, 10), fN.atr.bak.uncertainty3pts), pch = 5, cex = 0.5, col = 4)
 
-keep.bak.atr = c(keep.bak.atr, 'fN.atr.bak.uncertainty', 'fn.bak.atr', 'bak.fn')
+keep.bak.atr = c(keep.bak.atr, 'fN.atr.bak.uncertainty', 'fn.atr', 'fn.atr.sd', 'fn.ctrl',
+                 'fN.atr.bak.uncertainty3pts','fn.bak.atr', 'bak.fn')
+
 keep.bak.all = c(keep.bak.atr, keep.bak.gly)

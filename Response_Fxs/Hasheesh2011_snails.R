@@ -44,11 +44,11 @@ fx.hsh.ch = function(In, lc = lc50.ch.hash){
   lines(seq(0,3500,10), sapply(seq(0,3500,10), fx.hsh.ch, lc = 0.88), lty = 2, col = 2)
   
 muNq_ch_hash11_uncertainty = function(In){
-  if(In == 0) mun = 0 else{
+  #if(In == 0) mun = 0 else{
     Ins = (In/1000)
     lc50 = 10^(rnorm(1, log10(lc50.ch.hash), se.lc50.ch.hash))
     mun = pnorm((slp.ch.hash) * (Ins-lc50)) - fx.hsh.ch(0)
-  }
+  #}
   if(mun < 0) mun = 0
   return(mun)
 }
@@ -91,11 +91,13 @@ fx.hsh.prof = function(In, lc = lc50.prof.hash){
     lines(seq(0,5000,50), sapply(seq(0,5000,50), fx.hsh.prof, lc = 1.88), lty = 2, col = 2)
 
 muNq_prof_hash11_uncertainty = function(In){
-  if(In == 0) mun = 0 else{
+  #if(In == 0) mun = 0 else{
     Ins = (In/1000)
     lc50 = 10^(rnorm(1, log10(lc50.prof.hash), se.lc50.prof.hash))
     mun = pnorm((slp.prof.hash) * (Ins-lc50)) - fx.hsh.prof(0)
-  }
+  #}
+  if(mun < 0) mun = 0
+  
   return(mun)
 }
 points(seq(0,5000,10), sapply(seq(0,5000,10), muNq_prof_hash11_uncertainty), 
@@ -119,10 +121,35 @@ fn<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/D
     
 #get estimate of mean eggs/snail/day for each treatment
   ctrl.eggs = mean(fn$eggs_snail_day[fn$chem == 'control' & fn$surv != 0])
+    ctrl.eggs.sd = sd(fn$eggs_snail_day[fn$chem == 'control' & fn$surv != 0])
+  
   chlor.eggs = mean(fn$eggs_snail_day[fn$chem == 'chlorpyrifos' & fn$surv != 0])
+    chlor.eggs.sd = sd(fn$eggs_snail_day[fn$chem == 'chlorpyrifos' & fn$surv != 0])
+  
   prof.eggs = mean(fn$eggs_snail_day[fn$chem == 'profenofos' & fn$surv != 0])
-
-   
+    prof.eggs.sd = sd(fn$eggs_snail_day[fn$chem == 'profenofos' & fn$surv != 0])
+  
+#Functions that estimate parameter value in single concentration group #########
+    fN.hash.chlor.uncertainty = function(waste){ #function based on snail egg masses
+      wst = waste
+      fN = rnorm(1, chlor.eggs, chlor.eggs.sd) / ctrl.eggs
+      while(fN < 0) fN = rnorm(1, chlor.eggs, chlor.eggs.sd) / ctrl.eggs
+      fN
+    }
+    
+    #hist(sapply(rep(1,10000), fN.hash.chlor.uncertainty, simplify = T))
+    
+    fN.hash.prof.uncertainty = function(waste){ #function based on snail hatchlings
+      wst = waste
+      fN = rnorm(1, prof.eggs, prof.eggs.sd) / ctrl.eggs
+      while(fN < 0) fN = rnorm(1, prof.eggs, prof.eggs.sd) / ctrl.eggs
+      fN
+    }  
+    
+    #hist(sapply(rep(1,10000), fN.hash.prof.uncertainty, simplify = T))
+    
+    
+#Assume lc90 halts reproduction for third data point ###########   
 fn.hash = data.frame(chlor.conc = c(0, 720, 2820),
                      prof.conc = c(0, 1400, 3720),
                      chlor.rep = c(ctrl.eggs, chlor.eggs, 0),
@@ -133,8 +160,8 @@ fn.hash = data.frame(chlor.conc = c(0, 720, 2820),
        xlab = 'chlorpyrifos concentration (ppb)', ylab = 'relative decrease in fecundity', pch = 16)
     
 ch.fn.red.hash = drm(chlor.rep ~ chlor.conc, data = fn.hash, type = 'continuous',
-                 fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
-                           fixed = c(NA, 0, fn.hash$chlor.rep[1], NA)))
+                 fct = LL.3(names = c("b", "d", "e"),
+                           fixed = c(NA, fn.hash$chlor.rep[1], NA)))
 
   summary(ch.fn.red.hash)
   
@@ -146,7 +173,7 @@ ch.fn.red.hash = drm(chlor.rep ~ chlor.conc, data = fn.hash, type = 'continuous'
   lines(seq(0,3000, 3), sapply(seq(0,3000, 3), fn.hash.chlor.pred)[2,] / fn.hash$chlor.rep[1], col = 2, lty=3)
   lines(seq(0,3000, 3), sapply(seq(0,3000, 3), fn.hash.chlor.pred)[3,] / fn.hash$chlor.rep[1], col = 2, lty=3)
 
-fN.hash.chlor.uncertainty = function(In){
+fN.hash.chlor.uncertainty3pts = function(In){
   if(In == 0) fn = 1 else{
     init = predict(ch.fn.red.hash, newdata = data.frame(chlor.conc = In), se.fit = T)
   fn = rnorm(1, init[1], init[2]) / fn.hash$chlor.rep[1]
@@ -157,16 +184,17 @@ fN.hash.chlor.uncertainty = function(In){
   return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
 
-points(seq(0,3000, 3), sapply(seq(0,3000, 3), fN.hash.chlor.uncertainty), pch = 5, cex = 0.5, col = 4)
+points(seq(0,3000, 3), sapply(seq(0,3000, 3), fN.hash.chlor.uncertainty3pts), pch = 5, cex = 0.5, col = 4)
 
-keep.hsh.ch = c(keep.hsh.ch, 'fN.hash.chlor.uncertainty', 'ch.fn.red.hash', 'fn.hash')
+keep.hsh.ch = c(keep.hsh.ch, 'fN.hash.chlor.uncertainty3pts', 'ch.fn.red.hash', 'fn.hash', 'fN.hash.chlor.uncertainty',
+                'chlor.eggs', 'chlor.eggs.sd', 'ctrl.eggs')
 #profenofos reductions measured in mean eggs/snail/day  ###########
 plot(fn.hash$prof.conc, fn.hash$prof.rep / fn.hash$prof.rep[1], ylim = c(0,1), 
      xlab = 'profenofos concentration (ppb)', ylab = 'relative decrease in fecundity', pch = 16)
 
 pr.fn.red.hash = drm(prof.rep ~ prof.conc, data = fn.hash, type = 'continuous',
-                     fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
-                               fixed = c(NA, 0, fn.hash$prof.rep[1], NA)))
+                     fct = LL.3(names = c("b", "d", "e"),
+                               fixed = c(NA, fn.hash$prof.rep[1], NA)))
 
   summary(pr.fn.red.hash)
 
@@ -178,7 +206,7 @@ lines(seq(0,4000, 4), sapply(seq(0,4000, 4), fn.hash.prof.pred)[1,] / fn.hash$pr
 lines(seq(0,4000, 4), sapply(seq(0,4000, 4), fn.hash.prof.pred)[2,] / fn.hash$prof.rep[1], col = 2, lty=3)
 lines(seq(0,4000, 4), sapply(seq(0,4000, 4), fn.hash.prof.pred)[3,] / fn.hash$prof.rep[1], col = 2, lty=3)
 
-fN.hash.prof.uncertainty = function(In){
+fN.hash.prof.uncertainty3pts = function(In){
   if(In == 0) fn = 1 else{
     init = predict(pr.fn.red.hash, newdata = data.frame(prof.conc = In), se.fit = T)
     fn = rnorm(1, init[1], init[2]) / fn.hash$prof.rep[1]
@@ -189,7 +217,8 @@ fN.hash.prof.uncertainty = function(In){
   return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
 
-points(seq(0,4000, 4), sapply(seq(0,4000, 4), fN.hash.prof.uncertainty), pch = 5, cex = 0.5, col = 4)
+points(seq(0,4000, 4), sapply(seq(0,4000, 4), fN.hash.prof.uncertainty3pts), pch = 5, cex = 0.5, col = 4)
 
-keep.hsh.prof = c(keep.hsh.prof, 'fN.hash.prof.uncertainty', 'pr.fn.red.hash', 'fn.hash')
+keep.hsh.prof = c(keep.hsh.prof, 'fN.hash.prof.uncertainty3pts', 'pr.fn.red.hash', 'fn.hash', 'fN.hash.prof.uncertainty',
+                  'prof.eggs', 'prof.eggs.sd', 'ctrl.eggs')
 keep.hsh.all = c(keep.hsh.ch, keep.hsh.prof)

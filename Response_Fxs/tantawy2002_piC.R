@@ -19,14 +19,15 @@ time = c(0:25)
 #cercarial toxicity ############
 tant<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Cercarial Mortality/Tantawy2002.csv')
 tant$total = 100
+tant$conc = tant$conc/1000
 cerc<-subset(tant, larv == 'cercariae')
   cerc.but = subset(cerc, chem == 'butachlor')
   cerc.fpb = subset(cerc, chem == 'fluazifop-p-butyl')
 
 #butachlor toxicity to cercariae  ###############
 tant.piC.but<-drm(surv/total ~ time_hrs, conc, weights = total,  data = cerc.but, type = 'binomial', 
-                  fct = LL.4(names = c('b', 'c', 'd', 'e'),
-                            fixed = c(NA, 0, 1, NA)))
+                  fct = LL.3(names = c('b', 'd', 'e'),
+                            fixed = c(NA, 1, NA)))
   summary(tant.piC.but)
   plot(tant.piC.but) 
   
@@ -44,7 +45,7 @@ tant.piC.but<-drm(surv/total ~ time_hrs, conc, weights = total,  data = cerc.but
   }
   
   title('butachlor toxicity to cercariae')
-  legend('topright', legend = c('control', 650,1500,4500,6500), 
+  legend('topright', legend = c('control', .650,1.500,4.500,6.500), title = 'butachlor (ppm)',
          pch = c(17,16,16,16,16), col = c(1:5), cex=0.8, bty = 'n')  
 
 #Get estimate of cercariae-hrs for each concentration    
@@ -62,8 +63,8 @@ cerc.but = data.frame(e = summary(tant.piC.but)$coefficients[c(6:10),1],
                       e.se = summary(tant.piC.but)$coefficients[c(6:10),2],
                       b = summary(tant.piC.but)$coefficients[c(1:5),1],
                       b.se = summary(tant.piC.but)$coefficients[c(1:5),2],
-                      but = c(0,650,1500,4500,6500),
-                      logbut = log(c(0,650,1500,4500,6500)+1))
+                      but = unique(cerc.but$conc),
+                      logbut = log(unique(cerc.but$conc)+1))
     
 plot(cerc.but$but, cerc.but$e, pch = 16, xlab = 'butachlor (ppm)', ylab = 'LL.2 Parameters',
      ylim = c(0,20))
@@ -84,9 +85,9 @@ plot(cerc.but$but, cerc.but$e, pch = 16, xlab = 'butachlor (ppm)', ylab = 'LL.2 
               interval = 'confidence', level = 0.95)
     }
     
-    lines(seq(0,7000,7), sapply(seq(0,7000,7), el.pred)[1,], lty = 2)
-    lines(seq(0,7000,7), sapply(seq(0,7000,7), el.pred)[2,], lty = 3)
-    lines(seq(0,7000,7), sapply(seq(0,7000,7), el.pred)[3,], lty = 3)
+    lines(seq(0,7,.07), sapply(seq(0,7,.07), el.pred)[1,], lty = 2)
+    lines(seq(0,7,.07), sapply(seq(0,7,.07), el.pred)[2,], lty = 3)
+    lines(seq(0,7,.07), sapply(seq(0,7,.07), el.pred)[3,], lty = 3)
 
   el.but2 = lm(e ~ logbut, weights = e.se^-1, data = cerc.but) #log-linear response of LC50
     el.pred2 = function(but){
@@ -94,11 +95,11 @@ plot(cerc.but$but, cerc.but$e, pch = 16, xlab = 'butachlor (ppm)', ylab = 'LL.2 
               interval = 'confidence', level = 0.95)
     }
     
-  lines(seq(0,7000,7), sapply(seq(0,7000,7), el.pred2)[1,], lty = 2, col=3)
-  lines(seq(0,7000,7), sapply(seq(0,7000,7), el.pred2)[2,], lty = 3, col=3)
-  lines(seq(0,7000,7), sapply(seq(0,7000,7), el.pred2)[3,], lty = 3, col=3)
+  lines(seq(0,7,.07), sapply(seq(0,7,.07), el.pred2)[1,], lty = 2, col=3)
+  lines(seq(0,7,.07), sapply(seq(0,7,.07), el.pred2)[2,], lty = 3, col=3)
+  lines(seq(0,7,.07), sapply(seq(0,7,.07), el.pred2)[3,], lty = 3, col=3)
     
-  AIC(el.but, el.but2)  #linear is a better fit    
+  AIC(el.but, el.but2)  #exponential is a better fit    
   
   bl.but = lm(b ~ but, weights = b.se^-1, data = cerc.but)   
     bl.pred = function(but){
@@ -119,8 +120,9 @@ plot(cerc.but$but, cerc.but$e, pch = 16, xlab = 'butachlor (ppm)', ylab = 'LL.2 
       
 piC.tant02_but.lin_unc = function(He){
   if(He == 0) piC = 1 else{
-    e = as.numeric(predict(el.but, newdata = data.frame(but = He), se.fit = TRUE)[1:2])
-    b = as.numeric(predict(bl.but, newdata = data.frame(but = He), se.fit = TRUE)[1:2])
+    Heu = He/1000
+    e = as.numeric(predict(el.but, newdata = data.frame(but = Heu), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(bl.but, newdata = data.frame(but = Heu), se.fit = TRUE)[1:2])
         
     e.use = rnorm(1, e[1], e[2])
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
@@ -136,8 +138,9 @@ piC.tant02_but.lin_unc = function(He){
 
 piC.tant02_but.exp_unc = function(He){
   if(He == 0) piC = 1 else{
-    e = as.numeric(predict(el.but2, newdata = data.frame(logbut = log(He+1)), se.fit = TRUE)[1:2])
-    b = as.numeric(predict(bl.but, newdata = data.frame(but = He), se.fit = TRUE)[1:2])
+    Heu = He/1000
+    e = as.numeric(predict(el.but2, newdata = data.frame(logbut = log(Heu+1)), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(bl.but, newdata = data.frame(but = Heu), se.fit = TRUE)[1:2])
     
     e.use = rnorm(1, e[1], e[2])
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
@@ -155,9 +158,9 @@ piC.tant02_but.exp_unc = function(He){
   plot(cerc.but$but, tant.but.pic.aucs / tant.but.pic.aucs[1],
         xlab = 'Butachlor (ppb)', ylab = 'relative AUC (cercariae-hours)',
        pch = 16, ylim = c(0,1))
-    points(seq(0, 6500,50), sapply(seq(0, 6500,50), piC.tant02_but.lin_unc),
+    points(seq(0, 6500,50)/1000, sapply(seq(0, 6500,50), piC.tant02_but.lin_unc),
            pch = 5, col = 4, cex = 0.5)
-    points(seq(0, 6500,50), sapply(seq(0, 6500,50), piC.tant02_but.exp_unc),
+    points(seq(0, 6500,50)/1000, sapply(seq(0, 6500,50), piC.tant02_but.exp_unc),
            pch = 5, col = 2, cex = 0.5)
     
   keep.tant.but.pic = c('piC.tant02_but.lin_unc', 'piC.tant02_but.exp_unc', 'bl.but',
@@ -165,8 +168,8 @@ piC.tant02_but.exp_unc = function(He){
     
 #fluazifop-p-butyl toxicity to cercariae ###########
   tant.piC.fpb<-drm(surv/total ~ time_hrs, conc, weights = total,  data = cerc.fpb, type = 'binomial', 
-                    fct = LL.4(names = c('b', 'c', 'd', 'e'),
-                              fixed = c(NA, 0, 1, NA)))
+                    fct = LL.3(names = c('b', 'd', 'e'),
+                              fixed = c(NA, 1, NA)))
   summary(tant.piC.fpb)
   plot(tant.piC.fpb) 
   
@@ -184,7 +187,7 @@ piC.tant02_but.exp_unc = function(He){
   }
   
   title('fluazifop-p-butyl toxicity to cercariae')
-  legend('topright', legend = c('control', 1760,4500,9000,17600), 
+  legend('topright', legend = c('control', 1.760,4.500,9.000,17.600), 
          pch = c(17,16,16,16,16), col = c(1:5), cex=0.8, bty = 'n')  
   
 #Get estimate of cercariae-hrs for each concentration    
@@ -203,13 +206,13 @@ piC.tant02_but.exp_unc = function(He){
                         e.se = summary(tant.piC.fpb)$coefficients[c(6:10),2],
                         b = summary(tant.piC.fpb)$coefficients[c(1:5),1],
                         b.se = summary(tant.piC.fpb)$coefficients[c(1:5),2],
-                        fpb = c(0,1760,4500,9000,17600),
-                        logfpb = log(c(0,1760,4500,9000,17600)+1))
+                        fpb = unique(cerc.fpb$conc),
+                        logfpb = log(unique(cerc.fpb$conc)+1))
   
   plot(cerc.fpb$fpb, cerc.fpb$e, pch = 16, xlab = 'fluazifop-p-butyl (ppm)', 
        ylab = 'L.2 Parameters', ylim = c(0,20))
   
-  points(cerc.fpb$fpb+50, cerc.fpb$b, pch = 17, col=2)
+  points(cerc.fpb$fpb, cerc.fpb$b, pch = 17, col=2)
   
   for(i in 1:length(cerc.fpb$fpb)){
     segments(x0 = cerc.fpb$fpb[i], y0 = cerc.fpb$e[i] + cerc.fpb$e.se[i],
@@ -225,9 +228,9 @@ el.fpb = lm(e ~ fpb, weights = e.se^-1, data = cerc.fpb) #linear response of LC5
             interval = 'confidence', level = 0.95)
   }
     
-  lines(seq(0,18000,100), sapply(seq(0,18000,100), el.pred.fpb)[1,], lty = 2)
-  lines(seq(0,18000,100), sapply(seq(0,18000,100), el.pred.fpb)[2,], lty = 3)
-  lines(seq(0,18000,100), sapply(seq(0,18000,100), el.pred.fpb)[3,], lty = 3)
+  lines(seq(0,18,0.1), sapply(seq(0,18,0.1), el.pred.fpb)[1,], lty = 2)
+  lines(seq(0,18,0.1), sapply(seq(0,18,0.1), el.pred.fpb)[2,], lty = 3)
+  lines(seq(0,18,0.1), sapply(seq(0,18,0.1), el.pred.fpb)[3,], lty = 3)
     
 el.fpb2 = lm(e ~ logfpb, weights = e.se^-1, data = cerc.fpb) #log-linear response of LC50
   el.pred.fpb2 = function(fpb){
@@ -235,9 +238,9 @@ el.fpb2 = lm(e ~ logfpb, weights = e.se^-1, data = cerc.fpb) #log-linear respons
             interval = 'confidence', level = 0.95)
   }
     
-  lines(seq(0,18000,100), sapply(seq(0,18000,100), el.pred.fpb2)[1,], lty = 2, col=3)
-  lines(seq(0,18000,100), sapply(seq(0,18000,100), el.pred.fpb2)[2,], lty = 3, col=3)
-  lines(seq(0,18000,100), sapply(seq(0,18000,100), el.pred.fpb2)[3,], lty = 3, col=3)
+  lines(seq(0,18,0.1), sapply(seq(0,18,0.1), el.pred.fpb2)[1,], lty = 2, col=3)
+  lines(seq(0,18,0.1), sapply(seq(0,18,0.1), el.pred.fpb2)[2,], lty = 3, col=3)
+  lines(seq(0,18,0.1), sapply(seq(0,18,0.1), el.pred.fpb2)[3,], lty = 3, col=3)
     
     AIC(el.fpb, el.fpb2)  #exponential is a better fit    
     
@@ -246,9 +249,9 @@ bl.fpb = lm(b ~ fpb, weights = b.se^-1, data = cerc.fpb)
     predict(bl.fpb, newdata = data.frame(fpb = fpb), interval = 'confidence', level = 0.95)
   }
     
-  lines(seq(0,18000,100), sapply(seq(0,18000,100), bl.pred.fpb)[1,], lty = 2, col = 2)
-  lines(seq(0,18000,100), sapply(seq(0,18000,100), bl.pred.fpb)[2,], lty = 3, col = 2)
-  lines(seq(0,18000,100), sapply(seq(0,18000,100), bl.pred.fpb)[3,], lty = 3, col = 2)
+  lines(seq(0,18,0.1), sapply(seq(0,18,0.1), bl.pred.fpb)[1,], lty = 2, col = 2)
+  lines(seq(0,18,0.1), sapply(seq(0,18,0.1), bl.pred.fpb)[2,], lty = 3, col = 2)
+  lines(seq(0,18,0.1), sapply(seq(0,18,0.1), bl.pred.fpb)[3,], lty = 3, col = 2)
     
     legend('top', lty = c(2,2,2,3), col = c(1,3,2,1), bty = 'n', title = 'Fit models',
            legend = c('LC50 - Linear',
@@ -260,8 +263,9 @@ bl.fpb = lm(b ~ fpb, weights = b.se^-1, data = cerc.fpb)
     
 piC.tant02_fpb.exp_unc = function(He){
   if(He == 0) piC = 1 else{
-    e = as.numeric(predict(el.fpb2, newdata = data.frame(logfpb = log(He+1)), se.fit = TRUE)[1:2])
-    b = as.numeric(predict(bl.fpb, newdata = data.frame(fpb = He), se.fit = TRUE)[1:2])
+    Heu = He/1000
+    e = as.numeric(predict(el.fpb2, newdata = data.frame(logfpb = log(Heu+1)), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(bl.fpb, newdata = data.frame(fpb = Heu), se.fit = TRUE)[1:2])
     
     e.use = rnorm(1, e[1], e[2])
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
@@ -277,8 +281,9 @@ piC.tant02_fpb.exp_unc = function(He){
     
 piC.tant02_fpb.lin_unc = function(He){
   if(He == 0) piC = 1 else{
-    e = as.numeric(predict(el.fpb, newdata = data.frame(fpb = He), se.fit = TRUE)[1:2])
-    b = as.numeric(predict(bl.fpb, newdata = data.frame(fpb = He), se.fit = TRUE)[1:2])
+    Heu = He/1000
+    e = as.numeric(predict(el.fpb, newdata = data.frame(fpb = Heu), se.fit = TRUE)[1:2])
+    b = as.numeric(predict(bl.fpb, newdata = data.frame(fpb = Heu), se.fit = TRUE)[1:2])
     
     e.use = rnorm(1, e[1], e[2])
     while(e.use < 0) e.use = rnorm(1, e[1], e[2])
@@ -296,13 +301,11 @@ piC.tant02_fpb.lin_unc = function(He){
   plot(cerc.fpb$fpb, tant.fpb.pic.aucs/tant.fpb.pic.aucs[1],
         xlab = 'Fluazifop-p-butyl (ppb)', ylab = 'relative AUC (cercariae-hours)',
         pch = 16, ylim = c(0,1))
-    points(seq(0, 18000,100), sapply(seq(0, 18000,100), piC.tant02_fpb.lin_unc),
+    points(seq(0, 18000,100)/1000, sapply(seq(0, 18000,100), piC.tant02_fpb.lin_unc),
            pch = 5, col = 4, cex = 0.5)
-    points(seq(0, 18000,100), sapply(seq(0, 18000,100), piC.tant02_fpb.exp_unc),
+    points(seq(0, 18000,100)/1000, sapply(seq(0, 18000,100), piC.tant02_fpb.exp_unc),
            pch = 5, col = 2, cex = 0.5)
     
-    #looks like linear response performs better at low concentrations, exponential performs better
-      #at high concentrations; so function used will be determined by EEC / concentration range tested
 #keep vector ########    
 keep.tant.fpb.pic = c('piC.tant02_fpb.lin_unc', 'piC.tant02_fpb.exp_unc', 'bl.fpb',
                       'el.fpb2', 'el.fpb', 'L.3.fx', 'tant.fpb.pic.aucs') 

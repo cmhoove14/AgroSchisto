@@ -31,8 +31,8 @@ require(LW1949)
     mal.sum$mort = mal.sum$mal.d / mal.sum$mal.total
     
       mal.mod<-drm(mal.d / mal.total ~ mal.c, weights = mal.total, data = mal.sum, type = 'binomial',  
-                   fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
-                              fixed = c(NA, 0, 1, NA)))
+                   fct = LL.2(names = c("b", "e"),
+                              fixed = c(NA, NA)))
 
      muPq_mal_Halstead<-function(In){
         predict(mal.mod, data.frame(mal.c = In), interval = 'confidence', level = 0.95)
@@ -52,7 +52,7 @@ require(LW1949)
     par.mal = c(coef(mal.mod), 'Lower Limit:(Intercept)' = 0, 'Upper Limit:(Intercept)' = 1)[c(1,3,4,2)]  
            
       muPq_mal_Halstead_uncertainty<-function(In){
-        rdrm(1, L.4(), par.mal, In, yerror = 'rbinom', ypar = 5)$y / 5 #estimate deaths / live 
+        rdrm(1, LL.2(), coef(mal.mod), In, yerror = 'rbinom', ypar = 5)$y / 5 #estimate deaths / live 
       }
         points(seq(0, 40000, 40), sapply(seq(0, 40000, 40), muPq_mal_Halstead_uncertainty),
              pch = 5, col=4, cex = 0.5)

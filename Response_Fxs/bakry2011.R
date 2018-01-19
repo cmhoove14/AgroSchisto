@@ -15,24 +15,25 @@ require(drc)
 
 #Snail (H. duryi) toxicity ##########
 #Malathion #####################
-  mun.mal = data.frame(conc = c(.176, .480, .830, 1.760, 3.360)*1000,
-                       mort = c(0,   .10, .25, .50 , .90),
+  mun.mal = data.frame(conc = c(0, .176, .480, .830, 1.760, 3.360)*1000,
+                       mort = c(0, 0,   .10, .25, .50 , .90),
                        surv = 0)
   mun.mal$surv = 1 - mun.mal$mort
   mun.mal$ppm = mun.mal$conc/1000
+  mun.mal$ppmlog10 = log10(mun.mal$ppm)
   mun.mal$probit = qnorm(mun.mal$mort, mean = 5)
   
-  plot(mun.mal$ppm, mun.mal$probit, pch = 16)
+  plot(mun.mal$ppmlog10, mun.mal$probit, pch = 16)
   #looks like LC10 was estimated differently, so only fit to parameters derived from L&W model
   mun.mal.sub = subset(mun.mal, probit >= 0) 
-    lm.bak.mal = lm(probit ~ ppm, data = mun.mal.sub)
+    lm.bak.mal = lm(probit ~ ppmlog10, data = mun.mal.sub)
     
     abline(coef(lm.bak.mal), lty = 2)
     
-    lc50.bak.mal = (5 - coef(lm.bak.mal)[1]) / coef(lm.bak.mal)[2]
+    lc50.bak.mal = 10^((5 - coef(lm.bak.mal)[1]) / coef(lm.bak.mal)[2])
     slp.bak.mal = coef(lm.bak.mal)[2]
     #get standard error from reported 95% CIs of lc50
-    se.lc50.bak.mal = mean(c(log10(3.12/lc50.bak.mal), log10(lc50.bak.mal/0.99))) / 1.96
+    se.lc50.bak.mal = mean(c(log10(3.12/1.76), log10(1.76/0.99))) / 1.96
     
   plot(mun.mal$conc, mun.mal$mort, pch = 16, 
        xlab = 'Malathion (ppb)', ylab = 'prop dead', ylim = c(0,1), xlim = c(0,5000),
@@ -41,19 +42,19 @@ require(drc)
 
   fx.bak.mal = function(In, lc = lc50.bak.mal){
     Ins = In/1000
-    pnorm(slp.bak.mal * (Ins - lc))
+    pnorm(slp.bak.mal * log10(Ins / lc))
   }
     lines(seq(0,5000,50), sapply(seq(0,5000,50), fx.bak.mal), lty = 2, col = 2)
-    lines(seq(0,5000,50), sapply(seq(0,5000,50), fx.bak.mal, lc = 0.99), lty = 2, col = 2)
-    lines(seq(0,5000,50), sapply(seq(0,5000,50), fx.bak.mal, lc = 3.12), lty = 2, col = 2)
-    
+    lines(seq(0,5000,50), sapply(seq(0,5000,50), fx.bak.mal, lc = 0.99), lty = 3, col = 2)
+    lines(seq(0,5000,50), sapply(seq(0,5000,50), fx.bak.mal, lc = 3.12), lty = 3, col = 2)
+   
   muNq_mal_Bakry11_uncertainty = function(In){
-    if(In == 0) mun = 0 else{
+    #if(In == 0) mun = 0 else{
       Ins = (In/1000)
       lc50 = 10^(rnorm(1, log10(lc50.bak.mal), se.lc50.bak.mal))
-      mun = pnorm((slp.bak.mal) * (Ins-lc50)) - fx.bak.mal(0)
-    }
-    if(mun < 0) mun = 0
+      mun = pnorm((slp.bak.mal) * log10(Ins/lc50))
+    #}
+    #if(mun < 0) mun = 0
  
     return(mun)
   }
@@ -98,11 +99,11 @@ plot(mun.del$conc, mun.del$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
   lines(seq(0,10000,100), sapply(seq(0,10000,100), fx.bak.del, lc = 3.1), lty = 2, col = 2)
 
   muNq_del_Bakry11_uncertainty = function(In){
-    if(In == 0) mun = 0 else{
+    #if(In == 0) mun = 0 else{
       Ins = (In/1000)
       lc50 = 10^(rnorm(1, log10(lc50.bak.del), se.lc50.bak.del))
-      mun = pnorm((slp.bak.del) * (Ins-lc50)) - fx.bak.del(0)
-    }
+    #  mun = pnorm((slp.bak.del) * (Ins-lc50)) - fx.bak.del(0)
+    #}
     if(mun < 0) mun = 0
     
     return(mun)
@@ -162,8 +163,8 @@ plot(mun.del$conc, mun.del$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
 bakry11<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/bakry2011.csv')
   
 #get mean eggs/snail/day across all time points for each treatment   
-  fn.ctrl = mean(bakry11$eggs_snail_day[bakry11$chem == 'control' & bakry11$surv != 0])  
-    fn.ctrl.sd = sd(bakry11$eggs_snail_day[bakry11$chem == 'control' & bakry11$surv != 0])
+  fn.ctrl11 = mean(bakry11$eggs_snail_day[bakry11$chem == 'control' & bakry11$surv != 0])  
+    fn.ctrl.sd11 = sd(bakry11$eggs_snail_day[bakry11$chem == 'control' & bakry11$surv != 0])
   
   fn.mal = mean(bakry11$eggs_snail_day[bakry11$chem == 'malathion' & bakry11$surv != 0])  
     fn.mal.sd = sd(bakry11$eggs_snail_day[bakry11$chem == 'malathion' & bakry11$surv != 0])
@@ -171,17 +172,36 @@ bakry11<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroD
   fn.del = mean(bakry11$eggs_snail_day[bakry11$chem == 'deltamethrin' & bakry11$surv != 0])  
     fn.del.sd = sd(bakry11$eggs_snail_day[bakry11$chem == 'deltamethrin' & bakry11$surv != 0])
       
-      
+#Functions that estimate parameter value in single concentration group #########
+    fNq_mal_Bakry11_uncertainty = function(waste){ #function based on snail egg masses
+      wst = waste
+      fN = rnorm(1, fn.mal, fn.mal.sd) / fn.ctrl11
+      while(fN < 0) fN = rnorm(1, fn.mal, fn.mal.sd) / fn.ctrl11
+      fN
+    }
+    
+    #hist(sapply(rep(1,1000), fNq_mal_Bakry11_uncertainty, simplify = T))
+    
+    fNq_del_Bakry11_uncertainty = function(waste){ #function based on snail hatchlings
+      wst = waste
+      fN = rnorm(1, fn.del, fn.del.sd) / fn.ctrl11
+      while(fN < 0) fN = rnorm(1, fn.del, fn.del.sd) / fn.ctrl11
+      fN
+    }  
+    
+    #hist(sapply(rep(1,1000), fNq_del_Bakry11_uncertainty, simplify = T))
+    
+    
 #assume lc90 halts all reproduction to provide third data point
   fn.bak = data.frame(mal = c(0, 0.48, 3.36),
                       del = c(0, 1.21, 7.26),
-                      del.r = c(fn.ctrl, fn.mal, 0),
-                      mal.r = c(fn.ctrl, fn.del, 0))  
+                      del.r = c(fn.ctrl11, fn.mal, 0),
+                      mal.r = c(fn.ctrl11, fn.del, 0))  
       
 #Malathion reproduction ##########      
   fn.bak.mal = drm(mal.r ~ mal, data = fn.bak, type = 'continuous',
-                   fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
-                              fixed = c(NA, 0, fn.bak$mal.r[1], NA)))
+                   fct = LL.3(names = c('b', 'd', 'e'),
+                              fixed = c(NA, fn.bak$mal.r[1], NA)))
   
     summary(fn.bak.mal)
     
@@ -197,25 +217,27 @@ plot(fn.bak$mal*1000, fn.bak$mal.r / fn.bak$mal.r[1] , ylim = c(0,1), pch = 16,
   lines(seq(0,4000,10), sapply(seq(0,4000,10), fn.bak.mal.pred)[2,] / fn.bak$mal.r[1], col = 2, lty=3)
   lines(seq(0,4000,10), sapply(seq(0,4000,10), fn.bak.mal.pred)[3,] / fn.bak$mal.r[1], col = 2, lty=3)
     
-  fNq_mal_Bakry11_uncertainty = function(In){
-    if(In == 0) fn = 1 else{
+  fNq_mal_Bakry11_uncertainty3pts = function(In){
+    #if(In == 0) fn = 1 else{
       Ins = In/1000
       init = predict(fn.bak.mal, newdata = data.frame(mal = Ins), se.fit = T)
     if(init[1] == 0) fn = 0 else{
       fn = rnorm(1, init[1], init[2]) / fn.bak$mal.r[1]
       }
-    if(fn < 0) fn = 0
-    if(fn > 1) fn = 1  
-  }
+  #  if(fn < 0) fn = 0
+  #  if(fn > 1) fn = 1  
+  #}
      return(fn)
 } #normalized to 1, upper limit at 1, lower limit at 0
   
-  points(seq(0,4000,4), sapply(seq(0,4000,4), fNq_mal_Bakry11_uncertainty), pch = 5, cex = 0.5, col = 4)
-keep.bak.mal = c(keep.bak.mal, 'fn.bak', 'fn.bak.mal', 'fNq_mal_Bakry11_uncertainty')
+  points(seq(0,4000,4), sapply(seq(0,4000,4), fNq_mal_Bakry11_uncertainty3pts), pch = 5, cex = 0.5, col = 4)
+  
+keep.bak.mal = c(keep.bak.mal, 'fn.bak', 'fn.bak.mal', 'fNq_mal_Bakry11_uncertainty3pts', 'fNq_mal_Bakry11_uncertainty',
+                 'fn.mal', 'fn.mal.sd', 'fn.ctrl11')
 #deltamethrin reproduction ##########      
   fn.bak.del = drm(del.r ~ del, data = fn.bak, type = 'continuous',
-                   fct = L.4(names = c("Slope","Lower Limit","Upper Limit", "ED50"),
-                              fixed = c(NA, 0, fn.bak$del.r[1], NA)))
+                   fct = LL.3(names = c('b', 'd', 'e'),
+                              fixed = c(NA, fn.bak$del.r[1], NA)))
     summary(fn.bak.del)
   
   fn.bak.del.pred = function(In){
@@ -230,20 +252,22 @@ keep.bak.mal = c(keep.bak.mal, 'fn.bak', 'fn.bak.mal', 'fNq_mal_Bakry11_uncertai
     lines(seq(0,7000,10), sapply(seq(0,7000,10), fn.bak.del.pred)[2,] / fn.bak$del.r[1], col = 2, lty=3)
     lines(seq(0,7000,10), sapply(seq(0,7000,10), fn.bak.del.pred)[3,] / fn.bak$del.r[1], col = 2, lty=3)
   
-  fNq_del_Bakry11_uncertainty = function(In){
-    if(In == 0) fn = 1 else{
+  fNq_del_Bakry11_uncertainty3pts = function(In){
+   # if(In == 0) fn = 1 else{
       Ins = In/1000
     init = predict(fn.bak.del, newdata = data.frame(del = Ins), se.fit = T)
     if(init[1] == 0) fn = 0 else{
       fn = rnorm(1, init[1], init[2]) / fn.bak$del.r[1]
     }  
-    if(fn < 0) fn = 0
-    if(fn > 1) fn = 1  
-  }
+ #   if(fn < 0) fn = 0
+ #   if(fn > 1) fn = 1  
+ # }
     return(fn)
 } 
   
-  points(seq(0,7000,7), sapply(seq(0,7000,7), fNq_del_Bakry11_uncertainty), pch = 5, cex = 0.5, col = 4)
-  keep.bak.del = c(keep.bak.del, 'fn.bak', 'fn.bak.del', 'fNq_del_Bakry11_uncertainty')  
+  points(seq(0,7000,7), sapply(seq(0,7000,7), fNq_del_Bakry11_uncertainty3pts), pch = 5, cex = 0.5, col = 4)
+  
+  keep.bak.del = c(keep.bak.del, 'fn.bak', 'fn.bak.del', 'fNq_del_Bakry11_uncertainty3pts', 'fNq_del_Bakry11_uncertainty',
+                   'fn.del', 'fn.del.sd', 'fn.ctrl11')  
 #full keep vector ###############  
   keep.bak11.N = c(keep.bak.mal, keep.bak.del)

@@ -107,12 +107,12 @@ plot(x = cerc.g0$time_hrs[cerc.g0$conc == 0], y = cerc.g0$prop_surv[cerc.g0$conc
     b.use = rnorm(1, b[1], b[2])
     
     while(e.use <= 0)     e.use = rnorm(1, e[1], e[2])
-      auc = integrate(f = function(t) {(1/(1+exp(b.use*(log(t / e.use)))))}, 
-                    lower=0, upper=24, stop.on.error = FALSE)[1]$value
+    auc = integrate(L.3.fx, lc50 = e.use, slp = b.use, lower=0, upper=24)[1]$value
+
     return(auc)
   }  
   
-#Final:generate relative cercariae-hrs function  
+#Final:generate relative cercariae-hrs function and plot sample output
   piC.meta_atr_unc = function(He){
     if(He == 0) piC = 1 else{
       piC = meta.atr.piC.fx(He) / meta.atr.piC.fx(0)
@@ -121,5 +121,7 @@ plot(x = cerc.g0$time_hrs[cerc.g0$conc == 0], y = cerc.g0$prop_surv[cerc.g0$conc
     
     return(piC)
   }
+  
+  plot(x = c(0:200), y = sapply(c(0:200), piC.grg08_atr_unc, simplify = T), pch = 17, col = 6, cex = 0.6)
   
   keep.meta.piC = c('piC.meta_atr_unc', 'meta.atr.piC.fx', 'atrmeta.e', 'atrmeta.b')  

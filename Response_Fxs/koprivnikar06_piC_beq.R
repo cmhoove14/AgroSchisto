@@ -12,7 +12,7 @@
 require(drc)
 
 L.3.fx = function(t, lc50 = lc50, slp = slp){
-  1 / (1+exp(slp*(t - lc50)))
+  1 / (1+exp(slp*log(t / lc50)))
 }
 
 #Cercarial mortality (E. trivolvis) from Koprivnikar 2006 ##################
@@ -31,7 +31,7 @@ plot(x = kop.cc$time_hrs, y = kop.cc$surv,
 #model fitting. Using drm function requires knowledge of the sample size to properly
 #weight observations
 #Control experiment ##########
-  kop.ctrl = nls(surv ~ 1/(1+exp(slp*(time_hrs - lc50))), data = kop.cc,
+  kop.ctrl = nls(surv ~ 1/(1+exp(slp*log(time_hrs / lc50))), data = kop.cc,
                  start = list(slp = 5, lc50 = 2.5), weights = surv.se^-1)
   
   lines(time, L.3.fx(time, lc50 = summary(kop.ctrl)$coefficients[2],
@@ -45,7 +45,7 @@ kop.20 = subset(kop.c, conc == 20)
   
   points(x = kop.20$time_hrs, y = kop.20$surv, pch = 16, col = 2)
 
-  kop.20mod = nls(surv ~ 1/(1+exp(slp*(time_hrs - lc50))), data = kop.20,
+  kop.20mod = nls(surv ~ 1/(1+exp(slp*log(time_hrs / lc50))), data = kop.20,
                   start = list(slp = 5, lc50 = 2.5), weights = surv.se^-1)
   
   lines(time, L.3.fx(time, lc50 = summary(kop.20mod)$coefficients[2],
@@ -59,7 +59,7 @@ kop.200 = subset(kop.c, conc == 200)
   
   points(x = kop.200$time_hrs, y = kop.200$surv, pch = 16, col = 3)
   
-  kop.200mod = nls(surv ~ 1/(1+exp(slp*(time_hrs - lc50))), data = kop.200,
+  kop.200mod = nls(surv ~ 1/(1+exp(slp*log(time_hrs / lc50))), data = kop.200,
                    start = list(slp = 5, lc50 = 2.5), weights = surv.se^-1)
   
   lines(time, L.3.fx(time, lc50 = summary(kop.200mod)$coefficients[2],
@@ -163,3 +163,29 @@ title('Koprivnikar 06 cercarial survival parameters')
   
   keep.kop06.beq = c('kopatr.auc', 'auc.kop0', 'piC.kop_atr_unc', 'piC.kop_atr_unc2',
                      'ek.mod', 'ek.mod2', 'bk.mod')
+
+#plot to test function
+  plot(x = kop.cc$time_hrs, y = kop.cc$surv,
+       xlab = 'time (hrs)', ylab = 'prop dead', pch = 16)
+    points(x = kop.20$time_hrs, y = kop.20$surv, pch = 16, col = 2)
+    points(x = kop.200$time_hrs, y = kop.200$surv, pch = 16, col = 3)
+  
+    
+    pred.fx.plot = function(He, clr){
+      e = as.numeric(predict(ek.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
+      b = as.numeric(predict(bk.mod, newdata = data.frame(atr = He), se.fit = TRUE)[1:2])
+      
+      e.use = rnorm(1, e[1], e[2])
+      while(e.use < 0) e.use = rnorm(1, e[1], e[2])
+      b.use = rnorm(1, b[1], b[2])
+      while(b.use < 0) b.use = rnorm(1, e[1], e[2])
+      
+      lines(time, L.3.fx(time, slp = b.use, lc50 = e.use), lty=2, col = clr)
+    }   
+    
+    for(i in c(0,20,200)){
+      c = i/20 + 1
+      print(c)
+      replicate(10, pred.fx.plot(He = i, clr = c))
+    }
+    

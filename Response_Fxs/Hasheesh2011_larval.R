@@ -43,13 +43,13 @@ fx.piM.hsh.chlor = function(In, lc = lc50.hash.pim.ch){
   lines(seq(0,4000,10), sapply(seq(0,4000,10), fx.piM.hsh.chlor, lc = 0.56), lty = 3, col = 2)
 
 piM_ch_Hash11_uncertainty = function(In){
-  if(In == 0) piM = 1 else{
+  #if(In == 0) piM = 1 else{
     Ins = In/1000
     lc50 = 10^(rnorm(1, log10(lc50.hash.pim.ch), se.lc50.hash.pim.ch))
     piM = pnorm(-slp.hash.pim.ch * (Ins - lc50)) / fx.piM.hsh.chlor(0)
-  }
-  if(piM > 1) piM = 1
-  if(piM < 0) piM = 0
+  #}
+  #if(piM > 1) piM = 1
+  #if(piM < 0) piM = 0
   
   return(piM)
 }
@@ -91,13 +91,13 @@ fx.piM.hsh.prof = function(In, lc = lc50.hash.pim.prof){
   lines(seq(0,4000,10), sapply(seq(0,4000,10), fx.piM.hsh.prof, lc = 1.15), lty = 3, col = 2)
   
 piM_pr_Hash11_uncertainty = function(In){
-  if(In == 0) piM = 1 else{
+  #if(In == 0) piM = 1 else{
     Ins = In/1000
     lc50 = 10^(rnorm(1, log10(lc50.hash.pim.prof), se.lc50.hash.pim.prof))
     piM = pnorm(-slp.hash.pim.prof * (Ins - lc50)) / fx.piM.hsh.prof(0)
-  }
-  if(piM > 1) piM = 1
-  if(piM < 0) piM = 0
+  #}
+  #if(piM > 1) piM = 1
+  #if(piM < 0) piM = 0
   
   return(piM)
 }
@@ -143,13 +143,13 @@ fx.piC.hsh.prof = function(In, lc = lc50.hash.pic.prof){
   lines(seq(0,4000,10), sapply(seq(0,4000,10), fx.piC.hsh.prof, lc = 1.32), lty = 3, col = 2)
 
   piC_pr_Hash11_uncertainty = function(In){
-    if(In == 0) piC = 1 else{
+   # if(In == 0) piC = 1 else{
       Ins = In/1000
       lc50 = 10^(rnorm(1, log10(lc50.hash.pic.prof), se.lc50.hash.pic.prof))
       piC = pnorm(-slp.hash.pic.prof * (Ins - lc50)) / fx.piC.hsh.prof(0)
-    }
-    if(piC > 1) piC = 1
-    if(piC < 0) piC = 0
+   # }
+    #if(piC > 1) piC = 1
+    #if(piC < 0) piC = 0
     
     return(piC)
   }
@@ -192,13 +192,13 @@ plot(piC.hsh.ch$conc, piC.hsh.ch$surv, pch = 16, ylim = c(0,1), xlim = c(0,3500)
   lines(seq(0,4000,10), sapply(seq(0,4000,10), fx.piC.hsh.chlor, lc = 0.62), lty = 3, col = 2)
   
   piC_ch_Hash11_uncertainty = function(In){
-    if(In == 0) piC = 1 else{
+    #if(In == 0) piC = 1 else{
       Ins = In/1000
       lc50 = 10^(rnorm(1, log10(lc50.hash.pic.ch), se.lc50.hash.pic.ch))
       piC = pnorm(-slp.hash.pic.ch * (Ins - lc50)) / fx.piC.hsh.chlor(0)
-    }
-    if(piC > 1) piC = 1
-    if(piC < 0) piC = 0
+    #}
+    #if(piC > 1) piC = 1
+    #if(piC < 0) piC = 0
     
     return(piC)
   }

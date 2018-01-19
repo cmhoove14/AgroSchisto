@@ -11,6 +11,7 @@
 
 #Data extraction and model fitting to Ghaffar 2016 SNAIL (B. alexandrina) data
 require(drc)
+require(LW1949)
 
 #Snail (30 B. alexandrina 6-8mm shell width) toxicity ##########
 #Butralin ##############
@@ -52,11 +53,14 @@ plot(but.dat$butralin, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,1300
   lines(seq(0,13000,10), sapply(seq(0,13000,10), fx.mun.but, lc = (3.7)), lty = 3, col = 2)
 #Doesn't perfectly replicate uncertainty, but variance of underlying function is unobtainable  
   mu_Nq_butr_gaf16_uncertainty = function(He){
-    if(He == 0) mun = 0 else{
+   # if(He == 0) mun = 0 else{
     heu = (He/1000)
     lc50 = 10^(rnorm(1, log10(lc50.gaf.but), se.lc50.gaf.but))
     mun = pnorm((slp.gaf.but) * (heu-lc50)) - fx.mun.but(0)
-    }
+  #  }
+    
+    if(mun < 0) mun = 0
+    
     return(mun)
   }
     points(seq(0,13000,50), sapply(seq(0,13000,50), mu_Nq_butr_gaf16_uncertainty, simplify = T), 
@@ -101,12 +105,14 @@ plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33
   lines(seq(0,33000,10), sapply(seq(0,33000,10), fx.mun.gly, lc = 9.13), lty = 3, col = 2)
   
   mu_Nq_gly_gaf16_uncertainty = function(He){
-    if(He == 0) mun = 0 else{
+   # if(He == 0) mun = 0 else{
       heu = He/1000
       lc50 = 10^(rnorm(1, log10(lc50.gaf.gly), se.lc50.gaf.gly))
       mun = pnorm((slp.gaf.gly) * (heu - lc50)) - fx.mun.gly(0) #mortality normalized to 0
-    }
-    return(mun)
+   # }
+      if(mun < 0) mun = 0
+
+      return(mun)
   }
 
     points(seq(0,33000,100), sapply(seq(0,33000,100), mu_Nq_gly_gaf16_uncertainty, simplify = T), 
@@ -151,11 +157,13 @@ plot(pen.dat$pendimethalin, pen.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0
     lines(seq(0,7500,5), sapply(seq(0,7500,5), fx.mun.pen, lc = 1.43), lty = 3, col = 2)
 
 mu_Nq_pen_gaf16_uncertainty = function(He){
-  if(He == 0) mun = 0 else{
+ # if(He == 0) mun = 0 else{
     heu = He/1000
   lc50 = 10^(rnorm(1, log10(lc50.gaf.pen), se.lc50.gaf.pen))
   mun = pnorm((slp.gaf.pen) * (heu - lc50)) - fx.mun.pen(0) #mortality normalized to 0
-  }
+ # }
+  if(mun < 0) mun = 0
+  
   return(mun)
 }
   
@@ -368,13 +376,13 @@ gaf16.juv<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/Agr
         sub = 'predicted vs observed (adults)')
   
 #Reductions in adult snail (B. alexandrina) reproduction ###########  
-  #Paper reports reproduction as R0: the summed product of live snails * eggs produced
+  #Paper reports reproduction as R0: the summed product of live snails/week * eggs/snail/week produced
   #we just want reduction in eggs produced as the model already takes additional mortality 
   #into account; therefore we normalize reported R0s by relative survival between treatment groups
   #to get relative estimate of eggs/snail/week
 sn.wk = as.numeric()  #snails/week estimates for each treatment
 for(i in 1:length(unique(gaf16.ad$conc))){
-  sn.wk[i] = sum(gaf16.ad$prop_surv[gaf16.ad$conc == unique(gaf16.ad$conc)[i]])
+  sn.wk[i] = sum(gaf16.ad$prop_surv[gaf16.ad$conc == unique(gaf16.ad$conc)[i]] * 30) #proportion surviving * 30 snails per treatment
 }  
 
 htch.wk = c(0.99, 0.92, 0.82, 0.24,
@@ -382,79 +390,87 @@ htch.wk = c(0.99, 0.92, 0.82, 0.24,
             0.9, 0.3, 0.05)   #vector of hatching proportions (hatches/egg)
 
 #vector of concentrations and reproduction measured as approximate hatchlings/snail/week
-  gafrep = data.frame('but.conc'=but.dat$butralin[1:4],
-                      'gly.conc'=gly.dat$glyphosate[1:4],
-                      'pen.conc'=pen.dat$pendimethalin[1:4],
-                      'but.rep'=c(44.231/sn.wk[1]*htch.wk[1], 7.05/sn.wk[2]*htch.wk[2], 
-                                  4.52/sn.wk[3]*htch.wk[3], 4.04/sn.wk[4]*htch.wk[4]),
-                      'gly.rep'=c(44.231/sn.wk[1]*htch.wk[1], 4.87/sn.wk[5]*htch.wk[5], 
-                                  4.20/sn.wk[6]*htch.wk[6], 4.23/sn.wk[7]*htch.wk[7]),
-                      'pen.rep'=c(44.231/sn.wk[1]*htch.wk[1], 5.18/sn.wk[8]*htch.wk[8], 
-                                  4.75/sn.wk[9]*htch.wk[9], 4.27/sn.wk[10]*htch.wk[10]))
+#hatchlings/snail/week = R0/live snails/week = eggs/snail/week * hatching proportion = hatchlings/snail/week
+  gafrep = data.frame('but.conc'=but.dat$butralin[1:4]/1000,
+                      'gly.conc'=gly.dat$glyphosate[1:4]/1000,
+                      'pen.conc'=pen.dat$pendimethalin[1:4]/1000,
+                      'but.rep'=c((44.231/sn.wk[1])*htch.wk[1], (7.05/sn.wk[2])*htch.wk[2], 
+                                  (4.52/sn.wk[3])*htch.wk[3], (4.04/sn.wk[4])*htch.wk[4]),
+                      'gly.rep'=c((44.231/sn.wk[1])*htch.wk[1], (4.87/sn.wk[5])*htch.wk[5], 
+                                  (4.20/sn.wk[6])*htch.wk[6], (4.23/sn.wk[7])*htch.wk[7]),
+                      'pen.rep'=c((44.231/sn.wk[1])*htch.wk[1], (5.18/sn.wk[8])*htch.wk[8], 
+                                  (4.75/sn.wk[9])*htch.wk[9], (4.27/sn.wk[10])*htch.wk[10]))
   
+    gafrep$but.rep = round(gafrep$but.rep, digits = 4)
+    gafrep$gly.rep = round(gafrep$gly.rep, digits = 4)
+    gafrep$pen.rep = round(gafrep$pen.rep, digits = 4)
+    
 #Reductions from butralin ##########
-plot(gafrep$but.conc, gafrep$but.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
-     xlab = 'Butralin (ppb)', ylab = 'relative reproduction rate')
+plot(gafrep$but.conc, gafrep$but.rep / gafrep$but.rep[1], pch = 16, ylim = c(0,1),
+     xlab = 'Butralin (ppm)', ylab = 'relative reproduction rate')
     
   but.r0 = drm(but.rep ~ but.conc, data = gafrep, type = 'continuous',
-               fct = LL.4(names = c("b", "c", "d", "e"),
-                          fixed = c(NA, gafrep$but.rep[4], gafrep$but.rep[1], NA))) 
+               fct = LL.3(names = c("b", "d", "e"),
+                          fixed = c(NA, gafrep$but.rep[1], NA))) 
     summary(but.r0)
     
   but.r0.pred = function(He){
     predict(but.r0, newdata = data.frame(but.conc = He), interval = 'confidence', level = 0.95)
   }
   
-    lines(seq(0,4500,10), sapply(seq(0,4500,10), but.r0.pred, simplify = T)[1,] / gafrep$but.rep[1],
+    lines(seq(0,4.500,.010), sapply(seq(0,4.500,.010), but.r0.pred, simplify = T)[1,] / gafrep$but.rep[1],
           lty = 2, col = 2) 
-    lines(seq(0,4500,10), sapply(seq(0,4500,10), but.r0.pred, simplify = T)[2,] / gafrep$but.rep[1],
+    lines(seq(0,4.500,.010), sapply(seq(0,4.500,.010), but.r0.pred, simplify = T)[2,] / gafrep$but.rep[1],
           lty = 3, col = 2) 
-    lines(seq(0,4500,10), sapply(seq(0,4500,10), but.r0.pred, simplify = T)[3,] / gafrep$but.rep[1],
+    lines(seq(0,4.500,.010), sapply(seq(0,4.500,.010), but.r0.pred, simplify = T)[3,] / gafrep$but.rep[1],
           lty = 3, col = 2) 
   
  fN.butr.fx.uncertainty = function(He){
-   if(He == 0) fn = 1 else{
-     init = predict(but.r0, newdata = data.frame(but.conc = He), se.fit = T)
+  # if(He == 0) fn = 1 else{
+     heu = He/1000
+     init = predict(but.r0, newdata = data.frame(but.conc = heu), se.fit = T)
      fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
-   }
+   #}
    
-   if(fn < 0) fn = 0
-   if(fn > 1) fn = 1
+   #if(fn < 0) fn = 0
+   #if(fn > 1) fn = 1
      
    return(fn)
  } #normalized to 1
  
- points(seq(0,4500,50), 
-        sapply(seq(0,4500,50), fN.butr.fx.uncertainty, simplify = T),
+ points(seq(0,4.500,.01), 
+        sapply(seq(0,4500,10), fN.butr.fx.uncertainty, simplify = T),
         pch = 5, col = 4, cex = 0.5) 
 
  keep.gaf.but.fn = c('fN.butr.fx.uncertainty', 'but.r0', 'gafrep')
+ 
 #Reductions from glyphosate ##########
- plot(gafrep$gly.conc, gafrep$gly.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
-      xlab = 'glyphosate (ppb)', ylab = 'relative reproduction rate')
+ plot(gafrep$gly.conc, gafrep$gly.rep/gafrep$gly.rep[1], pch = 16, ylim = c(0,1),
+      xlab = 'glyphosate (ppm)', ylab = 'relative reproduction rate')
  
    gly.r0 = drm(gly.rep ~ gly.conc, data = gafrep, type = 'continuous',
                 fct = LL.4(names = c("b", "c", "d", "e"),
-                          fixed = c(NA, gafrep$gly.rep[4], gafrep$but.rep[1], NA)))  
+                          fixed = c(NA, 0.01, gafrep$gly.rep[1], NA)))  
    summary(gly.r0)
    
  gly.r0.pred = function(He){
    predict(gly.r0, newdata = data.frame(gly.conc = He), interval = 'confidence', level = 0.95)
  }
  
-   lines(c(0:1000, seq(1001, 10000,100)), sapply(c(0:1000, seq(1001, 10000,100)), 
+   lines(c(seq(0,1,0.01), seq(1.1,10,0.1)), sapply(c(seq(0,1,0.01), seq(1.1,10,0.1)), 
                                                  gly.r0.pred, simplify = T)[1,]/gafrep$but.rep[1],
          lty = 2, col = 2) 
-   lines(c(0:1000, seq(1001, 10000,100)), sapply(c(0:1000, seq(1001, 10000,100)), 
+   lines(c(seq(0,1,0.01), seq(1.1,10,0.1)), sapply(c(seq(0,1,0.01), seq(1.1,10,0.1)), 
                                                  gly.r0.pred, simplify = T)[2,]/gafrep$but.rep[1],
          lty = 3, col = 2) 
-   lines(c(0:1000, seq(1001, 10000,100)), sapply(c(0:1000, seq(1001, 10000,100)), 
+   lines(c(seq(0,1,0.01), seq(1.1,10,0.1)), sapply(c(seq(0,1,0.01), seq(1.1,10,0.1)), 
                                                  gly.r0.pred, simplify = T)[3,]/gafrep$but.rep[1],
          lty = 3, col = 2) 
  
    fN.gly.fx.uncertainty = function(He){
      if(He == 0) fn = 1 else{
-       init = predict(gly.r0, newdata = data.frame(gly.conc = He), se.fit = T)
+       heu = He/1000
+       init = predict(gly.r0, newdata = data.frame(gly.conc = heu), se.fit = T)
        fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
      }
      if(fn < 0) fn = 0
@@ -463,8 +479,8 @@ plot(gafrep$but.conc, gafrep$but.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
      return(fn)
    } #normalized to 1
  
-     points(seq(1, 10000,100), 
-            sapply(seq(1, 10000,100), fN.gly.fx.uncertainty, simplify = T),
+     points(seq(0, 10, 0.1), 
+            sapply(seq(0, 10000,100), fN.gly.fx.uncertainty, simplify = T),
             pch = 5, col = 4, cex = 0.5) 
      
      keep.gaf.gly.fn = c('fN.gly.fx.uncertainty', 'gly.r0', 'gafrep')
@@ -473,24 +489,25 @@ plot(gafrep$pen.conc, gafrep$pen.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
      xlab = 'pendimethalin (ppb)', ylab = 'relative reproduction rate')
      
   pen.r0 = drm(pen.rep ~ pen.conc, data = gafrep, type = 'continuous',
-               fct = LL.4(names = c("b", "c", "d", "e"),
-                         fixed = c(NA, gafrep$pen.rep[4], gafrep$but.rep[1], NA)))  
+               fct = LL.3(names = c("b", "d", "e"),
+                         fixed = c(NA, gafrep$pen.rep[1], NA)))  
     summary(pen.r0)
      
   pen.r0.pred = function(He){
       predict(pen.r0, newdata = data.frame(pen.conc = He), interval = 'confidence', level = 0.95)
   }
      
-     lines(c(0:1300), sapply(c(0:1300), pen.r0.pred, simplify = T)[1,]/gafrep$but.rep[1],
+     lines(seq(0,1.5,0.01), sapply(seq(0,1.5,0.01), pen.r0.pred, simplify = T)[1,]/gafrep$but.rep[1],
            lty = 2, col = 2) 
-     lines(c(0:1300), sapply(c(0:1300), pen.r0.pred, simplify = T)[2,]/gafrep$but.rep[1],
+     lines(seq(0,1.5,0.01), sapply(seq(0,1.5,0.01), pen.r0.pred, simplify = T)[2,]/gafrep$but.rep[1],
            lty = 3, col = 2) 
-     lines(c(0:1300), sapply(c(0:1300), pen.r0.pred, simplify = T)[3,]/gafrep$but.rep[1],
+     lines(seq(0,1.5,0.01), sapply(seq(0,1.5,0.01), pen.r0.pred, simplify = T)[3,]/gafrep$but.rep[1],
            lty = 3, col = 2) 
      
   fN.pen.fx.uncertainty = function(He){
     if(He == 0) fn = 1 else{
-      init = predict(pen.r0, newdata = data.frame(pen.conc = He), se.fit = T)
+      heu = He/1000
+      init = predict(pen.r0, newdata = data.frame(pen.conc = heu), se.fit = T)
       fn = rnorm(1, init[1], init[2]) / gafrep$but.rep[1]
     }
     if(fn > 1) fn = 1
@@ -499,8 +516,8 @@ plot(gafrep$pen.conc, gafrep$pen.rep/gafrep$but.rep[1], pch = 16, ylim = c(0,1),
     return(fn)  
   } #normalized to 1
      
-     points(seq(0,1300, 10), 
-            sapply(seq(0,1300, 10), fN.pen.fx.uncertainty, simplify = T),
+     points(seq(0,1.5,0.01), 
+            sapply(seq(0,1500, 10), fN.pen.fx.uncertainty, simplify = T),
             pch = 5, col = 4, cex = 0.5) #plot with reference back to raw control value
   
     keep.gaf.pen.fn = c('fN.pen.fx.uncertainty', 'pen.r0', 'gafrep') 
