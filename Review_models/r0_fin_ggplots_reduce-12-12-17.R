@@ -26,6 +26,9 @@ load('Review_models/Savio/Atrazine/atr5000sims_pars_2017-12-12.Rdata')
                       iqr.25 = atr.med.r0.25[,7],
                       iqr.75 = atr.med.r0.75[,7])
   
+#summary of net effect at EEC
+  atr.df[which(round(atr.df$conc.eec, digits = 2) == 1.00),][2,]
+  
   gatr<-ggplot(atr.df) +
           theme_bw() +
           #theme(legend.position = 'bottom', legend.direction = 'horizontal') +
@@ -80,6 +83,10 @@ load('Review_models/Savio/Butralin/but5000sims_pars_2017-12-12.Rdata')
                       med = c(but.med.r0[,8], but.med.r0[,9]),
                       iqr.25 = c(but.med.r0.25[,8], but.med.r0.25[,9]),
                       iqr.75 = c(but.med.r0.75[,8], but.med.r0.75[,9]))
+  
+#summary of net effect at EEC
+  but.df[which(round(but.df$conc.eec, digits = 2) == 1.00),][4,]
+  
   
   gbut<-ggplot(but.df) +
           theme_bw() +
@@ -136,6 +143,9 @@ load('Review_models/Savio/Butralin/but5000sims_pars_2017-12-12.Rdata')
                       iqr.25 = c(gly.med.r0.25[,11], gly.med.r0.25[,12]),
                       iqr.75 = c(gly.med.r0.75[,11], gly.med.r0.75[,12]))
   
+#summary of net effect at EEC
+  gly.df[which(round(gly.df$conc.eec, digits = 2) == 1.00),][4,]
+  
   ggly<-ggplot(gly.df) +
           theme_bw() +
           #theme(legend.position = 'bottom', legend.direction = 'horizontal') +
@@ -189,7 +199,10 @@ ggly.par
                      med = chlor.med.r0[,10],
                      iqr.25 = chlor.med.r0.25[,10],
                      iqr.75 = chlor.med.r0.75[,10])
-
+  
+#summary of net effect at EEC
+  ch.df[which(round(ch.df$conc.eec, digits = 2) == 1.00),][2,]
+  
   gch<-ggplot(ch.df) +
           theme_bw() +
           #theme(legend.position = 'bottom', legend.direction = 'horizontal') +
@@ -261,6 +274,9 @@ gch.par.sub
                       iqr.25 = mal.med.r0.25[,8],
                       iqr.75 = mal.med.r0.75[,8])
   
+#summary of net effect at EEC
+  mal.df[which(round(mal.df$conc.eec, digits = 2) == 1.00),][2,]
+  
   gmal<-ggplot(mal.df) +
           theme_bw() +
           #theme(legend.position = 'bottom', legend.direction = 'horizontal') +
@@ -315,6 +331,9 @@ gmal.par
                       iqr.25 = prof.med.r0.25[,5],
                       iqr.75 = prof.med.r0.75[,5])
   
+#summary of net effect at EEC
+  prof.df[which(round(prof.df$conc.eec, digits = 2) == 1.00),][2,]
+  
   gprof<-ggplot(prof.df) +
           theme_bw() +
           #theme(legend.position = 'bottom', legend.direction = 'horizontal') +
@@ -358,6 +377,8 @@ gprof.par
 
 #Plot trajectories of herbicides and insecticides together############
 #Herbicides ###############
+#Net effects
+
 hrbdf = rbind(atr.df, but.df, gly.df)  
   hrbdf = subset(hrbdf, botup == 'Present')
   
@@ -377,6 +398,26 @@ hrbdf = rbind(atr.df, but.df, gly.df)
   ghrb   
   
   dev.off()
+  
+#Parameter effects
+hrbdf.par = rbind(par.atr.df, par.but.df, par.gly.df)  
+
+  ghrb.par<-ggplot(hrbdf.par) +
+    theme_bw() +
+    facet_grid(. ~ chem, scales = 'free_x') +
+    theme(legend.position = 'bottom', legend.direction = 'horizontal', legend.title = element_blank()) +
+    ylim(-100,100) +
+    labs(title = expression(paste('Parameter effects of herbicides on ', 'R'[0])),
+         x = 'Herbicide concentration',
+         y = expression(paste(Delta, R[0], ' (%)'))) +
+    scale_x_continuous(breaks = c(0,1,2), labels = c('0', 'EEC', '2EEC')) +
+    geom_hline(yintercept = 0, lty=2) + 
+    geom_ribbon(aes(x = conc.eec, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
+    geom_line(aes(x = conc.eec, y = r0, col = study), size = 1)
+
+  windows(width = 30, height = 15)
+  
+  ghrb.par  
   
 #Insecticides ###############
 insdf = rbind(ch.df, mal.df, prof.df)  
@@ -399,6 +440,26 @@ insdf = rbind(ch.df, mal.df, prof.df)
   gins
   
   dev.off()
+  
+#Parameter effects
+  insdf.par = rbind(par.ch.df, par.mal.df, par.prof.df)  
+  
+  gins.par<-ggplot(insdf.par) +
+    theme_bw() +
+    facet_grid(. ~ chem, scales = 'free_x') +
+    theme(legend.position = 'bottom', legend.direction = 'horizontal', legend.title = element_blank()) +
+    ylim(-100,100) +
+    labs(title = expression(paste('Parameter effects of insecticides on ', 'R'[0])),
+         x = 'Insecticide concentration',
+         y = expression(paste(Delta, R[0], ' (%)'))) +
+    scale_x_continuous(breaks = c(0,1,2), labels = c('0', 'EEC', '2EEC')) +
+    geom_hline(yintercept = 0, lty=2) + 
+    geom_ribbon(aes(x = conc.eec, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
+    geom_line(aes(x = conc.eec, y = r0, col = study), size = 1)
+  
+  windows(width = 30, height = 15)
+  
+  gins.par  
   
 #Combined herbicides and insecticides plot ############
 hrbdf = subset(hrbdf, botup == 'Present')  
