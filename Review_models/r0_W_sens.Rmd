@@ -1,0 +1,31 @@
+---
+title: "R0q_Sensitivity"
+author: "Chris Hoover"
+date: "January 27, 2018"
+output: pdf_document
+---
+
+#Sensitivity analysis of agrochemical effects on schistosomiasis transmission measured by $R_0$ and implications for worm burden and disease
+
+Approach here is to:
+1) sample from feasible parameter ranges for each agrochemical sensitive parameter
+2) estimate R0 using that set of parameters
+3) run the model to equilibrium using that set of parameters
+  a) record mean worm burden estimate
+  b) record individual probability of having some threshold worm burden, W, corresponding to heavy and probably symptomatic infection; need to find a literature estimate for this value of W
+  
+  
+```{r load_data, echo = FALSE}
+load('~/RemaisWork/Schisto/R Codes/ag_schist/Review_models/Savio/Atrazine/atr5000sims_pars_2017-12-12.Rdata')
+load('~/RemaisWork/Schisto/R Codes/ag_schist/Review_models/Savio/Butralin/but5000sims_pars_2017-12-12.Rdata')
+load('~/RemaisWork/Schisto/R Codes/ag_schist/Review_models/Savio/Chlorpyrifos/ch5000sims_pars_2017-11-29.Rdata')
+load('~/RemaisWork/Schisto/R Codes/ag_schist/Review_models/Savio/Glyphosate/gly5000sims_pars_2017-12-12.Rdata')
+load('~/RemaisWork/Schisto/R Codes/ag_schist/Review_models/Savio/Malathion/mal5000sims_pars_2017-12-12.Rdata')
+load('~/RemaisWork/Schisto/R Codes/ag_schist/Review_models/Savio/Profenofos/pr5000sims_pars_2017-12-12.Rdata')
+
+```
+
+```{r}
+
+```
+
