@@ -56,6 +56,8 @@ load('Review_models/Savio/Atrazine/atr5000sims_pars_2017-12-12.Rdata')
     
   par.atr.df = reshape(data = par.atr.df, idvar = c('conc', 'conc.eec', 'chem'), drop = 'botup', varying = 5:22, direction = 'long',
                        timevar = 'study', sep = '.', new.row.names = c(1:3000))  
+  par.atr.df$keep = 0
+  par.atr.df$keep[which(par.atr.df$study %in% c('munons', 'piCror', 'phinbax'))] = 1
     
   gatr.par<-ggplot(par.atr.df) +
               theme_bw() +
@@ -70,6 +72,25 @@ load('Review_models/Savio/Atrazine/atr5000sims_pars_2017-12-12.Rdata')
               geom_line(aes(x = conc, y = r0, col = study), size = 1)
     
   gatr.par
+  
+#restrict to studies used to produce net effect  
+  par.atr.df$keep = 0
+  par.atr.df$keep[which(par.atr.df$study %in% c('munons', 'piCror', 'phinbax'))] = 1
+  par.atr.keeps = subset(par.atr.df, keep == 1)
+  
+  gatr.par.keeps<-ggplot(par.atr.keeps) +
+    theme_bw() +
+    theme(legend.position = 'top', legend.direction = 'horizontal') +
+    xlim(0,2) +
+    ylim(-100,100) +
+    labs(x = 'Atrazine (EEC)',
+         y = expression(paste(Delta, R[0], ' (%)'))) +
+    geom_hline(yintercept = 0, lty=2) + 
+    geom_ribbon(aes(x = conc.eec, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
+    geom_line(aes(x = conc.eec, y = r0, col = study), size = 1)
+  
+  gatr.par.keeps
+  
 #Butralin ################
 load('Review_models/Savio/Butralin/but5000sims_r0med_2017-12-12.Rdata')
 load('Review_models/Savio/Butralin/but5000sims_r0.75_2017-12-12.Rdata')
@@ -129,6 +150,24 @@ load('Review_models/Savio/Butralin/but5000sims_pars_2017-12-12.Rdata')
   
   gbut.par
   
+#restrict to studies used to produce net effect  
+  par.but.df$keep = 0
+  par.but.df$keep[which(par.but.df$study %in% c('piCgaf', 'piMgaf', 'phinbax', 'mungaf'))] = 1
+  par.but.keeps = subset(par.but.df, keep == 1)
+  
+  gbut.par.keeps<-ggplot(par.but.keeps) +
+    theme_bw() +
+    theme(legend.position = 'top', legend.direction = 'horizontal') +
+    xlim(0,2) +
+    ylim(-100,100) +
+    labs(x = 'Butralin (EEC)',
+         y = expression(paste(Delta, R[0], ' (%)'))) +
+    geom_hline(yintercept = 0, lty=2) + 
+    geom_ribbon(aes(x = conc.eec, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
+    geom_line(aes(x = conc.eec, y = r0, col = study), size = 1)
+  
+  gbut.par.keeps
+  
 #Glyphosate ################
   load('Review_models/Savio/Glyphosate/gly5000sims_r0med_2017-12-12.Rdata')
   load('Review_models/Savio/Glyphosate/gly5000sims_r0.75_2017-12-12.Rdata')
@@ -173,20 +212,38 @@ colnames(par.gly.df)[c(4:27)] = c(paste0('r0.',c('piMgaf', 'piCgaf', 'mungaf', '
 par.gly.df = reshape(data = par.gly.df, idvar = c('conc', 'conc.eec', 'chem'), varying = 4:27, direction = 'long',
                      timevar = 'study', sep = '.', new.row.names = c(1:4000))  
 
-ggly.par<-ggplot(par.gly.df) +
-  theme_bw() +
-  #theme(legend.position = 'bottom', legend.direction = 'horizontal') +
-  xlim(0,7400) +
-  ylim(-100,100) +
-  labs(title = expression(paste('Parameter effect of Glyphosate on ', 'R'[0])),
-       x = 'Glyphosate (ppb)',
-       y = expression(paste(Delta, R[0], ' (%)'))) +
-  geom_hline(yintercept = 0, lty=2) + 
-  geom_ribbon(aes(x = conc, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
-  geom_line(aes(x = conc, y = r0, col = study), size = 1)
-
-ggly.par
-
+  ggly.par<-ggplot(par.gly.df) +
+    theme_bw() +
+    #theme(legend.position = 'bottom', legend.direction = 'horizontal') +
+    xlim(0,7400) +
+    ylim(-100,100) +
+    labs(title = expression(paste('Parameter effect of Glyphosate on ', 'R'[0])),
+         x = 'Glyphosate (ppb)',
+         y = expression(paste(Delta, R[0], ' (%)'))) +
+    geom_hline(yintercept = 0, lty=2) + 
+    geom_ribbon(aes(x = conc, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
+    geom_line(aes(x = conc, y = r0, col = study), size = 1)
+  
+  ggly.par
+  
+#restrict to studies used to produce net effect  
+  par.gly.df$keep = 0
+  par.gly.df$keep[which(par.gly.df$study %in% c('piCgaf', 'piMgaf', 'phinbax', 'mungaf'))] = 1
+  par.gly.keeps = subset(par.gly.df, keep == 1)
+  
+  ggly.par.keeps<-ggplot(par.gly.keeps) +
+    theme_bw() +
+    theme(legend.position = 'top', legend.direction = 'horizontal') +
+    xlim(0,2) +
+    ylim(-100,100) +
+    labs(x = 'Glyphosate (EEC)',
+         y = expression(paste(Delta, R[0], ' (%)'))) +
+    geom_hline(yintercept = 0, lty=2) + 
+    geom_ribbon(aes(x = conc.eec, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
+    geom_line(aes(x = conc.eec, y = r0, col = study), size = 1)
+  
+  ggly.par.keeps
+  
 #Chlorpyrifos ################
   load('Review_models/Savio/Chlorpyrifos/ch5000sims_r0med_2017-12-12.Rdata')
   load('Review_models/Savio/Chlorpyrifos/ch5000sims_r0.75_2017-12-12.Rdata')
@@ -244,22 +301,23 @@ gch.par<-ggplot(par.ch.df) +
 
 gch.par
 
-#get rid of munHash to see results better
-par.ch.sub = subset(par.ch.df, study != 'muNhash')
-
-gch.par.sub<-ggplot(par.ch.sub) +
-  theme_bw() +
-  #theme(legend.position = 'bottom', legend.direction = 'horizontal') +
-  xlim(0,128) +
-  ylim(-100,100) +
-  labs(title = expression(paste('Parameter effect of Chlorpyrifos on ', 'R'[0])),
-       x = 'Chlorpyrifos (ppb)',
-       y = expression(paste(Delta, R[0], ' (%)'))) +
-  geom_hline(yintercept = 0, lty=2) + 
-  geom_ribbon(aes(x = conc, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
-  geom_line(aes(x = conc, y = r0, col = study), size = 1)
-
-gch.par.sub
+#restrict to studies used to produce net effect  
+  par.ch.df$keep = 0
+  par.ch.df$keep[which(par.ch.df$study %in% c('piChash', 'piMhash', 'muPhal', 'fNibr', 'muNhash'))] = 1
+  par.ch.keeps = subset(par.ch.df, keep == 1)
+  
+  gch.par.keeps<-ggplot(par.ch.keeps) +
+    theme_bw() +
+    theme(legend.position = 'top', legend.direction = 'horizontal') +
+    xlim(0,2) +
+    ylim(-100,100) +
+    labs(x = 'Chlorpyrifos (EEC)',
+         y = expression(paste(Delta, R[0], ' (%)'))) +
+    geom_hline(yintercept = 0, lty=2) + 
+    geom_ribbon(aes(x = conc.eec, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
+    geom_line(aes(x = conc.eec, y = r0, col = study), size = 1)
+  
+  gch.par.keeps
 
 #Malathion ################
   load('Review_models/Savio/Malathion/mal5000sims_r0med_2017-12-12.Rdata')
@@ -304,20 +362,38 @@ colnames(par.mal.df)[c(4:24)] = c(paste0('r0.',c('piCtch', 'piMtch', 'fNbak', 'm
 par.mal.df = reshape(data = par.mal.df, idvar = c('conc', 'conc.eec', 'chem'), varying = 4:24, direction = 'long',
                     timevar = 'study', sep = '.', new.row.names = c(1:3500))  
 
-gmal.par<-ggplot(par.mal.df) +
-  theme_bw() +
-  #theme(legend.position = 'bottom', legend.direction = 'horizontal') +
-  xlim(0,36.8) +
-  ylim(-100,100) +
-  labs(title = expression(paste('Parameter effect of Malathion on ', 'R'[0])),
-       x = 'Malathion (ppb)',
-       y = expression(paste(Delta, R[0], ' (%)'))) +
-  geom_hline(yintercept = 0, lty=2) + 
-  geom_ribbon(aes(x = conc, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
-  geom_line(aes(x = conc, y = r0, col = study), size = 1)
+  gmal.par<-ggplot(par.mal.df) +
+    theme_bw() +
+    #theme(legend.position = 'bottom', legend.direction = 'horizontal') +
+    xlim(0,36.8) +
+    ylim(-100,100) +
+    labs(title = expression(paste('Parameter effect of Malathion on ', 'R'[0])),
+         x = 'Malathion (ppb)',
+         y = expression(paste(Delta, R[0], ' (%)'))) +
+    geom_hline(yintercept = 0, lty=2) + 
+    geom_ribbon(aes(x = conc, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
+    geom_line(aes(x = conc, y = r0, col = study), size = 1)
+  
+  gmal.par
 
-gmal.par
-
+#restrict to studies used to produce net effect  
+  par.mal.df$keep = 0
+  par.mal.df$keep[which(par.mal.df$study %in% c('piCtch', 'piMtch', 'muPhal', 'fNtch', 'muNtch'))] = 1
+  par.mal.keeps = subset(par.mal.df, keep == 1)
+  
+  gmal.par.keeps<-ggplot(par.mal.keeps) +
+    theme_bw() +
+    theme(legend.position = 'top', legend.direction = 'horizontal') +
+    xlim(0,2) +
+    ylim(-100,100) +
+    labs(x = 'Malathion (EEC)',
+         y = expression(paste(Delta, R[0], ' (%)'))) +
+    geom_hline(yintercept = 0, lty=2) + 
+    geom_ribbon(aes(x = conc.eec, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
+    geom_line(aes(x = conc.eec, y = r0, col = study), size = 1)
+  
+  gmal.par.keeps
+  
 #Profenofos ################
   load('Review_models/Savio/Profenofos/pr5000sims_r0med_2017-12-12.Rdata')
   load('Review_models/Savio/Profenofos/pr5000sims_r0.75_2017-12-12.Rdata')
@@ -354,9 +430,9 @@ par.prof.df = data.frame(conc = seq(0, 6.02, length.out = 500),
 
 par.prof.df = cbind(par.prof.df, prof.med.r0[,c(1:4)], prof.med.r0.25[,c(1:4)], prof.med.r0.75[,c(1:4)])
 
-colnames(par.prof.df)[c(4:15)] = c(paste0('r0.',c('muPsat','piChash', 'piMhash', 'munhash')),
-                                  paste0('r025.',c('muPsat','piChash', 'piMhash', 'munhash')),
-                                  paste0('r075.',c('muPsat','piChash', 'piMhash', 'munhash')))
+colnames(par.prof.df)[c(4:15)] = c(paste0('r0.',c('muPsat','piChash', 'piMhash', 'muNhash')),
+                                  paste0('r025.',c('muPsat','piChash', 'piMhash', 'muNhash')),
+                                  paste0('r075.',c('muPsat','piChash', 'piMhash', 'muNhash')))
 
 par.prof.df = reshape(data = par.prof.df, idvar = c('conc', 'conc.eec', 'chem'), varying = 4:15, direction = 'long',
                      timevar = 'study', sep = '.', new.row.names = c(1:2000))  
@@ -375,9 +451,27 @@ gprof.par<-ggplot(par.prof.df) +
 
 gprof.par
 
+#restrict to studies used to produce net effect  
+  par.prof.df$keep = 0
+  par.prof.df$keep[which(par.prof.df$study %in% c('piChash', 'piMhash', 'muPsat', 'muNhash'))] = 1
+  par.prof.keeps = subset(par.prof.df, keep == 1)
+  
+  gprof.par.keeps<-ggplot(par.prof.keeps) +
+    theme_bw() +
+    theme(legend.position = 'top', legend.direction = 'horizontal') +
+    xlim(0,2) +
+    ylim(-100,100) +
+    labs(x = 'Profenofos (EEC)',
+         y = expression(paste(Delta, R[0], ' (%)'))) +
+    geom_hline(yintercept = 0, lty=2) + 
+    geom_ribbon(aes(x = conc.eec, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
+    geom_line(aes(x = conc.eec, y = r0, col = study), size = 1)
+  
+  gprof.par.keeps
+
 #Plot trajectories of herbicides and insecticides together############
 #Herbicides ###############
-#Net effects
+#Net effects #########
 
 hrbdf = rbind(atr.df, but.df, gly.df)  
   hrbdf = subset(hrbdf, botup == 'Present')
@@ -393,13 +487,13 @@ hrbdf = rbind(atr.df, but.df, gly.df)
           geom_hline(yintercept = 0, lty=2) + 
           geom_ribbon(aes(x = conc.eec, ymin = iqr.25, ymax = iqr.75, fill = chem), alpha = 0.4) +
           geom_line(aes(x = conc.eec, y = med, col = chem), size = 1)
-  tiff('~/RemaisWork/Schisto/Agro_Review/Figures/r0_ConcRange/herbicides_net_response.tiff', 
-       width = 2550, height = 1650, res = 300)
+  #tiff('~/RemaisWork/Schisto/Agro_Review/Figures/r0_ConcRange/herbicides_net_response.tiff', 
+  #     width = 2550, height = 1650, res = 300)
   ghrb   
   
-  dev.off()
+  #dev.off()
   
-#Parameter effects
+#Parameter effects ###########
 hrbdf.par = rbind(par.atr.df, par.but.df, par.gly.df)  
 
   ghrb.par<-ggplot(hrbdf.par) +
@@ -419,7 +513,70 @@ hrbdf.par = rbind(par.atr.df, par.but.df, par.gly.df)
   
   ghrb.par  
   
+  
+#Kept parameter effects along with net effects ###########
+  #first make master dataframe
+  hrbdf.master = rbind(par.atr.keeps, par.but.keeps, par.gly.keeps)[,-8] 
+    hrbdf.master$effect = 'Direct'
+    hrbdf.master$effect[which(hrbdf.master$study == "phinbax")] = "Bottom Up"
+    
+  hrbdf.edit = hrbdf
+  colnames(hrbdf.edit)[4:7] = colnames(hrbdf.master)[4:7] #make colnames compatible with master df
+  hrbdf.edit$study = 'Combined'
+  hrbdf.edit$effect = 'Net'
+  
+  hrbdf.master = rbind(hrbdf.master, hrbdf.edit)
+  
+#plot as matrix with chemicals along columns and component/net effects along rows  
+  ghrb.master<-ggplot(hrbdf.master) +
+    theme_bw() +
+    facet_grid(effect ~ chem, switch = 'y') +
+    theme(legend.position = 'bottom', legend.direction = 'horizontal', legend.title = element_blank(),
+          strip.background = element_blank(), strip.text = element_text(size = 15),
+          axis.title = element_text(size = 12)) +
+    ylim(-100,100) +
+    labs(x = 'Herbicide concentration (EEC)',
+         y = expression(paste(Delta, R[0], ' (%)'))) +
+    #ggtitle('Component and net effects of herbicides') +
+    scale_x_continuous(breaks = c(0.1,1,2), labels = c('0.1', '1', '2'), trans = "log") +
+    geom_hline(yintercept = 0, lty=2) + 
+    geom_ribbon(aes(x = conc.eec, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
+    geom_line(aes(x = conc.eec, y = r0, col = study), size = 1) +
+    scale_color_manual(labels = c("Combined",
+                                  expression(paste('Abdel-Ghaffar et al. 2016 (', mu[N],')', sep = '')),
+                                  expression(paste('Omran & Salama 2013 (', mu[N], ')', sep = '')),
+                                  expression(paste('Baxter et al. 2011 (', Phi[N], ')', sep = '')),
+                                  expression(paste('Abdel-Ghaffar et al. 2016 (', pi[C], ')', sep = '')),
+                                  expression(paste('Rohr et al. 2008 (', pi[C], ')', sep = '')),
+                                  expression(paste('Abdel-Ghaffar et al. 2016 (', pi[M], ')', sep = ''))),
+                       values = c("Combined" = 'black', 
+                                  "mungaf" = 'red', 
+                                  "munons" = 'grey', 
+                                  "phinbax" = 'darkgreen', 
+                                  "piCgaf" = 'violet', 
+                                  "piCror" = 'purple', 
+                                  "piMgaf" = 'gold')) +
+    scale_fill_manual(labels = c("Combined",
+                                  expression(paste('Abdel-Ghaffar et al. 2016 (', mu[N],')', sep = '')),
+                                  expression(paste('Omran & Salama 2013 (', mu[N], ')', sep = '')),
+                                  expression(paste('Baxter et al. 2011 (', Phi[N], ')', sep = '')),
+                                  expression(paste('Abdel-Ghaffar et al. 2016 (', pi[C], ')', sep = '')),
+                                  expression(paste('Rohr et al. 2008 (', pi[C], ')', sep = '')),
+                                  expression(paste('Abdel-Ghaffar et al. 2016 (', pi[M], ')', sep = ''))),
+                       values = c("Combined" = 'black', 
+                                  "mungaf" = 'red', 
+                                  "munons" = 'grey', 
+                                  "phinbax" = 'darkgreen', 
+                                  "piCgaf" = 'violet', 
+                                  "piCror" = 'purple', 
+                                  "piMgaf" = 'gold'))
+  
+  windows(width = 25, height = 25)
+  
+  ghrb.master 
+  
 #Insecticides ###############
+#Net effects ##########  
 insdf = rbind(ch.df, mal.df, prof.df)  
 
   gins<-ggplot(insdf) +
@@ -434,14 +591,14 @@ insdf = rbind(ch.df, mal.df, prof.df)
           geom_ribbon(aes(x = conc.eec, ymin = iqr.25, ymax = iqr.75, fill = chem), alpha = 0.4) +
           geom_line(aes(x = conc.eec, y = med, col = chem), size = 1)
   
-  tiff('~/RemaisWork/Schisto/Agro_Review/Figures/r0_ConcRange/insecticides_net_response.tiff', 
-       width = 2550, height = 1650, res = 300)
+  #tiff('~/RemaisWork/Schisto/Agro_Review/Figures/r0_ConcRange/insecticides_net_response.tiff', 
+  #     width = 2550, height = 1650, res = 300)
      
   gins
   
-  dev.off()
+  #dev.off()
   
-#Parameter effects
+#Parameter effects #############
   insdf.par = rbind(par.ch.df, par.mal.df, par.prof.df)  
   
   gins.par<-ggplot(insdf.par) +
@@ -459,7 +616,88 @@ insdf = rbind(ch.df, mal.df, prof.df)
   
   windows(width = 30, height = 15)
   
-  gins.par  
+  gins.par 
+  
+#Kept parameter effects along with net effects ###########
+  #first make master dataframe
+  insdf.master = rbind(par.ch.keeps, par.mal.keeps, par.prof.keeps)[,-8] 
+  insdf.master$effect = 'Direct'
+    insdf.master$effect[grep("muP", insdf.master$study)] = "Top Down"
+  
+  insdf.edit = insdf
+  insdf.edit$study = 'Combined'
+  insdf.edit = insdf.edit[c(1:3,7,4:6)]
+  colnames(insdf.edit)[4:7] = colnames(insdf.master)[4:7] #make colnames compatible with master df
+  insdf.edit$effect = 'Net'
+  
+  insdf.master = rbind(insdf.master, insdf.edit)
+  insdf.master$effect = factor(insdf.master$effect, levels = c("Top Down", "Direct", "Net"))
+  
+#plot as matrix with chemicals along columns and component/net effects along rows  
+  gins.master<-ggplot(insdf.master) +
+    theme_bw() +
+    facet_grid(effect ~ chem, switch = 'y') +
+    theme(legend.position = 'bottom', legend.direction = 'horizontal', legend.title = element_blank(),
+          strip.background = element_blank(), strip.text = element_text(size = 15),
+          axis.title = element_text(size = 12)) +
+    ylim(-100,100) +
+    labs(x = 'Insecticide concentration (EEC)',
+         y = expression(paste(Delta, R[0], ' (%)'))) +
+    #ggtitle('Component and net effects of insecticides') +
+    scale_x_continuous(breaks = c(0.1,1,2), labels = c('0.1', '1', '2'), trans = "log") +
+    coord_trans(y = "log")
+    geom_hline(yintercept = 0, lty=2) + 
+    geom_ribbon(aes(x = conc.eec, ymin = r025, ymax = r075, fill = study), alpha = 0.4) +
+    geom_line(aes(x = conc.eec, y = r0, col = study), size = 1) +
+    scale_color_manual(labels = c("Combined",
+                                  expression(paste('Ibrahim et al. 1992 (', f[N],')', sep = '')),
+                                  expression(paste('Tchounwou et al. 1991 (', f[N], ')', sep = '')),
+                                  expression(paste('Hasheesh & Mohamed 2011 (', mu[N], ')', sep = '')),
+                                  expression(paste('Tchounwou et al. 1991A (', mu[N], ')', sep = '')),
+                                  expression(paste('Halstead et al. 2015 (', mu[P], ')', sep = '')),
+                                  expression(paste('Satapornvanit et al. 2009 (', mu[P], ')', sep = '')),
+                                  expression(paste('Hasheesh & Mohamed 2011 (', pi[C], ')', sep = '')),
+                                  expression(paste('Tchounwou et al 1992 (', pi[C], ')', sep = '')),
+                                  expression(paste('Hasheesh & Mohamed 2011 (', pi[M], ')', sep = '')),
+                                  expression(paste('Tchounwou et al 1991B (', pi[M], ')', sep = ''))),
+                       values = c("Combined" = 'black', 
+                                  "fNibr" = 'orange', 
+                                  "fNtch" = 'grey', 
+                                  "muNhash" = 'grey', 
+                                  "muNtch" = 'grey', 
+                                  "muPhal" = 'red', 
+                                  "muPsat" = 'darkred',
+                                  "piChash" = 'purple',
+                                  "piCtch" = 'violet',
+                                  "piMhash" = 'grey',
+                                  "piMtch" = 'grey')) +
+    scale_fill_manual(labels = c("Combined",
+                                 expression(paste('Ibrahim et al. 1992 (', f[N],')', sep = '')),
+                                 expression(paste('Tchounwou et al. 1991 (', f[N], ')', sep = '')),
+                                 expression(paste('Hasheesh & Mohamed 2011 (', mu[N], ')', sep = '')),
+                                 expression(paste('Tchounwou et al. 1991A (', mu[N], ')', sep = '')),
+                                 expression(paste('Halstead et al. 2015 (', mu[P], ')', sep = '')),
+                                 expression(paste('Satapornvanit et al. 2009 (', mu[P], ')', sep = '')),
+                                 expression(paste('Hasheesh & Mohamed 2011 (', pi[C], ')', sep = '')),
+                                 expression(paste('Tchounwou et al 1992 (', pi[C], ')', sep = '')),
+                                 expression(paste('Hasheesh & Mohamed 2011 (', pi[M], ')', sep = '')),
+                                 expression(paste('Tchounwou et al 1991B (', pi[M], ')', sep = ''))),
+                      values = c("Combined" = 'black', 
+                                 "fNibr" = 'orange', 
+                                 "fNtch" = 'grey', 
+                                 "muNhash" = 'grey', 
+                                 "muNtch" = 'grey', 
+                                 "muPhal" = 'red', 
+                                 "muPsat" = 'darkred',
+                                 "piChash" = 'purple',
+                                 "piCtch" = 'violet',
+                                 "piMhash" = 'grey',
+                                 "piMtch" = 'grey'))
+  
+  windows(width = 25, height = 25)
+  
+  gins.master 
+  
   
 #Combined herbicides and insecticides plot ############
 hrbdf = subset(hrbdf, botup == 'Present')  
