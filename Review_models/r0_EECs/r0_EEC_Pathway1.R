@@ -24,7 +24,7 @@ library(fBasics)
 library(drc)
 
 keep.fin.p1 = c(keep.baxrohr, keep.johnson07, 'rohr08_fN_uncertainty', 'rohr08_fN_uncertainty2', keep.halstead17,
-                'r0.He', 'r0.Fe', 'r0.fix', 'parameters', 'nil0', 'nil1', 'keep.fin.p1', 'today')
+                'r0.He', 'r0.Fe', 'r0.fix', 'parameters', 'nil0', 'nil1', 'keep.fin.p1', 'today', 'kmat')
 
 rm(list = setdiff(ls(), keep.fin.p1))
 dev.off()

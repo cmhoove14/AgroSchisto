@@ -10,10 +10,10 @@
 #and indicate changes that were made.###############
 
 #Load response and R0 functions #######
-source('Response_Fxs/fin/Halstead_Insecticides2015_fin.R')
 source('Response_Fxs/fin/Satapornvanit_Insecticides2009_fin.R')
+source('Response_Fxs/fin/Halstead_Insecticides2015_fin.R')
 
-source('Review_models/r0_of_q.R')
+source('Review_models/fin/r0_of_q_fin.R')
 
 today = Sys.Date()
 
@@ -21,7 +21,7 @@ library(parallel)
 library(fBasics)
 
 keep.fin.p3 = c(keep.hal15.muP, keep.all.sat09, 'today',
-                 'r0.In', 'r0.fix', 'parameters', 'nil0', 'nil1', 'keep.fin.p3')
+                 'r0.In', 'r0.fix', 'parameters', 'nil0', 'nil1', 'keep.fin.p3', 'kmat')
 
 rm(list = setdiff(ls(), keep.fin.p3))
 dev.off()

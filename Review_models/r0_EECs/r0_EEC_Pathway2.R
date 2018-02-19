@@ -30,7 +30,7 @@ library(fBasics)
 
 keep.fin.p2 = c(keep.bak.all, keep.tch91.snail, keep.gaf.all, keep.bak11.N, 'today',
                 keep.hsh.all, keep.ibr.ch, keep.ons.all, keep.muN.tantawy, keep.ragab.mun,
-                 'r0.In', 'r0.He', 'r0.Fe', 'r0.fix', 'parameters', 'nil0', 'nil1', 'keep.fin.p2')
+                 'r0.In', 'r0.He', 'r0.Fe', 'r0.fix', 'parameters', 'nil0', 'nil1', 'keep.fin.p2', 'kmat')
 
 rm(list = setdiff(ls(), keep.fin.p2))
 dev.off()

@@ -12,23 +12,27 @@ require(rootSolve)
 require(deSolve)
 
 #R0(q) code to investigate influence of agrochemicals on schisto transmission
+kmat = matrix(NA,2,2)
+  kmat[1,1] = 0
+  kmat[2,2] = 0
 
+area = 1
 #Model parameters ##############
-area = 200
+
 parameters=c(
   # Location parameters
   A = area,          # Area of site of interest, m^2
   H = 1.5*area,      # Human population at site of interest (based on 300 people at 200m^2 water contact site from Sokolow PNAS)
-  Om = 1,            # degree of overlap between water contamination, snail, and human habitats
+  Om = 1 / sqrt(area),# degree of overlap between water contamination, snail, and human habitats
   
   # Snail reproductive parameters
-  f_N = 0.10,        # Birth rate of adult snails (snails/reproductive snail/day, including survival to detection - more like a recruitment rate); 
+  f_N = 0.1,        # Birth rate of adult snails (snails/reproductive snail/day, including survival to detection - more like a recruitment rate); 
                      #   from Woolhouse & Chandiwana et al. 1990 
   phi_N = 50*area,   # Carrying capacity of snails (snails/m^2), from Sokolow et al. 2015
   z = 0.7,           # Fraction of exposed snails that reproduce
   
   # Snail mortality parameters
-  mu_N = 0.017,        # Natural mortality rate of large snails (deaths/snail/day; mean lifespan ~ 33 days (~1 month))
+  mu_N = 0.017,        # Natural mortality rate of large snails (deaths/snail/day; mean lifespan ~ 90 days (~1 month))
   mu_I = 0.083,        # Additional mortality rate of shedding snails as a result of infection, from Sokolow et al. 2015
   
   # Predator pop dynamic parameters (from pred tweaking code)
@@ -38,7 +42,7 @@ parameters=c(
   mu_P = 0.038,       #Predator mortality rate from Halstead et al paper
   
   # Predation parameters
-  alpha = 0.003,     # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; discounted for large area
+  alpha = 0.003/sqrt(area), # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; reduced by larger area
   Th = 0.067,        # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
   nn = 1,            # exponent of the Holling's type III functional response
   
@@ -52,11 +56,11 @@ parameters=c(
   pi_C = 14.21,        # mean cercariae-hrs in agrochemical-free water
   
   # transmission parameters
-  beta = 1.666e-5/24,   # Human-to-snail infection probability in reference area (exposed snails/susceptible snail/miracidi-hr/day); 
+  beta = 1.340292e-05 / sqrt(area),       # Human-to-snail infection probability in reference area (exposed snails/susceptible snail/miracidi-hr/day); 
                         #     divided by 24 to account for hourly scale of miracidial survival; average of best-fit beta values
                         #     from fitting procedure in Halstead et al, weighted by likelihood
   sigma = 1/40,         # Latent period for exposed snails (infectious snails/exposed snail/day))
-  lamda = 9.792e-5/24,  # Snail-to-human infection probability in reference area (adult worms/cercariae-hr); 
+  lamda = 4.722579e-05 / sqrt(area), # Snail-to-human infection probability in reference area (adult worms/cercariae-hr); 
                         #     divided by 24 to account for hourly scale of miracidial survival; average of best-fit twa lambda values
                         #     from fitting procedure in Halstead et al, weighted by likelihood
   k=0.08,               # Clumping parameter of negative binomial distribution of worms in humans
@@ -120,8 +124,8 @@ r0.In = function(In = 0,
   mu_Nq = mu_N + f.mu_Nq(In)
   alpha_q = alpha * f.alpha_q(In)
   theta_q = theta * f.theta_q(In)
-  pi_Mq = f.pi_Mq(In)
-  pi_Cq = f.pi_Cq(In)
+  pi_Mq = pi_M * f.pi_Mq(In)
+  pi_Cq = pi_C * f.pi_Cq(In)
   v_q = v * f.v_q(In)
 
   #Equilibrium estimate of P given prawn predator parameters and q
@@ -130,17 +134,22 @@ r0.In = function(In = 0,
   if(P.eq<0){P.eq = 0}
   
   #Equilibrium estimate of N given snail parameters
-  N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
+  N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q*(1/area))/(1+alpha*Th*(N/area))},
                          c(0, as.numeric(phi_Nq))))
   
   if(N.eq<0){N.eq = 0}
   
   #Equilibrium predation rate estimate
-  psi.eq = (alpha_q)/(1+alpha*Th*N.eq)
+  psi.eq = (alpha_q*(N.eq/area))/(1+alpha*Th*(N.eq/area))
   
-  #R_0 of q estimate
-  r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
-              (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
+#R_0 of q estimate
+  kmat[1,2] = (beta*omega*N.eq*H*m*v_q*pi_Mq)/(2*mu_H+mu_W)
+  kmat[2,1] = (sigma*lamda*omega*theta_q*pi_Cq)/((mu_Nq+P.eq*psi.eq+sigma)*(mu_Nq+mu_I+P.eq*psi.eq))
+  
+  r0 = max(eigen(kmat)$values)
+  
+  #r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
+  #            (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
   
   
   return(c(N.eq, P.eq, r0))
@@ -187,8 +196,8 @@ r0.He = function(He = 0,
   mu_Nq = mu_N + f.mu_Nq(He)
   alpha_q = alpha * f.alpha_q(He)
   theta_q = theta * f.theta_q(He)
-  pi_Mq = f.pi_Mq(He)
-  pi_Cq = f.pi_Cq(He)
+  pi_Mq = pi_M * f.pi_Mq(He)
+  pi_Cq = pi_C * f.pi_Cq(He)
   v_q = v * f.v_q(He)
 
 #Equilibrium estimate of P given prawn predator parameters and q
@@ -197,17 +206,21 @@ r0.He = function(He = 0,
     if(P.eq<0){P.eq = 0}
 
   #Equilibrium estimate of N given snail parameters
-  N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
+  N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q*(1/area))/(1+alpha*Th*(N/area))},
                          c(0, as.numeric(phi_Nq))))
   
   if(N.eq<0){N.eq = 0}
   
   #Equilibrium predation rate estimate
-  psi.eq = (alpha_q)/(1+alpha*Th*N.eq)
-
+  psi.eq = (alpha_q*(N.eq/area))/(1+alpha*Th*(N.eq/area))
+  
 #R_0 of q estimate
-  r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
-              (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
+  kmat[1,2] = (beta*omega*N.eq*H*m*v_q*pi_Mq)/(2*mu_H+mu_W)
+  kmat[2,1] = (sigma*lamda*omega*theta_q*pi_Cq)/((mu_Nq+P.eq*psi.eq+sigma)*(mu_Nq+mu_I+P.eq*psi.eq))
+  
+  r0 = max(eigen(kmat)$values)
+  #r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
+  #           (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
 
 return(c(N.eq, P.eq, r0))
 
@@ -253,8 +266,8 @@ r0.Fe = function(Fe = 0,
   mu_Nq = mu_N + f.mu_Nq(Fe)
   alpha_q = alpha * f.alpha_q(Fe)
   theta_q = theta * f.theta_q(Fe)
-  pi_Mq = f.pi_Mq(Fe)
-  pi_Cq = f.pi_Cq(Fe)
+  pi_Mq = pi_M * f.pi_Mq(Fe)
+  pi_Cq = pi_C * f.pi_Cq(Fe)
   v_q = v * f.v_q(Fe)
 
 #Equilibrium estimate of P given prawn predator parameters and q
@@ -263,17 +276,21 @@ r0.Fe = function(Fe = 0,
     if(P.eq<0){P.eq = 0}
 
   #Equilibrium estimate of N given snail parameters
-  N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
+  N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q*(1/area))/(1+alpha*Th*(N/area))},
                          c(0, as.numeric(phi_Nq))))
   
   if(N.eq<0){N.eq = 0}
   
   #Equilibrium predation rate estimate
-  psi.eq = (alpha_q)/(1+alpha*Th*N.eq)
+  psi.eq = (alpha_q*(N.eq/area))/(1+alpha*Th*(N.eq/area))
   
 #R_0 of q estimate
-  r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
-              (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
+  kmat[1,2] = (beta*omega*N.eq*H*m*v_q*pi_Mq)/(2*mu_H+mu_W)
+  kmat[2,1] = (sigma*lamda*omega*theta_q*pi_Cq)/((mu_Nq+P.eq*psi.eq+sigma)*(mu_Nq+mu_I+P.eq*psi.eq))
+  
+  r0 = max(eigen(kmat)$values)
+  #r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
+  #            (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
 
 return(c(N.eq, P.eq, r0))
 
@@ -318,8 +335,8 @@ phi_Nq = phi_N * phi_Nqx
 mu_Nq = mu_N + mu_Nqx
 alpha_q = alpha * alpha_qx
 theta_q = theta * theta_qx
-pi_Mq = pi_Mqx
-pi_Cq = pi_Cqx
+pi_Mq = pi_M * pi_Mqx
+pi_Cq = pi_C * pi_Cqx
 v_q = v * v_qx
 
 #Equilibrium estimate of P given prawn predator parameters and q
@@ -328,17 +345,21 @@ P.eq = phi_P*(1 - muPq/f_P)
   if(P.eq<0){P.eq = 0}
 
 #Equilibrium estimate of N given snail parameters
-N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
-                       c(0, as.numeric(phi_Nq))))
-
-if(N.eq<0){N.eq = 0}
+  N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q*(1/area))/(1+alpha*Th*(N/area))},
+                         c(0, as.numeric(phi_Nq))))
+  
+  if(N.eq<0){N.eq = 0}
 
 #Equilibrium predation rate estimate
-psi.eq = (alpha_q)/(1+alpha*Th*N.eq)
+  psi.eq = (alpha_q*(N.eq/area))/(1+alpha*Th*(N.eq/area))
 
 #R_0 of q estimate
-  r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
-              (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
+  kmat[1,2] = (beta*omega*N.eq*H*m*v_q*pi_Mq)/(2*mu_H+mu_W)
+  kmat[2,1] = (sigma*lamda*omega*theta_q*pi_Cq)/((mu_Nq+P.eq*psi.eq+sigma)*(mu_Nq+mu_I+P.eq*psi.eq))
+  
+  r0 = max(eigen(kmat)$values)
+  #r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
+  #            (2*(mu_Nq + mu_I + 0.1*P.eq*psi.eq)*(mu_Nq + 0.9*P.eq*psi.eq + sigma)*(mu_H + mu_W)))
   
 return(c(N.eq, P.eq, r0))
 
@@ -376,17 +397,21 @@ P.eq = phi_P*(1 - mu_P/f_P)
 if(P.eq<0){P.eq = 0}
 
 #Equilibrium estimate of N given snail parameters
-N.eq = max(uniroot.all(f = function(N){(f_N)*(1 - N/phi_N) - mu_N - (P.eq*alpha)/(1+alpha*Th*N)},
+N.eq = max(uniroot.all(f = function(N){(f_N)*(1 - N/phi_N) - mu_N - (P.eq*alpha*(1/area))/(1+alpha*Th*(N/area))},
                        c(0, as.numeric(phi_N))))
 
 if(N.eq<0){N.eq = 0}
 
 #Equilibrium predation rate estimate
-psi.eq = alpha/(1+alpha*Th*N.eq)
+psi.eq = (alpha*(N.eq/area))/(1+alpha*Th*(N.eq/area))
 
 #R_0 of q estimate
-r0 = sqrt((theta*H*lamda*pi_C*omega*sigma*m*beta*N.eq*v*pi_M*omega) / 
-            (2*(mu_N + mu_I + P.eq*psi.eq)*(mu_N + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
+  kmat[1,2] = (beta*omega*N.eq*H*m*v*pi_M)/(2*mu_H+mu_W)
+  kmat[2,1] = (sigma*lamda*omega*theta*pi_C)/((mu_N+P.eq*psi.eq+sigma)*(mu_N+mu_I+P.eq*psi.eq))
+
+  r0 = max(eigen(kmat)$values)
+#r0 = sqrt((theta*H*lamda*pi_C*omega*sigma*m*beta*N.eq*v*pi_M*omega) / 
+#            (2*(mu_N + mu_I + P.eq*psi.eq)*(mu_N + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
 
 return(c(N.eq, P.eq, r0))
 
@@ -477,17 +502,21 @@ P.eq = phi_P*(1 - muPq/f_P)
 if(P.eq<0){P.eq = 0}
 
 #Equilibrium estimate of N given snail parameters
-N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q)/(1+alpha*Th*N)},
+N.eq = max(uniroot.all(f = function(N){(f_Nq)*(1 - N/phi_Nq) - mu_Nq - (P.eq*alpha_q*(1/area))/(1+alpha*Th*(N/area))},
                        c(0, as.numeric(phi_Nq))))
 
 if(N.eq<0){N.eq = 0}
 
 #Equilibrium predation rate estimate
-psi.eq = (alpha_q)/(1+alpha*Th*N.eq)
+psi.eq = (alpha_q*(N.eq/area))/(1+alpha*Th*(N.eq/area))
 
 #R_0 of q estimate
-r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
-            (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
+  kmat[1,2] = (beta*omega*N.eq*H*m*v_q*pi_Mq)/(2*mu_H+mu_W)
+  kmat[2,1] = (sigma*lamda*omega*theta_q*pi_Cq)/((mu_Nq+P.eq*psi.eq+sigma)*(mu_Nq+mu_I+P.eq*psi.eq))
+  
+  r0 = max(eigen(kmat)$values)
+#r0 = sqrt((theta_q*H*lamda*pi_Cq*omega*sigma*m*beta*N.eq*v_q*pi_Mq*omega) / 
+#            (2*(mu_Nq + mu_I + P.eq*psi.eq)*(mu_Nq + P.eq*psi.eq + sigma)*(mu_H + mu_W)))
 
 return(c(N.eq, P.eq, r0))
 
@@ -526,7 +555,7 @@ plot(mup.dens, r0.mup, type = 'l', lwd = 2, xlab = 'pred mortality rate', ylab =
 parameters['mu_P'] = 0.038 #Reset mortality rate to original
 
 #influence of various snail carrying capacities on r0 ###############
-phin.dens = seq(1e4, 1e5, 1e2)
+phin.dens = seq(10, 200, 10)*area
 r0.phin = as.numeric()
 
 for(i in 1:length(phin.dens)){
@@ -536,7 +565,7 @@ for(i in 1:length(phin.dens)){
 
 plot(phin.dens, r0.phin, type = 'l', lwd = 2, xlab = 'snail carrying capacity', ylab = 'R0')
 
-parameters['phi_N'] = 1e4 #Reset carrying capacity to original rate to original
+parameters['phi_N'] = 50*area #Reset carrying capacity to original 
 
 #influence of various snail reproductive rates on r0 ###############
 fn.dens = seq(parameters['f_N'], 0, length.out = 50)
@@ -562,7 +591,7 @@ for(i in 1:length(mun.dens)){
 
 plot(mun.dens, r0.mun, type = 'l', lwd = 2, xlab = 'snail mortality rate', ylab = 'R0')
 
-parameters['mu_N'] = 1.7e-2 #Reset reproductive rate to original
+parameters['mu_N'] = 0.017 #Reset reproductive rate to original
 
 
 #Influence of variable beta and lambda on r0 #################
@@ -585,12 +614,11 @@ for(i in 1:length(lambda.vec)){
   lines(lambda.vec, r0.lambda, type = 'l', lwd = 2, col = 2, lty = 2)
 
 # Re read Model parameters to make sure everything is set properly ##############
-  area = 200
   parameters=c(
     # Location parameters
     A = area,          # Area of site of interest, m^2
     H = 1.5*area,      # Human population at site of interest (based on 300 people at 200m^2 water contact site from Sokolow PNAS)
-    Om = 1,            # degree of overlap between water contamination, snail, and human habitats
+    Om = 1 / sqrt(area),# degree of overlap between water contamination, snail, and human habitats
     
     # Snail reproductive parameters
     f_N = 0.10,        # Birth rate of adult snails (snails/reproductive snail/day, including survival to detection - more like a recruitment rate); 
@@ -609,7 +637,7 @@ for(i in 1:length(lambda.vec)){
     mu_P = 0.038,       #Predator mortality rate from Halstead et al paper
     
     # Predation parameters
-    alpha = 0.003,     # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; discounted for large area
+    alpha = 0.003/sqrt(area), # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; reduced by larger area
     Th = 0.067,        # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
     nn = 1,            # exponent of the Holling's type III functional response
     
@@ -623,11 +651,11 @@ for(i in 1:length(lambda.vec)){
     pi_C = 14.21,        # mean cercariae-hrs in agrochemical-free water
     
     # transmission parameters
-    beta = 1.666e-5/24,   # Human-to-snail infection probability in reference area (exposed snails/susceptible snail/miracidi-hr/day); 
+    beta = 3.046713e-05 / sqrt(area),       # Human-to-snail infection probability in reference area (exposed snails/susceptible snail/miracidi-hr/day); 
     #     divided by 24 to account for hourly scale of miracidial survival; average of best-fit beta values
     #     from fitting procedure in Halstead et al, weighted by likelihood
     sigma = 1/40,         # Latent period for exposed snails (infectious snails/exposed snail/day))
-    lamda = 9.792e-5/24,  # Snail-to-human infection probability in reference area (adult worms/cercariae-hr); 
+    lamda = 4.305566e-05 / sqrt(area), # Snail-to-human infection probability in reference area (adult worms/cercariae-hr); 
     #     divided by 24 to account for hourly scale of miracidial survival; average of best-fit twa lambda values
     #     from fitting procedure in Halstead et al, weighted by likelihood
     k=0.08,               # Clumping parameter of negative binomial distribution of worms in humans

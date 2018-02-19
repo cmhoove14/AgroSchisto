@@ -34,7 +34,7 @@ library(fBasics)
 keep.fin.p4 = c(keep.grg08, keep.kop06.beq, keep.atr.rohr08, keep.meta.piC, keep.tantawy.piC, keep.gaf.piC,
                 keep.tch92.beq, keep.hsh.pic, keep.hsh.pim, keep.gaf.piM, keep.tch91.beq, keep.tantawy.piM,
                 keep.tch91.Fe, keep.tch91.egv, 'r0.In', 'r0.He', 'r0.Fe', 'r0.fix', 'parameters', 'today',
-                'nil0', 'nil1', 'keep.fin.p4')
+                'nil0', 'nil1', 'keep.fin.p4', 'kmat')
 
 rm(list = setdiff(ls(), keep.fin.p4))
 dev.off()

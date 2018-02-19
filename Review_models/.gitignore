@@ -1,7 +1,3 @@
-r0_of_Malathion2_ws.RData
-r0_of_Atrazine_ws.RData
-r0_of_Atrazine_ws_nosqrt.RData
-deprecated.R
-r0_of_Malathion2_ws2.RData
-r0_of_malatr_sim.RData
+*.RData
 Savio
+r0_fin_ggplots_reduce-12-12-17.R
