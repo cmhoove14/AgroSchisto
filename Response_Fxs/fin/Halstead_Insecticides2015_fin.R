@@ -410,6 +410,6 @@ points(seq(0, 6, 0.01), sapply(seq(0, 6, 0.01), muPq_perm_Halstead_uncertainty),
   keep.hal15.muP = c('mal.sum', 'chlor.sum', 'terb.sum', 'esfen.sum', 'lamcy.sum', 'perm.sum',
                      'mal.mod', 'chlor.mod', 'terb.mod', 'esfen.mod', 'lamcy.mod', 'perm.mod',
                      'chlor.lwmod', 'terb.lwmod', 'esfen.lwmod', 'lamcy.lwmod', 'perm.lwmod',
-                     'par.mal', 'par.chlor', 'par.terb', 'par.esfen', 'par.lamcy', 'par.perm',
+                     'par.mal', 'par.perm',
                      'muPq_mal_Halstead_uncertainty', 'muPq_chlor_Halstead_uncertainty', 'muPq_terb_Halstead_uncertainty',
                      'muPq_esfen_Halstead_uncertainty', 'muPq_lamcy_Halstead_uncertainty', 'muPq_perm_Halstead_uncertainty')
