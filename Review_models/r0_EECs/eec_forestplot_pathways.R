@@ -10,9 +10,10 @@
 #and indicate changes that were made.###############
 
 require(forestplot)
-source('Review_models/r0_of_q.R')
+source('Review_models/fin/r0_of_q_fin.R')
 
-date = '2017-12-11'  #updated functions across the board
+date = '2018-02-19'  #updated functions across the board
+date000 = '2017-12-11'  #updated functions across the board
 date00 = '2017-11-27'  #runs as below, but with no implied 3rd data points for any d-r functions
 date0 = '2017-11-22'  #Runs with 5000 sims and median/IQR values & Glyphosate EEC = 3700
 date1 = '2017-11-11' #Runs with 5000 sims and median/IQR values
@@ -62,54 +63,7 @@ load(paste('Review_models/r0_EECs/eec.p4.df', date,'.RData', sep = ''))
                     subset(eec.p4.df, study == 'Tchounwou et al 1991b')[c(3,4,1,2),])
   
   eec.all = rbind(eec.p1.df, eec.p2.df, eec.p3.df, eec.p4.df)
-#50% EEC data frames  
-load(paste('Review_models/r0_EECs/eec0.5.p1.df', date,'.RData', sep = ''))
-  eec0.5.p1.df = eec0.5.p1.df[-1,] #Get rid of simulation with atrazine d-r function that excludes 30ppb datapoint
-  eec0.5.p1.df = eec0.5.p1.df[c(1,5,4,2,3,6),]
-  
-  eec0.5.p1.df$relr0.025 = (eec0.5.p1.df$r0 - 1.96*eec0.5.p1.df$r0.sd) / r0.He()[3] * 100 - 100
-  eec0.5.p1.df$relr0.975 = (eec0.5.p1.df$r0 + 1.96*eec0.5.p1.df$r0.sd) / r0.He()[3] * 100 - 100
-  
-  eec0.5.p1.df[c(2:6),c(13:23)] <- NA   #replace estimates with NAs for studies tested at one dose (no d-r fucntion)
-  
-  
-  
-load(paste('Review_models/r0_EECs/eec0.5.p2.df', date,'.RData', sep = ''))
-  ind = sapply(eec0.5.p2.df, is.factor)
-  eec0.5.p2.df[ind] = lapply(eec0.5.p2.df[ind], as.character)
-  eec0.5.p2.df = eec0.5.p2.df[order(eec0.5.p2.df[,1], eec0.5.p2.df[,4], eec0.5.p2.df[,2]),]
-  
-  eec0.5.p2.df$relr0.025 = (eec0.5.p2.df$r0 - 1.96*eec0.5.p2.df$r0.sd) / r0.He()[3] * 100 - 100
-  eec0.5.p2.df$relr0.975 = (eec0.5.p2.df$r0 + 1.96*eec0.5.p2.df$r0.sd) / r0.He()[3] * 100 - 100
-  
-  eec0.5.p2.df = rbind(subset(eec0.5.p2.df, study != 'Ragab & Shoukry 2006'), #reorder to put fertilizer estimates at the bottom
-                       subset(eec0.5.p2.df, study == 'Ragab & Shoukry 2006'))
-  
-  eec0.5.p2.df[c(1, 7, 11, 15, 19, 25),c(13:23)] = NA   #replace estimates with NAs for studies tested at one dose (no d-r fucntion)
-  
-load(paste('Review_models/r0_EECs/eec0.5.p3.df', date,'.RData', sep = ''))
-  ind = sapply(eec0.5.p3.df, is.factor)
-  eec0.5.p3.df[ind] = lapply(eec0.5.p3.df[ind], as.character)
-  eec0.5.p3.df = eec0.5.p3.df[order(eec0.5.p3.df[,1], eec0.5.p3.df[,4], eec0.5.p3.df[,2]),]
-  
-  eec0.5.p3.df$relr0.025 = (eec0.5.p3.df$r0 - 1.96*eec0.5.p3.df$r0.sd) / r0.He()[3] * 100 - 100
-  eec0.5.p3.df$relr0.975 = (eec0.5.p3.df$r0 + 1.96*eec0.5.p3.df$r0.sd) / r0.He()[3] * 100 - 100
-  
-  eec0.5.p3.df = subset(eec0.5.p3.df, chem != 'Zinc')
-  
-load(paste('Review_models/r0_EECs/eec0.5.p4.df', date,'.RData', sep = ''))
-  ind = sapply(eec0.5.p4.df, is.factor)
-  eec0.5.p4.df[ind] = lapply(eec0.5.p4.df[ind], as.character)
-  eec0.5.p4.df = eec0.5.p4.df[order(eec0.5.p4.df[,1], eec0.5.p4.df[,4], eec0.5.p4.df[,2]),]
 
-  eec0.5.p4.df = subset(eec0.5.p4.df, study != 'Meta')
-  
-  eec0.5.p4.df$relr0.025 = (eec0.5.p4.df$r0 - 1.96*eec0.5.p4.df$r0.sd) / r0.He()[3] * 100 - 100
-  eec0.5.p4.df$relr0.975 = (eec0.5.p4.df$r0 + 1.96*eec0.5.p4.df$r0.sd) / r0.He()[3] * 100 - 100
-  
-  eec0.5.p4.df = rbind(subset(eec0.5.p4.df, study != 'Tchounwou et al 1991b'), #reorder to put fertilizer estimates at the bottom
-                       subset(eec0.5.p4.df, study == 'Tchounwou et al 1991b')[c(3,4,1,2),])
-  
 #10% EEC data frames  
 load(paste('Review_models/r0_EECs/eec0.1.p1.df', date,'.RData', sep = ''))
   eec0.1.p1.df = eec0.1.p1.df[-1,] #Get rid of simulation with atrazine d-r function that excludes 30ppb datapoint
@@ -118,7 +72,7 @@ load(paste('Review_models/r0_EECs/eec0.1.p1.df', date,'.RData', sep = ''))
   eec0.1.p1.df$relr0.025 = (eec0.1.p1.df$r0 - 1.96*eec0.1.p1.df$r0.sd) / r0.He()[3] * 100 - 100
   eec0.1.p1.df$relr0.975 = (eec0.1.p1.df$r0 + 1.96*eec0.1.p1.df$r0.sd) / r0.He()[3] * 100 - 100
   
-  eec0.1.p1.df[c(2:6),c(13:23)] = NA  #replace estimates with NAs for studies tested at one dose (no d-r fucntion)
+  eec0.1.p1.df[c(2:6),c(7:23)] = NA  #replace estimates with NAs for studies tested at one dose (no d-r fucntion)
   
   
 load(paste('Review_models/r0_EECs/eec0.1.p2.df', date,'.RData', sep = ''))
@@ -133,7 +87,7 @@ load(paste('Review_models/r0_EECs/eec0.1.p2.df', date,'.RData', sep = ''))
     eec0.1.p2.df = rbind(subset(eec0.1.p2.df, study != 'Ragab & Shoukry 2006'), #reorder to put fertilizer estimates at the bottom
                          subset(eec0.1.p2.df, study == 'Ragab & Shoukry 2006'))
     
-    eec0.1.p2.df[c(1, 7, 11, 15, 19, 25),c(13:23)] = NA   #replace estimates with NAs for studies tested at one dose (no d-r fucntion)
+    eec0.1.p2.df[c(1, 7, 11, 15, 19, 25),c(7:23)] = NA   #replace estimates with NAs for studies tested at one dose (no d-r fucntion)
     
     
 load(paste('Review_models/r0_EECs/eec0.1.p3.df', date,'.RData', sep = ''))
@@ -164,7 +118,7 @@ dev.off()
 #Text list for forest plot ########
 tabtext =list(list('Study', #Studies ##############
                    
-                   'Pathway 1',
+                   'Pathway 1: Bottom-up ecological effects',
                    expression(bold('    Baxter et al, 2011'^'2')),
                    expression('    Halstead et al 2017'^'3'),
                    expression('    Rohr et al, 2008'^'3'),
@@ -174,7 +128,7 @@ tabtext =list(list('Study', #Studies ##############
                    
                    ' ',
                    
-                   'Pathway 2',
+                   'Pathway 2: Direct effects on snails',
                    expression('    Bakry et al 2012'^'3'),  #only provide two data points
                    '    Bakry et al 2012', 
                    expression(bold('    Omran & Salama 2013')), 
@@ -206,7 +160,7 @@ tabtext =list(list('Study', #Studies ##############
                    '    Ragab & Shoukry 2006',
                    ' ',
                    
-                   'Pathway 3',
+                   'Pathway 3: Top-down ecological effects',
                    expression(bold('    Halstead et al 2015')), 
                    '    Satapornvanit et al 2009', 
                    '    Satapornvanit et al 2009', 
@@ -221,7 +175,7 @@ tabtext =list(list('Study', #Studies ##############
                    #'    Satapornvanit et al 2009', #zinc not considered an agrochemical
                    ' ',
                    
-                   'Pathway 4',
+                   'Pathway 4: Direct effects on schistosomes',
                    '    Griggs et al 2008', 
                    '    Koprivnikar et al 2006', 
                    #'    Meta',
@@ -537,8 +491,8 @@ tiff(paste('~/RemaisWork/Schisto/Agro_Review/Figures/EEC_forest/Pathways_forest_
                           rep(FALSE,nrow(eec.p4.df)+1)),
              hrzl_lines = list('2'= gpar(lwd = 1, col="black", columns = 1:4),
                                '3'= gpar(col = 'grey'),
-                               '9'= gpar(col = 'grey'),
-                               '40'= gpar(col = 'grey'),
+                               '11'= gpar(col = 'grey'),
+                               '42'= gpar(col = 'grey'),
                                '54'= gpar(col = 'grey')),
              txt_gp = fpTxtGp(xlab = gpar(cex = 1.2),
                               ticks = gpar(cex = 1.1)),
@@ -547,7 +501,64 @@ tiff(paste('~/RemaisWork/Schisto/Agro_Review/Figures/EEC_forest/Pathways_forest_
              col = fpColors(box = c('black', 'blue'), lines = 'black'),
              clip=c(-Inf,Inf),
              xlab = expression(paste(Delta, R['0'], ' (%)')),
-             xticks = c(-100, -50,0,50,100,200,300))
+             xticks = c(-100, -50,0,50,100))
+  dev.off()
+  
+#With raw change in r0 at both EEC and 10% EEC values #########
+  tiff(paste('~/RemaisWork/Schisto/Agro_Review/Figures/EEC_forest/Pathways_forest_rawR0', date, '.tiff', sep = ''),
+       width = 4100*0.9, height = 5893*0.9, res = 300)
+  forestplot(labeltext = tabtext, 
+             legend_args = fpLegend(pos = list(x = 0.25, y = 0.99)),
+             legend = c('EEC', '10% EEC'),
+             fn.ci_norm = c(fpDrawNormalCI, fpDrawCircleCI),
+             line.margin = 0.1,
+             mean = cbind(c(NA,NA, eec.p1.df$r0.med,   
+                            NA,NA, eec.p2.df$r0.med,   
+                            NA,NA, eec.p3.df$r0.med,   
+                            NA,NA, eec.p4.df$r0.med), 
+                          c(NA,NA, eec0.1.p1.df$r0.med,   
+                            NA,NA, eec0.1.p2.df$r0.med,   
+                            NA,NA, eec0.1.p3.df$r0.med,   
+                            NA,NA, eec0.1.p4.df$r0.med)),
+             lower =cbind(c(NA,NA, eec.p1.df$r0.25,
+                            NA,NA, eec.p2.df$r0.25,
+                            NA,NA, eec.p3.df$r0.25,
+                            NA,NA, eec.p4.df$r0.25),
+                          c(NA,NA, eec0.1.p1.df$r0.25,
+                            NA,NA, eec0.1.p2.df$r0.25,
+                            NA,NA, eec0.1.p3.df$r0.25,
+                            NA,NA, eec0.1.p4.df$r0.25)),
+             upper =cbind(c(NA,NA, eec.p1.df$r0.75,
+                            NA,NA, eec.p2.df$r0.75,
+                            NA,NA, eec.p3.df$r0.75,
+                            NA,NA, eec.p4.df$r0.75),
+                          c(NA,NA, eec0.1.p1.df$r0.75,
+                            NA,NA, eec0.1.p2.df$r0.75,
+                            NA,NA, eec0.1.p3.df$r0.75,
+                            NA,NA, eec0.1.p4.df$r0.75)),
+             new_page = TRUE,
+             is.summary=c(TRUE,TRUE,
+                          rep(FALSE,nrow(eec.p1.df)+1),
+                          TRUE,
+                          rep(FALSE,nrow(eec.p2.df)+1),
+                          TRUE,
+                          rep(FALSE,nrow(eec.p3.df)+1),
+                          TRUE,
+                          rep(FALSE,nrow(eec.p4.df)+1)),
+             hrzl_lines = list('2'= gpar(lwd = 1, col="black", columns = 1:4),
+                               '3'= gpar(col = 'grey'),
+                               '11'= gpar(col = 'grey'),
+                               '42'= gpar(col = 'grey'),
+                               '54'= gpar(col = 'grey')),
+             txt_gp = fpTxtGp(xlab = gpar(cex = 1.2),
+                              ticks = gpar(cex = 1.1)),
+             vertices = TRUE,
+             boxsize = 0.3,
+             col = fpColors(box = c('black', 'blue'), lines = 'black'),
+             clip=c(-Inf,Inf),
+             xlab = expression(paste(R['0'])),
+             zero = r0.He()[3],
+             xticks = c(0, 1, 2, 3, 4, 5))
   dev.off()
   
 #With relative change in r0 +/- SD at both EEC and 10% EEC values #########
@@ -688,59 +699,6 @@ forestplot(tabtext,
                             ticks = gpar(cex = 1.1)),
            vertices = TRUE,
            boxsize = 0.25,
-           col = fpColors(box = c('black', 'blue'), lines = 'black'),
-           clip=c(-Inf,Inf),
-           xlab = expression(paste(Delta, R['0'])))
-
-#With raw change in r0 at both EEC and 10% EEC values #########
-windows(width = 36, height = 28)
-forestplot(tabtext, 
-           legend_args = fpLegend(pos = list(x = 0.5, y = 0.98)),
-           legend = c('EEC', '10% EEC'),
-           fn.ci_norm = c(fpDrawNormalCI, fpDrawCircleCI),
-           line.margin = 0.1,
-           mean = cbind(c(NA,NA, eec.p1.df$deltar0,   
-                          NA,NA, eec.p2.df$deltar0,   
-                          NA,NA, eec.p3.df$deltar0,   
-                          NA,NA, eec.p4.df$deltar0), 
-                        c(NA,NA, eec0.1.p1.df$deltar0,   
-                          NA,NA, eec0.1.p2.df$deltar0,   
-                          NA,NA, eec0.1.p3.df$deltar0,   
-                          NA,NA, eec0.1.p4.df$deltar0)),
-           lower =cbind(c(NA,NA, eec.p1.df$deltar0.lo,
-                          NA,NA, eec.p2.df$deltar0.lo,
-                          NA,NA, eec.p3.df$deltar0.lo,
-                          NA,NA, eec.p4.df$deltar0.lo),
-                        c(NA,NA, eec0.1.p1.df$deltar0.lo,
-                          NA,NA, eec0.1.p2.df$deltar0.lo,
-                          NA,NA, eec0.1.p3.df$deltar0.lo,
-                          NA,NA, eec0.1.p4.df$deltar0.lo)),
-           upper =cbind(c(NA,NA, eec.p1.df$deltar0.up,
-                          NA,NA, eec.p2.df$deltar0.up,
-                          NA,NA, eec.p3.df$deltar0.up,
-                          NA,NA, eec.p4.df$deltar0.up),
-                        c(NA,NA, eec0.1.p1.df$deltar0.up,
-                          NA,NA, eec0.1.p2.df$deltar0.up,
-                          NA,NA, eec0.1.p3.df$deltar0.up,
-                          NA,NA, eec0.1.p4.df$deltar0.up)),
-           new_page = TRUE,
-           is.summary=c(TRUE,TRUE,
-                        rep(FALSE,nrow(eec.p1.df)+1),
-                        TRUE,
-                        rep(FALSE,nrow(eec.p2.df)+1),
-                        TRUE,
-                        rep(FALSE,nrow(eec.p3.df)+1),
-                        TRUE,
-                        rep(FALSE,nrow(eec.p4.df)+1)),
-           hrzl_lines = list('2'= gpar(lwd = 1, col="black", columns = 1:3),
-                             '3'= gpar(col = 'grey'),
-                             '9'= gpar(col = 'grey'),
-                             '40'= gpar(col = 'grey'),
-                             '54'= gpar(col = 'grey')),
-           txt_gp = fpTxtGp(xlab = gpar(cex = 1.2),
-                            ticks = gpar(cex = 1.1)),
-           vertices = TRUE,
-           boxsize = 0.3,
            col = fpColors(box = c('black', 'blue'), lines = 'black'),
            clip=c(-Inf,Inf),
            xlab = expression(paste(Delta, R['0'])))
