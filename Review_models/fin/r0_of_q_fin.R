@@ -38,11 +38,11 @@ parameters=c(
   # Predator pop dynamic parameters (from pred tweaking code)
   f_P = 0.117,         #Predator intrinsic recruitment rate assuming 30000 eggs per year and 1% survival from eggs to repro maturity
                       #   from Adha-Ar et al 2016
-  phi_P = 0.15*area,   #Predator CC (0.125/m^2 from Sokolow et al realized predator density, discounted here for natural pop)
+  phi_P = 0.125*area,   #Predator CC (0.125/m^2 from Sokolow et al realized predator density, discounted here for natural pop)
   mu_P = 0.038,       #Predator mortality rate from Halstead et al paper
   
   # Predation parameters
-  alpha = 0.003/sqrt(area), # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; reduced by larger area
+  alpha = 0.02, # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; reduced by larger area
   Th = 0.067,        # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
   nn = 1,            # exponent of the Holling's type III functional response
   
@@ -537,7 +537,7 @@ for(i in 1:length(pred.dens)){
   plot(pred.dens, r0.pd, type = 'l', lwd = 2, xlab = 'pred CC', ylab = 'R0')
   plot(pred.dens, n.pd, type = 'l', lwd = 2, col = 3, xlab = 'pred CC', ylab = 'N*')
   
-  parameters['phi_P'] = 0.15*area
+  parameters['phi_P'] = 0.125*area
   
 r0.In(In = 0)  #R0 = 2.00: coexistence of snail population, pred population, and disease @ realized pred density of ~0.1/m^2
 
