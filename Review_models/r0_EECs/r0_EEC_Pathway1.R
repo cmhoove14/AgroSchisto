@@ -37,9 +37,8 @@ nsims = 5000         #Number of simulations to run
   eec.atr = rep(102, nsims)     #atrazine, EEC from Halstead et al 2017
   blnk.vec = c(1:nsims)
   
-#All pathway 2 response functions  
-parfx = c(phi_Nq_atr_baxrohr.no30, phi_Nq_atr_baxrohr, johnson07_theta_uncertainty, johnson07_phin_uncertainty,
-          halstead17_phiN_at_uncertainty, halstead17_phiN_fe_uncertainty, rohr08_fN_uncertainty2)  
+#All pathway 1 response functions  
+parfx = c(phi_Nq_atr_baxrohr.no30, phi_Nq_atr_baxrohr, johnson07_theta_uncertainty, johnson07_phin_uncertainty, halstead17_phiN_at_uncertainty, halstead17_phiN_fe_uncertainty, rohr08_fN_uncertainty2)  
 
 clus1 = makeCluster(no.cores)
 clusterExport(clus1, c(keep.fin.p1, 'uniroot.all', 'rdrm', 'LL.2', 'L.4'))

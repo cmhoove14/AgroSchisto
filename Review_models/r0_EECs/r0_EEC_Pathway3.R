@@ -42,10 +42,7 @@ nsims = 5000         #Number of simulations to run
   eec.znc = rep(100, nsims)     #zinc sulfate eec TBD
   
 #All pathway 3 response functions  
-parfx = c(muPq_chlor_satapornvanit09_uncertainty, muPq_chlor_Halstead_uncertainty, muPq_dim_satapornvanit09_uncertainty,
-          muPq_esfen_Halstead_uncertainty, muPq_lamcy_Halstead_uncertainty, muPq_mal_Halstead_uncertainty,
-          muPq_perm_Halstead_uncertainty, muPq_prof_satapornvanit09_uncertainty, muPq_terb_Halstead_uncertainty,
-          muPq_zinc_satapornvanit09_uncertainty, psi_q_chlor_satapornvanit09_uncertainty, psi_q_zinc_satapornvanit09_uncertainty)  
+parfx = c(muPq_chlor_satapornvanit09_uncertainty, muPq_chlor_Halstead_uncertainty, muPq_dim_satapornvanit09_uncertainty, muPq_esfen_Halstead_uncertainty, muPq_lamcy_Halstead_uncertainty, muPq_mal_Halstead_uncertainty, muPq_perm_Halstead_uncertainty, muPq_prof_satapornvanit09_uncertainty, muPq_terb_Halstead_uncertainty, muPq_zinc_satapornvanit09_uncertainty, psi_q_chlor_satapornvanit09_uncertainty, psi_q_zinc_satapornvanit09_uncertainty)  
 
 clus1 = makeCluster(no.cores)
 clusterExport(clus1, c(keep.fin.p3, 'uniroot.all', 'rdrm', 'LL.2', 'LL.3','L.4'))

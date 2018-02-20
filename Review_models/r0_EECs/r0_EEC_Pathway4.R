@@ -31,9 +31,7 @@ today = Sys.Date()
 library(parallel)
 library(fBasics)
 
-keep.fin.p4 = c(keep.grg08, keep.kop06.beq, keep.atr.rohr08, keep.meta.piC, keep.tantawy.piC, keep.gaf.piC,
-                keep.tch92.beq, keep.hsh.pic, keep.hsh.pim, keep.gaf.piM, keep.tch91.beq, keep.tantawy.piM,
-                keep.tch91.Fe, keep.tch91.egv, 'r0.In', 'r0.He', 'r0.Fe', 'r0.fix', 'parameters', 'today',
+keep.fin.p4 = c(keep.grg08, keep.kop06.beq, keep.atr.rohr08, keep.meta.piC, keep.tantawy.piC, keep.gaf.piC, keep.tch92.beq, keep.hsh.pic, keep.hsh.pim, keep.gaf.piM, keep.tch91.beq, keep.tantawy.piM, keep.tch91.Fe, keep.tch91.egv, 'r0.In', 'r0.He', 'r0.Fe', 'r0.fix', 'parameters', 'today',
                 'nil0', 'nil1', 'keep.fin.p4', 'kmat')
 
 rm(list = setdiff(ls(), keep.fin.p4))
@@ -57,12 +55,7 @@ nsims = 5000         #Number of simulations to run
   eec.amm = rep(100, nsims)     #Ammonium sulphate eec TBD
   
 #All pathway 4 response functions  
-parfx = c(piC.grg08_atr_unc2, piC.kop_atr_unc, piC.atr.rohr08.lin, piC.meta_atr_unc, piC.tant02_but.exp_unc,
-          piC.tant02_fpb.exp_unc, piC.ghaf_butr.exp_unc, piC.ghaf_gly.exp_unc, piC.ghaf_pen.exp_unc, 
-          piC.tch92_mal_unc, piC_ch_Hash11_uncertainty, piC_pr_Hash11_uncertainty, piM_ch_Hash11_uncertainty,
-          piM_pr_Hash11_uncertainty, piM.ghaf_butr.exp_unc, piM.ghaf_gly.exp_unc, piM.ghaf_pen.exp_unc, piM.tch91_mal_unc, 
-          piM.tant02_but.exp_unc, piM.tant02_fpb.exp_unc, piM.tch91_amm_unc, piM.tch91_ure_unc, tch91.egv.amm_unc, 
-          tch91.egv.ure_unc)  
+parfx = c(piC.grg08_atr_unc2, piC.kop_atr_unc, piC.atr.rohr08.lin, piC.meta_atr_unc, piC.tant02_but.exp_unc, piC.tant02_fpb.exp_unc, piC.ghaf_butr.exp_unc, piC.ghaf_gly.exp_unc, piC.ghaf_pen.exp_unc, piC.tch92_mal_unc, piC_ch_Hash11_uncertainty, piC_pr_Hash11_uncertainty, piM_ch_Hash11_uncertainty, piM_pr_Hash11_uncertainty, piM.ghaf_butr.exp_unc, piM.ghaf_gly.exp_unc, piM.ghaf_pen.exp_unc, piM.tch91_mal_unc,piM.tant02_but.exp_unc, piM.tant02_fpb.exp_unc, piM.tch91_amm_unc, piM.tch91_ure_unc, tch91.egv.amm_unc, tch91.egv.ure_unc)  
 
 clus1 = makeCluster(no.cores)
 clusterExport(clus1, c(keep.fin.p4, 'uniroot.all', 'rdrm', 'LL.2', 'L.4'))
