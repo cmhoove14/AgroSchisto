@@ -621,13 +621,13 @@ for(i in 1:length(lambda.vec)){
     Om = 1 / sqrt(area),# degree of overlap between water contamination, snail, and human habitats
     
     # Snail reproductive parameters
-    f_N = 0.10,        # Birth rate of adult snails (snails/reproductive snail/day, including survival to detection - more like a recruitment rate); 
+    f_N = 0.1,        # Birth rate of adult snails (snails/reproductive snail/day, including survival to detection - more like a recruitment rate); 
     #   from Woolhouse & Chandiwana et al. 1990 
     phi_N = 50*area,   # Carrying capacity of snails (snails/m^2), from Sokolow et al. 2015
     z = 0.7,           # Fraction of exposed snails that reproduce
     
     # Snail mortality parameters
-    mu_N = 0.017,        # Natural mortality rate of large snails (deaths/snail/day; mean lifespan ~ 33 days (~1 month))
+    mu_N = 0.017,        # Natural mortality rate of large snails (deaths/snail/day; mean lifespan ~ 90 days (~1 month))
     mu_I = 0.083,        # Additional mortality rate of shedding snails as a result of infection, from Sokolow et al. 2015
     
     # Predator pop dynamic parameters (from pred tweaking code)
@@ -651,11 +651,11 @@ for(i in 1:length(lambda.vec)){
     pi_C = 14.21,        # mean cercariae-hrs in agrochemical-free water
     
     # transmission parameters
-    beta = 3.046713e-05 / sqrt(area),       # Human-to-snail infection probability in reference area (exposed snails/susceptible snail/miracidi-hr/day); 
+    beta = 1.340292e-05 / sqrt(area),       # Human-to-snail infection probability in reference area (exposed snails/susceptible snail/miracidi-hr/day); 
     #     divided by 24 to account for hourly scale of miracidial survival; average of best-fit beta values
     #     from fitting procedure in Halstead et al, weighted by likelihood
     sigma = 1/40,         # Latent period for exposed snails (infectious snails/exposed snail/day))
-    lamda = 4.305566e-05 / sqrt(area), # Snail-to-human infection probability in reference area (adult worms/cercariae-hr); 
+    lamda = 4.722579e-05 / sqrt(area), # Snail-to-human infection probability in reference area (adult worms/cercariae-hr); 
     #     divided by 24 to account for hourly scale of miracidial survival; average of best-fit twa lambda values
     #     from fitting procedure in Halstead et al, weighted by likelihood
     k=0.08,               # Clumping parameter of negative binomial distribution of worms in humans
@@ -667,6 +667,6 @@ for(i in 1:length(lambda.vec)){
     #treatment parameters
     cov=0.43, #coverage of treatment across the population, Lampsar I = 100/1000 =0.1 %, Lampsar II = 129/300 = 43%
     eff=0.95 # efficiency of the drug
-  )
+  )  
   
-  
+  r0.In(In = 0)
