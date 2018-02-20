@@ -43,7 +43,7 @@ parameters=c(
   
   # Predation parameters
   alpha = 0.02, # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; reduced by larger area
-  Th = 0.067,        # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
+  Th = 0.3,        # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
   nn = 1,            # exponent of the Holling's type III functional response
   
   # miracidia parameters
