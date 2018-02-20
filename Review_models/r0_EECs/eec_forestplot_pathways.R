@@ -558,7 +558,7 @@ tiff(paste('~/RemaisWork/Schisto/Agro_Review/Figures/EEC_forest/Pathways_forest_
              clip=c(-Inf,Inf),
              xlab = expression(paste(R['0'])),
              zero = r0.He()[3],
-             xticks = c(0, 1, 2, 3, 4, 5))
+             xticks = c(0, 1, 2, 3, 4))
   dev.off()
   
 #With relative change in r0 +/- SD at both EEC and 10% EEC values #########

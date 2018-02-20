@@ -14,7 +14,7 @@ load("Review_models/r0_EECs/eec_par_values_2-19-18.RData")
 load("Review_models/r0_EECs/eec10percent_par_values_2-19-18.RData")  
 
 source('Review_models/fin/r0_of_q_fin.R')
-  #r0.In()    #Check to make sure baseline r0 = 2.95
+  #r0.In()    #Check to make sure baseline r0 = 1.86
 
 today = Sys.Date()
 

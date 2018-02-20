@@ -614,6 +614,8 @@ for(i in 1:length(lambda.vec)){
   lines(lambda.vec, r0.lambda, type = 'l', lwd = 2, col = 2, lty = 2)
 
 # Re read Model parameters to make sure everything is set properly ##############
+  #Model parameters ##############
+  
   parameters=c(
     # Location parameters
     A = area,          # Area of site of interest, m^2
@@ -633,12 +635,12 @@ for(i in 1:length(lambda.vec)){
     # Predator pop dynamic parameters (from pred tweaking code)
     f_P = 0.117,         #Predator intrinsic recruitment rate assuming 30000 eggs per year and 1% survival from eggs to repro maturity
     #   from Adha-Ar et al 2016
-    phi_P = 0.15*area,   #Predator CC (0.125/m^2 from Sokolow et al realized predator density, discounted here for natural pop)
+    phi_P = 0.125*area,   #Predator CC (0.125/m^2 from Sokolow et al realized predator density, discounted here for natural pop)
     mu_P = 0.038,       #Predator mortality rate from Halstead et al paper
     
     # Predation parameters
-    alpha = 0.003/sqrt(area), # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; reduced by larger area
-    Th = 0.067,        # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
+    alpha = 0.02, # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; reduced by larger area
+    Th = 0.3,        # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
     nn = 1,            # exponent of the Holling's type III functional response
     
     # miracidia parameters
@@ -667,6 +669,6 @@ for(i in 1:length(lambda.vec)){
     #treatment parameters
     cov=0.43, #coverage of treatment across the population, Lampsar I = 100/1000 =0.1 %, Lampsar II = 129/300 = 43%
     eff=0.95 # efficiency of the drug
-  )  
+  )
   
   r0.In(In = 0)
