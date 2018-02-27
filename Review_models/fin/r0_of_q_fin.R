@@ -42,8 +42,8 @@ parameters=c(
   mu_P = 0.038,       #Predator mortality rate from Halstead et al paper
   
   # Predation parameters
-  alpha = 0.02, # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; reduced by larger area
-  Th = 0.3,        # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
+  alpha = 0.03, # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; reduced by larger area
+  Th = 0.5,        # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
   nn = 1,            # exponent of the Holling's type III functional response
   
   # miracidia parameters
@@ -594,6 +594,20 @@ plot(mun.dens, r0.mun, type = 'l', lwd = 2, xlab = 'snail mortality rate', ylab 
 parameters['mu_N'] = 0.017 #Reset reproductive rate to original
 
 
+#influence of cercarial hours exposure on r0 ###############
+pic.dens = seq(parameters['pi_C']/10, parameters['pi_C'], length.out = 100)
+r0.pic = as.numeric()
+
+for(i in 1:length(pic.dens)){
+  parameters['pi_C'] = pic.dens[i]
+  r0.pic[i] = r0.In(In = 0)[3]
+}
+
+plot(pic.dens, r0.pic, type = 'l', lwd = 2, xlab = 'cercariae hours exposure per day', ylab = 'R0')
+
+parameters['mu_N'] = 14.21 #Reset cercariae hours exposure to original
+
+
 #Influence of variable beta and lambda on r0 #################
 beta.vec = seq(1e-9, 1e-5, length.out = 1000)
   r0.beta = as.numeric()
@@ -639,8 +653,8 @@ for(i in 1:length(lambda.vec)){
     mu_P = 0.038,       #Predator mortality rate from Halstead et al paper
     
     # Predation parameters
-    alpha = 0.02, # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; reduced by larger area
-    Th = 0.3,        # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
+    alpha = 0.03, # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica; reduced by larger area
+    Th = 0.5,        # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
     nn = 1,            # exponent of the Holling's type III functional response
     
     # miracidia parameters
@@ -669,6 +683,5 @@ for(i in 1:length(lambda.vec)){
     #treatment parameters
     cov=0.43, #coverage of treatment across the population, Lampsar I = 100/1000 =0.1 %, Lampsar II = 129/300 = 43%
     eff=0.95 # efficiency of the drug
-  )
-  
+  )  
   r0.In(In = 0)
