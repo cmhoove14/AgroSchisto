@@ -5,7 +5,7 @@ Scripts for fitting dose-response functions relating agrochemical concentrations
 Plots of all data, fitted dose response functions, and results of sampling the d-r function with uncertainty  
 ## Data  
 Folder containing data extracted from studies identified in review  
-##Scripts  
+## Scripts  
 ### bakry2011_malathion_deltamethrin_snails_fit.R`  
 Data from [Bakry et al 2011](https://www.sciencedirect.com/science/article/pii/S0048357511001283) investigating effect of **malathion** and **deltamethrin** on *Helisoma duryi* snail mortality and reproduction  
 #### Data reported  
@@ -15,7 +15,7 @@ Data from [Bakry et al 2011](https://www.sciencedirect.com/science/article/pii/S
 + Tables 3,4,5: Physiological effects of exposure on enzymatic activity and biochemical measures  
 #### Response functions fit  
 + Daily mortality rate for *H. duryi* exposed to malathion
-![Daily snail mortality exposed to malathion]("Plots/Bakry_2011/bakry2011_malathion_snail_mortality.png")
+![Daily snail mortality exposed to malathion]("/Plots/Bakry_2011/bakry2011_malathion_snail_mortality.png")
 + Daily mortality rate for *H. duryi* exposed to deltamethrin  
 #### Notes
 + Longitudonal survival could be used to investigate effects of cumulative exposure with survival analysis
