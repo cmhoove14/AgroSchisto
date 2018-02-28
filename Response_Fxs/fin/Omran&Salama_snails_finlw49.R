@@ -28,9 +28,9 @@ ons = read.csv('~/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/Omran&Sa
   atr.lw = fitLWauto(atr.dat)
   fatr = LWestimate(atr.lw, atr.dat)
   
-    lc50.ons.atr = 40.1425 #fatr$LWest[1]
-    slp.ons.atr = 2.637754 #fatr$LWest[12]
-    se.lc50.ons.atr = 0.1459167 #log10(fatr$LWest[3]/lc50.ons.atr) / qnorm(0.975)
+    lc50.ons.atr = as.numeric(fatr$LWest[1]) #40.1425 
+    slp.ons.atr = as.numeric(fatr$LWest[12]) #2.637754 
+    se.lc50.ons.atr = as.numeric(log10(fatr$LWest[3]/lc50.ons.atr) / qnorm(0.975)) #0.1459167 
     
   ons.munq.atr = function(He){
     #if(In == 0) mun = 0 else{
@@ -42,12 +42,7 @@ ons = read.csv('~/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/Omran&Sa
     return(mun)
   }
   
-  plot(ons.atr$conc, ons.atr$mort, pch = 16, ylim = c(0,1), #xlim = c(0,1000),
-       xlab = 'atrazine (ppb)', ylab = c('mortality')) 
-    points(seq(0,500000,500), sapply(seq(0,500000,500), ons.munq.atr),
-           pch = 5, col = 4, cex = 0.5)
-    
-  plotDE(atr.dat)
+  plotDE(atr.dat, xlab = "Dose (ppm)")
   predLines(fatr)
   points(seq(0,500,1), sapply(seq(0,500000,1000), ons.munq.atr)*100,
          pch = 5, col = 4, cex = 0.5)
@@ -62,9 +57,9 @@ keep.ons.atr = c('ons.munq.atr', 'lc50.ons.atr', 'slp.ons.atr', 'se.lc50.ons.atr
   gly.lw = fitLWauto(gly.dat)
   fgly = LWestimate(gly.lw, gly.dat)
   
-  lc50.ons.gly = 118.709 #fgly$LWest[1]
-  slp.ons.gly = 3.847287 # fgly$LWest[12]
-  se.lc50.ons.gly = 0.1564323 #log10(fgly$LWest[3]/lc50.ons.gly) / qnorm(0.975)
+  lc50.ons.gly = as.numeric(fgly$LWest[1]) #118.709 
+  slp.ons.gly = as.numeric(fgly$LWest[12]) #3.847287  
+  se.lc50.ons.gly = as.numeric(log10(fgly$LWest[3]/lc50.ons.gly) / qnorm(0.975)) #0.1564323 
   
   ons.munq.gly = function(He){
     #if(In == 0) mun = 0 else{
@@ -75,11 +70,6 @@ keep.ons.atr = c('ons.munq.atr', 'lc50.ons.atr', 'slp.ons.atr', 'se.lc50.ons.atr
     
     return(mun)
   }
-  
-  plot(ons.gly$conc, ons.gly$mort, pch = 16, ylim = c(0,1), #xlim = c(0,1000),
-       xlab = 'glyphosate (ppb)', ylab = c('mortality')) 
-    points(seq(0,500000,500), sapply(seq(0,500000,500), ons.munq.gly),
-           pch = 5, col = 4, cex = 0.5)
   
   plotDE(gly.dat)
   predLines(fgly)

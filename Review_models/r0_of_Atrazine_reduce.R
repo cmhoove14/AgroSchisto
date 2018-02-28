@@ -16,7 +16,7 @@ source('Response_Fxs/fin/koprivnikar06_piC_beq_fin.R')
 source('Response_Fxs/fin/griggs08_piC_beq_fin.R')
 source('Response_Fxs/fin/Baxter_Rohr_Atrazine2011_fin.R')
 source('Response_Fxs/fin/rohr08_piC_atrOnly_fin.R')
-source('Response_Fxs/fin/Omran&Salama_snails_fin.R')
+source('Response_Fxs/fin/Omran&Salama_snails_finlw49.R')
 
 source('Review_models/fin/r0_of_q_fin.R')
 
@@ -24,7 +24,7 @@ library(parallel)
 library(reshape2)
 
 keep.fin.atr = c(keep.bak.atr, keep.grg08, keep.kop06.beq, keep.meta.piC, keep.baxrohr, keep.atr.rohr08, keep.ons.atr,
-                 'r0.He', 'r0.fix', 'parameters', 'nil0', 'nil1', 'keep.fin.atr')
+                 'r0.He', 'r0.fix', 'kmat', 'parameters', 'nil0', 'nil1', 'keep.fin.atr')
 
 rm(list = setdiff(ls(), keep.fin.atr))
 dev.off()
@@ -81,15 +81,15 @@ r0.atr.fix = data.frame(atr = c(atra.df$atra,
 r0.atr.fix.n0 = subset(r0.atr.fix, atr != 0)  
 
 #Run simulations of atrazine concentrations from 0 - 2000, start with individual functions then combine ################
-conc.atr = c(0:204)  #Concentration range to test (atrazine EEC = 102)
+conc.atr = seq(0, 204, length.out = 100)  #Concentration range to test (atrazine EEC = 102)
 nsims = 100       #Number of simulations to run
 parfx = c(piC.meta_atr_unc, fN.atr.bak.uncertainty, muNq_atr_Bakry12_uncertainty, phi_Nq_atr_baxrohr, #Functions corresponding to affected parameters
-          piC.grg08_atr_unc, piC.kop_atr_unc2, piC.atr.rohr08.lin, ons.munq.atr)  
+          piC.grg08_atr_unc, auc.kop.lin.atr0, piC.atr.rohr08.lin, ons.munq.atr)  
 
 clus1 = makeCluster(no.cores)
-clusterExport(clus1, c(keep.fin.atr, 'uniroot.all', 'rdrm', 'LL.2'))
+clusterExport(clus1, c(keep.fin.atr, 'uniroot.all', 'rdrm', 'LL.2', 'kmat'))
 
-r0.atr.fill = array(data = NA, dim = c(length(conc.atr), nsims, length(parfx)+2))
+r0.atr.fill = array(data = NA, dim = c(length(conc.atr), nsims, length(parfx)+3))
 
 clusterSetRNGStream(cl = clus1, iseed = 43093) #set cluster seed for reproducibility
 
@@ -98,7 +98,7 @@ clusterSetRNGStream(cl = clus1, iseed = 43093) #set cluster seed for reproducibi
     #individual parameters
     r0.atr.fill[, i, 1] = parSapply(clus1, conc.atr, r0.He, f.pi_Cq = piC.meta_atr_unc)[3,]
     r0.atr.fill[, i, 2] = parSapply(clus1, conc.atr, r0.He, f.pi_Cq = piC.grg08_atr_unc)[3,]
-    r0.atr.fill[, i, 3] = parSapply(clus1, conc.atr, r0.He, f.pi_Cq = piC.kop_atr_unc2)[3,]
+    r0.atr.fill[, i, 3] = parSapply(clus1, conc.atr, r0.He, f.pi_Cq = auc.kop.lin.atr0)[3,]
     r0.atr.fill[, i, 4] = parSapply(clus1, conc.atr, r0.He, f.pi_Cq = piC.atr.rohr08.lin)[3,]
     r0.atr.fill[, i, 5] = parSapply(clus1, conc.atr, r0.He, f.f_Nq = fN.atr.bak.uncertainty)[3,]
     r0.atr.fill[, i, 6] = parSapply(clus1, conc.atr, r0.He, f.mu_Nq = muNq_atr_Bakry12_uncertainty)[3,]
@@ -116,6 +116,11 @@ clusterSetRNGStream(cl = clus1, iseed = 43093) #set cluster seed for reproducibi
                                     f.mu_Nq = ons.munq.atr,
                                     f.pi_Cq = piC.atr.rohr08.lin,
                                     f.phi_Nq = phi_Nq_atr_baxrohr)[3,]
+    
+    #combined estimate 3: Omran and Salama snail data, no cercariae effect
+    r0.atr.fill[, i, 11] = parSapply(clus1, conc.atr, r0.He,
+                                     f.mu_Nq = ons.munq.atr,
+                                     f.phi_Nq = phi_Nq_atr_baxrohr)[3,]
   
     print(i)
   }
@@ -125,23 +130,48 @@ stopCluster(clus1)
 ########## Post process ############
 #median and IQR of r0 simulations #########
 #median r0
-atr.med.r0 = matrix(nrow = length(conc.atr), ncol = length(parfx)+2)
-  for(i in 1:(length(parfx)+2)){
-    atr.med.r0[,i] = apply(r0.atr.fill[ , , i], 1, median) / r0.He(0)[3] *100-100
-  }
-#25 %ile r0
-atr.med.r0.25 = matrix(nrow = length(conc.atr), ncol = length(parfx)+2)
-for(i in 1:(length(parfx)+2)){
-  atr.med.r0.25[,i] = apply(r0.atr.fill[ , , i], 1, quantile, probs = 0.25) / r0.He(0)[3] *100-100
-}
+  #raw r0 value
+    atr.med.r0 = matrix(nrow = length(conc.atr), ncol = length(parfx)+3)
+      for(i in 1:(length(parfx)+2)){
+        atr.med.r0[,i] = apply(r0.atr.fill[ , , i], 1, median)
+      }
+    
+  #change in r0 as a percent from baseline
+    atr.med.r0_percent = matrix(nrow = length(conc.atr), ncol = length(parfx)+3)
+    for(i in 1:(length(parfx)+2)){
+      atr.med.r0_percent[,i] = apply(r0.atr.fill[ , , i], 1, median) / r0.He(0)[3] *100-100
+    }
 
-#75 %ile r0
-atr.med.r0.75 = matrix(nrow = length(conc.atr), ncol = length(parfx)+2)
-for(i in 1:(length(parfx)+2)){
-  atr.med.r0.75[,i] = apply(r0.atr.fill[ , , i], 1, quantile, probs = 0.75) / r0.He(0)[3] *100-100
-}
+  #25 %ile r0
+    #raw r0 value
+      atr.med.r0.25 = matrix(nrow = length(conc.atr), ncol = length(parfx)+3)
+      for(i in 1:(length(parfx)+2)){
+        atr.med.r0.25[,i] = apply(r0.atr.fill[ , , i], 1, quantile, probs = 0.25)
+      }
 
-plot(c(0:204), atr.med.r0[,10], type= 'l', lwd = 2, xlab = 'atrazine (ppb)', ylab = 'delta r0 (%)',
+    #change in r0 as a percent from baseline
+      atr.med.r0.25_percent = matrix(nrow = length(conc.atr), ncol = length(parfx)+3)
+      for(i in 1:(length(parfx)+2)){
+        atr.med.r0.25_percent[,i] = apply(r0.atr.fill[ , , i], 1, quantile, probs = 0.25) / r0.He(0)[3] *100-100
+      }
+
+  #75 %ile r0
+    #raw r0 value
+      atr.med.r0.75 = matrix(nrow = length(conc.atr), ncol = length(parfx)+3)
+      for(i in 1:(length(parfx)+2)){
+        atr.med.r0.75[,i] = apply(r0.atr.fill[ , , i], 1, quantile, probs = 0.75)
+      }
+    #change in r0 as a percent from baseline
+      atr.med.r0.75_percent = matrix(nrow = length(conc.atr), ncol = length(parfx)+3)
+      for(i in 1:(length(parfx)+2)){
+        atr.med.r0.75_percent[,i] = apply(r0.atr.fill[ , , i], 1, quantile, probs = 0.75) / r0.He(0)[3] *100-100
+      }
+
+plot(conc.atr, atr.med.r0[,10], type= 'l', lwd = 2, xlab = 'atrazine (ppb)', ylab = 'delta r0 (%)', ylim = c(1.5, 2.5))
+      lines(conc.atr, atr.med.r0.25[,10], lty = 2)
+      lines(conc.atr, atr.med.r0.75[,10], lty = 2)
+      
+plot(conc.atr, atr.med.r0_percent[,10], type= 'l', lwd = 2, xlab = 'atrazine (ppb)', ylab = 'delta r0 (%)',
      ylim = c(-50,50))
-  lines(c(0:204), atr.med.r0.25[,10], lty = 2)
-  lines(c(0:204), atr.med.r0.75[,10], lty = 2)
+  lines(conc.atr, atr.med.r0.25_percent[,10], lty = 2)
+  lines(conc.atr, atr.med.r0.75_percent[,10], lty = 2)

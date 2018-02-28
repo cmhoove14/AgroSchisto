@@ -12,7 +12,7 @@
 require(forestplot)
 source('Review_models/fin/r0_of_q_fin.R')
 
-date = '2018-02-19'  #updated functions across the board
+date = '2018-02-20'  #updated functions across the board
 date000 = '2017-12-11'  #updated functions across the board
 date00 = '2017-11-27'  #runs as below, but with no implied 3rd data points for any d-r functions
 date0 = '2017-11-22'  #Runs with 5000 sims and median/IQR values & Glyphosate EEC = 3700
