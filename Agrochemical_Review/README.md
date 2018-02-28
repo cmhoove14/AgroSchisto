@@ -6,10 +6,10 @@ Folder containing all data, code, and resulting plots used to estimate and analy
 
 ### Code  
 Folder containing code used to fit dose-response functions  
-### Data  
-Folder containing data extracted from studies identified in review  
-### Plots  
+#### Plots  
 Plots of all data, fitted dose response functions, and results of sampling the d-r function with uncertainty  
+#### Data  
+Folder containing data extracted from studies identified in review  
 
 ## Models
 Mathematical model, $R_0(q)$ function, parameter sets, and uncertainty analysis
