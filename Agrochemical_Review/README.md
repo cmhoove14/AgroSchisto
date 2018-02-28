@@ -12,10 +12,10 @@ Plots of all data, fitted dose response functions, and results of sampling the d
 Folder containing data extracted from studies identified in review  
 
 ## Models
-Mathematical model, $R_0(q)$ function, parameter sets, and uncertainty analysis
+Mathematical model, R0(q) function, parameter sets, and uncertainty analysis
 ## Sims
-Code for simulating model and estimating $R_0$ in the presence of agrochemical pollution  
+Code for simulating model and estimating R0 in the presence of agrochemical pollution  
 ### EEC
-Simulations and results at each agrochemical's Expected Environmental Concentration ($EEC$)
+Simulations and results at each agrochemical's Expected Environmental Concentration (*EEC*)
 ### Range
-Simulations and results across a range of agrochemical concentrations from $0$ -- $2 \times EEC$
+Simulations and results across a range of agrochemical concentrations from 0 - 2*EEC

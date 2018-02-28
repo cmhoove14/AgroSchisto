@@ -9,9 +9,9 @@ Folder containing data extracted from studies identified in review
 ### bakry2011_malathion_deltamethrin_snails_fit.R`  
 Data from [Bakry et al 2011](https://www.sciencedirect.com/science/article/pii/S0048357511001283) investigating effect of **malathion** and **deltamethrin** on *Helisoma duryi* snail mortality and reproduction  
 #### Data reported  
-+ Table 1: $LC_{50}$, confidence limits of $LC_{50}$, slope function, $LC_{0}$, $LC_{10}$, $LC_{25}$, $LC_{90}$ corresponding to 24-hr mortality and estimated using litchfield and wilcoxon method for both malathion and deltamethrin
-+ Figure 2: Longitudinal survival of control snail cohort and snail cohorts exposed to $LC_{10}$ of malathion and deltamethrin
-+ Table 2: Longitudinal egg production of control snail cohort and snail cohorts exposed to $LC_{10}$ of malathion and deltamethrin
++ Table 1: LC50, confidence limits of LC50, slope function, LC0, LC10, LC25, LC90 corresponding to 24-hr mortality and estimated using litchfield and wilcoxon method for both malathion and deltamethrin
++ Figure 2: Longitudinal survival of control snail cohort and snail cohorts exposed to LC10 of malathion and deltamethrin
++ Table 2: Longitudinal egg production of control snail cohort and snail cohorts exposed to LC10 of malathion and deltamethrin
 + Tables 3,4,5: Physiological effects of exposure on enzymatic activity and biochemical measures  
 #### Response functions fit  
 + Daily mortality rate for *H. duryi* exposed to malathion
@@ -19,4 +19,4 @@ Data from [Bakry et al 2011](https://www.sciencedirect.com/science/article/pii/S
 + Daily mortality rate for *H. duryi* exposed to deltamethrin  
 #### Notes
 + Longitudonal survival could be used to investigate effects of cumulative exposure with survival analysis
-+ Snail reproduction (measured as eggs/snail at discrete times over a four week period) sharply reduced in snails exposed to $LC_{10}$ of malathion and deltamethrin, but only able to compare control group to each exposed group, therefore unable to fit dose-response function
++ Snail reproduction (measured as eggs/snail at discrete times over a four week period) sharply reduced in snails exposed to LC10 of malathion and deltamethrin, but only able to compare control group to each exposed group, therefore unable to fit dose-response function
