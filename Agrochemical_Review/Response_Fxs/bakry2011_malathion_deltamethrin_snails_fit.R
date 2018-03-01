@@ -52,3 +52,10 @@ muNq_mal_Bakry11_uncertainty = function(In){
   
   #keep vector
   keep.bak.del = c('muNq_del_Bakry11_uncertainty', 'lc50.bak.del.report', 'se.lc50.bak.del', 'slp.bak.del.report')    
+
+#Snail reproduction over time, not analyzed at this point because only control and single dose group
+bakry11<-read.csv('Agrochemical_Review/Response_Fxs/Data/bakry2011.csv')
+  bakry11_ctrl <-subset(bakry11, chem == "control")
+  bakry11_mal <-subset(bakry11, chem == "malathion")
+  bakry11_del <-subset(bakry11, chem == "deltamethrin")
+  

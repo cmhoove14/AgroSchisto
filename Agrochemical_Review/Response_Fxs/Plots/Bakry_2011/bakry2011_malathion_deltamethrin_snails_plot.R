@@ -11,8 +11,7 @@
 
 
 #Data extraction and model fitting to Bakry 2011 [Bakry et al 2011](https://www.sciencedirect.com/science/article/pii/S0048357511001283) data
-require(drc)
-source("Agrochemical_Review/Response_Fxs/Fit_Fxs/bakry2011_malathion_deltamethrin_snails_fit.R")
+source("Agrochemical_Review/Response_Fxs/bakry2011_malathion_deltamethrin_snails_fit.R")
 
 #Snail (H. duryi) toxicity ##########
 #Malathion data extracted from table 1 #####################
@@ -24,7 +23,7 @@ mun.mal = data.frame(conc = c(0, .176, .480, .830, 1.760, 3.360)*1000,
   mun.mal$ppmlog10 = log10(mun.mal$ppm)
   mun.mal$probit = qnorm(mun.mal$mort, mean = 5)
   
-png("Agrochemical_Review/Response_Fxs/Plots/bakry2011_malathion_snail_mortality.png")
+png("Agrochemical_Review/Response_Fxs/Plots/Bakry_2011/bakry2011_malathion_snail_mortality.png")
 
 plot(mun.mal$conc, mun.mal$mort, pch = 16, 
      xlab = 'Malathion (ppb)', ylab = expression(italic(mu[N])), ylim = c(0,1), xlim = c(0,5000),
@@ -48,7 +47,7 @@ mun.del = data.frame(conc = c(0, .482, 1.21, 2.034, 4.82, 7.26)*1000,
   mun.del$ppmlog10 = log10(mun.del$ppm)
   mun.del$probit = qnorm(mun.del$mort, mean = 5)
 
-png("Agrochemical_Review/Response_Fxs/Plots/bakry2011_deltamethrin_snail_mortality.png")  
+png("Agrochemical_Review/Response_Fxs/Plots/Bakry_2011/bakry2011_deltamethrin_snail_mortality.png")  
 
 plot(mun.del$conc, mun.del$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
      xlab = 'Deltamethrin (ppb)', ylab = expression(italic(mu[N])), 
@@ -61,48 +60,16 @@ plot(mun.del$conc, mun.del$mort, pch = 16, ylim = c(0,1), xlim = c(0,10000),
          pch = 5, col = 4, cex = 0.5)
   legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), legend = c("Reported", "Sampled"), cex = 0.75)
   
-#Now lets look at reproduction over time ###########
-  #The paper only provides mean eggs / snail over 4 weeks exposure to lc10 of each insecticide
-  #This isn't enough data to generate d-r function without some assumptions
-  #So we'll assume there's no reproduction at lc90 and fit 2-parameter logistic function with 1 degree freedom
-  #Values for controls are equal to the sum of mean eggs per day produced in the control up to the day where
-  #reproduction stops in the lc10 test groups (day4 for malathion, day 14 for deltamethrin)    
-bakry11<-read.csv('C:/Users/chris_hoover/Documents/RemaisWork/Schisto/Data/AgroData/Data/Snail Mortality/bakry2011.csv')
+dev.off()  
+#Reproduction over time ###########
+png("Agrochemical_Review/Response_Fxs/Plots/Bakry_2011/bakry2011_snail_reproduction.png")  
   
-#get mean eggs/snail/day across all time points for each treatment   
-  fn.ctrl11 = mean(bakry11$eggs_snail_day[bakry11$chem == 'control' & bakry11$surv != 0])  
-    fn.ctrl.sd11 = sd(bakry11$eggs_snail_day[bakry11$chem == 'control' & bakry11$surv != 0])
+  plot(bakry11_ctrl$time, bakry11_ctrl$eggs, type = 'b', pch = 16, ylim = c(0,max(bakry11_ctrl$eggs)), xlim = c(0,30),
+       xlab = 'time (days)', ylab = "eggs laid", 
+       main = 'Snail reproduction over time')
+    lines(bakry11_mal$time, bakry11_mal$eggs, type = 'b', pch = 16, col = 2)
+    lines(bakry11_del$time, bakry11_del$eggs, type = 'b', pch = 16, col = 4)
+
+  legend("topright", bty="n", lty = rep(1,3), col = c(1,2,4), legend = c("Control", "Malathion", "Deltamethrin"), cex = 0.75)
   
-  fn.mal = mean(bakry11$eggs_snail_day[bakry11$chem == 'malathion' & bakry11$surv != 0])  
-    fn.mal.sd = sd(bakry11$eggs_snail_day[bakry11$chem == 'malathion' & bakry11$surv != 0])
-      
-  fn.del = mean(bakry11$eggs_snail_day[bakry11$chem == 'deltamethrin' & bakry11$surv != 0])  
-    fn.del.sd = sd(bakry11$eggs_snail_day[bakry11$chem == 'deltamethrin' & bakry11$surv != 0])
-      
-#Functions that estimate parameter value in single concentration group #########
-    fNq_mal_Bakry11_uncertainty = function(waste){ #function based on snail egg masses
-      wst = waste
-      fN = rnorm(1, fn.mal, fn.mal.sd) / fn.ctrl11
-      while(fN < 0) fN = rnorm(1, fn.mal, fn.mal.sd) / fn.ctrl11
-      fN
-    }
-    
-    #hist(sapply(rep(1,1000), fNq_mal_Bakry11_uncertainty, simplify = T))
-    
-    fNq_del_Bakry11_uncertainty = function(waste){ #function based on snail hatchlings
-      wst = waste
-      fN = rnorm(1, fn.del, fn.del.sd) / fn.ctrl11
-      while(fN < 0) fN = rnorm(1, fn.del, fn.del.sd) / fn.ctrl11
-      fN
-    }  
-    
-    #hist(sapply(rep(1,1000), fNq_del_Bakry11_uncertainty, simplify = T))
-    
-  
-keep.bak.mal = c(keep.bak.mal, 'fNq_mal_Bakry11_uncertainty',
-                 'fn.mal', 'fn.mal.sd', 'fn.ctrl11')
-  
-  keep.bak.del = c(keep.bak.del, 'fNq_del_Bakry11_uncertainty',
-                   'fn.del', 'fn.del.sd', 'fn.ctrl11')  
-#full keep vector ###############  
-  keep.bak11.N = c(keep.bak.mal, keep.bak.del)
+dev.off()  
