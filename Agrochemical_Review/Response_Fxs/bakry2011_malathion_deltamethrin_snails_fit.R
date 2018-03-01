@@ -11,7 +11,6 @@
 
 
 #Data extraction and model fitting to Bakry 2011 [Bakry et al 2011](https://www.sciencedirect.com/science/article/pii/S0048357511001283) data
-require(drc)
 
 #Snail (H. duryi) toxicity ##########
 #Malathion reported LC50 and slope data #####################
@@ -53,7 +52,7 @@ muNq_mal_Bakry11_uncertainty = function(In){
   #keep vector
   keep.bak.del = c('muNq_del_Bakry11_uncertainty', 'lc50.bak.del.report', 'se.lc50.bak.del', 'slp.bak.del.report')    
 
-#Snail reproduction over time, not analyzed at this point because only control and single dose group
+#Snail reproduction over time, not analyzed at this point because only control and single dose group for each chemical
 bakry11<-read.csv('Agrochemical_Review/Response_Fxs/Data/bakry2011.csv')
   bakry11_ctrl <-subset(bakry11, chem == "control")
   bakry11_mal <-subset(bakry11, chem == "malathion")
