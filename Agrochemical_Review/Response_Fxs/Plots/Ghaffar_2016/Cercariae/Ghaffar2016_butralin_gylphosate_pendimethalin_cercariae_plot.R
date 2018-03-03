@@ -10,10 +10,11 @@
 #and indicate changes that were made.###############
 
 #Data extraction and model fitting to Ghaffar 2016 LARVAL (S.mansoni) data
-source("Agrochemical_Review/Response_Fxs/Ghaffar2016_butralin_gylphosate_pendimethalin_cercariae_fit.R")
+source("Agrochemical_Review/Response_Fxs/Ghaffar2016_butralin_glyphosate_pendimethalin_cercariae_fit.R")
 
 #butralin cercariae raw data ###############
 png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Cercariae/Ghaffar_2016_raw_cercariae_mortality_data_butralin.png")
+
   plot(cer.ctrl$time_hrs, cer.ctrl$surv, ylim = c(0,1), xlim = c(0,24), pch=16, 
        xlab = 'time(hrs)', ylab = 'prop surviving')
     lines(time, L.3.fx(lc50 = gaf.ctrl.drc.cer$coefficients[2], slp = gaf.ctrl.drc.cer$coefficients[1], t = time), lty = 2)
@@ -31,7 +32,8 @@ png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Cercariae/Ghaffar_2016_
 dev.off()  
 
 #Fitted d-r function parameters ###########
-png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Cercariae/Ghaffar_2016_fitted_d-r_parameters_and_functions_butralin.png")
+png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Cercariae/Ghaffar_2016_fitted_d-r_parameters_and_functions_cercariae_butralin.png")
+
   plot(but.cer$butralin, but.cer$e, pch = 16, xlab = 'butralin (ppb)', 
        ylab = 'LL.2 Parameters (cercariae)', ylim = c(0,10))
   
@@ -106,7 +108,7 @@ png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Cercariae/Ghaffar_2016_
 dev.off()
 
 #Fitted d-r function parameters ########
-png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Cercariae/Ghaffar_2016_fitted_d-r_parameters_and_functions_glyphosate.png")
+png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Cercariae/Ghaffar_2016_fitted_d-r_parameters_and_functions_cercariae_glyphosate.png")
 
 plot(gly.cer$glyphosate, gly.cer$e, pch = 16, xlab = 'glyphosate (ppb)', 
      ylab = 'LL.2 Parameters (cercariae)', ylim = c(0,6))
@@ -161,7 +163,7 @@ set.seed(43093)
   
 dev.off()
 #pendimethalin cercariae raw data ###############
-png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Cercariae/Ghaffar_2016_raw_cercariae_mortality_data_pendimethalin.png")
+png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Cercariae/Ghaffar_2016_raw_cercariae_mortality_data_cercariae_pendimethalin.png")
 
 plot(cer$time_hrs[cer$conc==0], cer$surv[cer$conc==0], 
      pch=16, xlab = 'time(hrs)', ylab = 'prop surviving', ylim = c(0,1), xlim = c(0,24))
