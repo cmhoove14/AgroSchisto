@@ -20,6 +20,7 @@ mun.bak.prq = data.frame(conc = c(0, 1.1, 2.3, 4.4)*1000,
   mun.bak.prq$probit = qnorm(mun.bak.prq$mort, mean = 5)
 
 png("Agrochemical_Review/Response_Fxs/Plots/Bakry_2016/bakry2016_paraquat_snail_mortality.png")  
+
   plot(mun.bak.prq$conc, mun.bak.prq$mort, ylim = c(0,1), xlim = c(0,5000),
        pch = 16, xlab = 'paraquat (ppb)', ylab = expression(italic(mu[N])),
        main = 'Bakry et al 2016 paraquat snail mortality')

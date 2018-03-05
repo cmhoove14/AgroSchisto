@@ -15,17 +15,17 @@ source("Agrochemical_Review/Response_Fxs/bakry2012_atrazine_glyphosate_snails_fi
 #direct snail toxicity from paraquat ############  
   lc50.bak.prq.report = 2.3
   slp.bak.prq.report = 1.5
-
+  b1.bak.prq = get_b1(slp.bak.prq.report)
   #NO STANDARD ERROR REPORTED SO BORROW UNCERTAINTY FROM BAKRY 2012 ATRAZINE STUDY
   se.lc50.bak.prq = se.lc50.bak.atr
 
   muNq_prq_Bakry16_uncertainty = function(He){
     heu = (He/1000)
     lc50 = 10^(rnorm(1, log10(lc50.bak.prq.report), se.lc50.bak.prq))
-      mun = pnorm((slp.bak.prq.report) * log10(heu/lc50))
+      mun = pnorm(b1.bak.prq * log10(heu/lc50))
    
     return(mun)
   }
   
 #keep vector
-keep.bak.prq = c('muNq_prq_Bakry16_uncertainty', 'lc50.bak.prq.report', 'se.lc50.bak.prq', 'slp.bak.prq.report')    
+keep.bak.prq = c('muNq_prq_Bakry16_uncertainty', 'lc50.bak.prq.report', 'se.lc50.bak.prq', 'b1.bak.prq')    

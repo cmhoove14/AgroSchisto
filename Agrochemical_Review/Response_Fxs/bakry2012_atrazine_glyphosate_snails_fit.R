@@ -9,10 +9,12 @@
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
 
+source("Agrochemical_Review/Models/litchfield_wilcoxon_get_b1_from_slope.R")
+
 #direct snail toxicity from Atrazine ############  
 lc50.bak.atr.report = 1.25
 slp.bak.atr.report = 2.48
-
+b1.bak.atr = get_b1(slp.bak.atr.report)
 #Get standard error of reported LC50 based on 95%CI
   se.lc50.bak.atr = mean(c(log10(1.88 / lc50.bak.atr.report), log10(lc50.bak.atr.report / 0.83))) / 1.96
   
@@ -21,34 +23,35 @@ slp.bak.atr.report = 2.48
     Heu = (He/1000) #Parameters based on ppm, data input as ppb
     lc50 = 10^(rnorm(1, log10(lc50.bak.atr.report), se.lc50.bak.atr)) #Estimate lc50 with uncertainty and backtransform from log10 scale
     
-    mun = pnorm((slp.bak.atr.report) * log10(Heu/lc50)) #Estimate daily mortality (percent)
+    mun = pnorm(b1.bak.atr * log10(Heu/lc50)) #Estimate daily mortality (percent)
     
     return(mun)
   }
 
 #keep vector
-keep.bak.atr = c('muNq_atr_Bakry12_uncertainty', 'lc50.bak.atr.report', 'se.lc50.bak.atr', 'slp.bak.atr.report')    
+keep.bak.atr = c('muNq_atr_Bakry12_uncertainty', 'lc50.bak.atr.report', 'se.lc50.bak.atr', 'b1.bak.atr')    
 
 #direct snail toxicity from Glyphosate ############  
 lc50.bak.gly.report = 3.15
 slp.bak.gly.report = 2.16
+b1.bak.gly = get_b1(slp.bak.gly.report)
 
 #Get standard error of reported LC50 based on 95%CI
   se.lc50.bak.gly = log10(4.82 / lc50.bak.gly.report) / 1.96 
-  #Lower limit excluded from this estimate as upper limit leads to more sensible estimate of SE, lower limit it way out of range, assuming a manuscript typo or misprint
+  #Lower limit excluded from this estimate as upper limit leads to more sensible estimate of SE, lower limit it way out of range. Assuming a manuscript typo or misprint
 
 #Create function based on reverse of litchfield and wilcoxon      
 muNq_gly_Bakry12_uncertainty = function(He){
   Heu = (He/1000) #Parameters based on ppm, data input as ppb
   lc50 = 10^(rnorm(1, log10(lc50.bak.gly.report), se.lc50.bak.gly)) #Estimate lc50 with uncertainty and backtransform from log10 scale
   
-  mun = pnorm((slp.bak.gly.report) * log10(Heu/lc50)) #Estimate daily mortality (percent)
+  mun = pnorm(b1.bak.gly * log10(Heu/lc50)) #Estimate daily mortality (percent)
   
   return(mun)
 }
 
 #keep vector
-keep.bak.gly = c('muNq_gly_Bakry12_uncertainty', 'lc50.bak.gly.report', 'se.lc50.bak.gly', 'slp.bak.gly.report')    
+keep.bak.gly = c('muNq_gly_Bakry12_uncertainty', 'lc50.bak.gly.report', 'se.lc50.bak.gly', 'b1.bak.gly')    
 
 #Snail reproduction over time, not analyzed at this point because only control and single dose group for each chemical ######
 bakry12<-read.csv('Agrochemical_Review/Response_Fxs/Data/bakry2012.csv')
