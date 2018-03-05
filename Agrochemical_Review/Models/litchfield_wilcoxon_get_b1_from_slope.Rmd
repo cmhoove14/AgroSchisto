@@ -116,7 +116,8 @@ plot(pars[,2], pars[,1], pch = 16, cex = 1.2, xlim = c(0,45), ylim = c(0,100),
   points(dr$dose, (dr$nfx/dr$ntot)*100, pch = 17, col = 2)
   predLines(fLW)
   
-  lines(c(0:45), dr_fx(c(0:45), s = 2*slp, lc50 = lc50[2])*100, lty = 2, col = 4)
+  lines(c(0:45), dr_fx(c(0:45), s = slp, lc50 = lc50[2])*100, lty = 2, col = 4)
+  legend("topleft", legend = c("Actual function", "Estimated function"), lty = c(1,2), col = c(1,4), bty = "n", cex = 0.7)
 ```
 
 We can estimate the slope of the underlying linear model, $b_1$, given the slope parameter, $S$ using some algebra:
@@ -138,12 +139,32 @@ LC_{16} & =\frac{LC_{50}}{10^{\frac{-probit(0.16)}{b_1}}} \\
 \end{align}  
 
 ```{r}
-get_b1 <- function(lc50, slp){
-  uniroot.all(f = function(b1){2*slp*lc50*(lc50 / 10^(-qnorm(.16)/b1)) - (10^(qnorm(.84)/b1) * lc50)*(lc50 / 10^(-qnorm(.16)/b1)) - lc50^2}, interval = c(0, slp*10), n = 1e6)
+get_b1 <- function(slp){
+  uniroot.all(f = function(b1){2*slp / 10^(-qnorm(.16)/b1) - (10^(qnorm(.84)/b1) / 10^(-qnorm(.16)/b1)) - 1}, interval = c(0, slp*10), n = 1e6)
 }
 
-get_b1(lc50 = 19.21364, slp = 1.920837)
+get_b1(slp = slp)
 
 intslope[2]
 ```
 
+```{r}
+b1<- get_b1(slp = slp)
+
+dr_fx_b1 <- function(d, b1, lc50){
+    pnorm(b1 * log10(d/lc50))
+  }
+
+
+plot(pars[,2], pars[,1], pch = 16, cex = 1.2, xlim = c(0,45), ylim = c(0,100),
+     xlab = "Dose", ylab = "pct affected")
+  points(dr$dose, (dr$nfx/dr$ntot)*100, pch = 17, col = 2)
+  predLines(fLW)
+  
+  lines(c(0:45), dr_fx_b1(c(0:45), b1 = b1, lc50 = lc50[2])*100, lty = 2, col = 4, lwd = 2)
+  lines(c(0:45), dr_fx_b1(c(0:45), b1 = b1, lc50 = lc50[3])*100, lty = 3, col = 4)
+  lines(c(0:45), dr_fx_b1(c(0:45), b1 = b1, lc50 = lc50[4])*100, lty = 3, col = 4)
+legend("topleft", legend = c("Actual function", "Estimated function"), lty = c(1,2), col = c(1,4), bty = "n", cex = 0.7)
+```
+
+Doesn't do a perfect job of reproducing uncertainty because only variability comes from 95% CI of $LC_{50}$ parameter
