@@ -15,7 +15,7 @@ source("Agrochemical_Review/Models/litchfield_wilcoxon_get_b1_from_slope.R")
 #Snail (H. duryi) toxicity ##########
 #Malathion reported LC50 and slope data #####################
   lc50.bak.mal.report = 1.760
-  slp.bak.mal.report = 2.74
+  slp.bak.mal.report = 2.68
   b1.bak.mal = get_b1(slp.bak.mal.report)
   #get standard error from reported 95% CIs of lc50
       se.lc50.bak.mal = mean(c(log10(3.12/lc50.bak.mal.report), log10(lc50.bak.mal.report/0.99))) / 1.96
