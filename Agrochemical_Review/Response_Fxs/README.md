@@ -92,3 +92,18 @@ Data from [Abdel Ghaffar et al 2016](http://www.bioone.org/doi/abs/10.4002/040.0
 + Cercarial survival as a function of pendimethalin concentration, produced via estimation of LC50 and slope parameters as a function of butralin concentration incorporated into log-logistic d-r curve. See [INSERT LINK TO LARVAL SURVIVAL DYNAMICS EXPLANATION HERE](link.linkylink.com)  
   + Function: `piC.ghaf_pen.exp_unc`
   + Sampling and data: [Raw data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Miracidia/Ghaffar_2016_raw_miracidia_mortality_data_pendimethalin.png), [Parameter models](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Miracidia/Ghaffar_2016_fitted_d-r_parameters_and_functions_miracidia_pendimethalin.png), [Sampling and observed data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Miracidia/Ghaffar_2016_function_simulate_miracidia_pendimethalin.png)  
+  
+### `Ghaffar2016_butralin_glyphosate_pendimethalin_snails_fit.R`  
+Data from [Abdel Ghaffar et al 2016](http://www.bioone.org/doi/abs/10.4002/040.059.0201) investigating effect of **butralin**, **glyphosate**, and **pendimethalin** on *Biomphalaria alexandrina* snails  
+#### Data reported  
++ Table 1: 24-hr LC0, LC10, LC25, LC50, LC50 95%CI, LC90, LC90 95%CI, and "Slope of refression mortality on conc."  
++ This data is highly questionable and reproducing dose-response relationships from it has not been completed. Cited method is Litchfield and Wilcoxon, but methods to reproduce d-r function from reported Litchfield and Wilcoxon parameters in other studies from the same authors are not working here. Almost seems like they the reported parameters come from a linear relationship fit to % mortality and concentration  
+
+### `griggs08_atrazine_metolachlor_cercariae_fit.R`  
+Data from [Griggs et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/17763881) investigating effects of **atrazine** and **metloachlor** on *Echinistoma trivolvis* cercariae  
+#### Data reported  
++ Fig 1: cercarial die off over time in water control, solvent control, low dose group, and high dose group. Low dose group contains 10ppb metolachlor **and** 15ppb atrazine; high dose group contains 85ppb metolachlor **and** 100ppb atrazine therefore other studies that estimate response to these chemicals alone and in schistosome (rather than *Echistoma*) will be prioritized  
+#### Response functions fit  
++ cercarial survival as a function of metolachlor/atrazine concentration, produced via estimation of LC50 and slope parameters as a function of metolachlor/atrazine concentration incorporated into log-logistic d-r curve. See [INSERT LINK TO LARVAL SURVIVAL DYNAMICS EXPLANATION HERE](link.linkylink.com)  
+  + Function: `piC.grg08_atr_unc2`
+  + Sampling and data: [Raw data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Griggs2008/Griggs2008_raw_cercariae_mortality_data_atrazine.png), [Parameter models](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Griggs2008/Griggs2008_fitted_d-r_parameters_and_functions_cercariae_atrazine.png), [Sampling and observed data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Griggs2008/Griggs2008_function_simulate_cercariae_atrazine.png)  
