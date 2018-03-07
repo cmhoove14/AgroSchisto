@@ -107,3 +107,32 @@ Data from [Griggs et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/17763881) inve
 + cercarial survival as a function of metolachlor/atrazine concentration, produced via estimation of LC50 and slope parameters as a function of metolachlor/atrazine concentration incorporated into log-logistic d-r curve. See [INSERT LINK TO LARVAL SURVIVAL DYNAMICS EXPLANATION HERE](link.linkylink.com)  
   + Function: `piC.grg08_atr_unc2`
   + Sampling and data: [Raw data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Griggs2008/Griggs2008_raw_cercariae_mortality_data_atrazine.png), [Parameter models](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Griggs2008/Griggs2008_fitted_d-r_parameters_and_functions_cercariae_atrazine.png), [Sampling and observed data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Griggs2008/Griggs2008_function_simulate_cercariae_atrazine.png)  
+
+### `Halstead2015_insecticides_predators_fit.R`  
+Data from [Halstead et al 2015](https://www.sciencedirect.com/science/article/pii/S0045653515003410?via%3Dihub) investigating effects of **malathion**, **chlorpyrifos**, **terbufos**, **esfenvalerate**, **lambda-cyhalothrin**, and **permethrin** on *Procambarus clarkii* (crayfish) adults  
+#### Data reported  
++ Received the raw data from Neal Halstead (lead author), but could also extract the data from Fig 1  
+  + Data for 4-day and 10-day mortality endpoints  
+  
+#### Response functions fit  
++ For each insecticide, 4-day mortality as a function of insecticide concentration  
+  + malathion  
+    + function: `muPq_mal_Halstead_uncertainty`  
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead2015/halstead2015_malathion_predator_mortality.png)  
+  + chlorpyrifos  
+    + function: `muPq_chlor_Halstead_uncertainty`  
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead2015/halstead2015_chlorpyrifos_predator_mortality.png)  
+  + terbufos  
+    + function: `muPq_terb_Halstead_uncertainty`  
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead2015/halstead2015_terbufos_predator_mortality.png)  
+  + esfenvalerate  
+    + function: `muPq_esfen_Halstead_uncertainty`  
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead2015/halstead2015_esfenvalerate_predator_mortality.png)  
+  + lambda-cyhalothrin  
+    + function: `muPq_lamcy_Halstead_uncertainty`  
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead2015/halstead2015_lamcy_predator_mortality.png)  
+  + permethrin  
+    + function: `muPq_perm_Halstead_uncertainty`  
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead2015/halstead2015_permethrin_predator_mortality.png)  
+    
+###     
