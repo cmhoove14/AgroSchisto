@@ -12,29 +12,41 @@
 #Data extraction and model fitting to Ghaffar 2016 SNAIL (B. alexandrina) data
 require(drc)
 require(LW1949)
+source("Agrochemical_Review/Models/litchfield_wilcoxon_get_b1_from_slope.R")
 
 #Snail (30 B. alexandrina 6-8mm shell width) toxicity ##########
 #Butralin ##############
-but.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
-                     butralin = c(0, 556, 2417, 3906, 5560, 8703))
-but.dat.no0 = subset(but.dat, lcs!=0)
+but.dat = data.frame(lcs = c(0, 10, 25, 50, 90),
+                     butralin = c(556, 2417, 3906, 5560, 8703))
+  but.dat.no0 = subset(but.dat, lcs!=0)
   but.dat.no0$mort = but.dat.no0$lcs/100
-  but.dat.no0$probit = qnorm(but.dat.no0$lcs/100, mean = 5, sd = 1)
+  but.dat.no0$probit = qnorm(but.dat.no0$lcs/100)
   but.dat.no0$ppm = but.dat.no0$butralin/1000
   but.dat.no0$ppmlog10 = log10(but.dat.no0$butralin/1000)
   but.dat.no0$ppmlog = log(but.dat.no0$butralin/1000)
+
+  plot(but.dat$butralin/1000, but.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,13),
+       xlab = 'Butralin (ppm)', ylab = 'snail mortality rate')
+  
+  but.gaf.mod <- lm(mort ~ ppm, data = but.dat.no0)
+    abline(but.gaf.mod, lty = 2)
+    but.gaf.mod.lc84 = ((84/100) - coef(but.gaf.mod)[1])/coef(but.gaf.mod)[2]
+    but.gaf.mod.lc50 = ((50/100) - coef(but.gaf.mod)[1])/coef(but.gaf.mod)[2]
+    but.gaf.mod.lc16 = ((16/100) - coef(but.gaf.mod)[1])/coef(but.gaf.mod)[2]
+  
+  slp.manual = (but.gaf.mod.lc84/but.gaf.mod.lc50 + but.gaf.mod.lc50/but.gaf.mod.lc16)/2
   
   lc50.gaf.but.report = 5.56
-  slp.gaf.but.report = exp(1.093) #reported slp of 1.093 is unreasonable, assume they didn't transform back from log scale
+  slp.gaf.but.report = 1.093 #reported slp of 1.093 is unreasonable, assume they didn't transform back from log scale
+  b1.gaf.but = get_b1(slp.gaf.but.report)
   #get standard error from reported 95% CIs of lc50
-  se.lc50.gaf.but = mean(c(log(8.34/lc50.gaf.but.report), log(lc50.gaf.but.report/3.7))) / 1.96
-  
+    se.lc50.gaf.but = mean(c(log10(8.34/lc50.gaf.but.report), log10(lc50.gaf.but.report/3.7))) / 1.96
+    
   mu_Nq_butr_gaf16_uncertainty = function(He){
-    # if(He == 0) mun = 0 else{
     heu = (He/1000)
-    lc50 = exp(rnorm(1, log(lc50.gaf.but.report), se.lc50.gaf.but))
-    mun = pnorm((slp.gaf.but.report) * log(heu/lc50))
-    #  }
+    lc50 = 10^(rnorm(1, log10(lc50.gaf.but.report), se.lc50.gaf.but))
+    mun = pnorm(b1.gaf.but * log10(heu/lc50))
+
     return(mun)
   }
   
@@ -55,21 +67,22 @@ keep.gaf.but = c('mu_Nq_butr_gaf16_uncertainty',
 gly.dat = data.frame(lcs = c(0, 0, 10, 25, 50, 90),
                      glyphosate = c(0, 1506, 3875, 9174, 15062, 26249))
 
-gly.dat.no0 = subset(gly.dat, lcs!=0)
+  gly.dat.no0 = subset(gly.dat, lcs!=0)
   gly.dat.no0$probit = qnorm(gly.dat.no0$lcs/100, mean = 5, sd = 1)
   gly.dat.no0$ppm = gly.dat.no0$glyphosate/1000
   gly.dat.no0$ppmlog10 = log10(gly.dat.no0$glyphosate/1000)
-
+  
   lc50.gaf.gly.report = 15.062
-  slp.gaf.gly.report = exp(0.335)
-  se.lc50.gaf.gly = log(16.57/lc50.gaf.gly.report) / 1.96
+  slp.gaf.gly.report = 0.335
+  b1.gaf.gly = get_b1(exp(slp.gaf.gly.report))
+  
+  se.lc50.gaf.gly = log10(16.57/lc50.gaf.gly.report)  / 1.96
   
   mu_Nq_gly_gaf16_uncertainty = function(He){
-      # if(He == 0) mun = 0 else{
       heu = He/1000
       lc50 = exp(rnorm(1, log(lc50.gaf.gly.report), se.lc50.gaf.gly))
-      mun = pnorm((slp.gaf.gly.report) * log(heu / lc50))
-      # }
+      mun = pnorm(b1.gaf.gly * log(heu / lc50))
+
       return(mun)
     }
 
@@ -95,15 +108,16 @@ pen.dat.no0 = subset(pen.dat, lcs!=0)
   pen.dat.no0$ppmlog10 = log10(pen.dat.no0$pendimethalin/1000)
     
   lc50.gaf.pen.report = 2.148
-  slp.gaf.pen.report = (1.820) #non-transformed slope function here is the only one that makes sense
+  slp.gaf.pen.report = 1.820 #non-transformed slope function here is the only one that makes sense
+  b1.gaf.pen = get_b1(slp.gaf.pen.report)
+  
   se.lc50.gaf.pen = mean(c(log(3.22/lc50.gaf.pen.report), log(lc50.gaf.pen.report/1.43))) / 1.96
   
   mu_Nq_pen_gaf16_uncertainty = function(He){
-    # if(He == 0) mun = 0 else{
     heu = He/1000
     lc50 = exp(rnorm(1, log(lc50.gaf.pen.report), se.lc50.gaf.pen))
-    mun = pnorm((slp.gaf.pen.report) * log(heu / lc50))
-    # }
+    mun = pnorm(slp.gaf.pen.report * log(heu / lc50))
+
     return(mun)
   }
   
