@@ -48,9 +48,6 @@ ons.munq.atr = function(He){
     heu = log10((He/1000) + 1)
     init = predict(lm.ons.atr, newdata = data.frame(ppmlog10 = heu), se.fit = T)
     est = rnorm(1, init$fit, init$se.fit)
-  while(est < 0){
-    est = rnorm(1, init$fit, init$se.fit)
-  }
     mun = pnorm(est, mean = 5)
   return(mun)
 } 
