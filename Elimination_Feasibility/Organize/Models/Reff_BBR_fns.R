@@ -79,6 +79,13 @@ bouncebackRate<-function(W2, t2, W1, t1){
   bbr
 }
 
+#Prevalence function given W and k ##################################
+Prevalence <- function(W, k) {
+  p=1 - (1/(1+W/k)^(k))*(1+W/(1+W/k)) # fraction of humans with at least 2 parasites
+  return(p)
+}
+
+
 ### Obtain the negative binomial distribution for worm burden #####
 #The ecological model for the neg bin prob 
 # i number of parasites per person
