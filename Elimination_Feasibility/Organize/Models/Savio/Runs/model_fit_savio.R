@@ -345,9 +345,9 @@ subsample <- 10
 traceBurnbeta <- traceBurn[,1]
 traceBurnlamda1 <- traceBurn[,2]
 traceBurnlamda2 <- traceBurn[,3]
-traceBurnAndThinbeta <- traceBurnR0[seq(1,length(traceBurnbeta),subsample)]
-traceBurnAndThinlamda1 <- traceBurnD[seq(1,length(traceBurnlamda1),subsample)]
-traceBurnAndThinlamda2 <- traceBurnD[seq(1,length(traceBurnlamda2),subsample)]
+traceBurnAndThinbeta <- traceBurnbeta[seq(1,length(traceBurnbeta),subsample)]
+traceBurnAndThinlamda1 <- traceBurnAndThinlamda1[seq(1,length(traceBurnlamda1),subsample)]
+traceBurnAndThinlamda2 <- traceBurnAndThinlamda2[seq(1,length(traceBurnlamda2),subsample)]
 traceBurnAndThin <- cbind(traceBurnAndThinbeta, traceBurnAndThinlamda1, traceBurnAndThinlamda2)
 traceBurnAndThin <- mcmc(traceBurnAndThin)
 plot(traceBurnAndThin)
