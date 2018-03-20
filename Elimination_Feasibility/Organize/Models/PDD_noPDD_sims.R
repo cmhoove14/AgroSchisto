@@ -25,6 +25,11 @@ load("Elimination_Feasibility/Organize/Models/Outputs_Refs/trans_pars_eqbms_k_0.
 load("Elimination_Feasibility/Organize/Models/Outputs_Refs/trans_pars_eqbms_k_0.08noPdd.addNDD.Rdata")
 load("Elimination_Feasibility/Organize/Models/Outputs_Refs/trans_pars_eqbms_k_0.08withPdd.addNDD.Rdata")
 
+Prevalence <- function(W, k) {
+  p=1 - (1/(1+W/k)^(k))*(1+W/(1+W/k)) # fraction of humans with at least 2 parasites
+  return(p)
+}
+
 # next create 100 models with these beta, lamda combinations and run with DD, get 100 BBrate curves
 cov = 0.8  # 80% coverage
 eff = 0.94 # 94% efficacy from the Egg reduction rate reported for S. haematobium in <http://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0003286>
@@ -55,6 +60,17 @@ mda.events = data.frame(var = rep('Wt', length(mda.years)),
   w.pre.k008.mda1.pdd.addNDD = array(data = NA, dim = c(nrow(shortlist_first100), length(mda.years)))
   w.pos.k008.mda1.pdd.addNDD = array(data = NA, dim = c(nrow(shortlist_first100), length(mda.years)))
   
+#Vector of Prev-pre and Prev-pos values for non-NDD added models
+  prev.pre.k008.mda1 = array(data = NA, dim = c(nrow(shortlist_first100), length(mda.years)))
+  prev.pos.k008.mda1 = array(data = NA, dim = c(nrow(shortlist_first100), length(mda.years)))
+  prev.pre.k008.mda1.pdd = array(data = NA, dim = c(nrow(shortlist_first100), length(mda.years)))
+  prev.pos.k008.mda1.pdd = array(data = NA, dim = c(nrow(shortlist_first100), length(mda.years)))
+
+#Vector of Prev-pre and Prev-pos values for NDD added models
+  prev.pre.k008.mda1.addNDD = array(data = NA, dim = c(nrow(shortlist_first100), length(mda.years)))
+  prev.pos.k008.mda1.addNDD = array(data = NA, dim = c(nrow(shortlist_first100), length(mda.years)))
+  prev.pre.k008.mda1.pdd.addNDD = array(data = NA, dim = c(nrow(shortlist_first100), length(mda.years)))
+  prev.pos.k008.mda1.pdd.addNDD = array(data = NA, dim = c(nrow(shortlist_first100), length(mda.years)))
   
 params<-pars_Chris1
   params["cov"]<-cov
@@ -76,6 +92,8 @@ for(y in 1:nrow(shortlist_first100)){
     for(i in mda.years){
       w.pre.k008.mda1[y,i] = cov*det.runs.k008.mda1[(i*365), 5, y, 1] + (1-cov) * det.runs.k008.mda1[(i*365), 6, y, 1]
       w.pos.k008.mda1[y,i] = cov*det.runs.k008.mda1[(i*365+1), 5, y, 1] + (1-cov) * det.runs.k008.mda1[(i*365+1), 6, y, 1]
+      prev.pre.k008.mda1[y,i] = Prevalence(w.pre.k008.mda1[y,i], k.fit)
+      prev.pos.k008.mda1[y,i] = Prevalence(w.pos.k008.mda1[y,i], k.fit)
     } 
   
 #No PDD add NDDs  
@@ -90,6 +108,8 @@ for(y in 1:nrow(shortlist_first100)){
     for(i in mda.years){
       w.pre.k008.mda1.addNDD[y,i] = cov*det.runs.k008.mda1[(i*365), 5, y, 2] + (1-cov) * det.runs.k008.mda1[(i*365), 6, y, 2]
       w.pos.k008.mda1.addNDD[y,i] = cov*det.runs.k008.mda1[(i*365+1), 5, y, 2] + (1-cov) * det.runs.k008.mda1[(i*365+1), 6, y, 2]
+      prev.pre.k008.mda1.addNDD[y,i] = Prevalence(w.pre.k008.mda1.addNDD[y,i], k.fit)
+      prev.pos.k008.mda1.addNDD[y,i] = Prevalence(w.pos.k008.mda1.addNDD[y,i], k.fit)
     } 
 
 #With PDD, no added NDDs    
@@ -105,6 +125,8 @@ for(y in 1:nrow(shortlist_first100)){
   for(i in mda.years){
     w.pre.k008.mda1.pdd[y,i] = cov*det.runs.k008.mda1[(i*365), 5, y, 3] + (1-cov) * det.runs.k008.mda1[(i*365), 6, y, 3]
     w.pos.k008.mda1.pdd[y,i] = cov*det.runs.k008.mda1[(i*365+1), 5, y, 3] + (1-cov) * det.runs.k008.mda1[(i*365+1), 6, y, 3]
+    prev.pre.k008.mda1.pdd[y,i] = Prevalence(w.pre.k008.mda1.pdd[y,i], k.fit)
+    prev.pos.k008.mda1.pdd[y,i] = Prevalence(w.pre.k008.mda1.pdd[y,i], k.fit)
   } 
   
 #With PDD And added NDDs    
@@ -120,6 +142,8 @@ for(y in 1:nrow(shortlist_first100)){
   for(i in mda.years){
     w.pre.k008.mda1.pdd.addNDD[y,i] = cov*det.runs.k008.mda1[(i*365), 5, y, 4] + (1-cov) * det.runs.k008.mda1[(i*365), 6, y, 4]
     w.pos.k008.mda1.pdd.addNDD[y,i] = cov*det.runs.k008.mda1[(i*365+1), 5, y, 4] + (1-cov) * det.runs.k008.mda1[(i*365+1), 6, y, 4]
+    prev.pre.k008.mda1.pdd.addNDD[y,i] = Prevalence(w.pos.k008.mda1.pdd.addNDD[y,i], k.fit)
+    prev.pos.k008.mda1.pdd.addNDD[y,i] = Prevalence(w.pos.k008.mda1.pdd.addNDD[y,i], k.fit)
   } 
 
   print(y)
@@ -165,6 +189,19 @@ for(y in 1:nrow(shortlist_first100)){
        
   save(w.pre.k008.mda1.pdd.addNDD, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pre_mda_Pdd_AddNDD_k008.Rdata")  
   save(w.pos.k008.mda1.pdd.addNDD, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pos_mda_Pdd_AddNDD_k008.Rdata")  
+  
+# Pre and most MDA Prevalence estimates
+  save(prev.pre.k008.mda1, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pre_mda_noPdd_noAddNDD_k008.Rdata")  
+  save(prev.pos.k008.mda1, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_post_mda_noPdd_noAddNDD_k008.Rdata")  
+  
+  save(prev.pre.k008.mda1.pdd, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pre_mda_Pdd_noAddNDD_k008.Rdata") 
+  save(prev.pos.k008.mda1.pdd, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pos_mda_Pdd_noAddNDD_k008.Rdata") 
+
+  save(prev.pre.k008.mda1.addNDD, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pre_mda_noPdd_AddNDD_k008.Rdata")  
+  save(prev.pos.k008.mda1.addNDD, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pos_mda_noPdd_AddNDD_k008.Rdata")  
+       
+  save(prev.pre.k008.mda1.pdd.addNDD, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pre_mda_Pdd_AddNDD_k008.Rdata")  
+  save(prev.pos.k008.mda1.pdd.addNDD, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pos_mda_Pdd_AddNDD_k008.Rdata")  
 
 #Full simulation array
   save(det.runs.k008.mda1, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/k008_mda_fullarray.Rdata")
