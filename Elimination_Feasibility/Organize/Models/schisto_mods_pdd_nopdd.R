@@ -121,7 +121,11 @@ pars_Chris1=c( #Excluding beta, Phi_Nq, f_Nq, and muPq which will be read into t
 #Model with PDD and additional NDDs: crowding of adult worms and adaptive immunity ##########
 ##Parasite Fecundity reduced due to crowding at high densities (NDD)
   f_Wgk <- function(W, gamma, k) {
-    (1 + ((W*(1-(exp(-gamma))))/k))^(-k-1)
+    if(k <= 0){
+      return(0)
+    } else{
+      return((1 + ((W*(1-(exp(-gamma))))/k))^(-k-1))
+    }
   }
   
   pars_Chris1["gam"] <- 0.001
