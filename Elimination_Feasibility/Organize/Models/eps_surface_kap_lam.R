@@ -97,12 +97,3 @@ for(l in 1:sim.range){
 stopCluster(clusteps)
 
 save(eps.fill, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/eps_surface_lamRnage_kRange.Rdata")
-
-windows()
-
-persp(y = lam.range, ylim = range(lam.range), x = kap.range, xlim = range(kap.range),
-      z = eps.fill, ticktype = 'detailed', nticks = 4, 
-      xlab = 'Pos. Density Dependence',
-      ylab = 'Transmission Intensity',
-      zlab = 'Elimination Feasibility Estimator',
-      phi = 0, theta = 90, shade = 0.4, col = 'lightblue')
