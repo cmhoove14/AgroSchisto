@@ -15,10 +15,16 @@ source("Elimination_Feasibility/Organize/Models/Stochastic/stochastic_model_addN
 source("Elimination_Feasibility/Organize/Models/schisto_mods_pdd_nopdd.R")
 library(parallel)
 
+load("Elimination_Feasibility/Organize/Models/Outputs_Refs/model_fit_profile_likelihood_parameters.Rdata")
+
+par.sims = 50
+  lam.range = seq(min(fin_pars95ci$lamda_twa), max(fin_pars95ci$lamda_twa), length.out = par.sims)  #transmission intensity range
+  kap.range = seq(0, 2, length.out = par.sims)        #Pos. density dependence range
+
 n.cores = detectCores() - 1
 
-min.sim = 1
-max.sim = 5
+min.sim = 501
+max.sim = 506
 
 #Set parameters #######
 covrg = 0.8
@@ -48,13 +54,9 @@ params = as.list(pars_Chris1)
   eps.prev = as.numeric() #vector to fill with prevalence based epsilon (elim. feas. estimator) vals from slope of bbr
 
 #Run simulations #######
-#Necesssary parameter values: transmission, PDD, initial state variables  
-par.sims = 50
-  lam.range = seq(1.2e-4, 3.4e-4, length.out = par.sims)  #transmission intensity range
-  kap.range = seq(1e-3, 2, length.out = par.sims)        #Pos. density dependence range
 
 #get equilibrium state variables    
-load("Elimination_Feasibility/Organize/Models/Outputs_Refs/eqbm_stoch_sims.Rdata")  
+load("Elimination_Feasibility/Organize/Models/Outputs_Refs/eqbm_stoch_sims2.Rdata")  
 stoch_sims_eqbm_vals_fin = stoch_sims_eqbm_vals_fin[c(min.sim:max.sim),]
   
 stoch.sims = 10  #number of simulations for each parameter set
@@ -80,7 +82,7 @@ for(s in c(min.sim:max.sim)){
 }  
 
 #Make cluster ######
-clust = makeCluster(n.cores)
+clust = makeCluster(1)
 clusterExport(cl = clust, 
               varlist = c('params','lam.range', 'kap.range', 'years', 'stoch.sim.noise', 'stoch_sims_eqbm_vals_fin',
                           'mda.years', 'year.days', 'par.sims', 'stoch.sims','fill', 'transitions', 'sfx', 'eff',
@@ -96,7 +98,7 @@ for(s in c(min.sim:max.sim)){
   fill.arr[s, , ] = 
   parSapply(clust, c(1:stoch.sims), stoch.sim.noise, init = stoch_sims_eqbm_vals_fin[s,c(3:7)], 
                                                 lam = stoch_sims_eqbm_vals_fin[s,2], 
-                                                k = stoch_sims_eqbm_vals_fin[s,1], simplify = T)[c(1,2,4,5),]
+                                                k = stoch_sims_eqbm_vals_fin[s,1], simplify = T)[c(1,2,4,5,6),]
   
   print(s)
 }  
