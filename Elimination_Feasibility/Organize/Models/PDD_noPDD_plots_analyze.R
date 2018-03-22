@@ -85,7 +85,7 @@ plot_sim_snails <- function(output.df){
 }
 
 #Load simulation array containing 100 transmission parameter sets, k=0.08, single round of MDA annually #####
-load("Elimination_Feasibility/Organize/Models/Outputs_Refs/k008_mda_fullarray.Rdata")
+load("Elimination_Feasibility/Organize/Models/Outputs_Refs/k008_mda_fullarray_profileFit.Rdata")
 
 #In full simulation array:
   #1st ([here, , , ]) dimension is time where each row represents a day
@@ -99,36 +99,36 @@ load("Elimination_Feasibility/Organize/Models/Outputs_Refs/k008_mda_fullarray.Rd
 
 #load all other objects
 #Mean w matrices    
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/mean_w_mda_noPdd_noAddNDD_k008.Rdata")  
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/mean_w_mda_noPdd_AddNDD_k008.Rdata")  
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/mean_w_mda_Pdd_noAddNDD_k008.Rdata")  
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/mean_w_mda_Pdd_AddNDD_k008.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/mean_w_mda_noPdd_noAddNDD_k008_profileFit.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/mean_w_mda_noPdd_AddNDD_k008_profileFit.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/mean_w_mda_Pdd_noAddNDD_k008_profileFit.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/mean_w_mda_Pdd_AddNDD_k008_profileFit.Rdata")  
 
 # Pre and most MDA W estimates
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pre_mda_noPdd_noAddNDD_k008.Rdata")  
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_post_mda_noPdd_noAddNDD_k008.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pre_mda_noPdd_noAddNDD_k008_profileFit.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_post_mda_noPdd_noAddNDD_k008_profileFit.Rdata")  
   
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pre_mda_Pdd_noAddNDD_k008.Rdata") 
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pos_mda_Pdd_noAddNDD_k008.Rdata") 
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pre_mda_Pdd_noAddNDD_k008_profileFit.Rdata") 
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pos_mda_Pdd_noAddNDD_k008_profileFit.Rdata") 
 
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pre_mda_noPdd_AddNDD_k008.Rdata")  
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pos_mda_noPdd_AddNDD_k008.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pre_mda_noPdd_AddNDD_k008_profileFit.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pos_mda_noPdd_AddNDD_k008_profileFit.Rdata")  
        
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pre_mda_Pdd_AddNDD_k008.Rdata")  
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pos_mda_Pdd_AddNDD_k008.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pre_mda_Pdd_AddNDD_k008_profileFit.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/w_pos_mda_Pdd_AddNDD_k008_profileFit.Rdata")  
   
 # Pre and most MDA Prevalence estimates
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pre_mda_noPdd_noAddNDD_k008.Rdata")  
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_post_mda_noPdd_noAddNDD_k008.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pre_mda_noPdd_noAddNDD_k008_profileFit.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_post_mda_noPdd_noAddNDD_k008_profileFit.Rdata")  
   
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pre_mda_Pdd_noAddNDD_k008.Rdata") 
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pos_mda_Pdd_noAddNDD_k008.Rdata") 
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pre_mda_Pdd_noAddNDD_k008_profileFit.Rdata") 
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pos_mda_Pdd_noAddNDD_k008_profileFit.Rdata") 
 
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pre_mda_noPdd_AddNDD_k008.Rdata")  
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pos_mda_noPdd_AddNDD_k008.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pre_mda_noPdd_AddNDD_k008_profileFit.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pos_mda_noPdd_AddNDD_k008_profileFit.Rdata")  
        
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pre_mda_Pdd_AddNDD_k008.Rdata")  
-  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pos_mda_Pdd_AddNDD_k008.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pre_mda_Pdd_AddNDD_k008_profileFit.Rdata")  
+  load("Elimination_Feasibility/Organize/Models/Outputs_Refs/prev_pos_mda_Pdd_AddNDD_k008_profileFit.Rdata")  
 
   covrg = 0.8
   k.fit = 0.08
@@ -232,84 +232,42 @@ eps_prev_PDD_NDD <- bbr_prev_PDD_NDD
   eps_prev_PDD_NDD <- fill_bbr_slope(bbr_prev_PDD_NDD, eps_prev_PDD_NDD)[,-c(101:103)]
 
 #Test for differences between PDD and PDD-free ###########
-#include presence/absence of pdd as a regression term in the model; store p-value associated with it  
-
-  for(m in 3:length(bbr.pdd.mean)){
-    test.seq = c(1:m)
-    test.df = subset(bbr.diff, time %in% test.seq)
-    mod.diff = lm(bbr ~ time + pdd, data = test.df, weights = bbr.sd^-1)
-    p.diff[m-2] = summary(mod.diff)$coefficients[3,4]
-  }  
-    
-    lines(c(3:nrow(bbr.df)), p.diff, lty=3, col=3, lwd=2)
-
-#Add final legend  
-  legend('bottomright', bty='n', cex = 0.8, lty = c(1,1,2,2,3), lwd = c(2,2,1,1,3), col = c(1,2,1,2,3),
-          legend = c('PDD-free model', 'PDD model', '95% CI PDD-free', '95% CI PDD', 'p-value')) 
-  
-#get epsilon for each sim & test if bbr slope (epsilon) significantly different from 0 over time ###########
-  eps.fill = matrix(ncol = length(3:ncol(bbr)),
-                    nrow = nrow(bbr))
-  eps.pdd.fill = matrix(ncol = length(3:ncol(bbr)),
-                        nrow = nrow(bbr))
-
-#get epsilon (slope of BBR profile) from year 3-20 for all 100 sims    
-  for(m in 1:ncol(eps.fill)){
-    for(i in 1:nrow(bbr)){
-      eps.fill[i,m] = lm(bbr[i,c(1:(m+2))] ~ c(1:(m+2)))$coefficients[2]
-      eps.pdd.fill[i,m] = lm(bbr.pdd[i,c(1:(m+2))] ~ c(1:(m+2)))$coefficients[2]
-    }
-    
-  } #end function
-  
-  #descriptive stats for epsilon estimates
-    eps.mean = colMeans(eps.fill)
-    eps.sd = apply(eps.fill, 2, sd)
-    
-    eps.pdd.mean = colMeans(eps.pdd.fill)
-    eps.pdd.sd = apply(eps.pdd.fill, 2, sd)
-    
 #vectors to fill with p-values from t tests    
   t.fill.g0 = as.numeric()        #is pdd-free model slope greater than 0?
   t.fill.l0 = as.numeric()        #is pdd-free model slope less than 0?
   t.fill.pdd.l0 = as.numeric()    #is pdd model slope less than 0/
   t.fill.pdd.diff = as.numeric()  #are pdd and pdd-free slopes different?
 
-  for(t in 1:ncol(eps.fill)){
-    t.fill.g0[t] = t.test(x = eps.fill[,t], mu = 0, alternative = 'greater')$p.value
-    t.fill.l0[t] = t.test(x = eps.fill[,t], mu = 0, alternative = 'less')$p.value
-    t.fill.pdd.l0[t] = t.test(x = eps.pdd.fill[,t], mu = 0, alternative = 'less')$p.value
-    t.fill.pdd.diff[t] = t.test(x = eps.fill[,t], y = eps.pdd.fill[,t], alternative = 'two.sided')$p.value
+  for(t in 3:nrow(eps_noPDD_NDD)){
+    t.fill.g0[t] = t.test(x = eps_noPDD_NDD[t,], mu = 0, alternative = 'greater')$p.value
+    t.fill.l0[t] = t.test(x = eps_noPDD_NDD[t,], mu = 0, alternative = 'less')$p.value
+    t.fill.pdd.l0[t] = t.test(x = eps_PDD_NDD[t,], mu = 0, alternative = 'less')$p.value
+    t.fill.pdd.diff[t] = t.test(x = eps_noPDD_NDD[t,], y = eps_PDD_NDD[,t], alternative = 'two.sided')$p.value
   }
 
-#plot epsilon over time 
-  
-  plot(c(3:ncol(bbr)), eps.mean, pch = 16, cex = 0.8, xlim = c(0,20), ylim = c(-0.03, 0.01), xlab = 'time (yrs)',
-        ylab = expression(paste('Elimination Feasibility Estimator ( ', epsilon, ')',sep = '')))
-    points(c(3:ncol(bbr)), eps.pdd.mean, pch = 16, cex = 0.8, col=2)
-    
-    #Add error bars as st dev
-    for(s in 1:length(eps.sd)){
-      segments(x0 = s+2, x1 = s+2, 
-               y0 = eps.mean[s] + eps.sd[s], y1 = eps.mean[s] - eps.sd[s])
-      segments(x0 = s+2, x1 = s+2, 
-               y0 = eps.pdd.mean[s] + eps.pdd.sd[s], y1 = eps.pdd.mean[s] - eps.pdd.sd[s], col = 2)
-    }
+#Same for prevalence  
+  t.fill.g0_prev = as.numeric()        #is pdd-free model slope greater than 0?
+  t.fill.l0_prev = as.numeric()        #is pdd-free model slope less than 0?
+  t.fill.pdd.l0_prev = as.numeric()    #is pdd model slope less than 0/
+  t.fill.pdd.diff_prev = as.numeric()  #are pdd and pdd-free slopes different?
 
+  for(t in 3:nrow(eps_prev_noPDD_NDD)){
+    t.fill.g0_prev[t] = t.test(x = eps_prev_noPDD_NDD[t,], mu = 0, alternative = 'greater')$p.value
+    t.fill.l0_prev[t] = t.test(x = eps_prev_noPDD_NDD[t,], mu = 0, alternative = 'less')$p.value
+    t.fill.pdd.l0_prev[t] = t.test(x = eps_prev_PDD_NDD[t,], mu = 0, alternative = 'less')$p.value
+    t.fill.pdd.diff_prev[t] = t.test(x = eps_prev_noPDD_NDD[t,], y = eps_PDD_NDD[,t], alternative = 'two.sided')$p.value
+  }
 
-    
 #manuscript plot versions ######
 #worm burden trajectories
-nopdd_addndd <- as.data.frame(det.runs.k008.mda1[ , , 1, 2])
-nopdd_addndd <- nopdd_addndd %>%
+nopdd_addndd <- as.data.frame(det.runs.k008.mda1[ , , 1, 2]) %>%
   mutate(Model = "PDD-Free") %>%
   select(time = V1,  Wt =V5 , Wu = V6, Model = Model) %>%
   mutate(W = covrg*Wt + (1-covrg)*Wu,
          t_yrs = time / 365 + 60/365) %>%
   gather(key = "Treatment", value = "Worm_Burden", W)
 
-pdd_addndd <- as.data.frame(det.runs.k008.mda1[ , , 1, 4])
-  pdd_addndd <- pdd_addndd %>%
+pdd_addndd <- as.data.frame(det.runs.k008.mda1[ , , 1, 4]) %>%
     mutate(Model = "PDD") %>%
     select(time = V1,  Wt =V5 , Wu = V6, Model = Model) %>%
     mutate(W = covrg*Wt + (1-covrg)*Wu,
@@ -355,36 +313,36 @@ bbr.ggp <- bbr.gg %>%
     annotate('text', x = 0, y = 0.34, label = 'b', size = 5)
 
 #epsilon estimates
-eps_noPDD_NDD <- as.data.frame(eps_noPDD_NDD) %>%
+eps_noPDD_NDD_sum <- as.data.frame(eps_noPDD_NDD) %>%
   mutate(mean_eps = rowMeans(.),
          sd_eps = apply(., 1, sd),
          time = c(1:19),
          Model = "PDD-Free") %>%
   select(mean_eps, sd_eps, time, Model)
 
-eps_PDD_NDD <- as.data.frame(eps_PDD_NDD) %>%
+eps_PDD_NDD_sum <- as.data.frame(eps_PDD_NDD) %>%
   mutate(mean_eps = rowMeans(.),
          sd_eps = apply(., 1, sd),
          time = c(1:19),
          Model = "PDD") %>%
   select(mean_eps, sd_eps, time, Model)
 
-eps.gg <- rbind(eps_noPDD_NDD, eps_PDD_NDD)
+eps.gg <- rbind(eps_noPDD_NDD_sum, eps_PDD_NDD_sum)
 
 eps.ggp <- eps.gg %>%
   ggplot(aes(x = time, y = mean_eps, fill = Model)) +
     theme_bw(base_size = 15) +
     theme(legend.position = 'none', axis.title.y = element_text(size = 10)) +
     xlim(0,20) +
-    ylim(-0.035,0.01) +
+    ylim(-0.02,0.02) +
     labs(x = 'time (yrs)',
          y = expression(paste('Elimination Feasibility Coefficient (',epsilon, ')', sep = ''))) +
     geom_bar(position = 'dodge', stat = 'identity', width = 0.8) +
     scale_fill_manual(values = alpha(c('black', 'red'), .6)) +
     geom_errorbar(aes(x = time, ymin = (mean_eps - sd_eps), ymax = (mean_eps + sd_eps)), 
                   width = 0.1, position = position_dodge(width = 0.8)) +
-    geom_vline(xintercept = 4.5, lty=2) +
-    annotate('text', x = 0, y = 0.009, label = 'c', size = 5)
+    #geom_vline(xintercept = 4.5, lty=2) +
+    annotate('text', x = 0, y = 0.019, label = 'c', size = 5)
 
 
 #combine plots with multiplot
@@ -459,35 +417,35 @@ bbr_prev.ggp <- bbr_prev.gg %>%
     annotate('text', x = 0, y = 0.34, label = 'b', size = 5)
 
 #epsilon estimates
-eps_prev_noPDD_NDD <- as.data.frame(eps_prev_noPDD_NDD) %>%
+eps_prev_noPDD_NDD_sum <- as.data.frame(eps_prev_noPDD_NDD) %>%
   mutate(mean_eps = rowMeans(.),
          sd_eps = apply(., 1, sd),
          time = c(1:19),
          Model = "PDD-Free") %>%
   select(mean_eps, sd_eps, time, Model)
 
-eps_prev_PDD_NDD <- as.data.frame(eps_prev_PDD_NDD) %>%
+eps_prev_PDD_NDD_sum <- as.data.frame(eps_prev_PDD_NDD) %>%
   mutate(mean_eps = rowMeans(.),
          sd_eps = apply(., 1, sd),
          time = c(1:19),
          Model = "PDD") %>%
   select(mean_eps, sd_eps, time, Model)
 
-eps_prev.gg <- rbind(eps_prev_noPDD_NDD, eps_prev_PDD_NDD)
+eps_prev.gg <- rbind(eps_prev_noPDD_NDD_sum, eps_prev_PDD_NDD_sum)
 
 eps_prev.ggp <- eps_prev.gg %>%
   ggplot(aes(x = time, y = mean_eps, fill = Model)) +
     theme_bw(base_size = 15) +
     theme(legend.position = 'none', axis.title.y = element_text(size = 10)) +
     xlim(0,20) +
-    ylim(-0.035,0.01) +
+    ylim(-0.0125,0.0125) +
     labs(x = 'time (yrs)',
          y = expression(paste('Elimination Feasibility Coefficient (',epsilon, ')', sep = ''))) +
     geom_bar(position = 'dodge', stat = 'identity', width = 0.8) +
     scale_fill_manual(values = alpha(c('black', 'red'), .6)) +
     geom_errorbar(aes(x = time, ymin = (mean_eps - sd_eps), ymax = (mean_eps + sd_eps)), 
                   width = 0.1, position = position_dodge(width = 0.8)) +
-    geom_vline(xintercept = 6.5, lty=2) +
+    geom_vline(xintercept = 7.5, lty=2) +
     annotate('text', x = 0, y = 0.009, label = 'c', size = 5)
 
 
