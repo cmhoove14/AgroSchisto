@@ -11,7 +11,7 @@ Stochastic versions of the models
 
 ## Scripts contained in this folder (in order that they would be run to reproduce results presented in the manuscript)  
 + `schisto_mods_pdd_nopdd.R` -- Deterministic models used to simulate schisto dynamics in the presence of different density dependencies. Also contain best-fitting parameter set   
-+ `model_fit_profile.R` -- Fits the model with density dependencies to observed data from a study site in Senegal and stores the resulting transmission parameter sets in `Outputs_Refs` folder as `transmission_parameter_sets.Rdata`  
++ `model_fit_profile.R` -- Fits the model with density dependencies to observed data from a study site in Senegal and stores the resulting transmission parameter sets in `Outputs_Refs` folder as `model_fit_profile_likelihood_parameters.Rdata` (run on savio with savio version)  
 + `Reff_BBR_fns` -- Functions to estimate Reff and BBR, derived from models in `schisto_mods_pdd_nopdd.R`  
 + `Reff_addNDDs_BBR_plots.R` -- Estimates Reff, BBR, and dW/dt across a range of worm burdens for the best fitting parameter set. Used to produce Figures 1 and 2 that demonstrate difference between model predictions with and without influence of positive density dependence  
 + `Get_eqbm_for_trans_parameter_sets.R` -- For each transmission parameter set, simulates pdd and pdd-free models over long time period to reach equilibrium and saves the resulting equilibrium values in `Outputs_Refs` folder  
