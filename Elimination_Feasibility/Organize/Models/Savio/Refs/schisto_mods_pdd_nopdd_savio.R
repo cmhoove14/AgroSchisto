@@ -3,7 +3,10 @@
 
 #mating function that implements PDD#######
 phi_Wk <- function(W, k) {
-  func <- function(x) {
+  if(k == 0){
+    return(1)
+  } else {
+    func <- function(x) {
     a <- ( W / (W + k) )
     b <- ((1-a)^(1+k))/(2*pi)
     return(( b*( 1-cos(x) ) / (( 1 + a*cos(x) )^(1+k)) ))
@@ -11,6 +14,8 @@ phi_Wk <- function(W, k) {
   val = integrate(func, 0, 2*pi, subdivisions = 10000,
                   rel.tol = 1e-10, stop.on.error = FALSE)$value
   return(1-val)
+  }
+  
 }
 #Model with PDD ####################
 schisto_mod_pdd=function(t, n, parameters) { 
@@ -121,7 +126,12 @@ pars_Chris1=c( #Excluding beta, Phi_Nq, f_Nq, and muPq which will be read into t
 #Model with PDD and additional NDDs: crowding of adult worms and adaptive immunity ##########
 ##Parasite Fecundity reduced due to crowding at high densities (NDD)
   f_Wgk <- function(W, gamma, k) {
-    (1 + ((W*(1-(exp(-gamma))))/k))^(-k-1)
+    if(k == 0){
+      return(1)
+    } else {
+      return((1 + ((W*(1-(exp(-gamma))))/k))^(-k-1))
+    }
+    
   }
   
   pars_Chris1["gam"] <- 0.001
