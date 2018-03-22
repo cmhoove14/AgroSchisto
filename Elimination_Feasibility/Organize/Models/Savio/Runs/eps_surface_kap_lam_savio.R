@@ -18,11 +18,10 @@ require(rootSolve)
 
 no.cores = detectCores() - 1
 
-source("Elimination_Feasibility/Organize/Models/Reff_BBR_fns.R")
-source("Elimination_Feasibility/Organize/Models/schisto_mods_pdd_nopdd.R")
+source("~/ElimFeas_StochMod/PostReview/Refs/schisto_mods_pdd_nopdd_savio.R")
 
-load("Elimination_Feasibility/Organize/Models/Outputs_Refs/model_fit_profile_likelihood_parameters.Rdata")
-load("Elimination_Feasibility/Organize/Models/Outputs_Refs/best_fit_params.Rdata")
+load("~/ElimFeas_StochMod/PostReview/Outputs/model_fit_profile_likelihood_parameters.Rdata")
+load("~/ElimFeas_StochMod/PostReview/Refs/best_fit_params.Rdata")
 
 #Use simplified r0 expression to determine range of lamda to test #########
 covrg <- 0.8
@@ -77,11 +76,7 @@ eps.est = function(lam, kap){
     bbr[b] = (1/w.pos[b])*(w.pre[b+1] - w.pos[b])
   }
   
-  plot(c(1:19), bbr, pch = 16)
-  
   eps = lm(bbr ~ c(1:19))$coefficients[2]
-  
-  abline(lm(bbr ~ c(1:19)), lty = 2, col = 2)
   
   return(as.numeric(eps))
     
@@ -102,4 +97,4 @@ for(l in 1:sim.range){
 
 stopCluster(clusteps)
 
-save(eps.fill, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/eps_surface_lamRange_kRange.Rdata")
+save(eps.fill, file = "~/ElimFeas_StochMod/PostReview/Outputs/eps_surface_lamRange_kRange.Rdata")

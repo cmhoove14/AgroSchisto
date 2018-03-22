@@ -13,6 +13,8 @@
 
 #50 simulations with 0<kap<2 and 1.2e-4<lam<3.7e-4 #############
 load("Elimination_Feasibility/Organize/Models/Outputs_Refs/eps_surface_lamRange_kRange.Rdata")
+load("Elimination_Feasibility/Organize/Models/Outputs_Refs/model_fit_profile_likelihood_parameters.Rdata")
+
   sim.range = 50
   lam.range = seq(min(fin_pars95ci$lamda_twa), max(fin_pars95ci$lamda_twa), length.out = sim.range)  #transmission intensity
   kap.range = seq(0, 2, length.out = sim.range)     #Pos. density dependence
