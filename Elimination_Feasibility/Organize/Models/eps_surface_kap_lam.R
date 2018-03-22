@@ -21,15 +21,16 @@ no.cores = detectCores() - 1
 source("Elimination_Feasibility/Organize/Models/Reff_BBR_fns.R")
 source("Elimination_Feasibility/Organize/Models/schisto_mods_pdd_nopdd.R")
 
+load("Elimination_Feasibility/Organize/Models/Outputs_Refs/model_fit_profile_likelihood_parameters.Rdata")
+load("Elimination_Feasibility/Organize/Models/Outputs_Refs/best_fit_params.Rdata")
+
 #Use simplified r0 expression to determine range of lamda to test #########
-params<-pars_Chris1
-covrg <- pars_Chris1["cov"]
-#we'll go with a range of lambdas from 1e-4 to 3e-4 corresponding to r0 ~1-2
+covrg <- params["cov"]
 
 #parameter ranges, values and vectors #########
   sim.range = 50                                    #number of values within test range to simulate
-  lam.range = seq(1e-4, 3e-4, length.out = sim.range)  #transmission intensity
-  kap.range = seq(1e-5, 2, length.out = sim.range)            #Pos. density dependence
+  lam.range = seq(min(fin_pars95ci$lamda_twa), max(fin_pars95ci$lamda_twa), length.out = sim.range)  #transmission intensity
+  kap.range = seq(0, 2, length.out = sim.range)            #Pos. density dependence
 
 #temp vectors to fill
   w.pre = as.numeric()
@@ -96,4 +97,4 @@ for(l in 1:sim.range){
 
 stopCluster(clusteps)
 
-save(eps.fill, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/eps_surface_lamRnage_kRange.Rdata")
+save(eps.fill, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/eps_surface_lamRange_kRange.Rdata")

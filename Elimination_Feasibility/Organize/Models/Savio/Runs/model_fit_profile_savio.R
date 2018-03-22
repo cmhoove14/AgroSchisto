@@ -4,9 +4,8 @@
 require(deSolve)
 require(tidyverse)
 require(rootSolve)
-require(coda)
 
-source("Elimination_Feasibility/Organize/Models/schisto_mods_pdd_nopdd.R")
+source("~/ElimFeas_StochMod/PostReview/Refs/schisto_mods_pdd_nopdd_savio.R")
 
 #Some useful functions #######
 phi_Wk <- function(W, k) {
@@ -99,12 +98,6 @@ params["cov"] <- covrg
   measured_ws <- c(W_baseline, W_5month_field_mean, W_Feb13_field_mean, W_Sep13_field_mean)
   w_errors <- c(W_baseline_se, W_5month_field_se, W_Feb13_field_se, W_Sep13_field_se)
   measured_ks <- c(W_baseline_k, W_5month_field_k, W_Feb13_field_k, W_Sep13_field_k)
-
-epi_plot <- as.data.frame(cbind("time" = timepoints,  "Worm_burden" = measured_ws, "se" = w_errors))
-
-epi_plot %>%
-  ggplot(aes(x = timepoints, y = measured_ws)) + geom_point() + theme_bw() + ylim(0,50) + 
-    geom_errorbar(ymin = measured_ws - w_errors, ymax = measured_ws + w_errors, width = 5)
 
 #timepoints at which transmission shifts from low to high
   seasons <- c(1, 134, 263, 502)
@@ -202,13 +195,6 @@ Tx_simulate<-function(lamdas){
 lamda1s<-seq(1e-6, 1e-3, length.out = 10)
 lamda2s<-seq(5e-6, 5e-3, length.out = 10)
 
-#test to find best starting place for optimization
-for(i in 1:length(lamda1s)){
-  negll <- Tx_simulate(c(lamda1s[i], lamda2s[i]))
-  #print(c(i, negll, lamda1s[i], lamda2s[i]))
-}
-
-
 #Fit using Optim
 op_min <- optim(par=c(lamda1s[2], lamda2s[2]), 
                 Tx_simulate, method="Nelder-Mead")
@@ -221,68 +207,9 @@ op_min <- optim(par=c(lamda1s[2], lamda2s[2]),
   params["lamda2"]<-bestLamda2
   params["lamda"]<-( (375/594) * bestLamda1) +( (219/594) * bestLamda2) 
   
-save(params, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/best_fit_params.Rdata")  
-
-#Fit using optim function with a variety of starting conditions ####################
-opter <- function(start_trip){
-  op_min <- optim(par=start_trip, Tx_simulate, method="Nelder-Mead")
-  return(op_min$par)
-}
-
-opt_pars <-matrix(ncol = 3, nrow = 10)
-
-for(i in 1:nrow(opt_pars)){
-  beta_use <- sample(betas, 1)
-  lamda1_use <- sample(lamda1s, 1)
-  lamda2_use <- sample(lamda2s, 1)
-  
-  trip_use <- c(beta_use, lamda1_use, lamda2_use)
-
-#prevent errors by not allowing sims with infinite likelihoods proceed to optimization    
-  while(!is.finite(Tx_simulate(trip_use))){
-    beta_use <- sample(betas, 1)
-    lamda1_use <- sample(lamda1s, 1)
-    lamda2_use <- sample(lamda2s, 1)
-    
-    trip_use <- c(beta_use, lamda1_use, lamda2_use)
-
-  }
-  
-  print(trip_use)
-  
-  opt_pars[i,] <- opter(trip_use)
-}
-
-opt_NLL <- as.numeric()
-
-for(i in 1:nrow(opt_pars)){
-  opt_NLL[i] <- Tx_simulate(opt_pars[i,])
-}  
-
-# Looks like there may be an issue with lots of local minima in the likelihood, but only ended up with one parameter set that's feasible. Could avoid this by placing constraint son the parameters, but no time for that right now
-
-  
-#Plot results of best simulation alongside observed data points ##########   	
-  best_eqbm <- ode(nstart, time, schisto_mod_pdd_add_ndds, params)[max(time)/30,]
-    
-  best_traj <- data.frame(ode(best_eqbm[c(2:6)], traj_time, schisto_mod_pdd_add_ndds_dyna,  
-                          params, events = list(data = mdas)))
-  
-traj_plot <-  best_traj %>%
-    select(time, Wt, Wu) %>%
-    mutate(W = covrg*Wt + (1-covrg)*Wu) %>%
-    gather(key = "Treatment", value = "Worm_Burden", -time)
-
-  epi_plot <- as.data.frame(cbind("time" = timepoints,  "Worm_burden" = measured_ws, "se" = w_errors))
-
-  epi_plot %>%
-    ggplot(aes(x = timepoints, y = measured_ws)) + geom_point() + theme_bw() + ylim(0,50) + 
-      geom_errorbar(ymin = measured_ws - w_errors, ymax = measured_ws + w_errors, width = 5) +
-      geom_line(data = traj_plot, aes(x = time, y = Worm_Burden, lty = Treatment), col = "purple")
-
-#Now do the grid search on a 3D grid of beta, lamda1 and lamda2 around the best fit parameter values ########
-  lamda1_range<-seq(from=bestLamda1*0.1, to=bestLamda1*1.9, length.out = 10)
-  lamda2_range<-seq(from=bestLamda2*0.1, to=bestLamda2*1.9, length.out = 10)
+#Now do a grid search on a 3D grid of beta, lamda1 and lamda2 around the best fit parameter values ########
+  lamda1_range<-seq(from=bestLamda1*0.1, to=bestLamda1*1.9, length.out = 50)
+  lamda2_range<-seq(from=bestLamda2*0.1, to=bestLamda2*1.9, length.out = 50)
   
 par_grid <- expand.grid(lamda1_range, lamda2_range)  
 
@@ -303,4 +230,4 @@ fin_pars95ci <- fin_pars %>%
   filter(negLL <= boundary) %>% 
   arrange(lamda_twa)
 
-save(fin_pars95ci, file = "Elimination_Feasibility/Organize/Models/Outputs_Refs/model_fit_profile_likelihood_parameters.Rdata")
+save(fin_pars95ci, file = "~/ElimFeas_StochMod/PostReview/Outputs/model_fit_profile_likelihood_parameters.Rdata")
