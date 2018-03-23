@@ -31,9 +31,6 @@ par.sims = 50
   par.mat$eps.prev.sd = NA #add column for elim. feas estimator (eps) derived from prevalence data st. dev
   par.mat$pe = NA          #add column for proba elimination (P(e))
   
-  
-mat.all = data.frame()
-
 #Use array loads from sim runs on savio to fill the data frame #########
 #In each array dimensions are as follows:
 # [here, , ] is kappa and lamda parameters used in the given set of simulations
@@ -129,30 +126,85 @@ load('Elimination_Feasibility/Organize/Models/Outputs_Refs/stoch_sims2001_2500.R
   sum(par.mat$kap == par.mat$kap.sim) == 2500
 
 par.mat2 = par.mat 
-  colnames(par.mat2)[c(1:7)] = c('lambda', 'kappa', 'S', 'E', 'I', 'Wt', 'Wu')
-rm(list = c('par.mat'))  
-#plots of and analysis of pe(e) / eps with no obs noise #######
+#plots of and analysis of pe(e) / eps #######
 #plot P(e) across eps
-plot(par.mat2$eps, par.mat2$pe, pch = 18, cex = 0.6, ylim = c(0,1),
+par.mat2 %>% 
+  ggplot(aes(x = eps, y = pe)) + geom_point(pch = 18, cex = 0.8) + 
+    labs(x = expression(epsilon), 
+         y = expression(italic('P(e)'))) +
+    theme_bw()
+
+#Save plot as tiff
+tiff("Elimination_Feasibility/plots/PLoS_Figs_PostReview/Fig5.tiff", 
+     height = 13.2, width = 13.2, units = 'cm', compression = "lzw", res = 300) 
+par.mat2 %>% 
+  ggplot(aes(x = eps, y = pe)) + geom_point(pch = 18, cex = 0.8) + 
+    labs(x = expression(epsilon), 
+         y = expression(italic('P(e)'))) +
+    theme_bw()
+dev.off()
+
+par.mat2 %>% 
+  ggplot(aes(x = eps, y = pe, col = lambda)) + geom_point(pch = 18, cex = 0.8) + 
+    labs(x = expression(epsilon), 
+         y = expression(italic('P(e)')),
+         col = expression(lambda)) +
+    scale_color_gradient(low = 'wheat1', high = 'red') +
+    theme_bw()
+
+par.mat2 %>% 
+  ggplot(aes(x = eps, y = pe, col = kap)) + geom_point(pch = 18, cex = 0.8) + 
+    labs(x = expression(epsilon), 
+         y = expression(italic('P(e)')),
+         col = expression(kappa)) +
+    scale_color_gradient(low = 'wheat1', high = 'red') +
+    theme_bw()
+
+par.mat2 %>% 
+  ggplot(aes(x = eps.prev, y = pe)) + geom_point(pch = 18, cex = 0.8) + 
+    labs(x = expression(epsilon), 
+         y = expression(italic('P(e)'))) +
+    theme_bw()
+  
+par.mat2 %>% 
+  ggplot(aes(x = eps.prev, y = pe, col = lambda)) + geom_point(pch = 18, cex = 0.8) + 
+    labs(x = expression(epsilon), 
+         y = expression(italic('P(e)')),
+         col = expression(lambda)) +
+    scale_color_gradient(low = 'wheat1', high = 'red') +
+    theme_bw()
+
+#prevalence based
+plot(par.mat2$eps.prev, par.mat2$pe, pch = 18, cex = 0.6, ylim = c(0,1),
      xlab = expression(epsilon), ylab = expression(italic('P(e)')))
 
 #ggplot to show val of lambda / kappa in addition to scatterP
-ggplot(data = par.mat2, aes(x = eps, y = pe, col = lambda)) +   #V2 for kappa, V1 for lambda
-  theme_bw() +
-  geom_point(shape = 18, size = 1.2) +
-  scale_color_gradient(low = 'wheat1', high = 'red') +
-  labs(col = expression(lambda),
-       x = expression(epsilon),
-       y = expression(italic(P(e))))
+par.mat2 %>% 
+  ggplot(aes(x = eps, y = pe, col = lambda)) +
+    theme_bw() +
+    geom_point(shape = 18, size = 1.2) +
+    scale_color_gradient(low = 'wheat1', high = 'red') +
+    labs(col = expression(lambda),
+         x = expression(epsilon),
+         y = expression(italic(P(e))))
+
+par.mat2 %>% 
+  ggplot(aes(x = eps.prev, y = pe, col = lambda)) +
+    theme_bw() +
+    geom_point(shape = 18, size = 1.2) +
+    scale_color_gradient(low = 'wheat1', high = 'red') +
+    labs(col = expression(lambda),
+         x = expression(epsilon),
+         y = expression(italic(P(e))))
 
 #only plot for vals where p(e) != 1 or 0
-par.mat0_1 = subset(par.mat2, pe != 0 & pe != 1 & kappa != 0)
+par.mat0_1 <- par.mat2 %>% 
+  filter(pe < 1 & pe >0 & kap != 0)
 
 plot(par.mat0_1$eps, par.mat0_1$pe, pch = 18, cex = 0.6, ylim = c(0,1),
      xlab = expression(epsilon), ylab = '',
      cex.lab = 1.4)
   mtext(side = 2, text = expression(italic('P(e)')), line = 2.4, cex = 1.2)
-
 
 #logit transform p(e)
 plot(par.mat0_1$eps, log(par.mat0_1$pe / (1 - par.mat0_1$pe)), 
@@ -174,7 +226,7 @@ pe.mod.weighted = lm(log(pe / (1 - pe)) ~ eps, data = par.mat0_1, weights = eps.
 #Doesn't look like adding weights changes much, so stick with unweighted regression  
   
 #including transmission intensity and pdd as regression coefficients
-pe.mod.all =  lm(log(pe / (1 - pe)) ~ eps + kappa + lambda, data = par.mat0_1) 
+pe.mod.all =  lm(log(pe / (1 - pe)) ~ eps + kap + lam, data = par.mat0_1) 
   summary(pe.mod.all)
 AIC(pe.mod, pe.mod.all)  #looks like this actually produces a better model... 
   
@@ -196,16 +248,16 @@ plot(par.mat2$eps, par.mat2$eps.sd, pch = 18, cex = 0.6, #ylim = c(0,1),
      xlab = expression(epsilon))
 
 #p(e) across transmission intensity
-plot(par.mat2$V1, par.mat2$pe, pch = 18, cex = 0.6, ylim = c(0,1),
+plot(par.mat2$lam, par.mat2$pe, pch = 18, cex = 0.6, ylim = c(0,1),
      xlab = expression(lambda), ylab = expression(italic('P(e)')))
 
 #p(e) across pos. dens. dep.
-plot(par.mat2$V2, par.mat2$pe, pch = 18, cex = 0.6, ylim = c(0,1),
+plot(par.mat2$kap, par.mat2$pe, pch = 18, cex = 0.6, ylim = c(0,1),
      xlab = expression(kappa), ylab = expression(italic('P(e)')))
 
 #surface of p(e) across kappa and lambda
-lams = unique(par.mat2$V1)
-kaps = unique(par.mat2$V2)
+lams = unique(par.mat2$lam)
+kaps = unique(par.mat2$kap)
 
 lkmat = matrix(par.mat2$pe, ncol=50, nrow=50, byrow = T)
 
@@ -214,7 +266,7 @@ persp(y = lams, ylim = range(lams), x = kaps, xlim = range(kaps),
       xlab = 'Pos. Density Dependence',
       ylab = 'Transmission Intensity',
       zlab = 'Probability of Elimination',
-      phi = 20, theta = 225, shade = 0.4, col = 'lightblue')
+      phi = 20, theta = 135, shade = 0.4, col = 'lightblue')
 
 
 #Use array loads from sim runs on savio to create new data frame with each row as a simulation #########
