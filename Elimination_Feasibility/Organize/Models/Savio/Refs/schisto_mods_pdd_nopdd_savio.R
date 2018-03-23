@@ -17,6 +17,13 @@ phi_Wk <- function(W, k) {
   }
   
 }
+
+#Prevalence function given W and k ##################################
+Prevalence <- function(W, k) {
+  p=1 - (1/(1+W/k)^(k))*(1+W/(1+W/k)) # fraction of humans with at least 2 parasites
+  return(p)
+}
+
 #Model with PDD ####################
 schisto_mod_pdd=function(t, n, parameters) { 
   with(as.list(parameters),{
