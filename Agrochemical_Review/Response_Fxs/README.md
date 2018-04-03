@@ -135,4 +135,11 @@ Data from [Halstead et al 2015](https://www.sciencedirect.com/science/article/pi
     + function: `muPq_perm_Halstead_uncertainty`  
     + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead2015/halstead2015_permethrin_predator_mortality.png)  
     
-###     
+### `Halstead_meso2017_fit.R`   
+Data from [Halstead et al 2018](https://www.nature.com/articles/s41467-018-03189-w) investigating effects of **Atrazine**, **Chlorpyrifos**, and **Fertilizer** on snail populations and infection rates in a mesocosm setting  
+#### Data reported  
++ Received raw data on snail and predator populations in different mesocosm treatments from Neal Halstead (lead author)
+
+#### Response functions fit  
++ `halstead17_phiN_fe_uncertainty`
++ `halstead17_phiN_at_uncertainty`
