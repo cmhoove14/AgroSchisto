@@ -152,12 +152,31 @@ Data from [Hasheesh & Mohamed 2011](https://www.sciencedirect.com/science/articl
 + Cercariae
   + Chlorpyrifos 
     + Function: `piC_ch_Hash11_uncertainty`
-    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/hasheesh2011_chlorpyrifos_cercariae_mortality.png)
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Larvae/hasheesh2011_chlorpyrifos_cercariae_mortality.png)
   + Profenofos: `piC_prof_Hash11_uncertainty`
-    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/hasheesh2011_profenofos_cercariae_mortality.png)
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Larvae/hasheesh2011_profenofos_cercariae_mortality.png)
 + Miracidia
   + Chlorpyrifos 
     + Function: `piM_ch_Hash11_uncertainty`
-    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/hasheesh2011_chlorpyrifos_miracidia_mortality.png)
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Larvae/hasheesh2011_chlorpyrifos_miracidia_mortality.png)
   + Profenofos: `piM_prof_Hash11_uncertainty`
-    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/hasheesh2011_profenofos_miracidia_mortality.png)
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Larvae/hasheesh2011_profenofos_miracidia_mortality.png)  
+    
+### `Hasheesh2011_chlorpyrifos_profenofos_snails_fit.R`    
+Data from [Hasheesh & Mohamed 2011](https://www.sciencedirect.com/science/article/pii/S0048357511000186) investigating effects of **Chlorpyrifos** and **Profenofos** on survival of *Bulinus truncatus* snails  
+#### Data reported  
++ Table 1: 24 hr LC25, LC50. LC50 95%CI, LC90, and slp parameters for *Bulinus truncatus* adult snails from Litchfield and Wilcoson method  
++ Table 2: Longitudinal survival and reproduction of snails exposed to LC25 of each chemical **NOTE** Only two data points (control and single dose group), so not possible to fit a dose response, but will consider how effects at this single concentration affects transmission  
++ Table 3: Growth rate of snails exposed LC25 of each chemical **NOTE** No growth in our model, so don't fit a function to this data  
++ Table 4: Effect of LC25 of Chlorpyrifos and Profenophos pesticides on the infectivity of Schistosoma haematobium miracidia to Bulinus truncatus snails. **NOTE** We assume that reduction in infectivity captured here are mostly due to increased mortality of miracidia therefore don't attempt to separately fit a response to this data 
+#### Response functions fit  
++ Chlorpyrifos  
+  + Function: `muNq_ch_hash11_uncertainty`  
+    + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snail/hasheesh2011_chlorpyrifos_snail_mortality.png)  
+  + Function: `fN.hash.chlor.uncertainty` (samples measurement of eggs/snail/day in the chlorpyrifos group and in the control group and returns the ratio which is interpreted as relative change in snail reproduction when exposed to LC25 of chlorpyrifos)  
+    + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snail/hasheesh2011_snail_reproduction_compare.png)  
++ Profenofos  
+  + Function: `muNq_prof_hash11_uncertainty`  
+    + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snail/hasheesh2011_profenofos_snail_mortality.png)  
+  + Function: `fN.hash.prof.uncertainty` (samples measurement of eggs/snail/day in the profenofos group and in the control group and returns the ratio which is interpreted as relative change in snail reproduction when exposed to LC25 of profenofos)  
+    + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snail/hasheesh2011_snail_reproduction_compare.png)      
