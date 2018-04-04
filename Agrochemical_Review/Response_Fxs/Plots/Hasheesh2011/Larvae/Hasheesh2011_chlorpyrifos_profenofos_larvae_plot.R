@@ -17,7 +17,7 @@ piM.hash.ch = data.frame(conc = c(0, 0.78, 1.8)*1000,
                         surv = 0)
   piM.hash.ch$surv = 1- piM.hash.ch$mort
 
-  png("Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/hasheesh2011_chlorpyrifos_miracidia_mortality.png")
+  png("Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Larvae/hasheesh2011_chlorpyrifos_miracidia_mortality.png")
   
   plot(piM.hash.ch$conc, piM.hash.ch$surv, pch = 16, ylim = c(0,1), xlim = c(0,3500),
        xlab = 'Chlorpyrifos (ppb)', ylab = '8-hr miracidial mortality',
@@ -39,7 +39,7 @@ piM.hash.prof = data.frame(conc = c(0, 1.5, 2.51)*1000,
                            surv = 0)
   piM.hash.prof$surv = 1- piM.hash.prof$mort
   
-png("Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/hasheesh2011_profenofos_miracidia_mortality.png")
+png("Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Larvae/hasheesh2011_profenofos_miracidia_mortality.png")
   
   plot(piM.hash.prof$conc, piM.hash.prof$surv, pch = 16, ylim = c(0,1), xlim = c(0,3500),
        xlab = 'Profenofos (ppb)', ylab = '8-hr miracidial mortality',
@@ -62,7 +62,7 @@ piC.hash.ch = data.frame(conc = c(0, 0.96, 2.1)*1000,
                         surv = 0)
   piC.hash.ch$surv = 1 - piC.hash.ch$mort
 
-png("Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/hasheesh2011_chlorpyrifos_cercariae_mortality.png")
+png("Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Larvae/hasheesh2011_chlorpyrifos_cercariae_mortality.png")
   
   plot(piC.hash.ch$conc, piC.hash.ch$surv, pch = 16, ylim = c(0,1), xlim = c(0,3500),
        xlab = 'Chlorpyrifos (ppb)', ylab = '8-hr cercarial mortality',
@@ -85,7 +85,7 @@ piC.hash.prof = data.frame(conc = c(0, 1.85, 2.85)*1000,
                           surv = 0)
   piC.hash.prof$surv = 1 - piC.hash.prof$mort
 
-png("Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/hasheesh2011_profenofos_cercariae_mortality.png")
+png("Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Larvae/hasheesh2011_profenofos_cercariae_mortality.png")
   
   plot(piC.hash.prof$conc, piC.hash.prof$surv, pch = 16, ylim = c(0,1), xlim = c(0,3500),
        xlab = 'Profenofos (ppb)', ylab = '8-hr cercarial mortality',
