@@ -143,3 +143,21 @@ Data from [Halstead et al 2018](https://www.nature.com/articles/s41467-018-03189
 #### Response functions fit  
 + `halstead17_phiN_fe_uncertainty`
 + `halstead17_phiN_at_uncertainty`
+
+### `Hasheesh2011_chlorpyrifos_profenofos_larvae_fit.R`  
+Data from [Hasheesh & Mohamed 2011](https://www.sciencedirect.com/science/article/pii/S0048357511000186) investigating effects of **Chlorpyrifos** and **Profenofos** on survival of *S. haematobium* miracidia and cercarie and *Bulinus truncatus* snails (see below)  
+#### Data reported  
++ Table 5: 8 hr LC50. LC50 95%CI, LC90, and slp parameters for miracidia and cercariae from Litchfield and Wilcoson method  
+#### Response functions fit  
++ Cercariae
+  + Chlorpyrifos 
+    + Function: `piC_ch_Hash11_uncertainty`
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/hasheesh2011_chlorpyrifos_cercariae_mortality.png)
+  + Profenofos: `piC_prof_Hash11_uncertainty`
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/hasheesh2011_profenofos_cercariae_mortality.png)
++ Miracidia
+  + Chlorpyrifos 
+    + Function: `piM_ch_Hash11_uncertainty`
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/hasheesh2011_chlorpyrifos_miracidia_mortality.png)
+  + Profenofos: `piM_prof_Hash11_uncertainty`
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/hasheesh2011_profenofos_miracidia_mortality.png)
