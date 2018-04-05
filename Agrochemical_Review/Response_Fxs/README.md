@@ -179,4 +179,14 @@ Data from [Hasheesh & Mohamed 2011](https://www.sciencedirect.com/science/articl
   + Function: `muNq_prof_hash11_uncertainty`  
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_profenofos_snail_mortality.png)  
   + Function: `fN.hash.prof.uncertainty` (samples measurement of eggs/snail/day in the profenofos group and in the control group and returns the ratio which is interpreted as relative change in snail reproduction when exposed to LC25 of profenofos)  
-    + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_snail_reproduction_compare.png)      
+    + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_snail_reproduction_compare.png)     
+    
+### `Ibrahim1992_chlorpyrifos_snails_fit.R`    
+Data from [Ibrahim et al 1992](https://www.ncbi.nlm.nih.gov/pubmed/1379273) investigating effects of **chlorpyrifos** on survival and reproduction of *Biomphalaria alexandrina*  
+#### Data reported   
++ Lots of different series tested based on when chlorpyrifos was added/removed from tanks containing snails, series 1 with data contained in Table 1 is most applicable  
+#### Response functions fit  
++ Function: `mu_N_chlor_ibr92_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ibrahim1992/ibrahim1992_chlorpyrifos_snail_mortality.png)
++ Function: `f_N_chlor_ibr92_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ibrahim1992/ibrahim1992_chlorpyrifos_snail_reproduction.png)
