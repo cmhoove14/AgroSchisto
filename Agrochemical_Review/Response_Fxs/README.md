@@ -189,4 +189,15 @@ Data from [Ibrahim et al 1992](https://www.ncbi.nlm.nih.gov/pubmed/1379273) inve
 + Function: `mu_N_chlor_ibr92_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ibrahim1992/ibrahim1992_chlorpyrifos_snail_mortality.png)
 + Function: `f_N_chlor_ibr92_uncertainty`
-  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ibrahim1992/ibrahim1992_chlorpyrifos_snail_reproduction.png)
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ibrahim1992/ibrahim1992_chlorpyrifos_snail_reproduction.png)  
+  
+### `Johnson2007_fertilizer_fit.R`  
+Data from [Johnson et al 2007](https://doi.org/10.1073/pnas.0707763104) investigating effects of eutrophication from **fertilizer** on snail populations and cercarial output and infection rates in tadpoles for the *Ribeiroa ondatrae* system. No dose-response functions here because only one treatment group compared to a control group.
+#### Data reported  
++ Cercariae shed per infected snail per day in control and fertilizer groups (Fig 3c)  
++ Snail eggs collected in samplers at 5 sampling points
++ Total snail biomass over the course of the experiment
+#### Response functions fit  
++ Function: `johnson07_theta_uncertainty` (proportional increase in cercarial shedding in fertilizer group)
++ Function: `johnson07_fN_uncertainty` (proportional increase in snail eggs sampled in fertilizer group)
++ Function: `johnson07_phin_uncertainty` (proportional increase in snail biomass in fertilizer group)
