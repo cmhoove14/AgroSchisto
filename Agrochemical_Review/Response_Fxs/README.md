@@ -248,3 +248,21 @@ Data from [Rohr et al 2008](https://esajournals.onlinelibrary.wiley.com/doi/full
 + Function: `piC.atr.rohr08.lin`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Rohr08/Rohr08_piC_atrazine_function_test.png)
 
+### `Satapornvanit2009_insecticides_predators_fit.R`  
+Data from [Satapornvanit et al 2009](https://www.ncbi.nlm.nih.gov/pubmed/19103457) investigating effects of **Zinc**, **Chlorpyrifos**, **Dimethoate**, and **profenofos** on mortality and feeding rate of post-larvae *Macrobrachium rosenbergii*  
+#### Data reported  
++ Figure 1 contains data on mean mortality rate for each chemical and dose group as well as reduction in feeding rate  
+#### Response functions fit  
+*Functions were fit using both `drc` and `LW1949` with results basically the same*
++ Function: `muPq_chlor_satapornvanit09_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_chlorpyrifos_mupq.png)
++ Function: `muPq_dim_satapornvanit09_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_dimethoate_mupq.png)
++ Function: `muPq_prof_satapornvanit09_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_profenofos_mupq.png)
++ Function: `muPq_zinc_satapornvanit09_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_zinc_mupq.png)
++ Function: `psi_q_chlor_satapornvanit09_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_chlorpyrifos_psiq.png)
++ Function: `psi_q_zinc_satapornvanit09_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_zinc_psiq.png)
