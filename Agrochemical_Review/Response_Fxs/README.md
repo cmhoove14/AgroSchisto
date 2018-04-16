@@ -209,3 +209,13 @@ Data from [Koprivnikar et al 2006](https://www.ncbi.nlm.nih.gov/pubmed/16729687)
 #### Response functions fit  
 + Function: `piC_kop_atr_unc`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Koprivnikar2006/Koprivnikar_2006_function_simulate_piC_atrazine.png)
+
+### `Omran&Salama2013_atrazine_glyphosate_snails_fit.R`  
+Data from [Omran and Salama 2013](https://www.ncbi.nlm.nih.gov/pubmed/24215068) investigating effects of atrazine on survival of *Biomphalaria alexandrina* snails  
+#### Data reported  
++ Figure 1 log concentration vs probit mortality for 7 dose groups    
+#### Response functions fit  
++ Function: `ons.munq.atr`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Omran&Salama2013/Omran&Salama2013_function_simulate_muN_atrazine.png)
++ Function: `ons.munq.gly`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Omran&Salama2013/Omran&Salama2013_function_simulate_muN_glyphosate.png)
