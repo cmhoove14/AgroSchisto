@@ -114,7 +114,7 @@ set.seed(43093)
   points(c(1:300), sapply(c(1:300), piC_kop_atr_unc, simplify = T),
          pch = 5, col = 4, cex = 0.5)
 
-  legend('bottomleft', pch = c(16,5,5), col = c(1,2,4), legend = c("observed", "log-linear lc50 fit", "linear lc50 fit"),
-         cex = 0.7, bty = 'n')
+  legend('bottomleft', pch = c(16,5), col = c(1,4), legend = c("observed", "simulated"),
+         cex = 0.8, bty = 'n')
   
 dev.off()  
