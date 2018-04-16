@@ -201,3 +201,11 @@ Data from [Johnson et al 2007](https://doi.org/10.1073/pnas.0707763104) investig
 + Function: `johnson07_theta_uncertainty` (proportional increase in cercarial shedding in fertilizer group)
 + Function: `johnson07_fN_uncertainty` (proportional increase in snail eggs sampled in fertilizer group)
 + Function: `johnson07_phin_uncertainty` (proportional increase in snail biomass in fertilizer group)
+
+### `koprivnikar2006_atrazine_cercariae_fit.R`  
+Data from [Koprivnikar et al 2006](https://www.ncbi.nlm.nih.gov/pubmed/16729687) investigating effects of atrazine on survival of *Echinistoma trivolvis* cercariae  
+#### Data reported  
++ Cercarial survival and standard error across three concentration levels  
+#### Response functions fit  
++ Function: `piC_kop_atr_unc`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Koprivnikar2006/Koprivnikar_2006_function_simulate_piC_atrazine.png)
