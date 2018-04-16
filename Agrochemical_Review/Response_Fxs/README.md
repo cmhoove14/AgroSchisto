@@ -232,3 +232,11 @@ Data from [Ragab and Shoukry 2006](https://www.ncbi.nlm.nih.gov/pubmed/17153706)
 + Function: `rag06_mun_urea`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ragab&Shoukry2006/Ragab&Shoukry2006_function_simulate_muN_urea.png)
 
+### `rohr08_nature_atrazine_fit.R`   
+Data from [Rohr et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/18972018) investigating effects of **Atrazine** on snail populations and infection rates in a an a,phibian trematode system    
+#### Data reported  
++ Table 1 data on snail population dynamics in mesocosm setting comparing control to atrazine treatment group  
+
+#### Response functions fit  
++ `rohr08_fN_uncertainty` - function using snail eggs data
++ `rohr08_fN_uncertainty2` - function using snail hatchlings data (preferred due to parameter interpretation)
