@@ -1,0 +1,38 @@
+#This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License#########
+#<http://creativecommons.org/licenses/by-nc/4.0/> by Christopher Hoover, Arathi Arakala, Manoj Gambhir 
+#and Justin Remais. This work was supported in part by the National Institutes of Health/National Science 
+#Foundation Ecology of Infectious Disease program funded by the Fogarty International Center 
+#(grant R01TW010286), the National Institute of Allergy and Infectious Diseases (grant K01AI091864), 
+#and the National Science Foundation Water Sustainability and Climate Program (grant 1360330).
+
+#Per the terms of this license, if you are making derivative use of this work, you must identify that 
+#your work is a derivative work, give credit to the original work, provide a link to the license, 
+#and indicate changes that were made.###############
+
+source("Agrochemical_Review/Response_Fxs/rohr08_atrazine_cercariae_fit.R")
+
+png("Agrochemical_Review/Response_Fxs/Plots/Rohr08/Rohr08_piC_atrazine_data.png")
+
+plot(atr$log_conc, atr$surv, xlab = 'log+1 Atrazine (ppb)', ylab = 'Prop alive @14-18 hrs', 
+     xlim = c(0,8), ylim = c(0.25,0.65), pch = 16)
+  for(i in 1:length(atr$log_conc)){
+    segments(x0 = atr$log_conc[i], y0 = 1-atr$hi[i],
+             x1 = atr$log_conc[i], y1 = 1-atr$lo[i])
+  }
+
+  lines(log(seq(0,2000,20)+1), sapply(seq(0,2000,20), rohr.atr.fx)[1,], lty = 2)
+  lines(log(seq(0,2000,20)+1), sapply(seq(0,2000,20), rohr.atr.fx)[2,], lty = 3)
+  lines(log(seq(0,2000,20)+1), sapply(seq(0,2000,20), rohr.atr.fx)[3,], lty = 3)
+      
+dev.off()
+#Plot to see how it does
+png("Agrochemical_Review/Response_Fxs/Plots/Rohr08/Rohr08_piC_atrazine_function_test.png")
+
+  plot(atr$conc, atr$surv / atr$surv[1], pch = 16, xlim = c(0,2000), ylim = c(0,1),
+       ylab = 'rel prop alive @ 14-18 hrs', xlab = 'Atrazine (ppb)',
+       main = 'Sample output of cercarial mortality')
+    points(seq(0, 2000, 10), sapply(seq(0, 2000, 10), piC.atr.rohr08.lin), pch = 5, col=4, cex = 0.5) 
+    legend('bottomleft', legend = c('Observed', 'Modeled'), 
+           pch = c(16,5), col = c(1,4), cex = 0.7, bty = 'n')
+
+dev.off()

@@ -233,10 +233,18 @@ Data from [Ragab and Shoukry 2006](https://www.ncbi.nlm.nih.gov/pubmed/17153706)
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ragab&Shoukry2006/Ragab&Shoukry2006_function_simulate_muN_urea.png)
 
 ### `rohr08_nature_atrazine_fit.R`   
-Data from [Rohr et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/18972018) investigating effects of **Atrazine** on snail populations and infection rates in a an a,phibian trematode system    
+Data from [Rohr et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/18972018) investigating effects of **Atrazine** on snail populations and infection rates in a an amphibian trematode system    
 #### Data reported  
 + Table 1 data on snail population dynamics in mesocosm setting comparing control to atrazine treatment group  
-
 #### Response functions fit  
 + `rohr08_fN_uncertainty` - function using snail eggs data
 + `rohr08_fN_uncertainty2` - function using snail hatchlings data (preferred due to parameter interpretation)
+
+### `rohr08_atrazine_cercariae_fit.R`   
+Data from [Rohr et al 2008](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1890/07-1429.1) investigating effects of **Atrazine** on survival of  *Echinistoma trivolvis* cercariae    
+#### Data reported  
++ Figure 3 %mortality in hours 14-18 of cercariae in 6 different dose groups  
+#### Response functions fit  
++ Function: `piC.atr.rohr08.lin`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Rohr08/Rohr08_piC_atrazine_function_test.png)
+
