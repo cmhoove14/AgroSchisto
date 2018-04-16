@@ -219,3 +219,16 @@ Data from [Omran and Salama 2013](https://www.ncbi.nlm.nih.gov/pubmed/24215068) 
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Omran&Salama2013/Omran&Salama2013_function_simulate_muN_atrazine.png)
 + Function: `ons.munq.gly`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Omran&Salama2013/Omran&Salama2013_function_simulate_muN_glyphosate.png)
+
+### `ragab2006_fertilizers_snails_fit`  
+Data from [Ragab and Shoukry 2006](https://www.ncbi.nlm.nih.gov/pubmed/17153706) investigating effects of fertilizers on *Biomphalaria alexandrina* snails  
+#### Data reported  
++ Table 1 LC50, 95%CI of LC50, LC90, and slp parameters  
+#### Response functions fit  
++ Function: `rag06_mun_amm`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ragab&Shoukry2006/Ragab&Shoukry2006_function_simulate_muN_ammonium_nitrate.png)
++ Function: `rag06_mun_pot`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ragab&Shoukry2006/Ragab&Shoukry2006_function_simulate_muN_potassium_sulphate.png)
++ Function: `rag06_mun_urea`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ragab&Shoukry2006/Ragab&Shoukry2006_function_simulate_muN_urea.png)
+
