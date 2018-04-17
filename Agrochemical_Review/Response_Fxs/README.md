@@ -289,3 +289,16 @@ Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investiga
 + Fluazifop-p-butyl linear function: `piM.tant02_fpb.lin_unc` - linear relationship between time-LC50 and concentration  
 + Fluazifop-p-butyl exponential function: `piM.tant02_fpb.exp_unc` - exponential relationship between time-LC50 and concentration  
   + Sampling and data for both: [Raw data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Miracidia/tantawy2002_fpb_piM_data.png), [Parameter models](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Miracidia/tantawy2002_fpb_piM_parameter_models.png), [Sampling and observed data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Miracidia/tantawy2002_fpb_piM_data_sim.png)  
+
+### `tantawy2002_butachlor_fpb_cercariae_fit.R`   
+Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investigating effects of **Butachlor**, **fluazifop-p-butyl** on mortality of *Biomphalaria alexandrina* snails and *Schistosoma mansoni* miracidia and cercariae  
+#### Data reported  
++ **Cercariae -** Table 7&8: longitudinal survival of *Schistosoma mansoni* miracidia in control and 4 dose groups 
+#### Response functions fit  
++ Cercarial survival as a function of butralin concentration, produced via estimation of LC50 and slope parameters as a function of butralin concentration incorporated into log-logistic d-r curve. See [INSERT LINK TO LARVAL SURVIVAL DYNAMICS EXPLANATION HERE](link.linkylink.com)  
++ Butachlor linear function: `piC.tant02_but.lin_unc` - linear relationship between time-LC50 and concentration  
++ Butachlor exponential function: `piC.tant02_but.exp_unc` - exponential relationship between time-LC50 and concentration  
+  + Sampling and data for both: [Raw data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Cercariae/tantawy2002_butachlor_piC_data.png), [Parameter models](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Cercariae/tantawy2002_butachlor_piC_parameter_models.png), [Sampling and observed data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Cercariae/tantawy2002_butachlor_piC_data_sim.png)  
++ Fluazifop-p-butyl linear function: `piC.tant02_fpb.lin_unc` - linear relationship between time-LC50 and concentration  
++ Fluazifop-p-butyl exponential function: `piC.tant02_fpb.exp_unc` - exponential relationship between time-LC50 and concentration  
+  + Sampling and data for both: [Raw data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Cercariae/tantawy2002_fpb_piC_data.png), [Parameter models](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Cercariae/tantawy2002_fpb_piC_parameter_models.png), [Sampling and observed data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Cercariae/tantawy2002_fpb_piC_data_sim.png)  
