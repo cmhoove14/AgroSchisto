@@ -302,3 +302,13 @@ Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investiga
 + Fluazifop-p-butyl linear function: `piC.tant02_fpb.lin_unc` - linear relationship between time-LC50 and concentration  
 + Fluazifop-p-butyl exponential function: `piC.tant02_fpb.exp_unc` - exponential relationship between time-LC50 and concentration  
   + Sampling and data for both: [Raw data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Cercariae/tantawy2002_fpb_piC_data.png), [Parameter models](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Cercariae/tantawy2002_fpb_piC_parameter_models.png), [Sampling and observed data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Cercariae/tantawy2002_fpb_piC_data_sim.png)  
+
+### `tchounwou91_malathion_snails_fit.R`  
+Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/1953025) investigating effects of **malathion** on mortality of *Bulinus havanensis* and *Helisoma trivolvis* snails and eggs  
+#### Data reported  
++ LC50, LC0, LC90 all with 95%CIs, and slope (not slope parameter, raw slope of probit-log10 transformed D-R function) for adult snails, juvenile snails, and snail eggs  
+#### Response functions fit  
++ `muNq_mal_tch91_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Snails/tchounwou1991_malathion_snail_mortality.png)
++ `fNq_mal_tch91_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Snails/tchounwou1991_malathion_snail_fecundity.png)
