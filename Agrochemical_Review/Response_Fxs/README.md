@@ -266,3 +266,14 @@ Data from [Satapornvanit et al 2009](https://www.ncbi.nlm.nih.gov/pubmed/1910345
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_chlorpyrifos_psiq.png)
 + Function: `psi_q_zinc_satapornvanit09_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_zinc_psiq.png)
+
+### `tantawy2002_butachlor_fpb_snails_fit.R`   
+Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investigating effects of **Butachlor**, **fluazifop-p-butyl** on mortality of *Biomphalaria alexandrina* snails and *Schistosoma mansoni* miracidia and cercariae  
+#### Data reported  
++ **Snails -** Table 1: 24-hr LC50, 95%CI LC50, LC0, LC10, LC25, LC90, slp for *Biomphalaria alexandrina*  
+#### Response functions fit  
++ `muN.tant.but_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Snails/tantawy2002_butachlor_muN_data_sim.png)
++ `muN.tant.fpb_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Snails/tantawy2002_fpb_muN_data_sim.png)
+
