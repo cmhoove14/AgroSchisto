@@ -25,6 +25,22 @@ png("Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Snails/tchounwou1991_m
          cex = 0.8, bty = 'n')
   
 dev.off()  
+
+png("Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Snails/tchounwou1991_malathion_snail_trivolvis_mortality.png")
+  plot(c(0, 225.71, 478.65, 1015.04), c(0, .05,.5,.95), pch = 16, xlim = c(0, 1015.04), ylim = c(0,1),
+       xlab = 'malathion (ppm)', ylab = 'H.trivolvis mortality')
+    segments(x0 = 416.75, x1 = 536.25, y0 = 0.5, y1 = 0.5)
+    
+  set.seed(43093)  
+    
+    points(seq(0, 1e3, 5), sapply(seq(0, 1e6, 5e3), muNq_trivolvis_mal_tch91_uncertainty), 
+           pch = 5, col = 4, cex = 0.5)
+    
+  legend('bottomright', pch = c(16,5), col = c(1,4), legend = c("observed", "simulated"),
+         cex = 0.8, bty = 'n')
+  
+dev.off()  
+
 #egg viability ###########
 png("Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Snails/tchounwou1991_malathion_snail_fecundity.png")
   
@@ -35,6 +51,22 @@ png("Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Snails/tchounwou1991_m
   set.seed(43093)  
 
   points(seq(0, 4e2, 1), sapply(seq(0, 4e5, 1e3), fNq_mal_tch91_uncertainty), 
+         pch = 5, col = 4, cex = 0.5)
+
+  legend('bottomleft', pch = c(16,5), col = c(1,4), legend = c("observed", "simulated"),
+         cex = 0.8, bty = 'n')
+  
+dev.off()  
+
+png("Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Snails/tchounwou1991_malathion_snail_trivolvis_fecundity.png")
+  
+  plot(eg.trivolvis$conc, 1 - eg.trivolvis$prop_dead, pch = 16, xlim = c(0, max(eg.trivolvis$conc)), ylim = c(0,1),
+       xlab = 'malathion (ppm)', ylab = 'H.trivolvis egg viability')
+    segments(x0 = 170.95, x1 = 203.73, y0 = 0.5, y1 = 0.5)
+  
+  set.seed(43093)  
+
+  points(seq(0, 4e2, 1), sapply(seq(0, 4e5, 1e3), fNq_trivolvis_mal_tch91_uncertainty), 
          pch = 5, col = 4, cex = 0.5)
 
   legend('bottomleft', pch = c(16,5), col = c(1,4), legend = c("observed", "simulated"),

@@ -23,6 +23,19 @@ sn = read.csv('Agrochemical_Review/Response_Fxs/Data/tchounwou1991.csv')
 
     return(mun)
   }
+
+#Parameters and function for H. trivolvis snails  
+  lc50.tch91.mal.trivolvis = 478.65
+  slp.tch91.mal.trivolvis = 5.04 #No need to use get_b1 function since this is already the raw slope, not the SLP parameter
+  se.lc50.tch91.mal.trivolvis = mean(c(log10(536.25 / lc50.tch91.mal.trivolvis), log10(lc50.tch91.mal.trivolvis/416.75))) / 1.96
+  
+  muNq_trivolvis_mal_tch91_uncertainty = function(In){
+      ins = (In/1000)
+      lc50 = 10^(rnorm(1, log10(lc50.tch91.mal.trivolvis), se.lc50.tch91.mal.trivolvis))
+      mun = pnorm((slp.tch91.mal.trivolvis) * log10(ins/lc50))
+
+    return(mun)
+  }
   
 #egg viability ###########
 eg = data.frame(time = 1,
@@ -43,7 +56,28 @@ eg = data.frame(time = 1,
     return(fn)
   }
   
+#Parameters and function for H. trivolvis eggs  
+eg.trivolvis = data.frame(time = 1,
+                          chem = 'malathion',
+                          conc = c(0, 92.57, 187.65, 380.40),
+                          prop_dead = c(0, .05, .5,.95))
+
+  lc50.tch91.mal.trivolvis.eg = 187.65
+  slp.tch91.mal.trivolvis.eg = 5.36 #No need to use get_b1 function since this is already the raw slope, not the SLP parameter
+  se.lc50.tch91.mal.trivolvis.eg = mean(c(log10(203.73 / lc50.tch91.mal.trivolvis.eg), log10(lc50.tch91.mal.trivolvis.eg/170.95))) / 1.96
+  
+  fNq_trivolvis_mal_tch91_uncertainty = function(In){
+      ins = (In/1000)
+      lc50 = 10^(rnorm(1, log10(lc50.tch91.mal.trivolvis.eg), se.lc50.tch91.mal.trivolvis.eg))
+      mun = pnorm((-slp.tch91.mal.trivolvis.eg) * log10(ins/lc50))
+
+    return(mun)
+  }
+  
 #Keep vector
   keep.tch91.snail = c('sn', 'lc50.tch91.mal', 'se.lc50.tch91.mal', 'slp.tch91.mal',
+                       'lc50.tch91.mal.trivolvis', 'se.lc50.tch91.mal.trivolvis', 'slp.tch91.mal.trivolvis',
                        'eg', 'lc50.tch91.mal.eg', 'se.lc50.tch91.mal.eg', 'slp.tch91.mal.eg',
-                       'fNq_mal_tch91_uncertainty', 'muNq_mal_tch91_uncertainty')
+                       'lc50.tch91.mal.trivolvis.eg', 'se.lc50.tch91.mal.trivolvis.eg', 'slp.tch91.mal.trivolvis.eg',
+                       'fNq_mal_tch91_uncertainty', 'muNq_mal_tch91_uncertainty',
+                       'fNq_trivolvis_mal_tch91_uncertainty', 'muNq_trivolvis_mal_tch91_uncertainty')
