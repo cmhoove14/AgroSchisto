@@ -316,3 +316,14 @@ Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/1953025) investi
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Snails/tchounwou1991_malathion_snail_trivolvis_mortality.png)
 + `fNq_trivolvis_mal_tch91_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Snails/tchounwou1991_malathion_snail_trivolvis_fecundity.png)
+
+### `tchounwou91_malathion_miracidia_fit.R`  
+Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/2066529) investigating effects of **malathion** on mortality of *Schistosoma mansoni*  
+#### Data reported  
++ Time series of miracidia mortality across 6 malathion concentrations. Also assessed bayluscide, but not interested in effects of molluscicides    
+#### Response functions fit  
++ `piM.tch91_mal_unc`
+  + Raw time series data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_malathion_miracidia_time_data.png)
+  + Time d-r parameters over concentration: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_malathion_miracidia_dose_pars.png)
+  + Time series validation: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_malathion_miracidia_validate.png)
+  + Sampling and data of d-r function: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_malathion_piM_validate.png)
