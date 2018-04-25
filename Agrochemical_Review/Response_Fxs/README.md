@@ -342,4 +342,4 @@ Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/1906907) investi
   + Raw time series data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_urea_miracidia_time_data.png)
   + Time d-r parameters over concentration: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_urea_miracidia_piM_dose_pars.png)
   + Time series validation: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_urea_miracidia_validate.png)
-  + Sampling and data of d-r function: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_urea_piM_validate.png)
+  + Sampling and data of d-r function: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_urea_miracidia_piM_validate.png)
