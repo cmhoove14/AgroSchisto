@@ -354,3 +354,13 @@ Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/1906907) investi
 + `tch91_ure_v_unc`  
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Eggs/urea_egg_viability_data_sim.png)
   
+### `tchounwou92_malathion_cercariae_fit.R`  
+Data from [Tchounwou et al (1992)](https://onlinelibrary.wiley.com/doi/abs/10.1002/tox.2530070202) investigating effects of **malathion** on mortality/survival of *Schistosoma mansoni* cercariae  
+#### Data reported  
++ Figure 2: Time series of cercariae mortality/survival across 6 concentrations of malathion    
+#### Response functions fit  
++ `piC.tch92_mal_unc`
+  + Raw time series data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1992/tchounwou92_malathion_cercariae_data.png)
+  + Time d-r parameters over concentration: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1992/tchounwou92_malathion_cercariae_dose_pars.png)
+  + Time series validation: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1992/tchounwou92_malathion_cercariae_validation.png)
+  + Sampling and data of d-r function: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1992/tchounwou92_malathion_piC_validation.png)
