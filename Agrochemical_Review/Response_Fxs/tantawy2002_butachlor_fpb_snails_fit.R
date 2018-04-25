@@ -32,14 +32,6 @@ snail.but = data.frame(conc = c(0,0.65, 1.5, 4.5,6.5,44)*1000, # suspected typo 
     return(mun)
   }
   
-  plot(snail.but$conc, snail.but$mort, pch = 16, ylim = c(0,1), xlim = c(0,max(snail.but$conc)+100),
-       xlab = 'Butachlor (ppb)', ylab = 'Snail mortality',
-       main = expression(paste('Butachlor toxicity to ', italic('Bi. alexandrina'))))
-    segments(x0 = 4060, x1 = 10400, y0 = 0.5, y1 = 0.5)
-  
-  points(seq(0, 50000, 100), sapply(seq(0, 50000, 100), muN.tant.but_uncertainty),
-         pch = 5, cex = 0.5, col = 4)
-  
 keep.tant.but = c('muN.tant.but_uncertainty', 'lc50.tant.but', 'se.lc50.tant.but', 'slp.tant.but')  
 
 #Fluazifop-p-butyl  ##########     
@@ -60,14 +52,6 @@ snail.fpb = data.frame(conc = c(0,1.76, 4.5, 9,17.6,58)*1000,
 
     return(mun)
   }
-  
-plot(snail.fpb$conc, snail.fpb$mort, pch = 16, ylim = c(0,1), xlim = c(0,max(snail.fpb$conc)+100),
-     xlab = 'fluazifop-p-butyl (ppb)', ylab = 'Snail mortality',
-     main = expression(paste('fluazifop-p-butyl toxicity to ', italic('Bi. alexandrina'))))
-  segments(x0 = 11730, x1 = 26400, y0 = 0.5, y1 = 0.5)
-
-  points(seq(0, 60000, 100), sapply(seq(0, 60000, 100), muN.tant.fpb_uncertainty),
-         pch = 5, cex = 0.5, col = 4)
   
 keep.tant.fpb = c('muN.tant.fpb_uncertainty', 'fx.tant.fpb', 'lc50.tant.fpb', 
                   'se.lc50.tant.fpb', 'slp.tant.fpb') 
