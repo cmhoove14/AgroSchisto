@@ -28,7 +28,7 @@ plot(mir.mal$time_hrs[mir.mal$conc==0], mir.mal$alive[mir.mal$conc==0]/mir.mal$t
           lty = 2, col = i)
   }
 
-title('malathion toxicity to cercariae')
+title('malathion toxicity to miracidia')
 legend('topright', title = 'Mal(ppm)', legend = c('control', unique(mir.mal$conc)[-1]), 
        pch = c(17,16,16,16,16,16), col = c(1:6), cex=0.8, bty = 'n')  
 
