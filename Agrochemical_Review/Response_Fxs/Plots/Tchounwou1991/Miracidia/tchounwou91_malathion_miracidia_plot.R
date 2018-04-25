@@ -85,6 +85,7 @@ plot(mir.mal$time_hrs[mir.mal$conc==0], mir.mal$surv[mir.mal$conc==0], pch=17, x
          pch = c(17,rep(16,5)), col = c(1,2:6), cex = 0.8, bty = 'n')
 
 #plot model predictions
+set.seed(43093)
 for(i in c(0,30,60,90,120,150)*1000){
   c = i/30000 + 1
   print(c)
@@ -97,6 +98,7 @@ png("Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou199
 plot(mirp.df$mal, tch91.mal.pim.aucs/tch91.mal.pim.aucs[1], pch = 16, ylim = c(0,1),
      xlab = 'Malathion (ppm)', ylab = expression(paste(pi[M])),
      main = 'Sample Output of miracidial mortality function')
+  set.seed(43093)
   points(seq(0,max(mirp.df$mal)*1000,500)/1000, sapply(seq(0,max(mirp.df$mal)*1000,500), piM.tch91_mal_unc), 
          pch = 5, col=4, cex = 0.5)
   
