@@ -177,7 +177,7 @@ sap.fr<-read.csv("Agrochemical_Review/Response_Fxs/Data/satapornvanit2009_m_rose
   fr.ch = subset(sap.fr, chem == 'chlorpyrifos')
   
 #Zinc ###################
-  zinc.fr= drm(feed_rate ~ conc, data = fr.z, type = 'continuous', weights = error,
+  zinc.fr= drm(feed_rate ~ conc, data = fr.z, type = 'continuous',
                fct = LL.3(names = c('b', 'd', 'e'),
                           fixed = c(NA, max(fr.z$feed_rate), NA)))
 
@@ -195,7 +195,7 @@ sap.fr<-read.csv("Agrochemical_Review/Response_Fxs/Data/satapornvanit2009_m_rose
 keep.zinc.sat09 = c(keep.zinc.sat09, 'psi_q_zinc_satapornvanit09_uncertainty', 
                     'par.tricksz', 'zinc.fr', 'fr.z')    
 #Chlorpyrifos ###################
-  chlor.fr= drm(feed_rate ~ conc, data = fr.ch, type = 'continuous', weights = error,
+  chlor.fr= drm(feed_rate ~ conc, data = fr.ch, type = 'continuous',
                fct = LL.3(names = c('b', 'd', 'e'),
                           fixed = c(NA, max(fr.ch$feed_rate), NA)))
 

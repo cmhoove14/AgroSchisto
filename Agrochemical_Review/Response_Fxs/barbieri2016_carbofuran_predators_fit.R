@@ -46,3 +46,6 @@ barb_lw_pars <- LWestimate(fitLWauto(barb_dat), barb_dat)
 
     return(mun)
   }
+
+  keep.barb2016 <- c("barb_carbofuran_muPq_uncertainty", "slp.barb.carb", "lc50.barb.carb", "se.barb.carb",
+                     "muPq_carb_barb16_uncertainty", "barb.mupq")
