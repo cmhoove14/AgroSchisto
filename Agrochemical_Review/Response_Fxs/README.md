@@ -51,6 +51,16 @@ Data from [Bakry et al 2016](https://www.ncbi.nlm.nih.gov/pubmed/24081640) inves
   + Function fit: `muNq_prq_Bakry16_uncertainty`  
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bakry_2016/bakry2016_paraquat_snail_mortality.png) 
 
+### `barbieri2016_carbofuran_predators_fit.R`  
+Data from [Barbieri et al 2016](https://www.ncbi.nlm.nih.gov/pubmed/23847016) investigating effect of **carbofuran** on *Macrobrachium olfersii* prawns  
+#### Data reported  
++Table 1: 24-hr mortality rates of cohorts of 135 juvenile prawns exposed to 8 concentrations of pesticide  
+#### Response functions fit  
++ Daily mortality of *Macrobrachium olfersii* using both DRC log-logistic fit and LW1949 methods   
+  + Function fit: `barb_carbofuran_muPq_uncertainty` (LW1949 function - used for comparability to other functions)  
+  + Function fit: `muPq_carb_barb16_uncertainty` (DRC function)  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Barbieri2016/carbofuran_mupq_sim_observed.png)  
+
 ### `Baxter_Rohr2011_reanalysis_atrazine_snail_carrying_capacity_fit.R`  
 Data from [Baxter et al 2011](http://onlinelibrary.wiley.com/doi/10.1002/etc.552/abstract) and reanalysis of it by [Rohr et al 2012](https://www.researchgate.net/publication/224284702_The_herbicide_atrazine_algae_and_snail_populations?enrichId=rgreq-687b4b78-6cbe-4c48-9c04-d495370159ae&enrichSource=Y292ZXJQYWdlOzIyNDI4NDcwMjtBUzoxMDEyNDM0Njg5MTA1OTlAMTQwMTE0OTczMjY1Mg%3D%3D&el=1_x_3) investigating effect of **atrazine** on algal dynamics and ultimate effects on *Physella* spp and *Stagnicola elodes* snail population dynamics  
 #### Data reported  
