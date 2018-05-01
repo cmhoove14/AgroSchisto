@@ -73,6 +73,14 @@ Data from [Baxter et al 2011](http://onlinelibrary.wiley.com/doi/10.1002/etc.552
 + Snail population carrying capacity as a function of any herbicide concentration, assuming response is proportional to its EEC value and is the same as the atrazine response `phi_Nq_rel_baxrohr.no30`  
   + no30 refers to exclusion of data point at 30ppb atrazine due to large influence of spatial block on results. See [Rohr et al 2012](https://www.researchgate.net/publication/224284702_The_herbicide_atrazine_algae_and_snail_populations?enrichId=rgreq-687b4b78-6cbe-4c48-9c04-d495370159ae&enrichSource=Y292ZXJQYWdlOzIyNDI4NDcwMjtBUzoxMDEyNDM0Njg5MTA1OTlAMTQwMTE0OTczMjY1Mg%3D%3D&el=1_x_3) for details  
   
+### `Bhavan2010_carbaryl_predator_feed_rate_fit.R`  
+Data from [Bhavan et al 2010](https://www.ncbi.nlm.nih.gov/pubmed/22167951) investigating effect of **Carbaryl** on *Macrobrachium malcomsonii* food consumption  
+#### Data reported  
++ Table 1 - food consumed in grams per day across three concentrations and a control group  
+#### Response functions fit  
++ Predator feeding rate as a function of carbaryl concentration  
+  + Function: `psi_q_carb_bhavan10_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bhavan2010/bhavan2010_carbaryl_feed_rate_data_sim.png)
 ### `Ghaffar2016_butralin_glyphosate_pendimethalin_cercariae_fit.R`  
 Data from [Abdel Ghaffar et al 2016](http://www.bioone.org/doi/abs/10.4002/040.059.0201) investigating effect of **butralin**, **glyphosate**, and **pendimethalin** on *Schistosoma mansoni* cercariae  
 #### Data reported  
