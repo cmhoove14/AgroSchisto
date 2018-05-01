@@ -97,7 +97,14 @@ Data from [Abdel Ghaffar et al 2016](http://www.bioone.org/doi/abs/10.4002/040.0
 Data from [Abdel Ghaffar et al 2016](http://www.bioone.org/doi/abs/10.4002/040.059.0201) investigating effect of **butralin**, **glyphosate**, and **pendimethalin** on *Biomphalaria alexandrina* snails  
 #### Data reported  
 + Table 1: 24-hr LC0, LC10, LC25, LC50, LC50 95%CI, LC90, LC90 95%CI, and "Slope of refression mortality on conc."  
-+ This data is highly questionable and reproducing dose-response relationships from it has not been completed. Cited method is Litchfield and Wilcoxon, but methods to reproduce d-r function from reported Litchfield and Wilcoxon parameters in other studies from the same authors are not working here. Almost seems like they the reported parameters come from a linear relationship fit to % mortality and concentration  
++ This data is somewhat questionable and reproducing dose-response relationships from it relies on estimating d-r based on the reported LC values rather than LC and slope as for other studies (see `Models/d-r_function_compare_methods.R`. Cited method is Litchfield and Wilcoxon, but methods to reproduce d-r function from reported Litchfield and Wilcoxon parameters in other studies from the same authors are not working here. 
+#### Response functions fit  
++ `mu_Nq_butr_gaf16_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/butralin_muN_simulate)  
++ `mu_Nq_gly_gaf16_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/glyphosate_muN_simulate)  
++ `mu_Nq_pen_gaf16_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/pendimethalin_muN_simulate)  
 
 ### `griggs08_atrazine_metolachlor_cercariae_fit.R`  
 Data from [Griggs et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/17763881) investigating effects of **atrazine** and **metloachlor** on *Echinistoma trivolvis* cercariae  
