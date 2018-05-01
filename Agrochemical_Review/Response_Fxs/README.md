@@ -80,7 +80,8 @@ Data from [Bhavan et al 2010](https://www.ncbi.nlm.nih.gov/pubmed/22167951) inve
 #### Response functions fit  
 + Predator feeding rate as a function of carbaryl concentration  
   + Function: `psi_q_carb_bhavan10_uncertainty`  
-  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bhavan2010/bhavan2010_carbaryl_feed_rate_data_sim.png)
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bhavan2010/bhavan2010_carbaryl_feed_rate_data_sim.png)  
+  
 ### `Ghaffar2016_butralin_glyphosate_pendimethalin_cercariae_fit.R`  
 Data from [Abdel Ghaffar et al 2016](http://www.bioone.org/doi/abs/10.4002/040.059.0201) investigating effect of **butralin**, **glyphosate**, and **pendimethalin** on *Schistosoma mansoni* cercariae  
 #### Data reported  
@@ -132,6 +133,15 @@ Data from [Griggs et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/17763881) inve
 + cercarial survival as a function of metolachlor/atrazine concentration, produced via estimation of LC50 and slope parameters as a function of metolachlor/atrazine concentration incorporated into log-logistic d-r curve. See [INSERT LINK TO LARVAL SURVIVAL DYNAMICS EXPLANATION HERE](link.linkylink.com)  
   + Function: `piC.grg08_atr_unc2`
   + Sampling and data: [Raw data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Griggs2008/Griggs2008_raw_cercariae_mortality_data_atrazine.png), [Parameter models](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Griggs2008/Griggs2008_fitted_d-r_parameters_and_functions_cercariae_atrazine.png), [Sampling and observed data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Griggs2008/Griggs2008_function_simulate_cercariae_atrazine.png)  
+
+### `Gustafson2016_atrazine_theta_fit.R`  
+Data from [Gustafson et al 2016](https://www.ncbi.nlm.nih.gov/pubmed/26762862) investigating effects of **atrazine** on parasite host nteractions in an amphibian trematode system. data of use is cercarie produced per day by *Physa acuta* snails infected with *Halipegus eccentricus*  
+#### Data reported  
++ Table 1/ Figure 2B: cercarie production per snail in control and two atrazine dose groups  
+#### Response functions fit  
++ Relative cercariae produced per snail
+  + Response function: `gust_theta_uncertainty`
+  + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Gustafson2016/atrazine_theta_data_sim.png)
 
 ### `Halstead2015_insecticides_predators_fit.R`  
 Data from [Halstead et al 2015](https://www.sciencedirect.com/science/article/pii/S0045653515003410?via%3Dihub) investigating effects of **malathion**, **chlorpyrifos**, **terbufos**, **esfenvalerate**, **lambda-cyhalothrin**, and **permethrin** on *Procambarus clarkii* (crayfish) adults  
