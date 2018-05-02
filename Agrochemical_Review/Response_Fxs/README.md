@@ -268,6 +268,18 @@ Data from [Kristoff et al 2011](https://www.ncbi.nlm.nih.gov/pubmed/21524429) in
 + Function: `fNq_azmeth_kristoff11_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Kristoff2011/kristoff2011_azinphos-methyl_snail_reproduction_data_sim.png)
 
+### `Mohamed2012_profenofos_diazinon_snails_fit.R`  
+Data from [Mohamed et al 2012](https://www.sciencedirect.com/science/article/pii/S0048357511001696) investigating effect of **Diazinon** and **profenofos** on mortality and reproduction of *Biomphalaria alexandrina*  
+#### Data reported  
++ Table 1: LC0, LC10, LC25, LC50, LC90, and slp parameters from Litchfield and Wilcoxon d-r model. No reported of uncertainty, so borrowed a value of 0.12 which represents the upper range of uncertainty from similar studies  
+#### Response functions fit  
++ Diazinon  
+  + Function: `muNq_diaz_mohamed_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Mohamed2012/diazinon_snails_data_sim.png)
++ profenofos  
+  + Function: `muNq_prof_mohamed_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Mohamed2012/profenofos_snails_data_sim.png)
+
 ### `Omran&Salama2013_atrazine_glyphosate_snails_fit.R`  
 Data from [Omran and Salama 2013](https://www.ncbi.nlm.nih.gov/pubmed/24215068) investigating effects of atrazine on survival of *Biomphalaria alexandrina* snails  
 #### Data reported  
