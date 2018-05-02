@@ -302,6 +302,23 @@ Data from [Monde et al 2016](https://link.springer.com/article/10.1007/s00244-01
 + `muNq_endo_monde16_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monde2016/endosulfan_snails_sim.png)
 
+### `Monte2016_glyphosate_larvae_fit.R`  
+Data from [Monte et al 2016](https://www.ncbi.nlm.nih.gov/pubmed/27373431) investigating effects of roundup (active ingredient: 41% **glyphosate**) on survival of *Echinistoma paraensei* cercariae and miracidia
+#### Data reported  
++ Table 2: longitudinal survival of miracidia in control and 5 dose groups  
++ Table 3: longitudinal survival of cercariae in control and 9 dose groups  
+#### Response functions fit  
++ `piC.mont16_gly_unc`
+  + Raw time series data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_cercariae_data.png)
+  + Time d-r parameters over concentration: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_cercariae_dose_pars.png)
+  + Time series validation: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_cercariae_validation.png)
+  + Sampling and data of d-r function: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_cercariae_piC_validation.png)
++ `piM.mont16_gly_unc`
+  + Raw time series data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_miracidia_data.png)
+  + Time d-r parameters over concentration: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_miracidia_dose_pars.png)
+  + Time series validation: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_miracidia_validation.png)
+  + Sampling and data of d-r function: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_miracidia_piM_validation.png)
+
 ### `Omran&Salama2013_atrazine_glyphosate_snails_fit.R`  
 Data from [Omran and Salama 2013](https://www.ncbi.nlm.nih.gov/pubmed/24215068) investigating effects of atrazine on survival of *Biomphalaria alexandrina* snails  
 #### Data reported  
