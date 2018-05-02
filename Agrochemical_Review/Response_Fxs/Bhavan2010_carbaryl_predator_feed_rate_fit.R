@@ -15,21 +15,23 @@ require(drc)
 bhavan_dat <- data.frame("food_con" = c(33.51, 28.47, 19.30, 13.32),
                          "error" = c(1.47, 1.44, 1.59, 1.04),
                          "carbaryl" = c(0, 5.15, 7.73, 15.47))
+
+bhavan_ref <- bhavan_dat$food_con[1]
   
-#Zinc ###################
+#carbaryl ###################
   carb_fr= drm(food_con ~ carbaryl, data = bhavan_dat, type = 'continuous',
                fct = LL.3(names = c('b', 'd', 'e'),
                           fixed = c(NA, max(bhavan_dat$food_con), NA)))
 
   psi_q_carb_bhavan10<-function(In){
-    predict(carb_fr, data.frame(conc = In), interval = 'confidence', level = 0.95) / bhavan_dat$food_con[1]
+    predict(carb_fr, data.frame(conc = In), interval = 'confidence', level = 0.95) / bhavan_ref
   }  
     
   par.tricks.carb = c(coef(carb_fr), 'd' = max(bhavan_dat$food_con))[c(1,3,2)]
     
   psi_q_carb_bhavan10_uncertainty<-function(In){
     rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.carb, yerror = 'rnorm', xerror = In,
-         ypar = c(0, predict(carb_fr, data.frame(dose = In), se.fit = T)[2]))$y / bhavan_dat$food_con[1]
+         ypar = c(0, predict(carb_fr, data.frame(dose = In), se.fit = T)[2]))$y / bhavan_ref
   }
     
-keep.carb.bhavan10 = c('psi_q_carb_bhavan10_uncertainty', 'par.tricks.carb', 'carb_fr')    
+keep.carb.bhavan10 = c('psi_q_carb_bhavan10_uncertainty', 'par.tricks.carb', 'carb_fr', "bhavan_ref")    
