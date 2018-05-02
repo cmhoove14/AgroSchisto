@@ -294,6 +294,13 @@ Data from [Mohamed et al 2012](https://www.sciencedirect.com/science/article/pii
   + Function: `fNq_moh_prof_moh12_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Mohamed2012/profenofos_snail_reproduction_data_sim.png)
 
+### `Monde2016_endosulfan_snail_fit.R`  
+Data from [Monde et al 2016](https://link.springer.com/article/10.1007/s00244-016-0275-7) investigating effects of **endosulfan** on *Bulinus globusus* survival and predation by catfish  
+#### Data reported  
++ Table 2: lc10, lc50, and lc90 parameters with confidence intervals  
+#### Response functions fit  
++ `muNq_endo_monde16_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monde2016/endosulfan_snails_sim.png)
 
 ### `Omran&Salama2013_atrazine_glyphosate_snails_fit.R`  
 Data from [Omran and Salama 2013](https://www.ncbi.nlm.nih.gov/pubmed/24215068) investigating effects of atrazine on survival of *Biomphalaria alexandrina* snails  
