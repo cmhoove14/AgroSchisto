@@ -215,6 +215,21 @@ Data from [Hasheesh & Mohamed 2011](https://www.sciencedirect.com/science/articl
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_profenofos_snail_mortality.png)  
   + Function: `fN.hash.prof.uncertainty` (samples measurement of eggs/snail/day in the profenofos group and in the control group and returns the ratio which is interpreted as relative change in snail reproduction when exposed to LC25 of profenofos)  
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_snail_reproduction_compare.png)     
+
+### `Hussein2016_fertilizer_snails_fit.R`  
+Data from [Hussein et al 2016](https://www.researchgate.net/publication/305149067_Effects_of_Three_Inorganic_Fertilizers_on_the_Biology_and_Histopathology_of_infected_Biomphalaria_alexandrina_snails?enrichId=rgreq-cf1a38509b7c5460cbc30f698ea58594-XXX&enrichSource=Y292ZXJQYWdlOzMwNTE0OTA2NztBUzozODI2MjU5NTgxMjE0NzJAMTQ2ODIzNjU0NTE4NQ%3D%3D&el=1_x_3&_esc=publicationCoverPdf) investigating effects of three fertilizers on *Biomphalaria alexandrina* survival  
+#### Data reported  
++ Table 1: LC50, LC50 CIs, slope function, LC90 from LW1949 method  
+#### Response functions fit  
++ balanced fertilizer  
+  + Function: `muNq_balanced_hussein16_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hussein2016/balanced_fertilizer_snail_mortality.png)  
++ High phosphorous fertilizer  
+  + Function: `muNq_highp_hussein16_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hussein2016/highp_fertilizer_snail_mortality.png)  
++ High nitrogen fertilizer     
+  + Function: `muNq_highn_hussein16_uncertainty`   
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hussein2016/highn_fertilizer_snail_mortality.png)   
     
 ### `Ibrahim1992_chlorpyrifos_snails_fit.R`    
 Data from [Ibrahim et al 1992](https://www.ncbi.nlm.nih.gov/pubmed/1379273) investigating effects of **chlorpyrifos** on survival and reproduction of *Biomphalaria alexandrina*  
