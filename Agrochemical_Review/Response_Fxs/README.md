@@ -276,9 +276,14 @@ Data from [Mohamed et al 2012](https://www.sciencedirect.com/science/article/pii
 + Diazinon  
   + Function: `muNq_diaz_mohamed_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Mohamed2012/diazinon_snails_data_sim.png)
+  + Function: `fNq_moh_diaz_moh12_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Mohamed2012/diazinon_snail_reproduction_data_sim.png)
 + profenofos  
   + Function: `muNq_prof_mohamed_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Mohamed2012/profenofos_snails_data_sim.png)
+  + Function: `fNq_moh_prof_moh12_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Mohamed2012/profenofos_snail_reproduction_data_sim.png)
+
 
 ### `Omran&Salama2013_atrazine_glyphosate_snails_fit.R`  
 Data from [Omran and Salama 2013](https://www.ncbi.nlm.nih.gov/pubmed/24215068) investigating effects of atrazine on survival of *Biomphalaria alexandrina* snails  

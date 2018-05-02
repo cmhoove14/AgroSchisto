@@ -70,3 +70,102 @@ muNq_prof_mohamed_uncertainty = function(In){
   
 #keep vector
   keep.moh.prof = c('muNq_prof_mohamed_uncertainty', 'lc50.moh.prof.report', 'se.lc50.moh.prof', 'b1.moh.prof')    
+
+#Reproduction data from tables 2A and B ######
+#Diazinon  
+#Concentrations tested  
+  diaz_conc <- c(0, 1.40, 10.53, 12.25)
+
+#Fecundity data over entire study period from table 2A    
+  diaz_fecun <- c(3.50+1.35+2.55+2.70+18.18+14.50+4.30+4.60+8.70+11.20+2.40+3.50+3.57+5.50+5.40+8.20+9.30+11.20+10.60+12.80,
+                  3.50+0.70+0.26+1.00+8.60+0+1.1+1.33+0.55+2.1+0+0+0+5+15.3+1+10.5,
+                  3.50+1.45+0.75+0.46+17.10+14.7+11+1.25+21+19.3,
+                  3.50+0+5.33+1.20)
+
+#proportion of eggs that hatch in each concnetration group    
+  diaz_hatch <- c(100,100,51.7,23.3)/100
+
+#Fecundity rate as hatchlings/snail/week  
+  diaz_rate <- diaz_fecun*diaz_hatch
+  
+#Reference value to scale to 0-1 
+  moh_repro_ref <- diaz_fecun[1]
+
+#Combine in a data frame  
+  diaz_repro_df <- data.frame(conc = diaz_conc,
+                              fecun = diaz_fecun,
+                              hatch = diaz_hatch,
+                              rate = diaz_rate)
+  
+#Estimate d-r function with drc  
+  diaz_repro_mod= drm(rate ~ conc, data = diaz_repro_df, type = 'continuous',
+                      fct = LL.3(names = c('b', 'd', 'e'),
+                                 fixed = c(NA, max(diaz_repro_df$rate), NA)))
+
+  fNq_moh_diaz_moh12<-function(In){
+    predict(diaz_repro_mod, data.frame(conc = In/1000), interval = 'confidence', level = 0.95)
+  }  
+    
+  par.tricks.diaz = c(coef(diaz_repro_mod), 'd' = max(diaz_repro_df$rate))[c(1,3,2)]
+    
+  fNq_moh_diaz_moh12_uncertainty<-function(In){
+    fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.diaz, yerror = 'rnorm', xerror = In/1000,
+               ypar = c(0, predict(diaz_repro_mod, data.frame(dose = In/1000), se.fit = T)[2]))$y / moh_repro_ref
+    
+    if(fn < 0){
+      return(0)
+    } else {
+      return(fn)
+    }
+  }
+  
+keep.moh.diaz <- c(keep.moh.diaz, "fNq_moh_diaz_moh12_uncertainty", "diaz_repro_mod", "moh_repro_ref", "par.tricks.diaz")  
+
+#Profenofos (selecron)  
+#Concentrations tested  
+  prof_conc <- c(0, 0.40, 2.44, 3.11)
+
+#Fecundity data over entire study period from table 2A    
+  prof_fecun <- c(diaz_fecun[1], #Same control for both chemcials
+                  3.50+0.80+0.10+0.77+0.15+0.31+10.3+17.6+8+6,
+                  3.50+0.75+0.72+1.80+14.70+6.4,
+                  3.50+1.00)
+
+#proportion of eggs that hatch in each concnetration group    
+  prof_hatch <- c(100,100,0,0)/100
+
+#Fecundity rate as hatchlings/snail/week  
+  prof_rate <- prof_fecun*prof_hatch
+  
+#Combine in a data frame  
+  prof_repro_df <- data.frame(conc = prof_conc,
+                              fecun = prof_fecun,
+                              hatch = prof_hatch,
+                              rate = prof_rate)
+  
+#Estimate d-r function with drc  
+  prof_repro_mod= drm(rate ~ conc, data = prof_repro_df, type = 'continuous',
+                      fct = LL.3(names = c('b', 'd', 'e'),
+                                 fixed = c(NA, max(prof_repro_df$rate), NA)))
+
+  fNq_moh_prof_moh12<-function(In){
+    predict(prof_repro_mod, data.frame(conc = In/1000), interval = 'confidence', level = 0.95)
+  }  
+    
+  par.tricks.prof = c(coef(prof_repro_mod), 'd' = max(prof_repro_df$rate))[c(1,3,2)]
+    
+  fNq_moh_prof_moh12_uncertainty<-function(In){
+    fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.prof, yerror = 'rnorm', xerror = In/1000,
+               ypar = c(0, predict(prof_repro_mod, data.frame(dose = In/1000), se.fit = T)[2]))$y / moh_repro_ref
+    
+    if(fn < 0){
+      return(0)
+    } else {
+      return(fn)
+    }
+  }
+
+keep.moh.prof <- c(keep.moh.prof, "fNq_moh_prof_moh12_uncertainty", "par.tricks.prof", "moh_repro_ref", "prof_repro_mod")
+
+keep.moh12_all <- c(keep.moh.diaz, keep.moh.prof)
+
