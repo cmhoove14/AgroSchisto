@@ -112,3 +112,116 @@ mu_Nq_pen_gaf16_uncertainty = function(He){
 keep.gaf.pen = c('mu_Nq_pen_gaf16_uncertainty',
                  'gaf.b.lin.pen', 'gaf.se.b.lin.pen', 'gaf.m.lin.pen')    
   
+
+#Reproductive toxicity #########
+  #Paper reports reproduction as R0: the summed product of live snails/week * eggs/snail/week produced
+  #we just want reduction in eggs produced as the model already takes additional mortality 
+  #into account; therefore we normalize reported R0s by relative survival between treatment groups
+  #to get relative estimate of eggs/snail/week
+
+#Longitudinal surival data from table 3
+  gaf16.ad<-read.csv('Agrochemical_Review/Response_Fxs/Data/ghaffar2016_adult.csv')
+    sn.wk = as.numeric()  #snails/week estimates for each treatment
+  for(i in 1:length(unique(gaf16.ad$conc))){
+    sn.wk[i] = sum(gaf16.ad$prop_surv[gaf16.ad$conc == unique(gaf16.ad$conc)[i]]) #proportion surviving over study period
+  }  
+  
+  htch.wk = c(0.99, 0.92, 0.82, 0.24,
+              0.89, 0.58, 0.46,
+              0.9, 0.3, 0.05)   #vector of hatching proportions (hatches/egg) from table4
+
+#vector of concentrations and reproduction measured as approximate hatchlings/snail/week
+#hatchlings/snail/week = R0/live snails/week = eggs/snail/week * hatching proportion *live weeks = hatchlings/snail over study period
+  gafrep = data.frame('but.conc'=c(0, 0.556, 2.41, 3.906),
+                      'gly.conc'=c(0, 1.506, 3.87, 9.17),
+                      'pen.conc'=c(0, 0.214, 0.535, 1.299),
+                  #Estimates of hatchlings/snail as R0/live snails/week * weeks alive
+                      'but.rep'=c((44.231/sn.wk[1])*htch.wk[1]*8, (7.05/sn.wk[2])*htch.wk[2]*8, 
+                                  (4.52/sn.wk[3])*htch.wk[3]*6, (4.04/sn.wk[4])*htch.wk[4]*4),
+                      'gly.rep'=c((44.231/sn.wk[1])*htch.wk[1]*8, (4.87/sn.wk[5])*htch.wk[5]*8, 
+                                  (4.20/sn.wk[6])*htch.wk[6]*6, (4.23/sn.wk[7])*htch.wk[7]*4),
+                      'pen.rep'=c((44.231/sn.wk[1])*htch.wk[1]*8, (5.18/sn.wk[8])*htch.wk[8]*8, 
+                                  (4.75/sn.wk[9])*htch.wk[9]*5, (4.27/sn.wk[10])*htch.wk[10]*4))
+  
+  gafrep_ref <- gafrep[1,4]  #reference reproductive rate to scale to 0-1
+  
+#Butralin ##########
+  but_gafrep <- gafrep[c(1:4),c(1,4)] 
+  
+  but_repro_mod= drm(but.rep ~ but.conc, data = but_gafrep, type = 'continuous',
+                      fct = LL.3(names = c('b', 'd', 'e'),
+                                 fixed = c(NA, max(but_gafrep$but.rep), NA)))
+
+  but.r0.pred<-function(He){
+    predict(but_repro_mod, data.frame(conc = He/1000), interval = 'confidence', level = 0.95)
+  }  
+    
+  par.tricks.but.gaf = c(coef(but_repro_mod), 'd' = max(but_gafrep$but.rep))[c(1,3,2)]
+    
+  fN.butr.fx.uncertainty<-function(He){
+    fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.but.gaf, yerror = 'rnorm', xerror = He/1000,
+               ypar = c(0, predict(but_repro_mod, data.frame(but.conc = He/1000), se.fit = T)[2]))$y / gafrep_ref
+    
+    if(fn < 0){
+      return(0)
+    } else {
+      return(fn)
+    }
+  }
+  
+   keep.gaf.but = c(keep.gaf.but, 'fN.butr.fx.uncertainty', 'par.tricks.but.gaf', 'gafrep_ref', "but_repro_mod")
+
+#Glyphosate #########
+  gly_gafrep <- gafrep[c(1:4),c(2,5)]
+
+  gly_repro_mod= drm(gly.rep ~ gly.conc, data = gly_gafrep, type = 'continuous',
+                      fct = LL.3(names = c('b', 'd', 'e'),
+                                 fixed = c(NA, max(gly_gafrep$gly.rep), NA)))
+
+  gly.r0.pred<-function(He){
+    predict(gly_repro_mod, data.frame(conc = He/1000), interval = 'confidence', level = 0.95)
+  }  
+    
+  par.tricks.gly.gaf = c(coef(gly_repro_mod), 'd' = max(gly_gafrep$gly.rep))[c(1,3,2)]
+    
+  fN.gly.fx.uncertainty<-function(He){
+    fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.gly.gaf, yerror = 'rnorm', xerror = He/1000,
+               ypar = c(0, predict(gly_repro_mod, data.frame(gly.conc = He/1000), se.fit = T)[2]))$y / gafrep_ref
+    
+    if(fn < 0){
+      return(0)
+    } else {
+      return(fn)
+    }
+  }
+  
+   keep.gaf.gly = c(keep.gaf.gly, 'fN.gly.fx.uncertainty', 'par.tricks.gly.gaf', 'gafrep_ref', "gly_repro_mod")
+
+#Pendimethalin #########
+  pen_gafrep <- gafrep[c(1:4),c(3,6)]
+  
+  pen_repro_mod= drm(pen.rep ~ pen.conc, data = pen_gafrep, type = 'continuous',
+                      fct = LL.3(names = c('b', 'd', 'e'),
+                                 fixed = c(NA, max(pen_gafrep$pen.rep), NA)))
+
+  pen.r0.pred<-function(He){
+    predict(pen_repro_mod, data.frame(conc = He/1000), interval = 'confidence', level = 0.95)
+  }  
+    
+  par.tricks.pen.gaf = c(coef(pen_repro_mod), 'd' = max(pen_gafrep$pen.rep))[c(1,3,2)]
+    
+  fN.pen.fx.uncertainty<-function(He){
+    fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.pen.gaf, yerror = 'rnorm', xerror = He/1000,
+               ypar = c(0, predict(pen_repro_mod, data.frame(pen.conc = He/1000), se.fit = T)[2]))$y / gafrep_ref
+    
+    if(fn < 0){
+      return(0)
+    } else {
+      return(fn)
+    }
+  }
+  
+   keep.gaf.pen = c(keep.gaf.pen, 'fN.pen.fx.uncertainty', 'par.tricks.pen.gaf', 'gafrep_ref', "pen_repro_mod")
+
+ 
+  

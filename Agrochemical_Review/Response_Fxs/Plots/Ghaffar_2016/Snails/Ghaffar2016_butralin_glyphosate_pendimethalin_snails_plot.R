@@ -44,6 +44,28 @@ png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/butralin_muN_sim
 
 dev.off()    
 
+png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/butralin_fN_simulate.png")
+
+plot(gafrep$but.conc, gafrep$but.rep, pch = 16, #ylim = c(0,6.25),
+     xlab = 'Butralin (ppm)', ylab = 'relative reproduction rate')
+  
+    lines(seq(0,6,.010), sapply(seq(0,6,.010)*1000, but.r0.pred, simplify = T)[1,],
+          lty = 2, col = 2) 
+    lines(seq(0,6,.010), sapply(seq(0,6,.010)*1000, but.r0.pred, simplify = T)[2,],
+          lty = 3, col = 2) 
+    lines(seq(0,6,.010), sapply(seq(0,6,.010)*1000, but.r0.pred, simplify = T)[3,],
+          lty = 3, col = 2) 
+    
+    set.seed(43093)
+ 
+ points(seq(0,4.500,.01), 
+        sapply(seq(0,4500,10), fN.butr.fx.uncertainty, simplify = T)*gafrep_ref,
+        pch = 5, col = 4, cex = 0.5) 
+
+  legend("topright", bty="n", pch = c(16, 5), col = c(1,4), legend = c("Reported", "Sampled"), cex = 0.75)
+
+dev.off()    
+
 #Glyphosate #############
 png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/glyphosate_muN_function.png")
 
@@ -76,6 +98,27 @@ plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33
 
 dev.off()   
 
+png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/glyphosate_fN_simulate.png")
+
+  plot(gafrep$gly.conc, gafrep$gly.rep, pch = 16, #ylim = c(0,6.25),
+     xlab = 'Glyphosate (ppm)', ylab = 'relative reproduction rate')
+  
+    lines(seq(0,10,0.1), sapply(seq(0,10,0.1)*1000, gly.r0.pred, simplify = T)[1,],
+          lty = 2, col = 2) 
+    lines(seq(0,10,0.1), sapply(seq(0,10,0.1)*1000, gly.r0.pred, simplify = T)[2,],
+          lty = 3, col = 2) 
+    lines(seq(0,10,0.1), sapply(seq(0,10,0.1)*1000, gly.r0.pred, simplify = T)[3,],
+          lty = 3, col = 2) 
+    
+    set.seed(43093)
+ 
+ points(seq(0,10,0.1), 
+        sapply(seq(0,10,0.1)*1000, fN.gly.fx.uncertainty, simplify = T)*gafrep_ref,
+        pch = 5, col = 4, cex = 0.5) 
+
+  legend("topright", bty="n", pch = c(16, 5), col = c(1,4), legend = c("Reported", "Sampled"), cex = 0.75)
+
+dev.off()  
 #Pendimethalin ##############
 
 #Create function based on LC values
@@ -109,3 +152,25 @@ png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/pendimethalin_mu
     legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), legend = c("Reported", "Sampled"), cex = 0.75)
 
 dev.off()
+
+png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/pendimethalin_fN_simulate.png")
+
+  plot(gafrep$pen.conc, gafrep$pen.rep, pch = 16, #ylim = c(0,6.25),
+     xlab = 'Pendimethalin (ppm)', ylab = 'relative reproduction rate')
+  
+    lines(seq(0,1.3,0.01), sapply(seq(0,1.3,0.01)*1000, pen.r0.pred, simplify = T)[1,],
+          lty = 2, col = 2) 
+    lines(seq(0,1.3,0.01), sapply(seq(0,1.3,0.01)*1000, pen.r0.pred, simplify = T)[2,],
+          lty = 3, col = 2) 
+    lines(seq(0,1.3,0.01), sapply(seq(0,1.3,0.01)*1000, pen.r0.pred, simplify = T)[3,],
+          lty = 3, col = 2) 
+    
+    set.seed(43093)
+ 
+ points(seq(0,1.3,0.01), 
+        sapply(seq(0,1.3,0.01)*1000, fN.pen.fx.uncertainty, simplify = T)*gafrep_ref,
+        pch = 5, col = 4, cex = 0.5) 
+
+  legend("topright", bty="n", pch = c(16, 5), col = c(1,4), legend = c("Reported", "Sampled"), cex = 0.75)
+
+dev.off()  

@@ -97,7 +97,7 @@ muNq_prof_mohamed_uncertainty = function(In){
                               hatch = diaz_hatch,
                               rate = diaz_rate)
   
-#Estimate d-r function with drc  
+#Estimate d-r function with drc: eggs/snail/week over entire study period as a function of diazinon concentration
   diaz_repro_mod= drm(rate ~ conc, data = diaz_repro_df, type = 'continuous',
                       fct = LL.3(names = c('b', 'd', 'e'),
                                  fixed = c(NA, max(diaz_repro_df$rate), NA)))
@@ -110,7 +110,7 @@ muNq_prof_mohamed_uncertainty = function(In){
     
   fNq_moh_diaz_moh12_uncertainty<-function(In){
     fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.diaz, yerror = 'rnorm', xerror = In/1000,
-               ypar = c(0, predict(diaz_repro_mod, data.frame(dose = In/1000), se.fit = T)[2]))$y / moh_repro_ref
+               ypar = c(0, predict(diaz_repro_mod, data.frame(conc = In/1000), se.fit = T)[2]))$y / moh_repro_ref
     
     if(fn < 0){
       return(0)
@@ -143,7 +143,7 @@ keep.moh.diaz <- c(keep.moh.diaz, "fNq_moh_diaz_moh12_uncertainty", "diaz_repro_
                               hatch = prof_hatch,
                               rate = prof_rate)
   
-#Estimate d-r function with drc  
+#Estimate d-r function with drc: eggs/snail/week over entire study period as a function of profenofos concentration  
   prof_repro_mod= drm(rate ~ conc, data = prof_repro_df, type = 'continuous',
                       fct = LL.3(names = c('b', 'd', 'e'),
                                  fixed = c(NA, max(prof_repro_df$rate), NA)))
@@ -156,7 +156,7 @@ keep.moh.diaz <- c(keep.moh.diaz, "fNq_moh_diaz_moh12_uncertainty", "diaz_repro_
     
   fNq_moh_prof_moh12_uncertainty<-function(In){
     fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.prof, yerror = 'rnorm', xerror = In/1000,
-               ypar = c(0, predict(prof_repro_mod, data.frame(dose = In/1000), se.fit = T)[2]))$y / moh_repro_ref
+               ypar = c(0, predict(prof_repro_mod, data.frame(conc = In/1000), se.fit = T)[2]))$y / moh_repro_ref
     
     if(fn < 0){
       return(0)
