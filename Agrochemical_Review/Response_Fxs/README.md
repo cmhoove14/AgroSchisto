@@ -260,6 +260,14 @@ Data from [Koprivnikar et al 2006](https://www.ncbi.nlm.nih.gov/pubmed/16729687)
 + Function: `piC_kop_atr_unc`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Koprivnikar2006/Koprivnikar_2006_function_simulate_piC_atrazine.png)
 
+### `Kristoff2011_azinphos-methyl_snail_reproduction_fit.R`  
+Data from [Kristoff et al 2011](https://www.ncbi.nlm.nih.gov/pubmed/21524429) investigating reprodcutive toxicity of **azinphos-methyl**, an organophosphate insecticide, to *Biomphalaria glabrata* snails  
+#### Data reported  
++ Table 1: reproductive parameters of snail cohorts exposed to azinphos-methyl
+#### Response functions fit  
++ Function: `fNq_azmeth_kristoff11_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Kristoff2011/kristoff2011_azinphos-methyl_snail_reproduction_data_sim.png)
+
 ### `Omran&Salama2013_atrazine_glyphosate_snails_fit.R`  
 Data from [Omran and Salama 2013](https://www.ncbi.nlm.nih.gov/pubmed/24215068) investigating effects of atrazine on survival of *Biomphalaria alexandrina* snails  
 #### Data reported  
