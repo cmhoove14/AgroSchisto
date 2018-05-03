@@ -90,6 +90,14 @@ Data from [Bhavan et al 2010](https://www.ncbi.nlm.nih.gov/pubmed/22167951) inve
   + Function: `psi_q_carb_bhavan10_uncertainty`  
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bhavan2010/bhavan2010_carbaryl_feed_rate_data_sim.png)  
   
+### `Browne&Moore2014_2-4D_pred_consumption_fit.R`   
+Data from [Browne and Moore 2014](https://www.ncbi.nlm.nih.gov/pubmed/24799048) investigating effects of **2,4-D** on feeding behavior of *Orconectes rusticus* crayfish  
+#### Data reported  
++ Figure 6: consumption rate of crayfish measured as weight of gelatin fish food eaten across dose groups  
+#### Response functions fit  
++ `psi_q_24D_browne14_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Browne2014/pred_consumption_2-4D_data_sim.png)
+  
 ### `Ghaffar2016_butralin_glyphosate_pendimethalin_cercariae_fit.R`  
 Data from [Abdel Ghaffar et al 2016](http://www.bioone.org/doi/abs/10.4002/040.059.0201) investigating effect of **butralin**, **glyphosate**, and **pendimethalin** on *Schistosoma mansoni* cercariae  
 #### Data reported  
