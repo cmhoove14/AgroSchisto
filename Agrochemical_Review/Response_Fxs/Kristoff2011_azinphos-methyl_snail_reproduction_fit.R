@@ -37,4 +37,4 @@ kristoff_ref <- kristoff_dat$egg_mass[1]
          ypar = c(0, predict(azmeth_mod, data.frame(azmethyl = ins), se.fit = T)[2]))$y / kristoff_ref
   }
     
-keep.carb.bhavan10 = c('fNq_azmeth_kristoff11_uncertainty', 'par.tricks.azmeth', 'azmeth_mod')    
+keep.azmeth.kristoff11 = c('fNq_azmeth_kristoff11_uncertainty', 'par.tricks.azmeth', 'azmeth_mod')    
