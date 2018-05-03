@@ -150,7 +150,6 @@ Data from [Abdel Ghaffar et al 2016](http://www.bioone.org/doi/abs/10.4002/040.0
   + `fN.pen.fx.uncertainty` snail reproduction  
     + Sampling and data [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/pendimethalin_fN_simulate.png)
 
-
 ### `griggs08_atrazine_metolachlor_cercariae_fit.R`  
 Data from [Griggs et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/17763881) investigating effects of **atrazine** and **metloachlor** on *Echinistoma trivolvis* cercariae  
 #### Data reported  
@@ -174,7 +173,7 @@ Data from [Halstead et al 2015](https://www.sciencedirect.com/science/article/pi
 #### Data reported  
 + Received the raw data from Neal Halstead (lead author), but could also extract the data from Fig 1  
   + Data for 4-day and 10-day mortality endpoints  
-  
+
 #### Response functions fit  
 + For each insecticide, 4-day mortality as a function of insecticide concentration  
   + malathion  
@@ -241,6 +240,13 @@ Data from [Hasheesh & Mohamed 2011](https://www.sciencedirect.com/science/articl
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_profenofos_snail_mortality.png)  
   + Function: `fN.hash.prof.uncertainty` (samples measurement of eggs/snail/day in the profenofos group and in the control group and returns the ratio which is interpreted as relative change in snail reproduction when exposed to LC25 of profenofos)  
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_snail_reproduction_compare.png)     
+
+### `hua_insecticides_cercariae_fit.R`  
+Data from [Hua et al 2016](doi:10.1017/S0031182015001894) investigating effects of **carbaryl**, **malathion**, **cypermethrin**, **permethrin**, **imidacloprid**, and **thiamethoxam** on *Echinoparyphium spp*  
+#### Data reported  
++ Figure 1: mortality-dose plots for all six insecticides  
+#### Response functions fit  
++ NONE RELIABLE: They tested insecticide toxicity to two populations: "PWA" is from a pond far from any agricultural influence and "ICP" is from a pond next to ag sources. We'll use PWA since we don't want to consider the role of adaptation in any quantitative analysis here. Also have a feeling that within the small concentration they investigated, they may be picking up more natural variability and/or error in their actual concentrations than any sort of direct effect of the insecticides themselves. In addition, they should really test a range of concentrations that spans from no effect to complete effect (e.g. 100% mortality within 6 hours) in order to accurately estimate a dose-response relationship. Attempted to proceed regardless of these concerns, but was unable to estimate reliable d-r functions for most insecticides, so excluding this study. See R script for details
 
 ### `Hussein2016_fertilizer_snails_fit.R`  
 Data from [Hussein et al 2016](https://www.researchgate.net/publication/305149067_Effects_of_Three_Inorganic_Fertilizers_on_the_Biology_and_Histopathology_of_infected_Biomphalaria_alexandrina_snails?enrichId=rgreq-cf1a38509b7c5460cbc30f698ea58594-XXX&enrichSource=Y292ZXJQYWdlOzMwNTE0OTA2NztBUzozODI2MjU5NTgxMjE0NzJAMTQ2ODIzNjU0NTE4NQ%3D%3D&el=1_x_3&_esc=publicationCoverPdf) investigating effects of three fertilizers on *Biomphalaria alexandrina* survival  
