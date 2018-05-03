@@ -49,7 +49,7 @@ dev.off()
 png("Agrochemical_Review/Response_Fxs/Plots/Omkar1985/omkar1985_predator_mortality_carbaryl.png")
 
 plot(c(0.0461, 0.0513, 0.0572)*1000, c(.25,0.5,0.75), pch = 16, ylim = c(0,1), xlim = c(0,60),
-     xlab = "Phosphamidon (ppb)", ylab = "Predator daily mortality rate")
+     xlab = "Carbaryl (ppb)", ylab = "Predator daily mortality rate")
   segments(x0 = 0.0485*1000, x1 = 0.0541*1000, y0 = 0.5, y1 = 0.5)
   
   set.seed(43093)

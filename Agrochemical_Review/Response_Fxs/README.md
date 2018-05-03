@@ -396,6 +396,20 @@ Data from [Satapornvanit et al 2009](https://www.ncbi.nlm.nih.gov/pubmed/1910345
 + Function: `psi_q_zinc_satapornvanit09_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_zinc_psiq.png)
 
+### `Shukla1985_quinalphos_dichlorvos_monocrotophos_carbaryl_predators_plot.R`  
+Data from [Omran and Shukla 1985](https://www.jstor.org/stable/20104000) investigating effects of **quinalphos**, **dichlorvos**, **monocrotophos**, and **carbaryl** on *Macrobrachium lamarrei*  
+#### Data reported  
++ Table 1: lc25, lc50, lc75 and CIs for lc50
+#### Response functions fit  
++ `muPq_quin_shukla85_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/shukla1985/shukla1985_predator_mortality_quinalphos.png)
++ `muPq_dich_shukla85_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/shukla1985/shukla1985_predator_mortality_dichlorvos.png)
++ `muPq_mono_shukla85_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/shukla1985/shukla1985_predator_mortality_monocrotophos.png)
++ `muPq_carb_shukla85_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/shukla1985/shukla1985_predator_mortality_carbaryl.png)
+
 ### `tantawy2002_butachlor_fpb_snails_fit.R`   
 Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investigating effects of **Butachlor**, **fluazifop-p-butyl** on mortality of *Biomphalaria alexandrina* snails and *Schistosoma mansoni* miracidia and cercariae  
 #### Data reported  
