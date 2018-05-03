@@ -409,6 +409,18 @@ Data from [Omran and Shukla 1985](https://www.jstor.org/stable/20104000) investi
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/shukla1985/shukla1985_predator_mortality_monocrotophos.png)
 + `muPq_carb_shukla85_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/shukla1985/shukla1985_predator_mortality_carbaryl.png)
+  
+### `Shukla1984_endosulfan_methyl-demeton_carbaryl_predators_fit.R`  
+Data from [Omran and Shukla 1984](http://www.jstor.org/stable/20103942) investigating effects of **endosulfan**, **methyldemeton**, and **carbaryl** on *Macrobrachium lamarrei*  
+#### Data reported  
++ Table 1: lc25, lc50, lc75 and CIs for lc50
+#### Response functions fit  
++ `muPq_endo_shuk84_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/shukla1984/shukla1984_predator_mortality_endosulfan.png)
++ `muPq_mede_shuk84_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/shukla1984/shukla1984_predator_mortality_methyl-demeton.png)
++ `muPq_carb_shuk84_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/shukla1984/shukla1984_predator_mortality_carbaryl.png)
 
 ### `tantawy2002_butachlor_fpb_snails_fit.R`   
 Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investigating effects of **Butachlor**, **fluazifop-p-butyl** on mortality of *Biomphalaria alexandrina* snails and *Schistosoma mansoni* miracidia and cercariae  
