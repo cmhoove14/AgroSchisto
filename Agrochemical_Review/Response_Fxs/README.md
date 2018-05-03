@@ -319,6 +319,26 @@ Data from [Monte et al 2016](https://www.ncbi.nlm.nih.gov/pubmed/27373431) inves
   + Time series validation: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_miracidia_validation.png)
   + Sampling and data of d-r function: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_miracidia_piM_validation.png)
 
+### `Oliveira_endosulfan_snail_fit.R`  
+Data from [Oliveira et al 2009](https://www.ncbi.nlm.nih.gov/pubmed/19138786) investigating effects of **endosulfan** on reproduction of *Biomphlaria tenagophila* snails  
+#### Data reported  
++ Figs 1&2: eggs per snail over eights weeks, mortality of eggs and hathability of eggs. Together provide good estimate of hatchlings/snail  
+#### Response functions fit  
++ `fNq_endo_oliv09_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Oliveira2009/endosulfan_snail_reproduction_data_sim.png)
+
+### `Omkar1985_endosulfan_phosphamidon_carbaryl_predators_fit.R`  
+Data from [Omkar and Multi 1985](https://www.jstor.org/stable/20104053?seq=1#page_scan_tab_contents) investigating effects of **endosulfan**, **phosphamidon**, and **carbaryl** on adult (50-55mm) Macrobrachium dayanum  
+#### Data reported  
++ Table 1: 24hr lc25, lc50, lc75 and CI of lc50  
+#### Response functions fit  
++ `muPq_endo_omkar85_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Omkar1985/omkar1985_predator_mortality_endosulfan.png)
++ `muPq_phos_omkar85_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Omkar1985/omkar1985_predator_mortality_phosphamidon.png)
++ `muPq_carb_omkar85_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Omkar1985/omkar1985_predator_mortality_carbaryl.png)
+
 ### `Omran&Salama2013_atrazine_glyphosate_snails_fit.R`  
 Data from [Omran and Salama 2013](https://www.ncbi.nlm.nih.gov/pubmed/24215068) investigating effects of atrazine on survival of *Biomphalaria alexandrina* snails  
 #### Data reported  
