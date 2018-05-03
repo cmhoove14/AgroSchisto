@@ -73,6 +73,14 @@ Data from [Baxter et al 2011](http://onlinelibrary.wiley.com/doi/10.1002/etc.552
 + Snail population carrying capacity as a function of any herbicide concentration, assuming response is proportional to its EEC value and is the same as the atrazine response `phi_Nq_rel_baxrohr.no30`  
   + no30 refers to exclusion of data point at 30ppb atrazine due to large influence of spatial block on results. See [Rohr et al 2012](https://www.researchgate.net/publication/224284702_The_herbicide_atrazine_algae_and_snail_populations?enrichId=rgreq-687b4b78-6cbe-4c48-9c04-d495370159ae&enrichSource=Y292ZXJQYWdlOzIyNDI4NDcwMjtBUzoxMDEyNDM0Njg5MTA1OTlAMTQwMTE0OTczMjY1Mg%3D%3D&el=1_x_3) for details  
   
+### `Benli2007_2-4D_predators_plot.R`  
+Data from [Benli et al 2007](https://www.sciencedirect.com/science/article/pii/S0048357507000053#bib17) investigating effects of the herbicide **2,4D** on survival of adult *Astacus leptodactylus* crayfish  
+#### Data reported  
++ Table 1 and text: lc1, lc5, lc10, lc15, lc50, lc85, lc90, lc95, lc99, lc50CIs, slope
+#### Response functions fit  
++ `muPq_24d_benli07_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Benli2007/benli2007_2-4D_predator_mortality.png)
+  
 ### `Bhavan2010_carbaryl_predator_feed_rate_fit.R`  
 Data from [Bhavan et al 2010](https://www.ncbi.nlm.nih.gov/pubmed/22167951) investigating effect of **Carbaryl** on *Macrobrachium malcomsonii* food consumption  
 #### Data reported  
