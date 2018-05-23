@@ -1,0 +1,603 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(car)
+library(nlme)
+library(lme4)
+library(visreg)
+library(MASS)
+library(MuMIn)
+library(lattice)
+library(rmarkdown)
+library(glmmADMB)
+library(bbmle)
+
+#data already has the doubly-treated children removed
+detach(data)
+data<-read.delim("clipboard")
+attach(data)
+
+data$year<-as.factor(year)
+data$net<-as.factor(net)
+```
+
+
+```{r warning=FALSE}
+#The following analyses were guided by Chapter 12 - Analysis of BACI experiments found at http://people.stat.sfu.ca/~cschwarz/Stat-650/Notes/PDFbigbook-R/R-part013.pdf
+#I did not initially include cluster as a random effect because not every treatment was in each cluster.  Thus, treatment ends up being confounded with cluster if we treat cluster as a random effect.  However, below, I consider prawn density, prawn biomass, and cluster as a random effect in the prawn BACI analyses.
+#Rather than conducting analyses on egg abundance, I modeled prevalence and intensity separately so the two analyses were not confounded.  Given that there are no zero loads with intensity, there is no need to test for zero-inflation.
+
+#Start with glmmadmb approach because it has two different parameterization of the negative binomial distribution
+#nbinom parameterization = (variance = µ(1 + µ/k)); nbinom1 fit = (variance = ??µ).
+#BACI Net Effect Sm
+net.Sh.intensity.p <- glmmadmb(round(ShW) ~ net + year + net:year + sex + lake + (1|Village) + (1|Village:year), family="poisson", data=subset(data, year!=2018 & Sh!=0), na.action=na.omit)
+net.Sh.intensity.nb <- glmmadmb(round(ShW) ~ net + year + net:year + sex + lake + (1|Village) + (1|Village:year), family="nbinom", data=subset(data, year!=2018 & Sh!=0), na.action=na.omit)
+net.Sh.intensity.nb1 <- glmmadmb(round(ShW) ~ net + year + net:year + sex + lake + (1|Village) + (1|Village:year), family="nbinom1", data=subset(data, year!=2018 & Sh!=0), na.action=na.omit)
+
+#BACI Net Effect Sm
+net.Sm.intensity.p <- glmmadmb(round(SmW) ~ net + year + net:year + sex + lake + (1|Village) + (1|Village:year), family="poisson", data=subset(data, year!=2018 & Sm!=0), na.action=na.omit)
+net.Sm.intensity.nb <- glmmadmb(round(SmW) ~ net + year + net:year + sex + lake + (1|Village) + (1|Village:year), family="nbinom", data=subset(data, year!=2018 & Sm!=0), na.action=na.omit)
+net.Sm.intensity.nb1 <- glmmadmb(round(SmW) ~ net + year + net:year + sex + lake + (1|Village) + (1|Village:year), family="nbinom1", data=subset(data, year!=2018 & Sm!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sh
+prawn.Sh.intensity.p <- glmmadmb(round(ShW) ~ Intervention.type + year + Intervention.type:year + sex + lake (1|Village) + (1|Village:year), family="poisson", data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+prawn.Sh.intensity.nb <- glmmadmb(round(ShW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family="nbinom", data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+prawn.Sh.intensity.nb1 <- glmmadmb(round(ShW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family="nbinom1", data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sm
+prawn.Sm.intensity.p <- glmmadmb(round(SmW) ~ Intervention.type + year + Intervention.type:year + sex + lake (1|Village) + (1|Village:year), family="poisson", data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+prawn.Sm.intensity.nb <- glmmadmb(round(SmW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family="nbinom", data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+prawn.Sm.intensity.nb1 <- glmmadmb(round(SmW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family="nbinom1", data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+
+#BACI Veg. Removal Effect Sh
+veg.Sh.intensity.p <- glmmadmb(round(ShW) ~ Intervention.type + year + Intervention.type:year + sex + lake (1|Village) + (1|Village:year), family="poisson", data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+veg.Sh.intensity.nb <- glmmadmb(round(ShW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family="nbinom", data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+veg.Sh.intensity.nb1 <- glmmadmb(round(ShW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family="nbinom1", data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+
+#BACI Veg. Removal Effect Sm
+veg.Sm.intensity.p <- glmmadmb(round(SmW) ~ Intervention.type + year + Intervention.type:year + sex + lake (1|Village) + (1|Village:year), family="poisson", data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+veg.Sm.intensity.nb <- glmmadmb(round(SmW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family="nbinom", data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+veg.Sm.intensity.nb1 <- glmmadmb(round(SmW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family="nbinom1", data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+
+#AIC tables
+AICtab(net.Sh.intensity.p, net.Sh.intensity.nb, net.Sh.intensity.nb1)
+AICtab(net.Sm.intensity.p, net.Sm.intensity.nb, net.Sm.intensity.nb1)
+
+AICtab(prawn.Sh.intensity.p, prawn.Sh.intensity.nb, prawn.Sh.intensity.nb1)
+AICtab(prawn.Sm.intensity.p, prawn.Sm.intensity.nb, prawn.Sm.intensity.nb1)
+
+AICtab(veg.Sh.intensity.p, veg.Sh.intensity.nb, veg.Sh.intensity.nb1)
+AICtab(veg.Sm.intensity.p, veg.Sm.intensity.nb, veg.Sm.intensity.nb1)
+
+#For all models the nbinom distribution had a lower AIC than the nbinom1 or poission.  I dio not show the output, but you are welcome to run the models.
+```
+
+```{r warning=FALSE}
+#The following analyses were guided by Chapter 12 - Analysis of BACI experiments found at http://people.stat.sfu.ca/~cschwarz/Stat-650/Notes/PDFbigbook-R/R-part013.pdf
+#I did not initially include cluster as a random effect because not every treatment was in each cluster.  Thus, treatment ends up being confounded with cluster if we treat cluster as a random effect.  However, below, I consider prawn density, proawn biomass, and cluster or individual as a random effect in the prawn BACI analyses.
+#Rather than conducting analyses on egg abundance, I modeled prevalence and intensity separately so the two analyses were not confounded.  Given that there are no zero loads with intensity, there is no need to test for zero-inflation.
+
+#Start with glmmadmb approach because it has two different parameterization of the negative binomial distribution
+#nbinom parameterization = (variance = µ(1 + µ/k)); nbinom1 fit = (variance = ??µ).
+
+#For all models the nbinom distribution had a lower AIC than the nbinom1 or poission.  I dio not show the output, but you are welcome to run the models.
+
+#Given that the glmer and glmer.nb functions run faster, I ran all subsequent models with the lme4 package
+#BACI Net Effect Sh
+net.Sh.prev <- glmer(Sh ~ net + year + net:year + sex + lake + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2018), na.action=na.omit)
+net.Sh.intensity.p <- glmer(round(ShW) ~ net + year + net:year + sex + lake + (1|Village) + (1|Village:year), family=poisson, data=subset(data, year!=2018 & Sh!=0), na.action=na.omit)
+net.Sh.intensity.nb <- glmer.nb(round(ShW) ~ net + year + net:year + sex + lake + (1|Village) + (1|Village:year), data=subset(data, year!=2018 & Sh!=0), na.action=na.omit)
+
+#BACI Net Effect Sm
+net.Sm.prev <- glmer(Sm ~ net + year + net:year + sex + lake + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2018), na.action=na.omit)
+net.Sm.intensity.p <- glmer(round(SmW) ~ net + year + net:year + sex + lake + (1|Village) + (1|Village:year), family=poisson, data=subset(data, year!=2018 & Sm!=0), na.action=na.omit)
+net.Sm.intensity.nb <- glmer.nb(round(SmW) ~ net + year + net:year + sex + lake + (1|Village) + (1|Village:year), data=subset(data, year!=2018 & Sm!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sh
+prawn.Sh.prev <- glmer(Sh ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sh.intensity.p <- glmer(round(ShW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family=poisson, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+prawn.Sh.intensity.nb <- glmer.nb(round(ShW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sm
+prawn.Sm.prev <- glmer(Sm ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sm.intensity.p <- glmer(round(SmW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family=poisson, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+prawn.Sm.intensity.nb <- glmer.nb(round(SmW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+
+#BACI Veg. Removal Effect Sh
+veg.Sh.prev <- glmer(Sh ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net"), na.action=na.omit)
+veg.Sh.intensity.p <- glmer(round(ShW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family=poisson, data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+veg.Sh.intensity.nb <- glmer.nb(round(ShW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+
+#BACI Veg. Removal Effect Sm
+veg.Sm.prev <- glmer(Sm ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net"), na.action=na.omit)
+veg.Sm.intensity.p <- glmer(round(SmW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), family=poisson, data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+veg.Sm.intensity.nb <- glmer.nb(round(SmW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+```
+
+```{r}
+#AIC table to re-verify that negative binomial is better than poisson
+AICtab(net.Sh.intensity.p, net.Sh.intensity.nb)
+AICtab(net.Sm.intensity.p, net.Sm.intensity.nb)
+
+AICtab(prawn.Sh.intensity.p, prawn.Sh.intensity.nb)
+AICtab(prawn.Sm.intensity.p, prawn.Sm.intensity.nb)
+
+AICtab(veg.Sh.intensity.p, veg.Sh.intensity.nb)
+AICtab(veg.Sm.intensity.p, veg.Sm.intensity.nb)
+
+#For all models the nbinom distribution had a lower AIC than the nbinom1 or poission.
+```
+
+```{r warning=FALSE}
+#Net Sh prevalence output
+Anova(net.Sh.prev)
+summary(net.Sh.prev)
+visreg(net.Sh.prev, "net", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium prevalence")
+visreg(net.Sh.prev, "net", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. haematobium prevalence")
+```
+
+```{r warning=FALSE}
+#Net Sh egg output
+Anova(net.Sh.intensity.nb)
+summary(net.Sh.intensity.nb)
+visreg(net.Sh.intensity.nb, "net", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium egg from infected children")
+visreg(net.Sh.intensity.nb, "net", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. haematobium egg from infected children")
+```
+
+```{r warning=FALSE}
+#Net Sm prevalence output
+Anova(net.Sm.prev)
+summary(net.Sm.prev)
+visreg(net.Sm.prev, "net", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni prevalence")
+visreg(net.Sm.prev, "net", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. mansoni prevalence")
+```
+
+```{r warning=FALSE}
+#Net Sm egg output
+Anova(net.Sm.intensity.nb)
+summary(net.Sm.intensity.nb)
+visreg(net.Sm.intensity.nb, "net", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni egg count from infected children")
+visreg(net.Sm.intensity.nb, "net", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. mansoni egg count from infected children")
+```
+```{r}
+#Prawn Sh prevalence output
+Anova(prawn.Sh.prev)
+summary(prawn.Sh.prev)
+visreg(prawn.Sh.prev, "Intervention.type", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium prevalence")
+visreg(prawn.Sh.prev, "Intervention.type", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. haematobium prevalence")
+```
+
+```{r warning=FALSE}
+#Prawn Sh egg output
+Anova(prawn.Sh.intensity.nb)
+summary(prawn.Sh.intensity.nb)
+visreg(prawn.Sh.intensity.nb, "Intervention.type", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium egg count from infected children")
+visreg(prawn.Sh.intensity.nb, "Intervention.type", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. haematobium egg count from infected children")
+```
+
+```{r warning=FALSE}
+#Prawn Sm prevalence output
+Anova(prawn.Sm.prev)
+summary(prawn.Sm.prev)
+visreg(prawn.Sm.prev, "Intervention.type", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni prevalence")
+visreg(prawn.Sm.prev, "Intervention.type", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. mansoni prevalence")
+```
+
+```{r warning=FALSE}
+#Prawn Sm egg output
+Anova(prawn.Sm.intensity.nb)
+summary(prawn.Sm.intensity.nb)
+visreg(prawn.Sm.intensity.nb, "Intervention.type", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni egg count from infected children")
+visreg(prawn.Sm.intensity.nb, "Intervention.type", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. mansoni egg count from infected children")
+```
+
+```{r warning=FALSE}
+#Veg Sh prevalence output
+Anova(veg.Sh.prev)
+summary(veg.Sh.prev)
+visreg(veg.Sh.prev, "Intervention.type", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium prevalence")
+visreg(veg.Sh.prev, "Intervention.type", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. haematobium prevalence")
+```
+
+```{r warning=FALSE}
+#Veg Sh egg output
+Anova(veg.Sh.intensity.nb)
+summary(veg.Sh.intensity.nb)
+visreg(veg.Sh.intensity.nb, "Intervention.type", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium egg count from infected children")
+visreg(veg.Sh.intensity.nb, "Intervention.type", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. haematobium egg count from infected children")
+```
+
+```{r warning=FALSE}
+#Veg Sm prevalence output
+Anova(veg.Sm.prev)
+summary(veg.Sm.prev)
+visreg(veg.Sm.prev, "Intervention.type", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni prevalence")
+visreg(veg.Sm.prev, "Intervention.type", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. mansoni prevalence")
+```
+
+```{r warning=FALSE}
+#Veg Sm egg output
+Anova(veg.Sm.intensity.nb)
+summary(veg.Sm.intensity.nb)
+visreg(veg.Sm.intensity.nb, "Intervention.type", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni egg count from infected children")
+visreg(veg.Sm.intensity.nb, "Intervention.type", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. mansoni egg count from infected children")
+```
+
+```{r warning=FALSE}
+#Additional Prawn Models with Prawn Density or Prawn Biomass per m^2 as independent variables instead of prawn presence or absence.
+#BACI Prawn Effect Sh Prawn Density
+prawn.Sh.prev.density <- glmer(Sh ~ prawn_density + year + prawn_density:year + sex + lake + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sh.intensity.nb.density <- glmer.nb(round(ShW) ~ prawn_density + year + prawn_density:year + sex + lake + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sm Prawn Density
+prawn.Sm.prev.density <- glmer(Sm ~ prawn_density + year + prawn_density:year + sex + lake + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sm.intensity.nb.density <- glmer.nb(round(SmW) ~ prawn_density + year + prawn_density:year + sex + lake + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sh Prawn Biomass
+prawn.Sh.prev.biomass <- glmer(Sh ~ prawn_biomass + year + prawn_biomass:year + sex + lake + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sh.intensity.nb.biomass <- glmer.nb(round(ShW) ~ prawn_biomass + year + prawn_biomass:year + sex + lake + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sm Prawn Biomass
+prawn.Sm.prev.biomass <- glmer(Sm ~ prawn_biomass + year + prawn_biomass:year + sex + lake + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sm.intensity.nb.biomass <- glmer.nb(round(SmW) ~ prawn_biomass + year + prawn_biomass:year + sex + lake + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+
+```
+
+```{r warning=FALSE}
+#Prawn Sh prevalence output density
+Anova(prawn.Sh.prev.density)
+summary(prawn.Sh.prev.density)
+visreg(prawn.Sh.prev.density, "prawn_density", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium prevalence", xlab = expression("Prawns/" ~ (m^{2})))
+visreg(prawn.Sh.prev.density, "prawn_density", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. haematobium prevalence", xlab = expression("Prawns/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sh egg output density
+#Model failed to converge: degenerate  Hessian with 1 negative eigenvalues
+#Anova(prawn.Sh.intensity.nb.density)
+#summary(prawn.Sh.intensity.nb.density)
+#visreg(prawn.Sh.intensity.nb.density, "prawn_density", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium egg count from infected children", xlab = expression("Prawns/" ~ (m^{2})))
+#visreg(prawn.Sh.intensity.nb.density, "prawn_density", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. haematobium egg count from infected children", xlab = expression("Prawns/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sm prevalence output density
+Anova(prawn.Sm.prev.density)
+summary(prawn.Sm.prev.density)
+visreg(prawn.Sm.prev.density, "prawn_density", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni prevalence", xlab = expression("Prawns/" ~ (m^{2})))
+visreg(prawn.Sm.prev.density, "prawn_density", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. mansoni prevalence", xlab = expression("Prawns/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sm egg output density
+Anova(prawn.Sm.intensity.nb.density)
+summary(prawn.Sm.intensity.nb.density)
+visreg(prawn.Sm.intensity.nb.density, "prawn_density", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni egg count from infected children", xlab = expression("Prawns/" ~ (m^{2})))
+visreg(prawn.Sm.intensity.nb.density, "prawn_density", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. mansoni egg count from infected children", xlab = expression("Prawns/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sh prevalence output biomass
+Anova(prawn.Sh.prev.biomass)
+summary(prawn.Sh.prev.biomass)
+visreg(prawn.Sh.prev.biomass, "prawn_biomass", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium prevalence", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+visreg(prawn.Sh.prev.biomass, "prawn_biomass", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. haematobium prevalence", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sh egg output biomass
+Anova(prawn.Sh.intensity.nb.biomass)
+summary(prawn.Sh.intensity.nb.biomass)
+visreg(prawn.Sh.intensity.nb.biomass, "prawn_biomass", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium egg count from infected children", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+visreg(prawn.Sh.intensity.nb.biomass, "prawn_biomass", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. haematobium egg count from infected children", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sm prevalence output biomass
+Anova(prawn.Sm.prev.biomass)
+summary(prawn.Sm.prev.biomass)
+visreg(prawn.Sm.prev.biomass, "prawn_biomass", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni prevalence", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+visreg(prawn.Sm.prev.biomass, "prawn_biomass", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. mansoni prevalence", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sm egg output biomass
+Anova(prawn.Sm.intensity.nb.biomass)
+summary(prawn.Sm.intensity.nb.biomass)
+visreg(prawn.Sm.intensity.nb.biomass, "prawn_biomass", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni egg count from infected children", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+visreg(prawn.Sm.intensity.nb.biomass, "prawn_biomass", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. mansoni egg count from infected children", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Density and Prawn Biomass models including cluster as a random effect.
+#BACI Prawn Effect Sh Prawn Density
+prawn.Sh.prev.density <- glmer(Sh ~ prawn_density + year + prawn_density:year + sex + lake + (1|cluster) + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sh.intensity.nb.density <- glmer.nb(round(ShW) ~ prawn_density + year + prawn_density:year + sex + lake + (1|cluster)+ (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sm Prawn Density
+prawn.Sm.prev.density <- glmer(Sm ~ prawn_density + year + prawn_density:year + sex + lake+ (1|cluster) + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sm.intensity.nb.density <- glmer.nb(round(SmW) ~ prawn_density + year + prawn_density:year + sex + lake + (1|cluster)+ (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sh Prawn Biomass
+prawn.Sh.prev.biomass <- glmer(Sh ~ prawn_biomass + year + prawn_biomass:year + sex + lake+ (1|cluster) + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sh.intensity.nb.biomass <- glmer.nb(round(ShW) ~ prawn_biomass + year + prawn_biomass:year + sex + lake + (1|cluster)+ (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sm Prawn Biomass
+prawn.Sm.prev.biomass <- glmer(Sm ~ prawn_biomass + year + prawn_biomass:year + sex + lake+ (1|cluster) + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sm.intensity.nb.biomass <- glmer.nb(round(SmW) ~ prawn_biomass + year + prawn_biomass:year + sex + lake + (1|cluster)+ (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+
+```
+
+```{r warning=FALSE}
+#Prawn Sh prevalence output density
+Anova(prawn.Sh.prev.density)
+summary(prawn.Sh.prev.density)
+visreg(prawn.Sh.prev.density, "prawn_density", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium prevalence", xlab = expression("Prawns/" ~ (m^{2})))
+visreg(prawn.Sh.prev.density, "prawn_density", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. haematobium prevalence", xlab = expression("Prawns/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sh egg output density
+Anova(prawn.Sh.intensity.nb.density)
+summary(prawn.Sh.intensity.nb.density)
+visreg(prawn.Sh.intensity.nb.density, "prawn_density", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium egg count from infected children", xlab = expression("Prawns/" ~ (m^{2})))
+visreg(prawn.Sh.intensity.nb.density, "prawn_density", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. haematobium egg count from infected children", xlab = expression("Prawns/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sm prevalence output density
+Anova(prawn.Sm.prev.density)
+summary(prawn.Sm.prev.density)
+visreg(prawn.Sm.prev.density, "prawn_density", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni prevalence", xlab = expression("Prawns/" ~ (m^{2})))
+visreg(prawn.Sm.prev.density, "prawn_density", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. mansoni prevalence", xlab = expression("Prawns/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sm egg output density
+Anova(prawn.Sm.intensity.nb.density)
+summary(prawn.Sm.intensity.nb.density)
+visreg(prawn.Sm.intensity.nb.density, "prawn_density", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni egg count from infected children", xlab = expression("Prawns/" ~ (m^{2})))
+visreg(prawn.Sm.intensity.nb.density, "prawn_density", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. mansoni egg count from infected children", xlab = expression("Prawns/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sh prevalence output biomass
+Anova(prawn.Sh.prev.biomass)
+summary(prawn.Sh.prev.biomass)
+visreg(prawn.Sh.prev.biomass, "prawn_biomass", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium prevalence", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+visreg(prawn.Sh.prev.biomass, "prawn_biomass", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. haematobium prevalence", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sh egg output biomass
+Anova(prawn.Sh.intensity.nb.biomass)
+summary(prawn.Sh.intensity.nb.biomass)
+visreg(prawn.Sh.intensity.nb.biomass, "prawn_biomass", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium egg count from infected children", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+visreg(prawn.Sh.intensity.nb.biomass, "prawn_biomass", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. haematobium egg count from infected children", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sm prevalence output biomass
+Anova(prawn.Sm.prev.biomass)
+summary(prawn.Sm.prev.biomass)
+visreg(prawn.Sm.prev.biomass, "prawn_biomass", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni prevalence", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+visreg(prawn.Sm.prev.biomass, "prawn_biomass", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. mansoni prevalence", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Sm egg output biomass
+Anova(prawn.Sm.intensity.nb.biomass)
+summary(prawn.Sm.intensity.nb.biomass)
+visreg(prawn.Sm.intensity.nb.biomass, "prawn_biomass", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni egg count from infected children", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+visreg(prawn.Sm.intensity.nb.biomass, "prawn_biomass", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. mansoni egg count from infected children", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Prawn Density and Prawn Biomass models including Individual as a random effect.
+#BACI Prawn Effect Sh Prawn Density
+prawn.Sh.prev.density <- glmer(Sh ~ prawn_density + year + prawn_density:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sh.intensity.nb.density <- glmer.nb(round(ShW) ~ prawn_density + year + prawn_density:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sm Prawn Density
+prawn.Sm.prev.density <- glmer(Sm ~ prawn_density + year + prawn_density:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sm.intensity.nb.density <- glmer.nb(round(SmW) ~ prawn_density + year + prawn_density:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sh Prawn Biomass
+prawn.Sh.prev.biomass <- glmer(Sh ~ prawn_biomass + year + prawn_biomass:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sh.intensity.nb.biomass <- glmer.nb(round(ShW) ~ prawn_biomass + year + prawn_biomass:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+
+#BACI Prawn Effect Sm Prawn Biomass
+prawn.Sm.prev.biomass <- glmer(Sm ~ prawn_biomass + year + prawn_biomass:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net"), na.action=na.omit)
+prawn.Sm.intensity.nb.biomass <- glmer.nb(round(SmW) ~ prawn_biomass + year + prawn_biomass:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="veg_removal" & Intervention.type!="net" & Sm!=0), na.action=na.omit)
+
+```
+
+```{r}
+#Prawn Sh prevalence output density
+Anova(prawn.Sh.prev.density)
+summary(prawn.Sh.prev.density)
+visreg(prawn.Sh.prev.density, "prawn_density", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium prevalence", xlab = expression("Prawns/" ~ (m^{2})))
+visreg(prawn.Sh.prev.density, "prawn_density", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. haematobium prevalence", xlab = expression("Prawns/" ~ (m^{2})))
+
+```
+
+```{r}
+#Prawn Sh egg output density
+Anova(prawn.Sh.intensity.nb.density)
+summary(prawn.Sh.intensity.nb.density)
+visreg(prawn.Sh.intensity.nb.density, "prawn_density", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium egg count from infected children", xlab = expression("Prawns/" ~ (m^{2})))
+visreg(prawn.Sh.intensity.nb.density, "prawn_density", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. haematobium egg count from infected children", xlab = expression("Prawns/" ~ (m^{2})))
+
+```
+
+```{r}
+#Prawn Sm prevalence output density
+Anova(prawn.Sm.prev.density)
+summary(prawn.Sm.prev.density)
+visreg(prawn.Sm.prev.density, "prawn_density", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni prevalence", xlab = expression("Prawns/" ~ (m^{2})))
+visreg(prawn.Sm.prev.density, "prawn_density", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. mansoni prevalence", xlab = expression("Prawns/" ~ (m^{2})))
+
+```
+
+```{r}
+#Prawn Sm egg output density
+Anova(prawn.Sm.intensity.nb.density)
+summary(prawn.Sm.intensity.nb.density)
+visreg(prawn.Sm.intensity.nb.density, "prawn_density", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni egg count from infected children", xlab = expression("Prawns/" ~ (m^{2})))
+visreg(prawn.Sm.intensity.nb.density, "prawn_density", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. mansoni egg count from infected children", xlab = expression("Prawns/" ~ (m^{2})))
+
+```
+
+```{r}
+#Prawn Sh prevalence output biomass
+Anova(prawn.Sh.prev.biomass)
+summary(prawn.Sh.prev.biomass)
+visreg(prawn.Sh.prev.biomass, "prawn_biomass", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium prevalence", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+visreg(prawn.Sh.prev.biomass, "prawn_biomass", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. haematobium prevalence", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+
+```
+
+```{r}
+#Prawn Sh egg output biomass
+Anova(prawn.Sh.intensity.nb.biomass)
+summary(prawn.Sh.intensity.nb.biomass)
+visreg(prawn.Sh.intensity.nb.biomass, "prawn_biomass", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium egg count from infected children", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+visreg(prawn.Sh.intensity.nb.biomass, "prawn_biomass", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. haematobium egg count from infected children", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+
+```
+
+```{r}
+#Prawn Sm prevalence output biomass
+Anova(prawn.Sm.prev.biomass)
+summary(prawn.Sm.prev.biomass)
+visreg(prawn.Sm.prev.biomass, "prawn_biomass", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni prevalence", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+visreg(prawn.Sm.prev.biomass, "prawn_biomass", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. mansoni prevalence", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+
+```
+
+```{r}
+#Prawn Sm egg output biomass
+Anova(prawn.Sm.intensity.nb.biomass)
+summary(prawn.Sm.intensity.nb.biomass)
+visreg(prawn.Sm.intensity.nb.biomass, "prawn_biomass", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni egg count from infected children", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+visreg(prawn.Sm.intensity.nb.biomass, "prawn_biomass", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. mansoni egg count from infected children", xlab = expression("Prawn biomass (g/" ~ (m^{2})))
+
+```
+
+```{r warning=FALSE}
+#Re-running the net effect and veg removal models including Individual as a random effect
+#BACI Net Effect Sh
+net.Sh.prev <- glmer(Sh ~ net + year + net:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2018), na.action=na.omit)
+net.Sh.intensity.nb <- glmer.nb(round(ShW) ~ net + year + net:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), data=subset(data, year!=2018 & Sh!=0), na.action=na.omit)
+
+#BACI Net Effect Sm
+net.Sm.prev <- glmer(Sm ~ net + year + net:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2018), na.action=na.omit)
+net.Sm.intensity.nb <- glmer.nb(round(SmW) ~ net + year + net:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), data=subset(data, year!=2018 & Sm!=0), na.action=na.omit)
+
+#BACI Veg. Removal Effect Sh
+veg.Sh.prev <- glmer(Sh ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net"), na.action=na.omit)
+veg.Sh.intensity.nb <- glmer.nb(round(ShW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net" & Sh!=0), na.action=na.omit)
+
+#BACI Veg. Removal Effect Sm
+veg.Sm.prev <- glmer(Sm ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), family=binomial, data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net"), na.action=na.omit)
+veg.Sm.intensity.nb <- glmer.nb(round(SmW) ~ Intervention.type + year + Intervention.type:year + sex + lake + (1|ID) + (1|Village) + (1|Village:year), data=subset(data, year!=2016 & Intervention.type!="prawn" & Intervention.type!="net" & Sm!=0))
+
+```
+
+```{r}
+#Net Sh prevalence output
+Anova(net.Sh.prev)
+summary(net.Sh.prev)
+visreg(net.Sh.prev, "net", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium prevalence")
+visreg(net.Sh.prev, "net", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. haematobium prevalence")
+
+```
+
+```{r}
+#Net Sh egg output
+Anova(net.Sh.intensity.nb)
+summary(net.Sh.intensity.nb)
+visreg(net.Sh.intensity.nb, "net", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium egg count from infected children")
+visreg(net.Sh.intensity.nb, "net", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. haematobium egg count from infected children")
+
+```
+
+```{r}
+#Net Sm prevalence output
+Anova(net.Sm.prev)
+summary(net.Sm.prev)
+visreg(net.Sm.prev, "net", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni prevalence")
+visreg(net.Sm.prev, "net", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. mansoni prevalence")
+
+```
+
+```{r}
+#Net Sm egg output
+Anova(net.Sm.intensity.nb)
+summary(net.Sm.intensity.nb)
+visreg(net.Sm.intensity.nb, "net", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni egg count from infected children")
+visreg(net.Sm.intensity.nb, "net", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. mansoni egg count from infected children")
+
+```
+
+```{r}
+#Veg Sh prevalence output
+Anova(veg.Sh.prev)
+summary(veg.Sh.prev)
+visreg(veg.Sh.prev, "Intervention.type", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium prevalence")
+visreg(veg.Sh.prev, "Intervention.type", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. haematobium prevalence")
+
+```
+
+```{r}
+#Veg Sh egg output
+Anova(veg.Sh.intensity.nb)
+summary(veg.Sh.intensity.nb)
+visreg(veg.Sh.intensity.nb, "Intervention.type", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. haematobium egg count from infected children")
+visreg(veg.Sh.intensity.nb, "Intervention.type", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. haematobium egg count from infected children")
+
+```
+
+```{r}
+#Veg Sm prevalence output
+Anova(veg.Sm.prev)
+summary(veg.Sm.prev)
+visreg(veg.Sm.prev, "Intervention.type", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni prevalence")
+visreg(veg.Sm.prev, "Intervention.type", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Logit-transformed S. mansoni prevalence")
+
+```
+
+```{r}
+#Veg Sm egg output
+Anova(veg.Sm.intensity.nb)
+summary(veg.Sm.intensity.nb)
+visreg(veg.Sm.intensity.nb, "Intervention.type", by="year", scale="response", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="S. mansoni egg count from infected children")
+visreg(veg.Sm.intensity.nb, "Intervention.type", by="year", scales=list(alternating=FALSE, tck=c(1,0)), par.strip.text = list(col = "black"), ylab="Log-transformed S. mansoni egg count from infected children")
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
