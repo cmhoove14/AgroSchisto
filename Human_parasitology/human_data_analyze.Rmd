@@ -605,15 +605,39 @@ We'll again fit this model with $I_{jt}$ as a simple binary variable defined at 
 
 This is better since we're treating communities as their own entities and therefore controlling for inter-community variability in transmission, but we're still treating *individual* egg burdens as independent when we know that individuals are likely correlated. Model 3 will address this concern by controlling for individuals' previous egg burden. In addition to controlling for confounding by inter-community and inter-individual variability, conditioning on prior outcome is also a good way to control for potential unmeasured confounding from other sources  
 
-
-## Model 3: Transition model in which individual egg burden, $Y_{ijt}$ is associated with previous infection, $Y_{ijt-1}$, and determined by each community's transmission intensity, $T_j$ and interventions, $I_{jt}$   
+## Model 3: Individual egg burden, $Y_{ijt}$ is determined by each community's unique transmission intensity that varies by year, $T_{jt}$, praziquantel administration, $P_t$, and interventions, $I_{jt}$  
 
 ### Proposed DAG:  
-Graphical representation of the data-generating mechanism corresponding to assumptions of Model 3. $Y_{ijt}$ is the measured egg burden at each time point, $T_j$ is the transmission intensity unique to each community that produces $Y_{ijt}$ at each time point, and $I_{jt}$ is the intervention in each community. Including $Y_{ijt-1}$ controls for confounding by $T_j$ regardless of whether dummy variables on communities serve as a good proxy for $T_j$.  
+Graphical representation of the data-generating mechanism corresponding to assumptions of Model 3. $Y_{ijt}$ is the measured egg burden at each time point, $T_j$ is the transmission intensity unique to each community that produces $Y_{ijt}$ at each time point, $I_{jt}$ is the intervention in each community, and $P_t$ is praziquantel administration    
 
 \begin{figure}[h!]
   \includegraphics{DAG3.png}
   \caption{Proposed DAG for model 3}
+\end{figure}
+
+### Proposed Model:  
+\begin{align*}
+Y_{ijt}&=\beta_0+\beta_1I_{jt}+\beta_2P_t+\beta_3T_j+\beta_4Year_t+\beta_5T_j\times Year_t
+\intertext{Therefore in year 1 with no Praziquantel and no intervention:}
+Y_{ij1}&=\beta_0+\beta_3T_j
+\intertext{In year 2 with praziquantel, but no intervention:}
+Y_{ij2}&=\beta_0+\beta_2+\beta_3T_j+\beta_4Year_2+\beta_5T_j\times Year_2
+\intertext{And in year 3 with both praziquantel and intervention:}
+Y_{ij3}&=\beta_0+\beta_1I_{jt}+\beta_2+\beta_3T_j+\beta_4Year_3+\beta_5T_j\times Year_3
+\end{align*}
+
+We'll again fit this model with $I_{jt}$ as a simple binary variable defined at the community-year level with control communities as the reference group and estimate $\beta_1$ as our parameter of interest using a negative binomial GLM. $\beta_0+\beta_3+\beta_4+\beta_5$ can be interpreted as the community-level transmission intensity in year $t$, $T_{jt}$   
+
+This model is still not accounting for potential correlation between individuals that is not explained at the community level, which is what models 4 and 5 will account for
+
+## Model 4: Transition model in which individual egg burden, $Y_{ijt}$ is associated with previous infection, $Y_{ijt-1}$, and determined by each community's transmission intensity, $T_j$ and interventions, $I_{jt}$   
+
+### Proposed DAG:  
+Graphical representation of the data-generating mechanism corresponding to assumptions of Model 4. $Y_{ijt}$ is the measured egg burden at each time point, $T_j$ is the transmission intensity unique to each community that produces $Y_{ijt}$ at each time point, and $I_{jt}$ is the intervention in each community. Including $Y_{ijt-1}$ controls for confounding by $T_j$ regardless of whether dummy variables on communities serve as a good proxy for $T_j$.  
+
+\begin{figure}[h!]
+  \includegraphics{DAG4.png}
+  \caption{Proposed DAG for model 4}
 \end{figure}
 
 ### Proposed Model:  
@@ -627,10 +651,33 @@ Y_{ij3}&=\beta_0+\beta_1I_{jt}+\beta_2\log(Y_{ij2}+1)+\beta_3T_j
 
 We'll again fit this model with $I_{jt}$ as a simple binary variable defined at the community level with control communities as the reference group and estimate $\beta_1$ as our parameter of interest using a negative binomial GLM. Since the outcome is only defined in 2017 and 2018, no need to control for praziquantel administration which occurred in both years.  
 
+
+## Model 5: Transition model in which individual egg burden, $Y_{ijt}$ is associated with previous infection, $Y_{ijt-1}$, and determined by each community's transmission intensity that varies with year, $T_jt$, and interventions, $I_{jt}$   
+
+### Proposed DAG:  
+Graphical representation of the data-generating mechanism corresponding to assumptions of Model 5. $Y_{ijt}$ is the measured egg burden at each time point, $T_jt$ is the transmission intensity unique to each community in each year that produces $Y_{ijt}$ at each time point, and $I_{jt}$ is the intervention in each community. Including $Y_{ijt-1}$ controls for confounding by $T_j$ regardless of whether dummy variables on communities serve as a good proxy for $T_j$.  
+
+\begin{figure}[h!]
+  \includegraphics{DAG5.png}
+  \caption{Proposed DAG for model 5}
+\end{figure}
+
+### Proposed Model:  
+\begin{align*}
+Y_{ijt}&=\beta_0+\beta_1I_{jt}+\beta_2\log(Y_{ijt-1}+1)+\beta_3T_j+\beta_4Year_t+\beta_5T_j\times Year_t
+\intertext{Therefore in year 2 with no intervention (and year 2 as reference for the $Year_t$ variable):}
+Y_{ij2}&=\beta_0+\beta_2\log(Y_{ij1}+1)+\beta_3T_j
+\intertext{And in year 3 with intervention:}
+Y_{ij3}&=\beta_0+\beta_1I_{jt}+\beta_2\log(Y_{ij2}+1)+\beta_3T_j+\beta_4Year_t+\beta_5T_j\times Year_t
+\end{align*}
+
+We'll again fit this model with $I_{jt}$ as a simple binary variable defined at the community level with control communities as the reference group and estimate $\beta_1$ as our parameter of interest using a negative binomial GLM. Since the outcome is only defined in 2017 and 2018, no need to control for praziquantel administration which occurred in both years.  
+
+
 # Implementation
-Model 3 actually requires a bit more data wrangling to add the lag variables:  
+Models 4 and 5 actually require a bit more data wrangling to add the lag variables:  
 ```{r dat_wrang}
-mod3_dat <- full_long %>% arrange(Child_ID, year) %>% group_by(Child_ID) %>% 
+mod4_dat <- full_long %>% arrange(Child_ID, year) %>% group_by(Child_ID) %>% 
   mutate(s_haem_mean_l1 = lag(s_haem_mean),
          log_s_haem_mean_l1 = lag(log(s_haem_mean+1)),
          s_haem_mean_narm_l1 = lag(s_haem_mean_narm),
@@ -673,7 +720,7 @@ mod2_haem_mean_net <- glm.nb(round(s_haem_mean) ~ Net + pzq + School,
   
 #Model 3  
 mod3_haem_mean_net <- glm.nb(round(s_haem_mean) ~ Net + School + log_s_haem_mean_l1, 
-                             data = mod3_dat %>% filter(extra_pzq != 1 & 
+                             data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                         Intervention %in% c("control", "net") & 
                                                         year != 2018))
 
@@ -715,20 +762,42 @@ mod2_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + pzq + School,
   mod2_haem_narm_net_res <- as.data.frame(round(cbind(summary(mod2_haem_mean_narm_net)$coef, 
                                             confint(mod2_haem_mean_narm_net)), 3)[,c(1,2,5,6,3,4)])
     mod2_haem_narm_net_res$model <- "Model 2"
-  
+ 
 #Model 3  
-mod3_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + School + log_s_haem_mean_narm_l1, 
+mod3_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + pzq + School*year_fac, 
                                   weights = s_haem_mean_w,
-                                  data = mod3_dat %>% filter(extra_pzq != 1 & 
+                                  data = full_long %>% filter(extra_pzq != 1 & 
+                                                              Intervention %in% c("control", "net") & 
+                                                              year != 2018))
+
+  mod3_haem_narm_net_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_net)$coef, 
+                                          na.omit(confint(mod3_haem_mean_narm_net))), 3)[,c(1,2,5,6,3,4)])
+    mod3_haem_narm_net_res$model <- "Model 3"
+     
+#Model 4  
+mod4_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + School + log_s_haem_mean_narm_l1, 
+                                  weights = s_haem_mean_w,
+                                  data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                              Intervention %in% c("control", "net") & 
                                                              year != 2018))
 
-  mod3_haem_narm_net_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_net)$coef,
+  mod4_haem_narm_net_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_net)$coef,
                                             na.omit(confint(mod3_haem_mean_narm_net))), 3)[,c(1,2,5,6,3,4)])
-    mod3_haem_narm_net_res$model <- "Model 3"
-    
+    mod4_haem_narm_net_res$model <- "Model 4"
+ 
+## Model 5 not run since can't exclude 2018 ## 
+#mod5_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + School*year_fac + log_s_haem_mean_narm_l1, 
+#                                  weights = s_haem_mean_w,
+#                                  data = mod4_dat %>% filter(extra_pzq != 1 & 
+#                                                             Intervention %in% c("control", "net")))
+
+#  mod5_haem_narm_net_res <- as.data.frame(round(cbind(summary(mod5_haem_mean_narm_net)$coef,
+#                                          na.omit(confint(mod5_haem_mean_narm_net))), 3)[,c(1,2,5,6,3,4)])
+#    mod5_haem_narm_net_res$model <- "Model 5"
+       
 #Plot net effect estimate    
-rbind(mod1_haem_narm_net_res["Net",], mod2_haem_narm_net_res["Net",], mod3_haem_narm_net_res["Net",]) %>% 
+rbind(mod1_haem_narm_net_res["Net",], mod2_haem_narm_net_res["Net",], mod3_haem_narm_net_res["Net",], 
+      mod4_haem_narm_net_res["Net",]) %>% 
   rename("lower" = !!names(.[3]),
          "upper" = !!names(.[4])) %>% 
   ggplot(aes(x = exp(Estimate), y = model)) + theme_bw() +
@@ -763,7 +832,7 @@ mod2_haem_mean_prawn <- glm.nb(round(s_haem_mean) ~ Prawns + pzq + sex + School,
 
 #Model 3
 mod3_haem_mean_prawn <- glm.nb(round(s_haem_mean) ~ Prawns + sex + School + log_s_haem_mean_l1, 
-                               data = mod3_dat %>% filter(extra_pzq != 1 & Intervention %in% c("control", "prawn")))
+                               data = mod4_dat %>% filter(extra_pzq != 1 & Intervention %in% c("control", "prawn")))
 
   mod3_haem_prawn_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_prawn)$coef, 
                                                    confint(mod3_haem_mean_prawn)), 3)[,c(1,2,5,6,3,4)])
@@ -799,22 +868,42 @@ mod2_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + pzq + Sch
                                                            Intervention %in% c("control", "prawn")))
 
   mod2_haem_narm_prawn_res <- as.data.frame(round(cbind(summary(mod2_haem_mean_narm_prawn)$coef, 
-                                                   confint(mod2_haem_mean_narm_prawn)), 3)[,c(1,2,5,6,3,4)])
+                                                  confint(mod2_haem_mean_narm_prawn)), 3)[,c(1,2,5,6,3,4)])
     mod2_haem_narm_prawn_res$model <- "Model 2"
 
 #Model 3
-mod3_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + School + log_s_haem_mean_narm_l1, 
-                               data = mod3_dat %>% filter(extra_pzq != 1 & 
-                                                          Intervention %in% c("control", "prawn")))
+mod3_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + pzq + School*year_fac, 
+                               data = full_long %>% filter(extra_pzq != 1 & 
+                                                           Intervention %in% c("control", "prawn")))
 
   mod3_haem_narm_prawn_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_prawn)$coef, 
-                                                   confint(mod3_haem_mean_narm_prawn)), 3)[,c(1,2,5,6,3,4)])
+                                                  na.omit(confint(mod3_haem_mean_narm_prawn))), 3)[,c(1,2,5,6,3,4)])
     mod3_haem_narm_prawn_res$model <- "Model 3"
- 
+    
+#Model 4
+mod4_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + School + log_s_haem_mean_narm_l1, 
+                               data = mod4_dat %>% filter(extra_pzq != 1 & 
+                                                          Intervention %in% c("control", "prawn")))
+
+  mod4_haem_narm_prawn_res <- as.data.frame(round(cbind(summary(mod4_haem_mean_narm_prawn)$coef, 
+                                                   confint(mod4_haem_mean_narm_prawn)), 3)[,c(1,2,5,6,3,4)])
+    mod4_haem_narm_prawn_res$model <- "Model 4"
+
+#Model 5
+mod5_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + School*year_fac + log_s_haem_mean_narm_l1, 
+                               data = mod4_dat %>% filter(extra_pzq != 1 & 
+                                                          Intervention %in% c("control", "prawn")))
+
+  mod5_haem_narm_prawn_res <- as.data.frame(round(cbind(summary(mod5_haem_mean_narm_prawn)$coef, 
+                                                  na.omit(confint(mod5_haem_mean_narm_prawn))), 3)[,c(1,2,5,6,3,4)])
+    mod5_haem_narm_prawn_res$model <- "Model 5"
+     
 #Plot prawn effect estimate    
 rbind(mod1_haem_narm_prawn_res["Prawns",], 
       mod2_haem_narm_prawn_res["Prawns",], 
-      mod3_haem_narm_prawn_res["Prawns",]) %>% 
+      mod3_haem_narm_prawn_res["Prawns",],
+      mod4_haem_narm_prawn_res["Prawns",],
+      mod5_haem_narm_prawn_res["Prawns",]) %>% 
   rename("lower" = !!names(.[3]),
          "upper" = !!names(.[4])) %>% 
   ggplot(aes(x = exp(Estimate), y = model)) + theme_bw() +
@@ -849,7 +938,7 @@ mod2_haem_mean_prawn_c <- glm.nb(round(s_haem_mean) ~ Prawn_biomass + pzq + sex 
 
 #Model 3
 mod3_haem_mean_prawn_c <- glm.nb(round(s_haem_mean) ~ Prawn_biomass + sex + School + log_s_haem_mean_l1, 
-                               data = mod3_dat %>% filter(extra_pzq != 1 & Intervention %in% c("control", "prawn")))
+                               data = mod4_dat %>% filter(extra_pzq != 1 & Intervention %in% c("control", "prawn")))
 
   mod3_haem_prawn_res_c <- as.data.frame(round(cbind(summary(mod3_haem_mean_prawn_c)$coef, 
                                                    confint(mod3_haem_mean_prawn_c)), 3)[,c(1,2,5,6,3,4)])
@@ -888,18 +977,38 @@ mod2_haem_mean_narm_prawn_c <- glm.nb(round(s_haem_mean_narm) ~ Prawn_biomass + 
     mod2_haem_narm_prawn_res_c$model <- "Model 2"
 
 #Model 3
-mod3_haem_mean_narm_prawn_c <- glm.nb(round(s_haem_mean_narm) ~ Prawn_biomass + School + log_s_haem_mean_narm_l1, 
-                               data = mod3_dat %>% filter(extra_pzq != 1 & 
-                                                          Intervention %in% c("control", "prawn")))
+mod3_haem_mean_narm_prawn_c <- glm.nb(round(s_haem_mean_narm) ~ Prawn_biomass + pzq + School*year_fac, 
+                               data = full_long %>% filter(extra_pzq != 1 & 
+                                                           Intervention %in% c("control", "prawn")))
 
   mod3_haem_narm_prawn_res_c <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_prawn_c)$coef, 
-                                                   confint(mod3_haem_mean_narm_prawn_c)), 3)[,c(1,2,5,6,3,4)])
+                                                    na.omit(confint(mod3_haem_mean_narm_prawn_c))), 3)[,c(1,2,5,6,3,4)])
     mod3_haem_narm_prawn_res_c$model <- "Model 3"
-  
+    
+#Model 4
+mod4_haem_mean_narm_prawn_c <- glm.nb(round(s_haem_mean_narm) ~ Prawn_biomass + School + log_s_haem_mean_narm_l1, 
+                               data = mod4_dat %>% filter(extra_pzq != 1 & 
+                                                          Intervention %in% c("control", "prawn")))
+
+  mod4_haem_narm_prawn_res_c <- as.data.frame(round(cbind(summary(mod4_haem_mean_narm_prawn_c)$coef, 
+                                                    confint(mod4_haem_mean_narm_prawn_c)), 3)[,c(1,2,5,6,3,4)])
+    mod4_haem_narm_prawn_res_c$model <- "Model 4"
+
+#Model 5
+mod5_haem_mean_narm_prawn_c <- glm.nb(round(s_haem_mean_narm) ~ Prawn_biomass + School*year_fac + log_s_haem_mean_narm_l1, 
+                               data = mod4_dat %>% filter(extra_pzq != 1 & 
+                                                          Intervention %in% c("control", "prawn")))
+
+  mod5_haem_narm_prawn_res_c <- as.data.frame(round(cbind(summary(mod5_haem_mean_narm_prawn_c)$coef, 
+                                                    na.omit(confint(mod5_haem_mean_narm_prawn_c))), 3)[,c(1,2,5,6,3,4)])
+    mod5_haem_narm_prawn_res_c$model <- "Model 5"
+      
 #Plot prawn effect estimate    
 rbind(mod1_haem_narm_prawn_res_c["Prawn_biomass",], 
       mod2_haem_narm_prawn_res_c["Prawn_biomass",], 
-      mod3_haem_narm_prawn_res_c["Prawn_biomass",]) %>% 
+      mod3_haem_narm_prawn_res_c["Prawn_biomass",],
+      mod4_haem_narm_prawn_res_c["Prawn_biomass",],
+      mod5_haem_narm_prawn_res_c["Prawn_biomass",]) %>% 
   rename("lower" = !!names(.[3]),
          "upper" = !!names(.[4])) %>% 
   ggplot(aes(x = exp(Estimate), y = model)) + theme_bw() +
@@ -933,7 +1042,7 @@ mod2_haem_mean_veg <- glm.nb(round(s_haem_mean) ~ Veg + pzq + sex + School,
   
 #Model 3  
 mod3_haem_mean_veg <- glm.nb(round(s_haem_mean) ~ Veg + sex + School + log_s_haem_mean_l1, 
-                             data = mod3_dat %>% filter(extra_pzq != 1 & 
+                             data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                         Intervention %in% c("control", "veg_removal")))
 
   mod3_haem_veg_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_veg)$coef,
@@ -970,18 +1079,40 @@ mod2_haem_mean_narm_veg <- glm.nb(round(s_haem_mean_narm) ~ Veg + pzq + School,
   mod2_haem_narm_veg_res <- as.data.frame(round(cbind(summary(mod2_haem_mean_narm_veg)$coef, 
                                             confint(mod2_haem_mean_narm_veg)), 3)[,c(1,2,5,6,3,4)])
     mod2_haem_narm_veg_res$model <- "Model 2"
-  
+ 
 #Model 3  
-mod3_haem_mean_narm_veg <- glm.nb(round(s_haem_mean) ~ Veg + School + log_s_haem_mean_narm_l1, 
-                             data = mod3_dat %>% filter(extra_pzq != 1 & 
+mod3_haem_mean_narm_veg <- glm.nb(round(s_haem_mean_narm) ~ Veg + pzq + School*year_fac, 
+                             data = full_long %>% filter(extra_pzq != 1 & 
+                                                         Intervention %in% c("control", "veg_removal")))
+
+  mod3_haem_narm_veg_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_veg)$coef, 
+                                                na.omit(confint(mod3_haem_mean_narm_veg))), 3)[,c(1,2,5,6,3,4)])
+    mod3_haem_narm_veg_res$model <- "Model 3"
+     
+#Model 4  
+mod4_haem_mean_narm_veg <- glm.nb(round(s_haem_mean_narm) ~ Veg + School + log_s_haem_mean_narm_l1, 
+                             data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                         Intervention %in% c("control", "veg_removal")))
 
-  mod3_haem_narm_veg_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_veg)$coef,
-                                            na.omit(confint(mod3_haem_mean_narm_veg))), 3)[,c(1,2,5,6,3,4)])
-    mod3_haem_narm_veg_res$model <- "Model 3"
+  mod4_haem_narm_veg_res <- as.data.frame(round(cbind(summary(mod4_haem_mean_narm_veg)$coef,
+                                                na.omit(confint(mod4_haem_mean_narm_veg))), 3)[,c(1,2,5,6,3,4)])
+    mod4_haem_narm_veg_res$model <- "Model 4"
+    
+#Model 5  
+mod5_haem_mean_narm_veg <- glm.nb(round(s_haem_mean_narm) ~ Veg + School*year_fac + log_s_haem_mean_narm_l1, 
+                             data = mod4_dat %>% filter(extra_pzq != 1 & 
+                                                        Intervention %in% c("control", "veg_removal")))
+
+  mod5_haem_narm_veg_res <- as.data.frame(round(cbind(summary(mod5_haem_mean_narm_veg)$coef,
+                                                na.omit(confint(mod5_haem_mean_narm_veg))), 3)[,c(1,2,5,6,3,4)])
+    mod5_haem_narm_veg_res$model <- "Model 5"
     
 #Plot net effect estimate    
-rbind(mod1_haem_narm_veg_res["Veg",], mod2_haem_narm_veg_res["Veg",], mod3_haem_narm_veg_res["Veg",]) %>% 
+rbind(mod1_haem_narm_veg_res["Veg",], 
+      mod2_haem_narm_veg_res["Veg",], 
+      mod3_haem_narm_veg_res["Veg",],
+      mod4_haem_narm_veg_res["Veg",],
+      mod5_haem_narm_veg_res["Veg",]) %>% 
   rename("lower" = !!names(.[3]),
          "upper" = !!names(.[4])) %>% 
   ggplot(aes(x = exp(Estimate), y = model)) + theme_bw() +
@@ -1016,7 +1147,7 @@ mod2_haem_mean_veg_c <- glm.nb(round(s_haem_mean) ~ Veg_tons + pzq + sex + Schoo
   
 #Model 3  
 mod3_haem_mean_veg_c <- glm.nb(round(s_haem_mean) ~ Veg_tons + sex + School + log_s_haem_mean_l1, 
-                             data = mod3_dat %>% filter(extra_pzq != 1 & 
+                             data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                         Intervention %in% c("control", "veg_removal")))
 
   mod3_haem_veg_res_c <- as.data.frame(round(cbind(summary(mod3_haem_mean_veg_c)$coef,
@@ -1057,21 +1188,43 @@ mod2_haem_mean_narm_veg_c <- glm.nb(round(s_haem_mean_narm) ~ Veg_tons + pzq + S
   mod2_haem_narm_veg_res_c <- as.data.frame(round(cbind(summary(mod2_haem_mean_narm_veg_c)$coef, 
                                             confint(mod2_haem_mean_narm_veg_c)), 3)[,c(1,2,5,6,3,4)])
     mod2_haem_narm_veg_res_c$model <- "Model 2"
-  
+ 
 #Model 3  
-mod3_haem_mean_narm_veg_c <- glm.nb(round(s_haem_mean_narm) ~ Veg_tons + School + log_s_haem_mean_narm_l1, 
+mod3_haem_mean_narm_veg_c <- glm.nb(round(s_haem_mean_narm) ~ Veg_tons + pzq + School*year_fac, 
                                     weights = s_haem_mean_w,
-                                    data = mod3_dat %>% filter(extra_pzq != 1 & 
-                                                               Intervention %in% c("control", "veg_removal")))
+                                    data = full_long %>% filter(extra_pzq != 1 & 
+                                                                Intervention %in% c("control", "veg_removal")))
 
-  mod3_haem_narm_veg_res_c <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_veg_c)$coef,
+  mod3_haem_narm_veg_res_c <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_veg_c)$coef, 
                                             na.omit(confint(mod3_haem_mean_narm_veg_c))), 3)[,c(1,2,5,6,3,4)])
     mod3_haem_narm_veg_res_c$model <- "Model 3"
-    
+     
+#Model 4  
+mod4_haem_mean_narm_veg_c <- glm.nb(round(s_haem_mean_narm) ~ Veg_tons + School + log_s_haem_mean_narm_l1, 
+                                    weights = s_haem_mean_w,
+                                    data = mod4_dat %>% filter(extra_pzq != 1 & 
+                                                               Intervention %in% c("control", "veg_removal")))
+
+  mod4_haem_narm_veg_res_c <- as.data.frame(round(cbind(summary(mod4_haem_mean_narm_veg_c)$coef,
+                                            na.omit(confint(mod4_haem_mean_narm_veg_c))), 3)[,c(1,2,5,6,3,4)])
+    mod4_haem_narm_veg_res_c$model <- "Model 4"
+  
+#Model 5  
+mod5_haem_mean_narm_veg_c <- glm.nb(round(s_haem_mean_narm) ~ Veg_tons + School + log_s_haem_mean_narm_l1, 
+                                    weights = s_haem_mean_w,
+                                    data = mod4_dat %>% filter(extra_pzq != 1 & 
+                                                               Intervention %in% c("control", "veg_removal")))
+
+  mod5_haem_narm_veg_res_c <- as.data.frame(round(cbind(summary(mod5_haem_mean_narm_veg_c)$coef,
+                                            na.omit(confint(mod5_haem_mean_narm_veg_c))), 3)[,c(1,2,5,6,3,4)])
+    mod5_haem_narm_veg_res_c$model <- "Model 5"
+      
 #Plot net effect estimate    
 rbind(mod1_haem_narm_veg_res_c["Veg_tons",], 
       mod2_haem_narm_veg_res_c["Veg_tons",], 
-      mod3_haem_narm_veg_res_c["Veg_tons",]) %>% 
+      mod3_haem_narm_veg_res_c["Veg_tons",],
+      mod4_haem_narm_veg_res_c["Veg_tons",],
+      mod5_haem_narm_veg_res_c["Veg_tons",]) %>% 
   rename("lower" = !!names(.[3]),
          "upper" = !!names(.[4])) %>% 
   ggplot(aes(x = exp(Estimate), y = model)) + theme_bw() +
@@ -1102,7 +1255,7 @@ mod2_haem_mean_all <- glm.nb(round(s_haem_mean) ~ Net + Veg + Prawns + pzq + sex
   
 #Model 3  
 mod3_haem_mean_all <- glm.nb(round(s_haem_mean) ~ Net + Veg + Prawns + sex + School + log_s_haem_mean_l1, 
-                             data = mod3_dat %>% filter(extra_pzq != 1))
+                             data = mod4_dat %>% filter(extra_pzq != 1))
 
   mod3_haem_all_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_all)$coef,
                                             na.omit(confint(mod3_haem_mean_all))), 3)[,c(1,2,5,6,3,4)])
@@ -1143,23 +1296,44 @@ mod2_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns +
   mod2_haem_narm_all_res <- as.data.frame(round(cbind(summary(mod2_haem_mean_narm_all)$coef, 
                                             confint(mod2_haem_mean_narm_all)), 3)[,c(1,2,5,6,3,4)])
     mod2_haem_narm_all_res$model <- "Model 2"
-  
+
 #Model 3  
-mod3_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns + School + log_s_haem_mean_narm_l1, 
+mod3_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns + pzq + School*year_fac, 
                                   weights = s_haem_mean_w,
-                                  data = mod3_dat %>% filter(extra_pzq != 1))
+                                  data = full_long %>% filter(extra_pzq != 1))
 
-  mod3_haem_narm_all_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_all)$coef,
-                                            na.omit(confint(mod3_haem_mean_narm_all))), 3)[,c(1,2,5,6,3,4)])
+  mod3_haem_narm_all_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_all)$coef, 
+                                          na.omit(confint(mod3_haem_mean_narm_all))), 3)[,c(1,2,5,6,3,4)])
     mod3_haem_narm_all_res$model <- "Model 3"
+  
+      
+#Model 4  
+mod4_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns + School + log_s_haem_mean_narm_l1, 
+                                  weights = s_haem_mean_w,
+                                  data = mod4_dat %>% filter(extra_pzq != 1))
 
-#Plot net effect estimate    
+  mod4_haem_narm_all_res <- as.data.frame(round(cbind(summary(mod4_haem_mean_narm_all)$coef,
+                                            na.omit(confint(mod4_haem_mean_narm_all))), 3)[,c(1,2,5,6,3,4)])
+    mod4_haem_narm_all_res$model <- "Model 4"
+
+#Model 5  
+mod5_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns + School*year_fac + log_s_haem_mean_narm_l1, 
+                                  weights = s_haem_mean_w,
+                                  data = mod4_dat %>% filter(extra_pzq != 1))
+
+  mod5_haem_narm_all_res <- as.data.frame(round(cbind(summary(mod5_haem_mean_narm_all)$coef,
+                                            na.omit(confint(mod5_haem_mean_narm_all))), 3)[,c(1,2,5,6,3,4)])
+    mod5_haem_narm_all_res$model <- "Model 5"
+    
+#Plot intervention effect estimates    
 rbind(mod1_haem_narm_all_res[c("Net", "Veg", "Prawns"),], 
       mod2_haem_narm_all_res[c("Net", "Veg", "Prawns"),], 
-      mod3_haem_narm_all_res[c("Net", "Veg", "Prawns"),]) %>% 
+      mod3_haem_narm_all_res[c("Net", "Veg", "Prawns"),],
+      mod4_haem_narm_all_res[c("Net", "Veg", "Prawns"),],
+      mod5_haem_narm_all_res[c("Net", "Veg", "Prawns"),]) %>% 
   rename("lower" = !!names(.[3]),
          "upper" = !!names(.[4])) %>% 
-  mutate(Variable = rep(c("Net", "Veg", "Prawns"), 3)) %>% 
+  mutate(Variable = rep(c("Net", "Veg", "Prawns"), 5)) %>% 
   ggplot(aes(y = exp(Estimate), x = model, col = Variable)) + theme_bw() +
     geom_point(position = position_dodge(width = 0.25)) + 
     geom_errorbar(aes(ymin = exp(lower), ymax = exp(upper), x = model), 
@@ -1168,6 +1342,8 @@ rbind(mod1_haem_narm_all_res[c("Net", "Veg", "Prawns"),],
     xlab("") + 
     ylab(expression(paste("exp(", beta[1], ") - Additional eggs associated with intervention"))) +
     ggtitle("S. haematobium intervention effects")
+
+summary(mod5_haem_mean_narm_all)
     
 ```
 
@@ -1201,7 +1377,7 @@ mod2_mans_mean_narm_net <- glm.nb(round(s_mans_mean_narm) ~ Net + pzq + School,
 #Model 3  
 mod3_mans_mean_narm_net <- glm.nb(round(s_mans_mean_narm) ~ Net + School + log_s_mans_mean12_l1, 
                                   weights = s_mans_mean_w,
-                                  data = mod3_dat %>% filter(extra_pzq != 1 & 
+                                  data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                              Intervention %in% c("control", "net") & 
                                                              year != 2018),
                                   control = glm.control(maxit = 300))
@@ -1249,7 +1425,7 @@ mod2_mans_mean_narm_prawn <- glm.nb(round(s_mans_mean_narm) ~ Prawns + pzq + Sch
 #Model 3
 mod3_mans_mean_narm_prawn <- glm.nb(round(s_mans_mean_narm) ~ Prawns + School + log_s_mans_mean_narm_l1, 
                                     weights = s_mans_mean_w, 
-                                    data = mod3_dat %>% filter(extra_pzq != 1 & 
+                                    data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                                Intervention %in% c("control", "prawn")),
                                     control = glm.control(maxit = 200))
 
@@ -1290,7 +1466,7 @@ mod2_mans_mean_prawn_c <- glm.nb(round(s_mans_mean12) ~ Prawn_biomass + pzq + se
 
 #Model 3
 mod3_mans_mean_prawn_c <- glm.nb(round(s_mans_mean12) ~ Prawn_biomass + sex + School + log_s_mans_mean12_l1, 
-                               data = mod3_dat %>% filter(extra_pzq != 1 & Intervention %in% c("control", "prawn")))
+                               data = mod4_dat %>% filter(extra_pzq != 1 & Intervention %in% c("control", "prawn")))
 
   mod3_mans_prawn_res_c <- as.data.frame(round(cbind(summary(mod3_mans_mean_prawn_c)$coef, 
                                                    confint(mod3_mans_mean_prawn_c)), 3)[,c(1,2,5,6,3,4)])
@@ -1458,10 +1634,10 @@ This is better since we're treating villages as their own entities, but we're st
 
 ```{r mod3_haem_mean, eval=FALSE}
 #Note: observations from 2016 should automatically be omitted since the lag variable will be NA, but let's check first:
-mod3_dat %>% group_by(year) %>% summarise(sum(!is.na(log_s_haem_mean_l1)))
+mod4_dat %>% group_by(year) %>% summarise(sum(!is.na(log_s_haem_mean_l1)))
 
 #Confirmed, no non-NA observations in 2016
-mod3_haem_mean <- glm.nb(round(s_haem_mean) ~ Intervention + School + log_s_haem_mean_l1, data = mod3_dat)
+mod3_haem_mean <- glm.nb(round(s_haem_mean) ~ Intervention + School + log_s_haem_mean_l1, data = mod4_dat)
   round(cbind(summary(mod3_haem_mean)$coef, na.omit(confint(mod3_haem_mean))), 3)[,c(1,2,5,6,3,4)]
   plot(ggpredict(mod3_haem_mean, c("Intervention"))) + 
     ylab("Predicted S. haematobium egg burden") + ggtitle("Model 3 predictions, S. haematobium")
@@ -1470,7 +1646,7 @@ mod3_haem_mean <- glm.nb(round(s_haem_mean) ~ Intervention + School + log_s_haem
 ```
 
 ```{r mod3_haem_mean_prawn_dr, eval=FALSE}
-mod3_haem_mean <- glm.nb(round(s_haem_mean) ~ Veg + Net + Prawn_biomass + School + log_s_haem_mean_l1, data = mod3_dat)
+mod3_haem_mean <- glm.nb(round(s_haem_mean) ~ Veg + Net + Prawn_biomass + School + log_s_haem_mean_l1, data = mod4_dat)
   round(cbind(summary(mod3_haem_mean)$coef, na.omit(confint(mod3_haem_mean))), 3)[,c(1,2,5,6,3,4)]
   plot(ggpredict(mod3_haem_mean, c("Prawn_biomass"))) + 
     ylab("Predicted S. haematobium egg burden") + ggtitle("Model 3 predictions, S. haematobium")
@@ -1478,19 +1654,19 @@ mod3_haem_mean <- glm.nb(round(s_haem_mean) ~ Veg + Net + Prawn_biomass + School
   
 #Compare prawn biomass to only controls  
 mod3_haem_mean_prawn_bm <- glm.nb(round(s_haem_mean) ~ Prawn_biomass + sex + School + log_s_haem_mean_l1, 
-                                  data = mod3_dat %>% filter(extra_pzq != 1 & Intervention %in% c("control", "prawn")))
+                                  data = mod4_dat %>% filter(extra_pzq != 1 & Intervention %in% c("control", "prawn")))
 
   round(cbind(summary(mod3_haem_mean_prawn_bm)$coef, confint(mod3_haem_mean_prawn_bm)), 3)[,c(1,2,5,6,3,4)]
   
 #Compare prawn biomass to only controls with net effect 
 mod3_haem_mean_prawn_bm_net <- glm.nb(round(s_haem_mean) ~ Prawn_biomass + Net + sex + School + log_s_haem_mean_l1, 
-                                  data = mod3_dat %>% filter(extra_pzq != 1 & Intervention %in% c("control", "prawn", "net")))
+                                  data = mod4_dat %>% filter(extra_pzq != 1 & Intervention %in% c("control", "prawn", "net")))
 
   round(cbind(summary(mod3_haem_mean_prawn_bm_net)$coef, confint(mod3_haem_mean_prawn_bm_net)), 3)[,c(1,2,5,6,3,4)]
   
 #Compare veg removal to controls  
 mod3_haem_mean_veg <- glm.nb(round(s_haem_mean) ~ Veg + sex + School + log_s_haem_mean_l1, 
-                             data = mod3_dat %>% filter(extra_pzq != 1 & Intervention %in% c("control", "veg_removal")))
+                             data = mod4_dat %>% filter(extra_pzq != 1 & Intervention %in% c("control", "veg_removal")))
 
   round(cbind(summary(mod3_haem_mean_veg)$coef, confint(mod3_haem_mean_veg)), 3)[,c(1,2,5,6,3,4)]
   
@@ -1499,7 +1675,7 @@ mod3_haem_mean_veg <- glm.nb(round(s_haem_mean) ~ Veg + sex + School + log_s_hae
 
 ```{r mod3_haem_samp1, eval=FALSE}
 #see if using only first haematobium urine sample makes a difference since using mean introduces some missingness  
-mod3_haem1 <- glm.nb(s_haem1 ~ Intervention + School + log_s_haem1_l1, data = mod3_dat)
+mod3_haem1 <- glm.nb(s_haem1 ~ Intervention + School + log_s_haem1_l1, data = mod4_dat)
   round(cbind(summary(mod3_haem1)$coef, na.omit(confint(mod3_haem1))), 3)[,c(1,2,5,6,3,4)]
 #Doesn't qualitatively change results
 
@@ -1507,7 +1683,7 @@ mod3_haem1 <- glm.nb(s_haem1 ~ Intervention + School + log_s_haem1_l1, data = mo
 
 
 ```{r mod3_mans_mean, eval=FALSE}
-mod3_mans_mean <- glm.nb(s_mans_mean12 ~ Intervention + School + log_s_mans_mean12_l1, data = mod3_dat)
+mod3_mans_mean <- glm.nb(s_mans_mean12 ~ Intervention + School + log_s_mans_mean12_l1, data = mod4_dat)
   round(cbind(summary(mod3_mans_mean)$coef, na.omit(confint(mod3_mans_mean))), 3)[,c(1,2,5,6,3,4)]
   plot(ggpredict(mod3_mans_mean, c("log_s_mans_mean12_l1", "Intervention"))) + 
     ylab("Predicted S. mansoni egg burden") + ggtitle("Model 3 predictions, S. mansoni")
