@@ -9,8 +9,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 require(gee)
 require(geepack)
+require(sandwich)
 require(lme4)
-require(gee)
 require(MASS)
 require(glmmTMB)
 require(ggeffects)
@@ -40,6 +40,7 @@ What is the source/point of clusters?
 + From Sanna: "There was a protocol to assign clusters based on matching of several variables for each site: latitude, longitude, water point # and cattle presence (qualitative). Once clusters were assigned, they were used to stratify the randomization of treatment.  With such a small sample size (16 sites), randomization might otherwise have failed — ie. all prawn treatments may have ended up on the Lake, or at high cattle use sites, or at places with many water points.  Thus, we intended to assign one high prawn and one low prawn village in each cluster randomly and ensure control sites of comparable ecology were also being tracked. Somewhere in the middle of the experiment (at the end of the first follow up year) because we lacked prawns, [difficult] executive decisions were made by Giulio, so he can explain more why one high and one low prawn treatment were applied in each of 3 clusters (rather than one single density (or several densities) of prawns were assigned in each of the 5 clusters).  Whether "cluster" remains in the analysis doesn’t matter as much to me as having used the clusters in the first place to ensure a wide stratification of treatments and controls in space and across other influential ecological variables.  Note that “high prawn” and “low prawn” should probably be referred to as “very low prawn” and “extremely low prawn” when we look at the actual realized densities across the transmission periods in the prawn sites."  
 Better to use mean of multiple data points or single data point for less missingness?  
 + Giulio says using a single stool sample for *S. mansoni* underestimates prevalence on the village level, but that for four communities, only 1 stool sample was collaected. In our analyses to follow average individual egg burden is estimated for each individual and for each species (mansoni and haematobium) and an additional weight variable is constructed which indicates the number of egg burden estimates that contribute to that mean (max of 2 for haematobium, max of 4 for mansoni)  
+Giulio says ~80 children in Maka Diama (prawn village) and Ndiol Maure (control village) received PZQ in 2017 outside of our study and should therefore be excluded, but the 2017 dataset and the full dataset shared by Stanford has all children from Diokhor Tack, Malla, Gankette Guinth, Merina Guewal, Maka Diama, and Ndiol Maure coded as receiving extra PZQ in 2017  
 
 # Data loading, cleaning, and merging  
 ```{r interventions_data, warning=FALSE}
@@ -217,7 +218,10 @@ dat3 <- read_csv("~/RemaisWork/Schisto/Stanford/Human_Parasitology_data/Third_ro
                                      breaks = c(0,1,100,400, Inf), 
                                      labels = c("No", "Lo", "Md", "Hi"), right = FALSE),
            pzq = 1, 
-           extra_pzq = 0)  %>% 
+           #Individuals who received additional praziquantel influencing their 2018 egg burden
+           extra_pzq = ifelse(Child_ID %in% c("DT/1/008", "DT/1/021","DT/1/032",
+                                              "MD/3/015", "MD/3/023",
+                                              "MO/2/013", "MO/2/014", "MO/3/030"), 1, 0))  %>% 
     select(Child_ID, year, School, pzq, extra_pzq,
            s_haem1 = P5_omega_total,
            s_haem2 = P6_omega_total,
@@ -285,7 +289,33 @@ full_long <- rbind(dat1, dat2, dat3) %>%
   mutate(School = factor(School),
          Child_ID = factor(Child_ID),
          year_fac = factor(year),
+         year_2016 = ifelse(year == 2016, 1, 0),
+         year_2017 = ifelse(year == 2017, 1, 0),
+         year_2018 = ifelse(year == 2018, 1, 0),
          pzq = factor(pzq))
+
+#Full community-level dataset in long format
+full_long_comm <- full_long %>% #filter(extra_pzq != 1) %>%
+  group_by(School, year) %>% 
+  summarise(haem_mean = mean(c(s_haem1, s_haem2), na.rm = TRUE),
+            haem_samps = length(na.omit(c(s_haem1, s_haem2))),
+            haem_pos = length(which(s_haem_mean_narm > 0)), 
+            haem_prev = haem_pos / length(na.omit(s_haem_mean_narm)),
+            mans_mean = mean(c(s_mans1_1, s_mans1_2,
+                               s_mans2_1, s_mans2_2), na.rm = TRUE),
+            mans_samps = length(na.omit(c(s_mans1_1, s_mans1_2,
+                                          s_mans2_1, s_mans2_2))),
+            mans_pos = length(which(s_mans_mean_narm > 0)),
+            mans_prev = mans_pos / length(na.omit(s_mans_mean_narm)),
+            extra_pzq = mean(extra_pzq)) %>% 
+  inner_join(interventions, by = c("School", "year")) %>% 
+  group_by(School) %>% 
+  mutate(vil_haem_mean = mean(haem_mean),
+         vil_mans_mean = mean(mans_mean)) %>% 
+  ungroup() %>% 
+  mutate(vil_haem_diff = haem_mean - vil_haem_mean,
+         vil_mans_diff = mans_mean - vil_mans_mean) %>% 
+  arrange(year, School)
 
 #Full dataset in wide format
 full_wide <- dat1 %>% 
@@ -677,6 +707,20 @@ We'll again fit this model with $I_{jt}$ as a simple binary variable defined at 
 # Implementation
 Models 4 and 5 actually require a bit more data wrangling to add the lag variables:  
 ```{r dat_wrang}
+mod_comm <- full_long_comm %>% arrange(School, year) %>% group_by(School) %>% 
+  mutate(haem_mean_l1 = lag(haem_mean),
+         haem_diff_l1 = lag(vil_haem_diff),
+         haem_2016 = haem_mean[which(year == 2016)],
+         log_haem_mean_l1 = lag(log(haem_mean+1)),
+         log_haem_2016 = log(haem_mean[which(year == 2016)]+1),         
+         mans_mean_l1 = lag(mans_mean),
+         mans_diff_l1 = lag(vil_mans_diff),
+         mans_2016 = mans_mean[which(year == 2016)],
+         log_mans_mean_l1 = lag(log(mans_mean+1)),
+         log_mans_2016 = log(mans_mean[which(year == 2016)]+1),
+         year_fac = factor(as.character(year), levels = c("2016", "2017", "2018")),
+         pzq = ifelse(year != 2016, 1, 0))
+
 mod4_dat <- full_long %>% arrange(Child_ID, year) %>% group_by(Child_ID) %>% 
   mutate(s_haem_mean_l1 = lag(s_haem_mean),
          log_s_haem_mean_l1 = lag(log(s_haem_mean+1)),
@@ -689,12 +733,289 @@ mod4_dat <- full_long %>% arrange(Child_ID, year) %>% group_by(Child_ID) %>%
          s_mans_mean12_l1 = lag(s_mans_mean12),
          log_s_mans_mean12_l1 = lag(log(s_mans_mean12+1)),
          s_mans_mean_narm_l1 = lag(s_mans_mean_narm),
-         log_s_mans_mean_narm_l1 = lag(log(s_mans_mean_narm+1)))
+         log_s_mans_mean_narm_l1 = lag(log(s_mans_mean_narm+1))) %>% 
+  full_join(mod_comm %>% select(School, year, 
+                                 haem_mean_l1, haem_2016, 
+                                 mans_mean_l1, mans_2016),
+             by = c("School", "year"))
+
+
 ```
 
-## Schistosoma haematobium  
+```{r robust_se_fx}
+#function to get robust standard errors and spit out data frame with 95%CI
+robust_fx <- function(mod_obj){
+  df_init <- as.data.frame(summary(mod_obj)$coef)
+  
+  rob_se <- sqrt(diag(vcovHC(mod_obj, type = "HC0")))
+  rob_lo <- rob_se * qnorm(0.025) + df_init[,"Estimate"]
+  rob_up <- rob_se * qnorm(0.975) + df_init[,"Estimate"]
+  
+  out <- cbind(df_init, rob_se, rob_lo, rob_up)
+  
+  return(out)
+}
+```
+## Community level  
+```{r comm_mod1}
+#Model 1
+mod1_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + School + pzq, 
+                             weights = haem_samps,
+                             data = mod_comm)
 
-### Net effect  
+  mod1_haem_comm_all_res <- robust_fx(mod1_haem_comm_all)
+  mod1_haem_comm_all_res <- cbind(mod1_haem_comm_all_res, confint(mod1_haem_comm_all))
+    mod1_haem_comm_all_res$model <- "Model 1"
+
+mod1_haem_comm_all_res %>%     
+  mutate(coefficient = rownames(mod1_haem_comm_all_res)) %>% 
+  ggplot(aes(x = Estimate, y = coefficient)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = coefficient), height = 0.25) +
+    geom_vline(xintercept = 0, lty = 2) +
+    ylab("") + xlab("Coefficient values") +
+    ggtitle("Berkeley model coefficients", 
+            subtitle = "95% CIs derived from robust standard errors")
+ 
+mod1_haem_comm_all_res %>%     
+  mutate(coefficient = rownames(mod1_haem_comm_all_res)) %>% 
+  rename("naive_lo" = !!names(.[8]),
+         "naive_up" = !!names(.[9])) %>% 
+  ggplot(aes(x = Estimate, y = coefficient)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = coefficient), height = 0.25) +
+    geom_errorbarh(aes(xmin = naive_lo, xmax = naive_up, y = coefficient), height = 0.25, col = 2) +
+    geom_vline(xintercept = 0, lty = 2) +
+    ylab("") + xlab("Coefficient values") +
+    ggtitle("Berkeley model coefficients", 
+            subtitle = "95% CIs derived from robust standard errors")
+   
+```
+
+```{r comm_mod2}
+#Model 2
+mod2_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + year_fac + haem_mean_l1, 
+                             weights = haem_samps,
+                             data = mod_comm)
+
+  mod2_haem_comm_all_res <- robust_fx(mod2_haem_comm_all)
+  mod2_haem_comm_all_res <- cbind(mod2_haem_comm_all_res, confint(mod2_haem_comm_all))
+    mod2_haem_comm_all_res$model <- "Model 2"
+
+mod2_haem_comm_all_res %>%     
+  mutate(coefficient = rownames(mod2_haem_comm_all_res)) %>% 
+  ggplot(aes(x = Estimate, y = coefficient)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = coefficient), height = 0.25) +
+    geom_vline(xintercept = 0, lty = 2) +
+    ylab("") + xlab("Coefficient values") +
+    ggtitle("Berkeley model2 coefficients", 
+            subtitle = "95% CIs derived from robust standard errors")
+  
+mod2_haem_comm_all_res %>%     
+  mutate(coefficient = rownames(mod2_haem_comm_all_res)) %>% 
+  rename("naive_lo" = !!names(.[8]),
+         "naive_up" = !!names(.[9])) %>% 
+  ggplot(aes(x = Estimate, y = coefficient)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = coefficient), height = 0.25) +
+    geom_errorbarh(aes(xmin = naive_lo, xmax = naive_up, y = coefficient), height = 0.25, col = 2) +
+    geom_vline(xintercept = 0, lty = 2) +
+    ylab("") + xlab("Coefficient values") +
+    ggtitle("Berkeley model2 coefficients", 
+            subtitle = "95% CIs derived from robust standard errors")
+  
+```
+
+
+```{r more_comm_mods, message = FALSE}
+#Model 0
+mod0_haem_comm_all <- glm.nb(round(haem_mean) ~ year_fac + extra_pzq, 
+                             weights = haem_samps,
+                             data = mod_comm)
+
+  mod0_haem_comm_all_res <- robust_fx(mod0_haem_comm_all)
+    mod0_haem_comm_all_res$model <- "Model 0"
+
+#Model 00
+mod00_haem_comm_all <- glm.nb(round(haem_mean) ~ year_fac + School + extra_pzq, 
+                             weights = haem_samps,
+                             data = mod_comm)
+
+  mod00_haem_comm_all_res <- robust_fx(mod00_haem_comm_all)
+    mod00_haem_comm_all_res$model <- "Model 0"
+
+#Model 1
+mod1_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + year_fac + extra_pzq, 
+                             weights = haem_samps,
+                             data = mod_comm)
+
+  mod1_haem_comm_all_res <- robust_fx(mod1_haem_comm_all)
+    mod1_haem_comm_all_res$model <- "Model 1"
+
+#Model 2  
+mod2_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + year_fac + School + extra_pzq, 
+                             weights = haem_samps,
+                             data = mod_comm)
+
+  mod2_haem_comm_all_res <- robust_fx(mod2_haem_comm_all)
+    mod2_haem_comm_all_res$model <- "Model 2"
+
+#Model 4  
+mod4_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + year_fac + School + haem_mean_l1 + extra_pzq, 
+                             weights = haem_samps,
+                             data = mod_comm)
+
+  mod4_haem_comm_all_res <- robust_fx(mod4_haem_comm_all)
+    mod4_haem_comm_all_res$model <- "Model 4"
+
+mod4_haem_comm_all_res %>%     
+  mutate(coefficient = rownames(mod4_haem_comm_all_res)) %>% 
+  ggplot(aes(x = Estimate, y = coefficient)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = coefficient), height = 0.25) +
+    geom_vline(xintercept = 0, lty = 2) +
+    ylab("") + xlab("Coefficient values") +
+    ggtitle("Berkeley model coefficients", 
+            subtitle = "95% CIs derived from robust standard errors")
+
+anova(mod0_haem_comm_all, mod1_haem_comm_all, mod2_haem_comm_all, mod4_haem_comm_all)
+```
+
+```{r comm_diff_mods, message = FALSE}
+#Model deviation from the village level mean egg burden
+#rather than the egg burden iteself. Allows for increased efficiency since
+#the village effects are encapsulated in the data. Also allows for coefficient
+#estimates on a linear rather than log scale
+
+#Model 2  
+mod2_haem_diff_comm_all <- glm(vil_haem_diff ~ Net + Veg + Prawns + year_fac, 
+                               weights = haem_samps,
+                               data = mod_comm)
+
+  mod2_haem_diff_comm_all_res <- robust_fx(mod2_haem_diff_comm_all)
+    mod2_haem_diff_comm_all_res$model <- "Model 2"
+
+#Model 4  
+mod4_haem_diff_comm_all <- glm(vil_haem_diff ~ Net + Veg + Prawns + year_fac + haem_diff_l1, 
+                               weights = haem_samps,
+                               data = mod_comm)
+
+  mod4_haem_diff_comm_all_res <- robust_fx(mod4_haem_diff_comm_all)
+    mod4_haem_diff_comm_all_res$model <- "Model 4"
+
+mod4_haem_diff_comm_all_res %>%     
+  mutate(coefficient = rownames(mod4_haem_diff_comm_all_res)) %>% 
+  ggplot(aes(x = Estimate, y = coefficient)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = coefficient), height = 0.25) +
+    geom_vline(xintercept = 0, lty = 2) +
+    ylab("") + xlab("Coefficient values") +
+    ggtitle("Berkeley model coefficients", 
+            subtitle = "95% CIs derived from robust standard errors")
+
+anova(mod0_haem_comm_all, mod00_haem_comm_all, 
+      mod1_haem_comm_all, mod2_haem_comm_all, mod4_haem_comm_all)
+```
+# Permutation test  
+Conduct permutation test to determine, given our data, the probability of finding a significant effect of treatment regardless of how the interventions were assigned to communities. Basically determines if any finding of a significant association is a true effect or was pre-ordained given our data.
+
+```{r permute_fx}
+#Function to randomly reallocate treatment among communities
+#Made tricky by the fact that treatments vary each year
+#and there's dependence between years since the four communities
+#that received nets in 2017 also received prawns in 2018
+
+permute <- function(){
+#Get full treatment vector
+  treats <- mod_comm %>% 
+    unite(int_vec, c(Veg, Net, Prawns)) %>% 
+    group_by(School) %>% 
+    summarise(full_hist = paste(int_vec, collapse = "-")) %>% 
+    pull(full_hist)
+  
+#Resample to scramble treatment 
+  mix <- sample(treats, replace = FALSE)
+  
+#Unlist to rebind with the full df
+  mix2 <- unlist(strsplit(mix, "-"))
+  
+  mod_perm <- cbind(mod_comm, mix2 = mix2) %>% 
+  #Replace old values with randomly scrambled ones  
+    select(-c(Veg, Net, Prawns)) %>% 
+    separate(mix2, c("Veg", "Net", "Prawns"))
+  
+  mod1_perm <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + School + pzq, 
+                      weights = haem_samps,
+                      data = mod_perm)
+  
+  mod1_int_coef <- summary(mod1_perm)$coef[,"Estimate"][c("Veg1", "Net1", "Prawns1")]
+  
+  mod2_perm <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + year_fac + haem_mean_l1, 
+                      weights = haem_samps,
+                      data = mod_perm)
+  
+  mod2_int_coef <- summary(mod2_perm)$coef[,"Estimate"][c("Veg1", "Net1", "Prawns1")]
+  
+  return(c(mod1_int_coef, mod2_int_coef))
+}
+
+permute()
+```
+
+
+```{r perm_run, cache = TRUE}
+set.seed(43093)
+perm_result <- replicate(10000, permute())
+
+perm_result <- as.data.frame(t(perm_result))
+colnames(perm_result) <- c("Mod1_Veg", "Mod1_Net", "Mod1_Prawns",
+                           "Mod2_Veg", "Mod2_Net", "Mod2_Prawns")
+
+hist(perm_result$Mod1_Veg, col = "black", breaks = 100)
+  abline(v = summary(mod1_haem_comm_all)$coef[,"Estimate"]["Veg"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod1_Veg > 
+                 summary(mod1_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
+  
+hist(perm_result$Mod1_Net, col = "black", breaks = 100)
+  abline(v = summary(mod1_haem_comm_all)$coef[,"Estimate"]["Net"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod1_Net > 
+                 summary(mod1_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
+
+hist(perm_result$Mod1_Prawns, col = "black", breaks = 100)
+  abline(v = summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod1_Prawns > 
+                 summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
+
+hist(perm_result$Mod2_Veg, col = "black", breaks = 100)
+  abline(v = summary(mod2_haem_comm_all)$coef[,"Estimate"]["Veg"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod2_Veg > 
+                 summary(mod2_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
+
+hist(perm_result$Mod2_Net, col = "black", breaks = 100)
+  abline(v = summary(mod1_haem_comm_all)$coef[,"Estimate"]["Net"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod2_Net > 
+                 summary(mod2_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
+  
+hist(perm_result$Mod2_Prawns, col = "black", breaks = 100)
+  abline(v = summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod2_Prawns > 
+                 summary(mod2_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
+
+
+```
+
+
+## Individual level (not really valid since intervention is not defined at individual level)  
+### Schistosoma haematobium  
+
+#### Net effect  
 To test for a net effect, we'll compare communities which had a net installed in 2016 (therefore influencing egg burden in 2017) to control communities which had no net leading up to 2017
 
 ```{r net_effect, message=FALSE, echo = FALSE, include = FALSE, eval = FALSE}
@@ -742,74 +1063,68 @@ rbind(mod1_haem_net_res["Net",], mod2_haem_net_res["Net",], mod3_haem_net_res["N
 
 ```{r net_effect_narm, message=FALSE}
 #Model 1
-mod1_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + pzq, 
+mod1_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + pzq + extra_pzq, 
                                   weights = s_haem_mean_w,
                                   data = full_long %>% filter(extra_pzq != 1 & 
-                                                              Intervention %in% c("control", "net") & 
-                                                              year != 2018))
+                                                              Intervention %in% c("control", "net")))
 
-  mod1_haem_narm_net_res <- as.data.frame(round(cbind(summary(mod1_haem_mean_narm_net)$coef, 
-                                            confint(mod1_haem_mean_narm_net)), 3)[,c(1,2,5,6,3,4)])
+  mod1_haem_narm_net_res <- robust_fx(mod1_haem_mean_narm_net)
     mod1_haem_narm_net_res$model <- "Model 1"
 
 #Model 2  
-mod2_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + pzq + School, 
+mod2_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + pzq + School + extra_pzq, 
                                   weights = s_haem_mean_w,
                                   data = full_long %>% filter(extra_pzq != 1 & 
-                                                              Intervention %in% c("control", "net") & 
-                                                              year != 2018))
+                                                              Intervention %in% c("control", "net")))
 
-  mod2_haem_narm_net_res <- as.data.frame(round(cbind(summary(mod2_haem_mean_narm_net)$coef, 
-                                            confint(mod2_haem_mean_narm_net)), 3)[,c(1,2,5,6,3,4)])
+  mod2_haem_narm_net_res <- robust_fx(mod2_haem_mean_narm_net)
     mod2_haem_narm_net_res$model <- "Model 2"
  
 #Model 3  
-mod3_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + pzq + School*year_fac, 
+mod3_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + pzq + School + year_2018 + extra_pzq, 
                                   weights = s_haem_mean_w,
                                   data = full_long %>% filter(extra_pzq != 1 & 
-                                                              Intervention %in% c("control", "net") & 
-                                                              year != 2018))
+                                                              Intervention %in% c("control", "net")))
 
-  mod3_haem_narm_net_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_net)$coef, 
-                                          na.omit(confint(mod3_haem_mean_narm_net))), 3)[,c(1,2,5,6,3,4)])
+  mod3_haem_narm_net_res <- robust_fx(mod3_haem_mean_narm_net)
     mod3_haem_narm_net_res$model <- "Model 3"
      
 #Model 4  
-mod4_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + School + log_s_haem_mean_narm_l1, 
+mod4_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + School + log_s_haem_mean_narm_l1 + extra_pzq, 
                                   weights = s_haem_mean_w,
                                   data = mod4_dat %>% filter(extra_pzq != 1 & 
-                                                             Intervention %in% c("control", "net") & 
-                                                             year != 2018))
+                                                             Intervention %in% c("control", "net")))
 
-  mod4_haem_narm_net_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_net)$coef,
-                                            na.omit(confint(mod3_haem_mean_narm_net))), 3)[,c(1,2,5,6,3,4)])
+  mod4_haem_narm_net_res <- robust_fx(mod4_haem_mean_narm_net)
     mod4_haem_narm_net_res$model <- "Model 4"
  
-## Model 5 not run since can't exclude 2018 ## 
-#mod5_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + School*year_fac + log_s_haem_mean_narm_l1, 
-#                                  weights = s_haem_mean_w,
-#                                  data = mod4_dat %>% filter(extra_pzq != 1 & 
-#                                                             Intervention %in% c("control", "net")))
+# Model 5 
+mod5_haem_mean_narm_net <- glm.nb(round(s_haem_mean_narm) ~ Net + School + year_2018 + log_s_haem_mean_narm_l1 + extra_pzq, 
+                                  weights = s_haem_mean_w,
+                                  data = mod4_dat %>% filter(extra_pzq != 1 & 
+                                                             Intervention %in% c("control", "net")))
 
-#  mod5_haem_narm_net_res <- as.data.frame(round(cbind(summary(mod5_haem_mean_narm_net)$coef,
-#                                          na.omit(confint(mod5_haem_mean_narm_net))), 3)[,c(1,2,5,6,3,4)])
-#    mod5_haem_narm_net_res$model <- "Model 5"
+  mod5_haem_narm_net_res <- robust_fx(mod5_haem_mean_narm_net)
+    mod5_haem_narm_net_res$model <- "Model 5"
        
 #Plot net effect estimate    
-rbind(mod1_haem_narm_net_res["Net",], mod2_haem_narm_net_res["Net",], mod3_haem_narm_net_res["Net",], 
-      mod4_haem_narm_net_res["Net",]) %>% 
-  rename("lower" = !!names(.[3]),
-         "upper" = !!names(.[4])) %>% 
-  ggplot(aes(x = exp(Estimate), y = model)) + theme_bw() +
-    geom_point() + geom_errorbarh(aes(xmin = exp(lower), xmax = exp(upper), y = model), height = 0.25) +
-    geom_vline(xintercept = 1, lty = 2) +
-    ylab("") + xlab(expression(paste("exp(",beta[1], ") - Additional eggs associated with net presence"))) +
-    ggtitle("S. haematobium net effect")
+rbind(mod1_haem_narm_net_res["Net",], 
+      mod2_haem_narm_net_res["Net",], 
+      mod3_haem_narm_net_res["Net",], 
+      mod4_haem_narm_net_res["Net",], 
+      mod5_haem_narm_net_res["Net",]) %>% 
+  ggplot(aes(x = Estimate, y = model)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = model), height = 0.25) +
+    geom_vline(xintercept = 0, lty = 2) +
+    ylab("") + xlab(expression(paste(beta[1], " Net"))) +
+    ggtitle("S. haematobium net effect", 
+            subtitle = "95% CIs derived from robust standard errors")
   
 ```
 
 
-### Prawn effect  
+#### Prawn effect  
 To test for a prawn effect, we'll compare communities which had prawns introduced in 2017 to control communities which had no net in 2016
 
 ```{r prawn_effect, message=FALSE, echo = FALSE, include = FALSE, eval = FALSE}
@@ -853,49 +1168,44 @@ rbind(mod1_haem_prawn_res["Prawns",], mod2_haem_prawn_res["Prawns",], mod3_haem_
 
 ```{r prawn_effect_narm, message=FALSE}
 #Model 1
-mod1_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + pzq, 
+mod1_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + pzq + extra_pzq, 
                                data = full_long %>% filter(extra_pzq != 1 & 
                                                            Intervention %in% c("control", "prawn")))
 
-  mod1_haem_narm_prawn_res <- as.data.frame(round(cbind(summary(mod1_haem_mean_narm_prawn)$coef, 
-                                                   confint(mod1_haem_mean_narm_prawn)), 3)[,c(1,2,5,6,3,4)])
+  mod1_haem_narm_prawn_res <- robust_fx(mod1_haem_mean_narm_prawn)
     mod1_haem_narm_prawn_res$model <- "Model 1"
   
   
 #Model 2
-mod2_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + pzq + School, 
+mod2_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + pzq + School + extra_pzq, 
                                data = full_long %>% filter(extra_pzq != 1 & 
                                                            Intervention %in% c("control", "prawn")))
 
-  mod2_haem_narm_prawn_res <- as.data.frame(round(cbind(summary(mod2_haem_mean_narm_prawn)$coef, 
-                                                  confint(mod2_haem_mean_narm_prawn)), 3)[,c(1,2,5,6,3,4)])
+  mod2_haem_narm_prawn_res <- robust_fx(mod2_haem_mean_narm_prawn)
     mod2_haem_narm_prawn_res$model <- "Model 2"
 
 #Model 3
-mod3_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + pzq + School*year_fac, 
+mod3_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + pzq + School + year_2018 + extra_pzq, 
                                data = full_long %>% filter(extra_pzq != 1 & 
                                                            Intervention %in% c("control", "prawn")))
 
-  mod3_haem_narm_prawn_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_prawn)$coef, 
-                                                  na.omit(confint(mod3_haem_mean_narm_prawn))), 3)[,c(1,2,5,6,3,4)])
+  mod3_haem_narm_prawn_res <- robust_fx(mod3_haem_mean_narm_prawn)
     mod3_haem_narm_prawn_res$model <- "Model 3"
     
 #Model 4
-mod4_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + School + log_s_haem_mean_narm_l1, 
+mod4_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + School + log_s_haem_mean_narm_l1 + extra_pzq, 
                                data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                           Intervention %in% c("control", "prawn")))
 
-  mod4_haem_narm_prawn_res <- as.data.frame(round(cbind(summary(mod4_haem_mean_narm_prawn)$coef, 
-                                                   confint(mod4_haem_mean_narm_prawn)), 3)[,c(1,2,5,6,3,4)])
+  mod4_haem_narm_prawn_res <- robust_fx(mod4_haem_mean_narm_prawn)
     mod4_haem_narm_prawn_res$model <- "Model 4"
 
 #Model 5
-mod5_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + School*year_fac + log_s_haem_mean_narm_l1, 
+mod5_haem_mean_narm_prawn <- glm.nb(round(s_haem_mean_narm) ~ Prawns + School + year_2018 + log_s_haem_mean_narm_l1 + extra_pzq, 
                                data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                           Intervention %in% c("control", "prawn")))
 
-  mod5_haem_narm_prawn_res <- as.data.frame(round(cbind(summary(mod5_haem_mean_narm_prawn)$coef, 
-                                                  na.omit(confint(mod5_haem_mean_narm_prawn))), 3)[,c(1,2,5,6,3,4)])
+  mod5_haem_narm_prawn_res <- robust_fx(mod5_haem_mean_narm_prawn)
     mod5_haem_narm_prawn_res$model <- "Model 5"
      
 #Plot prawn effect estimate    
@@ -904,14 +1214,14 @@ rbind(mod1_haem_narm_prawn_res["Prawns",],
       mod3_haem_narm_prawn_res["Prawns",],
       mod4_haem_narm_prawn_res["Prawns",],
       mod5_haem_narm_prawn_res["Prawns",]) %>% 
-  rename("lower" = !!names(.[3]),
-         "upper" = !!names(.[4])) %>% 
-  ggplot(aes(x = exp(Estimate), y = model)) + theme_bw() +
-    geom_point() + geom_errorbarh(aes(xmin = exp(lower), xmax = exp(upper), y = model), height = 0.25) +
-    geom_vline(xintercept = 1, lty = 2) +
+  ggplot(aes(x = Estimate, y = model)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = model), height = 0.25) +
+    geom_vline(xintercept = 0, lty = 2) +
     ylab("") + 
-    xlab(expression(paste("exp(",beta[1], ") - Additional eggs associated with prawn addition"))) +
-    ggtitle("S. haematobium prawn effect")
+    xlab(expression(paste(beta[1], " Prawns"))) +
+    ggtitle("S. haematobium prawn effect", 
+            subtitle = "95% CIs derived from robust standard errors")
   
     
 ```
@@ -956,14 +1266,73 @@ rbind(mod1_haem_prawn_res_c["Prawn_biomass",], mod2_haem_prawn_res_c["Prawn_biom
 
 ```
 
+```{r prawn_categorical_narm, message=FALSE}
+#Model 1
+mod1_haem_mean_narm_prawn_cat <- glm.nb(round(s_haem_mean_narm) ~ Prawn_cat + pzq, 
+                               data = full_long %>% filter(extra_pzq != 1 & 
+                                                           Intervention %in% c("control", "prawn")))
+
+  mod1_haem_narm_prawn_res_cat <- robust_fx(mod1_haem_mean_narm_prawn_cat)
+    mod1_haem_narm_prawn_res_cat$model <- "Model 1"
+  
+  
+#Model 2
+mod2_haem_mean_narm_prawn_cat <- glm.nb(round(s_haem_mean_narm) ~ Prawn_cat + pzq + School, 
+                               data = full_long %>% filter(extra_pzq != 1 & 
+                                                           Intervention %in% c("control", "prawn")))
+
+  mod2_haem_narm_prawn_res_cat <- robust_fx(mod2_haem_mean_narm_prawn_cat)
+    mod2_haem_narm_prawn_res_cat$model <- "Model 2"
+
+#Model 3
+mod3_haem_mean_narm_prawn_cat <- glm.nb(round(s_haem_mean_narm) ~ Prawn_cat + pzq + School + year_2018, 
+                               data = full_long %>% filter(extra_pzq != 1 & 
+                                                           Intervention %in% c("control", "prawn")))
+
+  mod3_haem_narm_prawn_res_cat <- robust_fx(mod3_haem_mean_narm_prawn_cat)
+    mod3_haem_narm_prawn_res_cat$model <- "Model 3"
+    
+#Model 4
+mod4_haem_mean_narm_prawn_cat <- glm.nb(round(s_haem_mean_narm) ~ Prawn_cat + School + log_s_haem_mean_narm_l1, 
+                               data = mod4_dat %>% filter(extra_pzq != 1 & 
+                                                          Intervention %in% c("control", "prawn")))
+
+  mod4_haem_narm_prawn_res_cat <- robust_fx(mod4_haem_mean_narm_prawn_cat)
+    mod4_haem_narm_prawn_res_cat$model <- "Model 4"
+
+#Model 5
+mod5_haem_mean_narm_prawn_cat <- glm.nb(round(s_haem_mean_narm) ~ Prawn_cat + School + year_2018 + log_s_haem_mean_narm_l1, 
+                               data = mod4_dat %>% filter(extra_pzq != 1 & 
+                                                          Intervention %in% c("control", "prawn")))
+
+  mod5_haem_narm_prawn_res_cat <- robust_fx(mod5_haem_mean_narm_prawn_cat)
+    mod5_haem_narm_prawn_res_cat$model <- "Model 5"
+      
+#Plot prawn effect estimate    
+rbind(mod1_haem_narm_prawn_res_cat[c("Prawn_catlow", "Prawn_cathigh"),], 
+      mod2_haem_narm_prawn_res_cat[c("Prawn_catlow", "Prawn_cathigh"),], 
+      mod3_haem_narm_prawn_res_cat[c("Prawn_catlow", "Prawn_cathigh"),],
+      mod4_haem_narm_prawn_res_cat[c("Prawn_catlow", "Prawn_cathigh"),],
+      mod5_haem_narm_prawn_res_cat[c("Prawn_catlow", "Prawn_cathigh"),]) %>% 
+  mutate(Density = rep(c("Prawn_catlow", "Prawn_cathigh"), 5)) %>% 
+  ggplot(aes(x = Estimate, y = model, col = Density)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = model), height = 0.25) +
+    geom_vline(xintercept = 0, lty = 2) +
+    ylab("") + 
+  xlab(expression(paste(beta[1], " Prawn Density Category"))) +
+    ggtitle("S. haematobium prawn category effect", 
+            subtitle = "95% CIs derived from robust standard errors")
+
+```
+
 ```{r prawn_continuous_narm, message=FALSE}
 #Model 1
 mod1_haem_mean_narm_prawn_c <- glm.nb(round(s_haem_mean_narm) ~ Prawn_biomass + pzq, 
                                data = full_long %>% filter(extra_pzq != 1 & 
                                                            Intervention %in% c("control", "prawn")))
 
-  mod1_haem_narm_prawn_res_c <- as.data.frame(round(cbind(summary(mod1_haem_mean_narm_prawn_c)$coef, 
-                                                   confint(mod1_haem_mean_narm_prawn_c)), 3)[,c(1,2,5,6,3,4)])
+  mod1_haem_narm_prawn_res_c <- robust_fx(mod1_haem_mean_narm_prawn_c)
     mod1_haem_narm_prawn_res_c$model <- "Model 1"
   
   
@@ -972,17 +1341,15 @@ mod2_haem_mean_narm_prawn_c <- glm.nb(round(s_haem_mean_narm) ~ Prawn_biomass + 
                                data = full_long %>% filter(extra_pzq != 1 & 
                                                            Intervention %in% c("control", "prawn")))
 
-  mod2_haem_narm_prawn_res_c <- as.data.frame(round(cbind(summary(mod2_haem_mean_narm_prawn_c)$coef, 
-                                                   confint(mod2_haem_mean_narm_prawn_c)), 3)[,c(1,2,5,6,3,4)])
+  mod2_haem_narm_prawn_res_c <- robust_fx(mod2_haem_mean_narm_prawn_c)
     mod2_haem_narm_prawn_res_c$model <- "Model 2"
 
 #Model 3
-mod3_haem_mean_narm_prawn_c <- glm.nb(round(s_haem_mean_narm) ~ Prawn_biomass + pzq + School*year_fac, 
+mod3_haem_mean_narm_prawn_c <- glm.nb(round(s_haem_mean_narm) ~ Prawn_biomass + pzq + School + year_2018, 
                                data = full_long %>% filter(extra_pzq != 1 & 
                                                            Intervention %in% c("control", "prawn")))
 
-  mod3_haem_narm_prawn_res_c <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_prawn_c)$coef, 
-                                                    na.omit(confint(mod3_haem_mean_narm_prawn_c))), 3)[,c(1,2,5,6,3,4)])
+  mod3_haem_narm_prawn_res_c <- robust_fx(mod3_haem_mean_narm_prawn_c)
     mod3_haem_narm_prawn_res_c$model <- "Model 3"
     
 #Model 4
@@ -990,17 +1357,15 @@ mod4_haem_mean_narm_prawn_c <- glm.nb(round(s_haem_mean_narm) ~ Prawn_biomass + 
                                data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                           Intervention %in% c("control", "prawn")))
 
-  mod4_haem_narm_prawn_res_c <- as.data.frame(round(cbind(summary(mod4_haem_mean_narm_prawn_c)$coef, 
-                                                    confint(mod4_haem_mean_narm_prawn_c)), 3)[,c(1,2,5,6,3,4)])
+  mod4_haem_narm_prawn_res_c <- robust_fx(mod4_haem_mean_narm_prawn_c)
     mod4_haem_narm_prawn_res_c$model <- "Model 4"
 
 #Model 5
-mod5_haem_mean_narm_prawn_c <- glm.nb(round(s_haem_mean_narm) ~ Prawn_biomass + School*year_fac + log_s_haem_mean_narm_l1, 
+mod5_haem_mean_narm_prawn_c <- glm.nb(round(s_haem_mean_narm) ~ Prawn_biomass + School + year_2018 + log_s_haem_mean_narm_l1, 
                                data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                           Intervention %in% c("control", "prawn")))
 
-  mod5_haem_narm_prawn_res_c <- as.data.frame(round(cbind(summary(mod5_haem_mean_narm_prawn_c)$coef, 
-                                                    na.omit(confint(mod5_haem_mean_narm_prawn_c))), 3)[,c(1,2,5,6,3,4)])
+  mod5_haem_narm_prawn_res_c <- robust_fx(mod5_haem_mean_narm_prawn_c)
     mod5_haem_narm_prawn_res_c$model <- "Model 5"
       
 #Plot prawn effect estimate    
@@ -1009,18 +1374,18 @@ rbind(mod1_haem_narm_prawn_res_c["Prawn_biomass",],
       mod3_haem_narm_prawn_res_c["Prawn_biomass",],
       mod4_haem_narm_prawn_res_c["Prawn_biomass",],
       mod5_haem_narm_prawn_res_c["Prawn_biomass",]) %>% 
-  rename("lower" = !!names(.[3]),
-         "upper" = !!names(.[4])) %>% 
-  ggplot(aes(x = exp(Estimate), y = model)) + theme_bw() +
-    geom_point() + geom_errorbarh(aes(xmin = exp(lower), xmax = exp(upper), y = model), height = 0.25) +
-    geom_vline(xintercept = 1, lty = 2) +
+  ggplot(aes(x = Estimate, y = model)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = model), height = 0.25) +
+    geom_vline(xintercept = 0, lty = 2) +
     ylab("") + 
-  xlab(expression(paste("exp(",beta[1], ") - Additional eggs associated with unit increase in prawn biomass"))) +
-    ggtitle("S. haematobium prawn effect")
+  xlab(expression(paste(beta[1], " Prawn Biomass"))) +
+    ggtitle("S. haematobium prawn effect", 
+            subtitle = "95% CIs derived from robust standard errors")
 
 ```
 
-### Vegetation removal effect  
+#### Vegetation removal effect  
 ```{r veg_effect, message=FALSE, echo = FALSE, include = FALSE, eval = FALSE}
 #Model 1
 mod1_haem_mean_veg <- glm.nb(round(s_haem_mean) ~ Veg + pzq + sex, 
@@ -1067,8 +1432,7 @@ mod1_haem_mean_narm_veg <- glm.nb(round(s_haem_mean_narm) ~ Veg + pzq,
                              data = full_long %>% filter(extra_pzq != 1 & 
                                                          Intervention %in% c("control", "veg_removal")))
 
-  mod1_haem_narm_veg_res <- as.data.frame(round(cbind(summary(mod1_haem_mean_narm_veg)$coef, 
-                                            confint(mod1_haem_mean_narm_veg)), 3)[,c(1,2,5,6,3,4)])
+  mod1_haem_narm_veg_res <- robust_fx(mod1_haem_mean_narm_veg)
     mod1_haem_narm_veg_res$model <- "Model 1"
 
 #Model 2  
@@ -1076,17 +1440,15 @@ mod2_haem_mean_narm_veg <- glm.nb(round(s_haem_mean_narm) ~ Veg + pzq + School,
                              data = full_long %>% filter(extra_pzq != 1 & 
                                                          Intervention %in% c("control", "veg_removal")))
 
-  mod2_haem_narm_veg_res <- as.data.frame(round(cbind(summary(mod2_haem_mean_narm_veg)$coef, 
-                                            confint(mod2_haem_mean_narm_veg)), 3)[,c(1,2,5,6,3,4)])
+  mod2_haem_narm_veg_res <- robust_fx(mod2_haem_mean_narm_veg)
     mod2_haem_narm_veg_res$model <- "Model 2"
  
 #Model 3  
-mod3_haem_mean_narm_veg <- glm.nb(round(s_haem_mean_narm) ~ Veg + pzq + School*year_fac, 
+mod3_haem_mean_narm_veg <- glm.nb(round(s_haem_mean_narm) ~ Veg + pzq + School + year_2018, 
                              data = full_long %>% filter(extra_pzq != 1 & 
                                                          Intervention %in% c("control", "veg_removal")))
 
-  mod3_haem_narm_veg_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_veg)$coef, 
-                                                na.omit(confint(mod3_haem_mean_narm_veg))), 3)[,c(1,2,5,6,3,4)])
+  mod3_haem_narm_veg_res <- robust_fx(mod3_haem_mean_narm_veg)
     mod3_haem_narm_veg_res$model <- "Model 3"
      
 #Model 4  
@@ -1094,17 +1456,15 @@ mod4_haem_mean_narm_veg <- glm.nb(round(s_haem_mean_narm) ~ Veg + School + log_s
                              data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                         Intervention %in% c("control", "veg_removal")))
 
-  mod4_haem_narm_veg_res <- as.data.frame(round(cbind(summary(mod4_haem_mean_narm_veg)$coef,
-                                                na.omit(confint(mod4_haem_mean_narm_veg))), 3)[,c(1,2,5,6,3,4)])
+  mod4_haem_narm_veg_res <- robust_fx(mod4_haem_mean_narm_veg)
     mod4_haem_narm_veg_res$model <- "Model 4"
     
 #Model 5  
-mod5_haem_mean_narm_veg <- glm.nb(round(s_haem_mean_narm) ~ Veg + School*year_fac + log_s_haem_mean_narm_l1, 
+mod5_haem_mean_narm_veg <- glm.nb(round(s_haem_mean_narm) ~ Veg + School + year_2018 + log_s_haem_mean_narm_l1, 
                              data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                         Intervention %in% c("control", "veg_removal")))
 
-  mod5_haem_narm_veg_res <- as.data.frame(round(cbind(summary(mod5_haem_mean_narm_veg)$coef,
-                                                na.omit(confint(mod5_haem_mean_narm_veg))), 3)[,c(1,2,5,6,3,4)])
+  mod5_haem_narm_veg_res <- robust_fx(mod5_haem_mean_narm_veg)
     mod5_haem_narm_veg_res$model <- "Model 5"
     
 #Plot net effect estimate    
@@ -1113,14 +1473,14 @@ rbind(mod1_haem_narm_veg_res["Veg",],
       mod3_haem_narm_veg_res["Veg",],
       mod4_haem_narm_veg_res["Veg",],
       mod5_haem_narm_veg_res["Veg",]) %>% 
-  rename("lower" = !!names(.[3]),
-         "upper" = !!names(.[4])) %>% 
-  ggplot(aes(x = exp(Estimate), y = model)) + theme_bw() +
-    geom_point() + geom_errorbarh(aes(xmin = exp(lower), xmax = exp(upper), y = model), height = 0.25) +
-    geom_vline(xintercept = 1, lty = 2) +
+  ggplot(aes(x = Estimate, y = model)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = model), height = 0.25) +
+    geom_vline(xintercept = 0, lty = 2) +
     ylab("") + 
-    xlab(expression(paste("exp(",beta[1], ") - Additional eggs associated with vegetation removal"))) +
-    ggtitle("S. haematobium vegetation removal effect")
+    xlab(expression(paste(beta[1], " Veg_removal"))) +
+    ggtitle("S. haematobium vegetation removal effect", 
+            subtitle = "95% CIs derived from robust standard errors")
   
 ```
 
@@ -1175,8 +1535,7 @@ mod1_haem_mean_narm_veg_c <- glm.nb(round(s_haem_mean_narm) ~ Veg_tons + pzq,
                                     data = full_long %>% filter(extra_pzq != 1 & 
                                                                 Intervention %in% c("control", "veg_removal")))
 
-  mod1_haem_narm_veg_res_c <- as.data.frame(round(cbind(summary(mod1_haem_mean_narm_veg_c)$coef, 
-                                            confint(mod1_haem_mean_narm_veg_c)), 3)[,c(1,2,5,6,3,4)])
+  mod1_haem_narm_veg_res_c <- robust_fx(mod1_haem_mean_narm_veg_c)
     mod1_haem_narm_veg_res_c$model <- "Model 1"
 
 #Model 2  
@@ -1185,18 +1544,16 @@ mod2_haem_mean_narm_veg_c <- glm.nb(round(s_haem_mean_narm) ~ Veg_tons + pzq + S
                                     data = full_long %>% filter(extra_pzq != 1 & 
                                                                 Intervention %in% c("control", "veg_removal")))
 
-  mod2_haem_narm_veg_res_c <- as.data.frame(round(cbind(summary(mod2_haem_mean_narm_veg_c)$coef, 
-                                            confint(mod2_haem_mean_narm_veg_c)), 3)[,c(1,2,5,6,3,4)])
+  mod2_haem_narm_veg_res_c <- robust_fx(mod2_haem_mean_narm_veg_c)
     mod2_haem_narm_veg_res_c$model <- "Model 2"
  
 #Model 3  
-mod3_haem_mean_narm_veg_c <- glm.nb(round(s_haem_mean_narm) ~ Veg_tons + pzq + School*year_fac, 
+mod3_haem_mean_narm_veg_c <- glm.nb(round(s_haem_mean_narm) ~ Veg_tons + pzq + School + year_2018, 
                                     weights = s_haem_mean_w,
                                     data = full_long %>% filter(extra_pzq != 1 & 
                                                                 Intervention %in% c("control", "veg_removal")))
 
-  mod3_haem_narm_veg_res_c <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_veg_c)$coef, 
-                                            na.omit(confint(mod3_haem_mean_narm_veg_c))), 3)[,c(1,2,5,6,3,4)])
+  mod3_haem_narm_veg_res_c <- robust_fx(mod3_haem_mean_narm_veg_c)
     mod3_haem_narm_veg_res_c$model <- "Model 3"
      
 #Model 4  
@@ -1205,18 +1562,16 @@ mod4_haem_mean_narm_veg_c <- glm.nb(round(s_haem_mean_narm) ~ Veg_tons + School 
                                     data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                                Intervention %in% c("control", "veg_removal")))
 
-  mod4_haem_narm_veg_res_c <- as.data.frame(round(cbind(summary(mod4_haem_mean_narm_veg_c)$coef,
-                                            na.omit(confint(mod4_haem_mean_narm_veg_c))), 3)[,c(1,2,5,6,3,4)])
+  mod4_haem_narm_veg_res_c <- robust_fx(mod4_haem_mean_narm_veg_c)
     mod4_haem_narm_veg_res_c$model <- "Model 4"
   
 #Model 5  
-mod5_haem_mean_narm_veg_c <- glm.nb(round(s_haem_mean_narm) ~ Veg_tons + School + log_s_haem_mean_narm_l1, 
+mod5_haem_mean_narm_veg_c <- glm.nb(round(s_haem_mean_narm) ~ Veg_tons + School + year_2018 + log_s_haem_mean_narm_l1, 
                                     weights = s_haem_mean_w,
                                     data = mod4_dat %>% filter(extra_pzq != 1 & 
                                                                Intervention %in% c("control", "veg_removal")))
 
-  mod5_haem_narm_veg_res_c <- as.data.frame(round(cbind(summary(mod5_haem_mean_narm_veg_c)$coef,
-                                            na.omit(confint(mod5_haem_mean_narm_veg_c))), 3)[,c(1,2,5,6,3,4)])
+  mod5_haem_narm_veg_res_c <- robust_fx(mod5_haem_mean_narm_veg_c)
     mod5_haem_narm_veg_res_c$model <- "Model 5"
       
 #Plot net effect estimate    
@@ -1225,16 +1580,18 @@ rbind(mod1_haem_narm_veg_res_c["Veg_tons",],
       mod3_haem_narm_veg_res_c["Veg_tons",],
       mod4_haem_narm_veg_res_c["Veg_tons",],
       mod5_haem_narm_veg_res_c["Veg_tons",]) %>% 
-  rename("lower" = !!names(.[3]),
-         "upper" = !!names(.[4])) %>% 
-  ggplot(aes(x = exp(Estimate), y = model)) + theme_bw() +
-    geom_point() + geom_errorbarh(aes(xmin = exp(lower), xmax = exp(upper), y = model), height = 0.25) +
-    geom_vline(xintercept = 1, lty = 2) +
+  ggplot(aes(x = Estimate, y = model)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = model), height = 0.25) +
+    geom_vline(xintercept = 0, lty = 2) +
     ylab("") + 
-    xlab(expression(paste(beta[1], " - Additional eggs associated with 1 ton vegetation removed"))) +
-    ggtitle("S. haematobium (continuous) vegetation removal effect")
+    xlab(expression(paste(beta[1], " Veg tons"))) +
+    ggtitle("S. haematobium (continuous) vegetation removal effect", 
+            subtitle = "95% CIs derived from robust standard errors")
 
 ```
+
+#### All intervention variables  
 
 ```{r all_ints, message = FALSE, echo = FALSE, include = FALSE, eval = FALSE}
 #Model 1
@@ -1279,13 +1636,21 @@ rbind(mod1_haem_all_res[c("Net", "Veg", "Prawns"),],
 ```
 
 ```{r all_ints_narm, message = FALSE}
+#Model 0
+mod0_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns + School + year_fac, 
+                                  weights = s_haem_mean_w,
+                                  data = full_long %>% filter(extra_pzq != 1))
+
+  mod0_haem_narm_all_res <- robust_fx(mod0_haem_mean_narm_all)
+    mod0_haem_narm_all_res$model <- "Model 0"
+
+
 #Model 1
 mod1_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns + pzq, 
                                   weights = s_haem_mean_w,
                                   data = full_long %>% filter(extra_pzq != 1))
 
-  mod1_haem_narm_all_res <- as.data.frame(round(cbind(summary(mod1_haem_mean_narm_all)$coef, 
-                                            confint(mod1_haem_mean_narm_all)), 3)[,c(1,2,5,6,3,4)])
+  mod1_haem_narm_all_res <- robust_fx(mod1_haem_mean_narm_all)
     mod1_haem_narm_all_res$model <- "Model 1"
 
 #Model 2  
@@ -1293,36 +1658,31 @@ mod2_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns +
                                   weights = s_haem_mean_w,
                                   data = full_long %>% filter(extra_pzq != 1))
 
-  mod2_haem_narm_all_res <- as.data.frame(round(cbind(summary(mod2_haem_mean_narm_all)$coef, 
-                                            confint(mod2_haem_mean_narm_all)), 3)[,c(1,2,5,6,3,4)])
+  mod2_haem_narm_all_res <- robust_fx(mod2_haem_mean_narm_all)
     mod2_haem_narm_all_res$model <- "Model 2"
 
 #Model 3  
-mod3_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns + pzq + School*year_fac, 
+mod3_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns + pzq + School + year_2018, 
                                   weights = s_haem_mean_w,
                                   data = full_long %>% filter(extra_pzq != 1))
 
-  mod3_haem_narm_all_res <- as.data.frame(round(cbind(summary(mod3_haem_mean_narm_all)$coef, 
-                                          na.omit(confint(mod3_haem_mean_narm_all))), 3)[,c(1,2,5,6,3,4)])
+  mod3_haem_narm_all_res <- robust_fx(mod3_haem_mean_narm_all)
     mod3_haem_narm_all_res$model <- "Model 3"
   
-      
 #Model 4  
 mod4_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns + School + log_s_haem_mean_narm_l1, 
                                   weights = s_haem_mean_w,
                                   data = mod4_dat %>% filter(extra_pzq != 1))
 
-  mod4_haem_narm_all_res <- as.data.frame(round(cbind(summary(mod4_haem_mean_narm_all)$coef,
-                                            na.omit(confint(mod4_haem_mean_narm_all))), 3)[,c(1,2,5,6,3,4)])
+  mod4_haem_narm_all_res <- robust_fx(mod4_haem_mean_narm_all)
     mod4_haem_narm_all_res$model <- "Model 4"
 
 #Model 5  
-mod5_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns + School*year_fac + log_s_haem_mean_narm_l1, 
+mod5_haem_mean_narm_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns + School + year_2018 + log_s_haem_mean_narm_l1, 
                                   weights = s_haem_mean_w,
                                   data = mod4_dat %>% filter(extra_pzq != 1))
 
-  mod5_haem_narm_all_res <- as.data.frame(round(cbind(summary(mod5_haem_mean_narm_all)$coef,
-                                            na.omit(confint(mod5_haem_mean_narm_all))), 3)[,c(1,2,5,6,3,4)])
+  mod5_haem_narm_all_res <- robust_fx(mod5_haem_mean_narm_all)
     mod5_haem_narm_all_res$model <- "Model 5"
     
 #Plot intervention effect estimates    
@@ -1331,23 +1691,20 @@ rbind(mod1_haem_narm_all_res[c("Net", "Veg", "Prawns"),],
       mod3_haem_narm_all_res[c("Net", "Veg", "Prawns"),],
       mod4_haem_narm_all_res[c("Net", "Veg", "Prawns"),],
       mod5_haem_narm_all_res[c("Net", "Veg", "Prawns"),]) %>% 
-  rename("lower" = !!names(.[3]),
-         "upper" = !!names(.[4])) %>% 
   mutate(Variable = rep(c("Net", "Veg", "Prawns"), 5)) %>% 
-  ggplot(aes(y = exp(Estimate), x = model, col = Variable)) + theme_bw() +
+  ggplot(aes(y = Estimate, x = model, col = Variable)) + theme_bw() +
     geom_point(position = position_dodge(width = 0.25)) + 
-    geom_errorbar(aes(ymin = exp(lower), ymax = exp(upper), x = model), 
+    geom_errorbar(aes(ymin = rob_lo, ymax = rob_up, x = model), 
                   width = 0.25, position = position_dodge(width = 0.25)) +
-    geom_hline(yintercept = 1, lty = 2) + coord_flip() +
+    geom_hline(yintercept = 0, lty = 2) + coord_flip() +
     xlab("") + 
-    ylab(expression(paste("exp(", beta[1], ") - Additional eggs associated with intervention"))) +
-    ggtitle("S. haematobium intervention effects")
+    ylab(expression(paste(beta, " - coefficients"))) +
+    ggtitle("S. haematobium intervention effects",
+            subtitle = "95% CIs derived from robust standard errors")
 
-summary(mod5_haem_mean_narm_all)
-    
 ```
 
-## Schistosoma mansoni  
+### Schistosoma mansoni  
 
 ### Net effect  
 
@@ -1483,6 +1840,8 @@ rbind(mod1_mans_prawn_res_c["Prawn_biomass",], mod2_mans_prawn_res_c["Prawn_biom
     ggtitle("S. mansoni prawn effect")
 
 ```
+
+
 
 
 # Scratch  
