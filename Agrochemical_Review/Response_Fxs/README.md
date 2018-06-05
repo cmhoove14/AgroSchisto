@@ -98,6 +98,14 @@ Data from [Browne and Moore 2014](https://www.ncbi.nlm.nih.gov/pubmed/24799048) 
 + `psi_q_24D_browne14_uncertainty`  
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Browne2014/pred_consumption_2-4D_data_sim.png)
   
+###`Fornstrom1997_terbufos_predators_fit.R`  
+Data from [Fornstrom et al 1997](https://setac.onlinelibrary.wiley.com/doi/abs/10.1002/etc.5620161212) investigating effects of **Terbufos** on survival of *Procambarus clarkii*  
+#### Data reported  
++ Figure 1: Longitudinal mortality rate of test organisms in each concentration group; data extracted at 24-hr mark for 24-hr D-R analysis  
+#### Response functions fit  
++ `muPq_terb_Fornstrom_uncertainty`  
+  + Sampling and Data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Fornstrom1997/Fornstrom1997_pred_mortality_data&sim.png)
+  
 ### `Ghaffar2016_butralin_glyphosate_pendimethalin_cercariae_fit.R`  
 Data from [Abdel Ghaffar et al 2016](http://www.bioone.org/doi/abs/10.4002/040.059.0201) investigating effect of **butralin**, **glyphosate**, and **pendimethalin** on *Schistosoma mansoni* cercariae  
 #### Data reported  
