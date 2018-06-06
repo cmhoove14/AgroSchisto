@@ -29,13 +29,10 @@ naq83_trif_mod <- drm(dead / tot ~ conc,
   naq83_trif_b <- summary(naq83_trif_mod)$coef[1,1]  #slope parameter of log-logistic fitted here
     
 muPq_trifluralin_Naqvi83_uncertainty<-function(In){
-  b = naq83_trif_b
-  lc50 = naq83_trif_lc50
-  lc50_se = naq83_trif_lc50_se
+
+  e = rnorm(1, naq83_trif_lc50, naq83_trif_lc50_se)
   
-  e = rnorm(1, lc50, lc50_se)
-  
-  mort <- 1 / (1 + exp(b*(log(In/1000)-e)))
+  mort <- 1 / (1 + exp(naq83_trif_b*(log(In/1000)-e)))
   
   mort
 }
@@ -62,9 +59,9 @@ muPq_oryzalin_Naqvi83_uncertainty<-function(In){
   lc50 = naq83_oryz_lc50
   lc50_se = naq83_oryz_lc50_se
   
-  e = rnorm(1, lc50, lc50_se)
+  e = rnorm(1, naq83_oryz_lc50, naq83_oryz_lc50_se)
   
-  mort <- 1 / (1 + exp(b*(log(In/1000)-e)))
+  mort <- 1 / (1 + exp(naq83_oryz_b*(log(In/1000)-e)))
   
   mort
 }
