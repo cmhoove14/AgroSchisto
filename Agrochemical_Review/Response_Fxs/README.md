@@ -359,8 +359,18 @@ Data from [Monte et al 2016](https://www.ncbi.nlm.nih.gov/pubmed/27373431) inves
   + Time series validation: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_miracidia_validation.png)
   + Sampling and data of d-r function: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_miracidia_piM_validation.png)
 
+### `Naqvi1983_trifluralin_oryzalin_predators_fit.R`  
+Data from [Naqvi et al 1983](https://www.ncbi.nlm.nih.gov/pubmed/6688742) investigating effects of  **trifluralin** and **oryzalin** on survival of *Procambarus clarkii*
+#### Data reported  
++ Tables 1 & 3: surivial rate and cohort size over tested concentrations of each chemical
+#### Response functions fit  
++ `muPq_trifluralin_Naqvi83_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Naqvi/Naqvi1983_trifluralin_p_clarkii.png)
++ `muPq_oryzalin_Naqvi83_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Naqvi/Naqvi1983_oryzalin_p_clarkii.png)
+
 ### `Naqvi1987_endosulfan_etc_predators_fit.R`  
-Data from [Naqvi et al 1987](https://www.sciencedirect.com/science/article/pii/0269749187901084) investigating effects of Thiodan (active ingredient **endosulfan**), Treflan (active ingredient **trifluaralin**), **MSMA**, and Oust (active ingredient **sulfometuron-methyl**) on survival of *Procambarus clarkii*. Other ingredient Cutrine-Plus not considered because it's an algicide
+Data from [Naqvi et al 1987](https://www.sciencedirect.com/science/article/pii/0269749187901084) investigating effects of Thiodan (active ingredient **endosulfan**), Treflan (active ingredient **trifluralin**), **MSMA**, and Oust (active ingredient **sulfometuron-methyl**) on survival of *Procambarus clarkii*. Other ingredient Cutrine-Plus not considered because it's an algicide
 #### Data reported  
 + Table 2: LC50, LC50 95%CIs, and slope parameters derived from Probit regression
 #### Response functions fit  
