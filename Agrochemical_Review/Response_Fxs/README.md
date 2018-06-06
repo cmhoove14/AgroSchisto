@@ -326,7 +326,7 @@ Data from [Koprivnikar et al 2006](https://www.ncbi.nlm.nih.gov/pubmed/16729687)
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Koprivnikar2006/Koprivnikar_2006_function_simulate_piC_atrazine.png)
 
 ### `Kristoff2011_azinphos-methyl_snail_reproduction_fit.R`  
-Data from [Kristoff et al 2011](https://www.ncbi.nlm.nih.gov/pubmed/21524429) investigating reprodcutive toxicity of **azinphos-methyl**, an organophosphate insecticide, to *Biomphalaria glabrata* snails  
+Data from [Kristoff et al 2011](https://www.ncbi.nlm.nih.gov/pubmed/21524429) investigating reproductive toxicity of **azinphos-methyl**, an organophosphate insecticide, to *Biomphalaria glabrata* snails  
 #### Data reported  
 + Table 1: reproductive parameters of snail cohorts exposed to azinphos-methyl
 #### Response functions fit  
@@ -449,6 +449,14 @@ Data from [Ragab and Shoukry 2006](https://www.ncbi.nlm.nih.gov/pubmed/17153706)
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ragab&Shoukry2006/Ragab&Shoukry2006_function_simulate_muN_potassium_sulphate.png)
 + Function: `rag06_mun_urea`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ragab&Shoukry2006/Ragab&Shoukry2006_function_simulate_muN_urea.png)
+
+### `Revathi2010_tributyltin_predator_reproduction_fit.R`  
+Data from [Revathi & Munuswamy 2010](https://www.ncbi.nlm.nih.gov/pubmed/20378147) investigating effects of **tributyltin** on *Machrobrachium rosenbergii* reproduction  
+#### Data reported  
++ Table 1: number of viable hatched embryos produced by broodstock females exposed to control and three dose groups  
+#### Response functions fit  
++ `fPq_tbt_Revathi10_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Revathi2010/revathi2010_tributyltin_pred_repro.png)
 
 ### `rohr08_nature_atrazine_fit.R`   
 Data from [Rohr et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/18972018) investigating effects of **Atrazine** on snail populations and infection rates in a an amphibian trematode system    
