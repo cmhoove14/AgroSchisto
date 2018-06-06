@@ -7,6 +7,31 @@ Plots of all data, fitted dose response functions, and results of sampling the d
 Folder containing data extracted from studies identified in review  
 ## Scripts  
 
+### `Bajet2012_insecticides_predators_fit.R`  
+Data from [Bajet et al 2012](https://www.sciencedirect.com/science/article/pii/S037837741200025X) investigating effects of **lamda-cyhalothrin**, **deltamethrin**, **cypermethrin**, **chlorpyrifos**, **profenofos**, **malathion**, **carbaryl** (insecticides), **2,4-D**, and **butachlor** (herbicides) to *Marobrachium lar*  
+#### Data reported  
++ Tables 1 & 2: LC50, LC50 95%CI, LC10, NOEC, LOEC values in ppb  
++ Table 6: Hazard quotients, EECs, and MECs for select insecticides  
+#### Response functions fit  
++ `muPq_lamcy_Bajet12_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bajet2012/Bajet2012_lamcy_pred.png)  
++ `muPq_deltamethrin_Bajet12_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bajet2012/Bajet2012_deltamethrin_pred.png)  
++ `muPq_cypermethrin_Bajet12_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bajet2012/Bajet2012_cypermethrin_pred.png)  
++ `muPq_chlorpyrifos_Bajet12_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bajet2012/Bajet2012_chlorpyrifos_pred.png)  
++ `muPq_profenofos_Bajet12_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bajet2012/Bajet2012_profenofos_pred.png)  
++ `muPq_malathion_Bajet12_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bajet2012/Bajet2012_malathion_pred.png)  
++ `muPq_carbaryl_Bajet12_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bajet2012/Bajet2012_carbaryl_pred.png)  
++ `muPq_24d_Bajet12_uncertainty`  
+  + Sampling and data: NA (no toxicity observed therefore this function just returns 0)  
++ `muPq_butachlor_Bajet12_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bajet2012/Bajet2012_butachlor_pred.png)  
+  
 ### `bakry2011_malathion_deltamethrin_snails_fit.R`  
 Data from [Bakry et al 2011](https://www.sciencedirect.com/science/article/pii/S0048357511001283) investigating effect of **malathion** and **deltamethrin** on *Helisoma duryi* snail mortality and reproduction  
 #### Data reported  
