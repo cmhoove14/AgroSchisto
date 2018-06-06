@@ -308,6 +308,16 @@ Data from [Kristoff et al 2011](https://www.ncbi.nlm.nih.gov/pubmed/21524429) in
 + Function: `fNq_azmeth_kristoff11_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Kristoff2011/kristoff2011_azinphos-methyl_snail_reproduction_data_sim.png)
 
+### `Leung1980_fenitrothion_predators_fit.R`  
+Data from [Leung et al 1980](https://www.ncbi.nlm.nih.gov/pubmed/7426798) investigating effects of **fenitrothion** on mortality of adult and juvenile *Procambarus clarkii*  
+#### Data reported  
++ Tables 2 and 3: cohort size and mortality rate (24-hr mortality endpoint used)
+#### Response functions fit  
++ `muPq_fenitrothion_Leung_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Leung1980/Leung1980_pred_mortality_data&sim.png)
++ `muPq_juv_fenitrothion_Leung_uncertainty`
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Leung1980/Leung1980_juv_pred_mortality_data&sim.png)
+
 ### `Mohamed2012_profenofos_diazinon_snails_fit.R`  
 Data from [Mohamed et al 2012](https://www.sciencedirect.com/science/article/pii/S0048357511001696) investigating effect of **Diazinon** and **profenofos** on mortality and reproduction of *Biomphalaria alexandrina*  
 #### Data reported  
@@ -348,6 +358,20 @@ Data from [Monte et al 2016](https://www.ncbi.nlm.nih.gov/pubmed/27373431) inves
   + Time d-r parameters over concentration: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_miracidia_dose_pars.png)
   + Time series validation: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_miracidia_validation.png)
   + Sampling and data of d-r function: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Monte2016/monte2016_glyphosate_miracidia_piM_validation.png)
+
+### `Naqvi1987_endosulfan_etc_predators_fit.R`  
+Data from [Naqvi et al 1987](https://www.sciencedirect.com/science/article/pii/0269749187901084) investigating effects of Thiodan (active ingredient **endosulfan**), Treflan (active ingredient **trifluaralin**), **MSMA**, and Oust (active ingredient **sulfometuron-methyl**) on survival of *Procambarus clarkii*. Other ingredient Cutrine-Plus not considered because it's an algicide
+#### Data reported  
++ Table 2: LC50, LC50 95%CIs, and slope parameters derived from Probit regression
+#### Response functions fit  
++ `muPq_endo_Naqvi87_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Naqvi/Naqvi1987_endosulfan_adult_p_clarkii.png)
++ `muPq_trif_Naqvi87_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Naqvi/Naqvi1987_treflan_adult_p_clarkii.png)
++ `muPq_msma_Naqvi87_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Naqvi/Naqvi1987_msma_adult_p_clarkii.png)
++ `muPq_oust_Naqvi87_uncertainty`  
+  + Not found to be toxic to adults therefore function just returns 0
 
 ### `Oliveira_endosulfan_snail_fit.R`  
 Data from [Oliveira et al 2009](https://www.ncbi.nlm.nih.gov/pubmed/19138786) investigating effects of **endosulfan** on reproduction of *Biomphlaria tenagophila* snails  
