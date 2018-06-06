@@ -474,6 +474,14 @@ Data from [Rohr et al 2008](https://esajournals.onlinelibrary.wiley.com/doi/full
 + Function: `piC.atr.rohr08.lin`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Rohr08/Rohr08_piC_atrazine_function_test.png)
 
+### `Sarojini1986_fenitrothion_predators_fit.R`  
+Data from [Sarojini et al 1986](https://www.sciencedirect.com/science/article/pii/0147651386900989) investigating effects of **fenitrothion** on *Macrobrachium lamerii* survival  
+#### Data reported  
++ Fig 2: Probit-Log10 mortality-concentration plot
+#### Response functions fit  
++ `muPq_fenitrothion_Sarojini86_uncertainty`  
+  + Sampling and data:[Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Sarojini1986/Sarojini1986_fenitrothion_m_lamerii.png)  
+
 ### `Satapornvanit2009_insecticides_predators_fit.R`  
 Data from [Satapornvanit et al 2009](https://www.ncbi.nlm.nih.gov/pubmed/19103457) investigating effects of **Zinc**, **Chlorpyrifos**, **Dimethoate**, and **profenofos** on mortality and feeding rate of post-larvae *Macrobrachium rosenbergii*  
 #### Data reported  
