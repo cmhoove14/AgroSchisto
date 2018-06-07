@@ -37,20 +37,6 @@ muPq_lamcy_Bajet12_uncertainty = function(In){
     return(mun)
 }
 
-plot(c(noec.lamcy.baj, lc10.lamcy.baj, lc50.lamcy.baj), c(0,10,50)/100, 
-     xlim = c(0, lc50.lamcy.baj*2), ylim = c(0,1), pch = 16,
-     xlab = "Lambda-Cyhalothrin (ppb)", ylab = "mortality",
-     main = "Bajet et al 2012 Macrobrachium lar")
-  segments(x0 = lc50.lamcy.baj.lo, x1 = lc50.lamcy.baj.up, y0 = 0.5, y1 = 0.5)
-  
-  set.seed(43093)
-  
-  points(seq(0,lc50.lamcy.baj*2,lc50.lamcy.baj/20), 
-         sapply(seq(0,lc50.lamcy.baj*2,lc50.lamcy.baj/20), muPq_lamcy_Bajet12_uncertainty),
-         pch = 5, col = 4, cex = 0.5)
-  legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), 
-         legend = c("Reported", "Sampled"), cex = 0.75)
-
 #keep vector
 keep.Bajet.lamcy = c('muPq_lamcy_Bajet12_uncertainty', 'baj.lamcy.m.lin', 'lc50.lamcy.baj', 'lc50.lamcy.baj.se')    
 
@@ -73,21 +59,6 @@ muPq_deltamethrin_Bajet12_uncertainty = function(In){
     return(mun)
 }
 
-plot(c(noec.delt.baj, lc10.delt.baj, lc50.delt.baj), c(0,10,50)/100, 
-     xlim = c(0, lc50.delt.baj*2), ylim = c(0,1), pch = 16,
-     xlab = "Deltamethrin (ppb)", ylab = "mortality",
-     main = "Bajet et al 2012 Macrobrachium lar")
-  segments(x0 = lc50.delt.baj.lo, x1 = lc50.delt.baj.up, y0 = 0.5, y1 = 0.5)
-  
-  set.seed(43093)
-  
-  points(seq(0,lc50.delt.baj*2,lc50.delt.baj/20), 
-         sapply(seq(0,lc50.delt.baj*2,lc50.delt.baj/20), muPq_deltamethrin_Bajet12_uncertainty),
-         pch = 5, col = 4, cex = 0.5)
-  legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), 
-         legend = c("Reported", "Sampled"), cex = 0.75)
-
-  
 #keep vector
 keep.Bajet.delt = c('muPq_deltamethrin_Bajet12_uncertainty', 'baj.delt.m.lin', 'lc50.delt.baj', 'lc50.delt.baj.se')    
 
@@ -109,20 +80,6 @@ muPq_cypermethrin_Bajet12_uncertainty = function(In){
   
     return(mun)
 }
-
-plot(c(noec.cyper.baj, lc10.cyper.baj, lc50.cyper.baj), c(0,10,50)/100, 
-     xlim = c(0, lc50.cyper.baj*2), ylim = c(0,1), pch = 16,
-     xlab = "cypermethrin (ppb)", ylab = "mortality",
-     main = "Bajet et al 2012 Macrobrachium lar")
-  segments(x0 = lc50.cyper.baj.lo, x1 = lc50.cyper.baj.up, y0 = 0.5, y1 = 0.5)
-  
-  set.seed(43093)
-  
-  points(seq(0,lc50.cyper.baj*2,lc50.cyper.baj/20), 
-         sapply(seq(0,lc50.cyper.baj*2,lc50.cyper.baj/20), muPq_cypermethrin_Bajet12_uncertainty),
-         pch = 5, col = 4, cex = 0.5)
-  legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), 
-         legend = c("Reported", "Sampled"), cex = 0.75)
 
 #keep vector
 keep.Bajet.cyper = c('muPq_cypermethrin_Bajet12_uncertainty', 'baj.cyper.m.lin', 'lc50.cyper.baj', 'lc50.cyper.baj.se')    
@@ -146,20 +103,6 @@ muPq_chlorpyrifos_Bajet12_uncertainty = function(In){
     return(mun)
 }
 
-plot(c(noec.chlor.baj, lc10.chlor.baj, lc50.chlor.baj), c(0,10,50)/100, 
-     xlim = c(0, lc50.chlor.baj*2), ylim = c(0,1), pch = 16,
-     xlab = "chlorpyrifos (ppb)", ylab = "mortality",
-     main = "Bajet et al 2012 Macrobrachium lar")
-  segments(x0 = lc50.chlor.baj.lo, x1 = lc50.chlor.baj.up, y0 = 0.5, y1 = 0.5)
-  
-  set.seed(43093)
-  
-  points(seq(0,lc50.chlor.baj*2,lc50.chlor.baj/20), 
-         sapply(seq(0,lc50.chlor.baj*2,lc50.chlor.baj/20), muPq_chlorpyrifos_Bajet12_uncertainty),
-         pch = 5, col = 4, cex = 0.5)
-  legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), 
-         legend = c("Reported", "Sampled"), cex = 0.75)
-
 #keep vector
 keep.Bajet.chlor = c('muPq_chlorpyrifos_Bajet12_uncertainty', 'baj.chlor.m.lin', 'lc50.chlor.baj', 'lc50.chlor.baj.se')    
 
@@ -181,20 +124,6 @@ muPq_profenofos_Bajet12_uncertainty = function(In){
   
     return(mun)
 }
-
-plot(c(noec.prof.baj, lc10.prof.baj, lc50.prof.baj), c(0,10,50)/100, 
-     xlim = c(0, lc50.prof.baj*2), ylim = c(0,1), pch = 16,
-     xlab = "profenofos (ppb)", ylab = "mortality",
-     main = "Bajet et al 2012 Macrobrachium lar")
-  segments(x0 = lc50.prof.baj.lo, x1 = lc50.prof.baj.up, y0 = 0.5, y1 = 0.5)
-  
-  set.seed(43093)
-  
-  points(seq(0,lc50.prof.baj*2,lc50.prof.baj/20), 
-         sapply(seq(0,lc50.prof.baj*2,lc50.prof.baj/20), muPq_profenofos_Bajet12_uncertainty),
-         pch = 5, col = 4, cex = 0.5)
-  legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), 
-         legend = c("Reported", "Sampled"), cex = 0.75)
 
 #keep vector
 keep.Bajet.prof = c('muPq_profenofos_Bajet12_uncertainty', 'baj.prof.m.lin', 'lc50.prof.baj', 'lc50.prof.baj.se')    
@@ -218,20 +147,6 @@ muPq_malathion_Bajet12_uncertainty = function(In){
     return(mun)
 }
 
-plot(c(noec.mal.baj, lc10.mal.baj, lc50.mal.baj), c(0,10,50)/100, 
-     xlim = c(0, lc50.mal.baj*2), ylim = c(0,1), pch = 16,
-     xlab = "malathion (ppb)", ylab = "mortality",
-     main = "Bajet et al 2012 Macrobrachium lar")
-  segments(x0 = lc50.mal.baj.lo, x1 = lc50.mal.baj.up, y0 = 0.5, y1 = 0.5)
-  
-  set.seed(43093)
-  
-  points(seq(0,lc50.mal.baj*2,lc50.mal.baj/20), 
-         sapply(seq(0,lc50.mal.baj*2,lc50.mal.baj/20), muPq_malathion_Bajet12_uncertainty),
-         pch = 5, col = 4, cex = 0.5)
-  legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), 
-         legend = c("Reported", "Sampled"), cex = 0.75)
-
 #keep vector
 keep.Bajet.mal = c('muPq_malathion_Bajet12_uncertainty', 'baj.mal.m.lin', 'lc50.mal.baj', 'lc50.mal.baj.se')    
 
@@ -253,20 +168,6 @@ muPq_carbaryl_Bajet12_uncertainty = function(In){
   
     return(mun)
 }
-
-plot(c(noec.carb.baj, lc10.carb.baj, lc50.carb.baj), c(0,10,50)/100, 
-     xlim = c(0, lc50.carb.baj*2), ylim = c(0,1), pch = 16,
-     xlab = "carbaryl (ppb)", ylab = "mortality",
-     main = "Bajet et al 2012 Macrobrachium lar")
-  segments(x0 = lc50.carb.baj.lo, x1 = lc50.carb.baj.up, y0 = 0.5, y1 = 0.5)
-  
-  set.seed(43093)
-  
-  points(seq(0,lc50.carb.baj*2,lc50.carb.baj/20), 
-         sapply(seq(0,lc50.carb.baj*2,lc50.carb.baj/20), muPq_carbaryl_Bajet12_uncertainty),
-         pch = 5, col = 4, cex = 0.5)
-  legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), 
-         legend = c("Reported", "Sampled"), cex = 0.75)
 
 #keep vector
 keep.Bajet.carb = c('muPq_carbaryl_Bajet12_uncertainty', 'baj.carb.m.lin', 'lc50.carb.baj', 'lc50.carb.baj.se')    
@@ -295,20 +196,6 @@ muPq_butachlor_Bajet12_uncertainty = function(He){
   
     return(mun)
 }
-
-plot(c(noec.but.baj, lc10.but.baj, lc50.but.baj), c(0,10,50)/100, 
-     xlim = c(0, lc50.but.baj*2), ylim = c(0,1), pch = 16,
-     xlab = "butachlor (ppb)", ylab = "mortality",
-     main = "Bajet et al 2012 Macrobrachium lar")
-  segments(x0 = lc50.but.baj.lo, x1 = lc50.but.baj.up, y0 = 0.5, y1 = 0.5)
-  
-  set.seed(43093)
-  
-  points(seq(0,lc50.but.baj*2,lc50.but.baj/20), 
-         sapply(seq(0,lc50.but.baj*2,lc50.but.baj/20), muPq_butachlor_Bajet12_uncertainty),
-         pch = 5, col = 4, cex = 0.5)
-  legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), 
-         legend = c("Reported", "Sampled"), cex = 0.75)
 
 #keep vector
 keep.Bajet.but = c('muPq_butachlor_Bajet12_uncertainty', 'baj.but.m.lin', 'lc50.but.baj', 'lc50.but.baj.se')    
