@@ -32,7 +32,7 @@ Data from [Bajet et al 2012](https://www.sciencedirect.com/science/article/pii/S
 + `muPq_butachlor_Bajet12_uncertainty`  
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bajet2012/Bajet2012_butachlor_pred.png)  
   
-### `bakry2011_malathion_deltamethrin_snails_fit.R`  
+### `Bakry2011_malathion_deltamethrin_snails_fit.R`  
 Data from [Bakry et al 2011](https://www.sciencedirect.com/science/article/pii/S0048357511001283) investigating effect of **malathion** and **deltamethrin** on *Helisoma duryi* snail mortality and reproduction  
 #### Data reported  
 + Table 1: LC50, confidence limits of LC50, slope function, LC0, LC10, LC25, LC90 corresponding to 24-hr mortality and estimated using litchfield and wilcoxon method for both malathion and deltamethrin
@@ -50,7 +50,7 @@ Data from [Bakry et al 2011](https://www.sciencedirect.com/science/article/pii/S
 + Longitudinal survival could be used to investigate effects of cumulative exposure with survival analysis
 + Snail reproduction (measured as eggs/snail at discrete times over a four week period) sharply reduced in snails exposed to LC10 of malathion and deltamethrin, but only able to compare control group to each exposed group, therefore unable to fit dose-response function [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bakry_2011/bakry2011_snail_reproduction.png)  
 
-### `bakry2012_atrazine_glyphosate_snails_fit.R`  
+### `Bakry2012_atrazine_glyphosate_snails_fit.R`  
 Data from [Bakry et al 2012](https://www.researchgate.net/publication/256457311_Influence_of_Atrazine_and_Roundup_pesticides_on_biochemical_and_molecular_aspects_of_Biomphalariaalexandrina_snails) investigating effect of **atrazine** and **glyphosate** on *Biomphalaria alexandrina* snail mortality and reproduction  
 #### Data reported  
 + Table 3: LC50, confidence limits of LC50, slope function, LC10, LC90 corresponding to 24-hr mortality and estimated using litchfield and wilcoxon method for both atrazine and glyphosate
@@ -67,7 +67,7 @@ Data from [Bakry et al 2012](https://www.researchgate.net/publication/256457311_
 + Longitudinal survival could be used to investigate effects of cumulative exposure with survival analysis
 + Snail reproduction (measured as eggs/snail in addition to hatchlings/snail at discrete times over a four week period) sharply reduced in snails exposed to LC10 of atrazine and glyphosate, but only able to compare control group to each exposed group, therefore unable to fit dose-response function [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bakry_2012/bakry2012_snail_reproduction.png)  
 
-### `bakry2016_paraquat_snails_fit.R`
+### `Bakry2016_paraquat_snails_fit.R`
 Data from [Bakry et al 2016](https://www.ncbi.nlm.nih.gov/pubmed/24081640) investigating effect of **paraquat** on *Lymnaea natalensis* snails
 #### Data reported  
 + Table 3: LC25, LC50, LC90 and slope function for 24-hr paraquat exposure, produced from reported parameters derived using Litchfield and Wilcoxon method  
@@ -76,7 +76,7 @@ Data from [Bakry et al 2016](https://www.ncbi.nlm.nih.gov/pubmed/24081640) inves
   + Function fit: `muNq_prq_Bakry16_uncertainty`  
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bakry_2016/bakry2016_paraquat_snail_mortality.png) 
 
-### `barbieri2016_carbofuran_predators_fit.R`  
+### `Barbieri2016_carbofuran_predators_fit.R`  
 Data from [Barbieri et al 2016](https://www.ncbi.nlm.nih.gov/pubmed/23847016) investigating effect of **carbofuran** on *Macrobrachium olfersii* prawns  
 #### Data reported  
 +Table 1: 24-hr mortality rates of cohorts of 135 juvenile prawns exposed to 8 concentrations of pesticide  
@@ -183,7 +183,7 @@ Data from [Abdel Ghaffar et al 2016](http://www.bioone.org/doi/abs/10.4002/040.0
   + `fN.pen.fx.uncertainty` snail reproduction  
     + Sampling and data [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/pendimethalin_fN_simulate.png)
 
-### `griggs08_atrazine_metolachlor_cercariae_fit.R`  
+### `Griggs08_atrazine_metolachlor_cercariae_fit.R`  
 Data from [Griggs et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/17763881) investigating effects of **atrazine** and **metloachlor** on *Echinistoma trivolvis* cercariae  
 #### Data reported  
 + Fig 1: cercarial die off over time in water control, solvent control, low dose group, and high dose group. Low dose group contains 10ppb metolachlor **and** 15ppb atrazine; high dose group contains 85ppb metolachlor **and** 100ppb atrazine therefore other studies that estimate response to these chemicals alone and in schistosome (rather than *Echistoma*) will be prioritized  
@@ -274,7 +274,7 @@ Data from [Hasheesh & Mohamed 2011](https://www.sciencedirect.com/science/articl
   + Function: `fN.hash.prof.uncertainty` (samples measurement of eggs/snail/day in the profenofos group and in the control group and returns the ratio which is interpreted as relative change in snail reproduction when exposed to LC25 of profenofos)  
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_snail_reproduction_compare.png)     
 
-### `hua_insecticides_cercariae_fit.R`  
+### `Hua_insecticides_cercariae_fit.R`  
 Data from [Hua et al 2016](doi:10.1017/S0031182015001894) investigating effects of **carbaryl**, **malathion**, **cypermethrin**, **permethrin**, **imidacloprid**, and **thiamethoxam** on *Echinoparyphium spp*  
 #### Data reported  
 + Figure 1: mortality-dose plots for all six insecticides  
@@ -317,7 +317,7 @@ Data from [Johnson et al 2007](https://doi.org/10.1073/pnas.0707763104) investig
 + Function: `johnson07_fN_uncertainty` (proportional increase in snail eggs sampled in fertilizer group)
 + Function: `johnson07_phin_uncertainty` (proportional increase in snail biomass in fertilizer group)
 
-### `koprivnikar2006_atrazine_cercariae_fit.R`  
+### `Koprivnikar2006_atrazine_cercariae_fit.R`  
 Data from [Koprivnikar et al 2006](https://www.ncbi.nlm.nih.gov/pubmed/16729687) investigating effects of atrazine on survival of *Echinistoma trivolvis* cercariae  
 #### Data reported  
 + Cercarial survival and standard error across three concentration levels  
@@ -446,7 +446,7 @@ Data from [Omran and Salama 2013](https://www.ncbi.nlm.nih.gov/pubmed/24215068) 
 + Function: `ons.munq.gly`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Omran&Salama2013/Omran&Salama2013_function_simulate_muN_glyphosate.png)
 
-### `ragab2006_fertilizers_snails_fit`  
+### `Ragab2006_fertilizers_snails_fit`  
 Data from [Ragab and Shoukry 2006](https://www.ncbi.nlm.nih.gov/pubmed/17153706) investigating effects of fertilizers on *Biomphalaria alexandrina* snails  
 #### Data reported  
 + Table 1 LC50, 95%CI of LC50, LC90, and slp parameters  
@@ -466,7 +466,7 @@ Data from [Revathi & Munuswamy 2010](https://www.ncbi.nlm.nih.gov/pubmed/2037814
 + `fPq_tbt_Revathi10_uncertainty`  
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Revathi2010/revathi2010_tributyltin_pred_repro.png)
 
-### `rohr08_nature_atrazine_fit.R`   
+### `Rohr08_nature_atrazine_fit.R`   
 Data from [Rohr et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/18972018) investigating effects of **Atrazine** on snail populations and infection rates in a an amphibian trematode system    
 #### Data reported  
 + Table 1 data on snail population dynamics in mesocosm setting comparing control to atrazine treatment group  
@@ -474,7 +474,7 @@ Data from [Rohr et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/18972018) invest
 + `rohr08_fN_uncertainty` - function using snail eggs data
 + `rohr08_fN_uncertainty2` - function using snail hatchlings data (preferred due to parameter interpretation)
 
-### `rohr08_atrazine_cercariae_fit.R`   
+### `Rohr08_atrazine_cercariae_fit.R`   
 Data from [Rohr et al 2008](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1890/07-1429.1) investigating effects of **Atrazine** on survival of  *Echinistoma trivolvis* cercariae    
 #### Data reported  
 + Figure 3 %mortality in hours 14-18 of cercariae in 6 different dose groups  
@@ -535,7 +535,7 @@ Data from [Omran and Shukla 1984](http://www.jstor.org/stable/20103942) investig
 + `muPq_carb_shuk84_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/shukla1984/shukla1984_predator_mortality_carbaryl.png)
 
-### `tantawy2002_butachlor_fpb_snails_fit.R`   
+### `Tantawy2002_butachlor_fpb_snails_fit.R`   
 Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investigating effects of **Butachlor**, **fluazifop-p-butyl** on mortality of *Biomphalaria alexandrina* snails and *Schistosoma mansoni* miracidia and cercariae  
 #### Data reported  
 + **Snails -** Table 1: 24-hr LC50, 95%CI LC50, LC0, LC10, LC25, LC90, slp for *Biomphalaria alexandrina*  
@@ -545,7 +545,7 @@ Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investiga
 + `muN.tant.fpb_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Snails/tantawy2002_fpb_muN_data_sim.png)
 
-### `tantawy2002_butachlor_fpb_miracidia_fit.R`   
+### `Tantawy2002_butachlor_fpb_miracidia_fit.R`   
 Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investigating effects of **Butachlor**, **fluazifop-p-butyl** on mortality of *Biomphalaria alexandrina* snails and *Schistosoma mansoni* miracidia and cercariae  
 #### Data reported  
 + **Miracidia -** Table 4&5: longitudinal survival of *Schistosoma mansoni* miracidia in control and 4 dose groups 
@@ -558,7 +558,7 @@ Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investiga
 + Fluazifop-p-butyl exponential function: `piM.tant02_fpb.exp_unc` - exponential relationship between time-LC50 and concentration  
   + Sampling and data for both: [Raw data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Miracidia/tantawy2002_fpb_piM_data.png), [Parameter models](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Miracidia/tantawy2002_fpb_piM_parameter_models.png), [Sampling and observed data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Miracidia/tantawy2002_fpb_piM_data_sim.png)  
 
-### `tantawy2002_butachlor_fpb_cercariae_fit.R`   
+### `Tantawy2002_butachlor_fpb_cercariae_fit.R`   
 Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investigating effects of **Butachlor**, **fluazifop-p-butyl** on mortality of *Biomphalaria alexandrina* snails and *Schistosoma mansoni* miracidia and cercariae  
 #### Data reported  
 + **Cercariae -** Table 7&8: longitudinal survival of *Schistosoma mansoni* miracidia in control and 4 dose groups 
@@ -571,7 +571,7 @@ Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investiga
 + Fluazifop-p-butyl exponential function: `piC.tant02_fpb.exp_unc` - exponential relationship between time-LC50 and concentration  
   + Sampling and data for both: [Raw data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Cercariae/tantawy2002_fpb_piC_data.png), [Parameter models](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Cercariae/tantawy2002_fpb_piC_parameter_models.png), [Sampling and observed data](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Cercariae/tantawy2002_fpb_piC_data_sim.png)  
 
-### `tchounwou91_malathion_snails_fit.R`  
+### `Tchounwou91_malathion_snails_fit.R`  
 Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/1953025) investigating effects of **malathion** on mortality of *Bulinus havanensis* and *Helisoma trivolvis* snails and eggs  
 #### Data reported  
 + LC50, LC0, LC90 all with 95%CIs, and slope (not slope parameter, raw slope of probit-log10 transformed D-R function) for adult snails, juvenile snails, and snail eggs  
@@ -585,7 +585,7 @@ Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/1953025) investi
 + `fNq_trivolvis_mal_tch91_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Snails/tchounwou1991_malathion_snail_trivolvis_fecundity.png)
 
-### `tchounwou91_malathion_miracidia_fit.R`  
+### `Tchounwou91_malathion_miracidia_fit.R`  
 Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/2066529) investigating effects of **malathion** on mortality of *Schistosoma mansoni*  
 #### Data reported  
 + Time series of miracidia mortality across 6 malathion concentrations. Also assessed bayluscide, but not interested in effects of molluscicides    
@@ -596,7 +596,7 @@ Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/2066529) investi
   + Time series validation: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_malathion_miracidia_validate.png)
   + Sampling and data of d-r function: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_malathion_piM_validate.png)
 
-### `tchounwou91b_fertilizer_miracidia_fit.R`  
+### `Tchounwou91b_fertilizer_miracidia_fit.R`  
 Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/1906907) investigating effects of **ammonium phosphate** and **urea** on mortality/survival of *Schistosoma mansoni*  
 #### Data reported  
 + Time series of miracidia mortality/survival across 6 concentrations of urea and ammonium phosphate fertilizers    
@@ -612,7 +612,7 @@ Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/1906907) investi
   + Time series validation: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_urea_miracidia_validate.png)
   + Sampling and data of d-r function: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Miracidia/tchounwou1991_urea_miracidia_piM_validate.png)
 
-### `tchounwou91b_fertilizer_egg_viability_fit.R`  
+### `Tchounwou91b_fertilizer_egg_viability_fit.R`  
 Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/1906907) investigating effects of **ammonium phosphate** and **urea** on hatchability of *Schistosoma mansoni* eggs
 #### Data reported  
 + Tables 1 & 2: proportion of eggs that hatch into miracidia across concentrations of fertilizers    
@@ -622,7 +622,7 @@ Data from [Tchounwou et al](https://www.ncbi.nlm.nih.gov/pubmed/1906907) investi
 + `tch91_ure_v_unc`  
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Tchounwou1991/Eggs/urea_egg_viability_data_sim.png)
   
-### `tchounwou92_malathion_cercariae_fit.R`  
+### `Tchounwou92_malathion_cercariae_fit.R`  
 Data from [Tchounwou et al (1992)](https://onlinelibrary.wiley.com/doi/abs/10.1002/tox.2530070202) investigating effects of **malathion** on mortality/survival of *Schistosoma mansoni* cercariae  
 #### Data reported  
 + Figure 2: Time series of cercariae mortality/survival across 6 concentrations of malathion    
