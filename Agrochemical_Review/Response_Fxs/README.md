@@ -177,7 +177,7 @@ Data from [Abdel Ghaffar et al 2016](http://www.bioone.org/doi/abs/10.4002/040.0
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/glyphosate_muN_simulate)  
   + `fN.gly.fx.uncertainty` snail reproduction  
     + Sampling and data [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/glyphosate_fN_simulate.png)
-+Pendimethalin      
++ Pendimethalin      
   + `mu_Nq_pen_gaf16_uncertainty` snail mortality  
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/pendimethalin_muN_simulate)  
   + `fN.pen.fx.uncertainty` snail reproduction  
