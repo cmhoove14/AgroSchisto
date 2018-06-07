@@ -333,6 +333,14 @@ Data from [Kristoff et al 2011](https://www.ncbi.nlm.nih.gov/pubmed/21524429) in
 + Function: `fNq_azmeth_kristoff11_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Kristoff2011/kristoff2011_azinphos-methyl_snail_reproduction_data_sim.png)
 
+### `Lavarias2013_fenitrothion_predators_fit.R`  
+Data from [Lavarias et al 2013](https://www.ncbi.nlm.nih.gov/pubmed/23876938) investigating effects of **Fenitrothion** on *Macrobrachium borellii* survival  
+#### Data reported  
++ Fig 1: Mortality over concentration plot  
+#### Response functions fit  
++ `muPq_fenitrothion_Lavarias13_uncertainty`  
+  + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Lavarias13/Lavarias13_fenitrothion_m_borellii.png)
+
 ### `Leung1980_fenitrothion_predators_fit.R`  
 Data from [Leung et al 1980](https://www.ncbi.nlm.nih.gov/pubmed/7426798) investigating effects of **fenitrothion** on mortality of adult and juvenile *Procambarus clarkii*  
 #### Data reported  
