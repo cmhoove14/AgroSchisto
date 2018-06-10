@@ -1,0 +1,36 @@
+---
+title: "Response function summary"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+require(tidyverse)
+require(corrr)
+```
+
+```{r}
+RFxSum <- read_csv("Response_Fx_Summary.csv")
+
+table(RFxSum$Chemical, RFxSum$Pathway)
+
+RFxSum %>% 
+  group_by(Chemical, Pathway) %>% 
+  summarise(n = n()) %>% 
+  spread(key = Pathway, value = n) %>% 
+  rename("bottom_up" = !!names(.[2]),
+         "direct_larvae" = !!names(.[3]),
+         "direct_snail" = !!names(.[4]),
+         "top_down" = !!names(.[5]),) %>% 
+  mutate(num_records = sum(bottom_up, direct_larvae, 
+                           direct_snail, top_down, na.rm = TRUE)) %>% 
+  filter(num_records > 1) %>% 
+  select(-num_records) %>% 
+  replace_na(list("bottom_up" = 0,
+                  "direct_larvae" = 0,
+                  "direct_snail" = 0,
+                  "top_down" = 0)) %>% 
+  knitr::kable()
+```
+
