@@ -24,7 +24,7 @@ snail.but = data.frame(conc = c(0,0.65, 1.5, 4.5,6.5,44)*1000, # suspected typo 
   se.lc50.tant.but = mean(c(log10(10.4 / lc50.tant.but), 
                             log10(lc50.tant.but/4.06))) / 1.96 #st. err of lc50 in ppm
   
-  muN.tant.but_uncertainty<-function(He){
+  muNq.tant.but_uncertainty<-function(He){
     Heu = (He/1000)
     lc50 = 10^(rnorm(1, log10(lc50.tant.but), se.lc50.tant.but))
     mun = pnorm(slp.tant.but * log10(Heu/lc50)) 
@@ -32,7 +32,7 @@ snail.but = data.frame(conc = c(0,0.65, 1.5, 4.5,6.5,44)*1000, # suspected typo 
     return(mun)
   }
   
-keep.tant.but = c('muN.tant.but_uncertainty', 'lc50.tant.but', 'se.lc50.tant.but', 'slp.tant.but')  
+keep.tant.but = c('muNq.tant.but_uncertainty', 'lc50.tant.but', 'se.lc50.tant.but', 'slp.tant.but')  
 
 #Fluazifop-p-butyl  ##########     
 snail.fpb = data.frame(conc = c(0,1.76, 4.5, 9,17.6,58)*1000, 
@@ -45,7 +45,7 @@ snail.fpb = data.frame(conc = c(0,1.76, 4.5, 9,17.6,58)*1000,
   #get standard error from reported 95% CIs of lc50
   se.lc50.tant.fpb = mean(c(log10(26.4 / lc50.tant.fpb), log10(lc50.tant.fpb/11.73))) / 1.96 #st. err of lc50 in ppm
   
-  muN.tant.fpb_uncertainty<-function(He){
+  muNq.tant.fpb_uncertainty<-function(He){
     Heu = (He/1000)
     lc50 = 10^(rnorm(1, log10(lc50.tant.fpb), se.lc50.tant.fpb))
     mun = pnorm(slp.tant.fpb * log10(Heu/lc50)) 
@@ -53,11 +53,11 @@ snail.fpb = data.frame(conc = c(0,1.76, 4.5, 9,17.6,58)*1000,
     return(mun)
   }
   
-keep.tant.fpb = c('muN.tant.fpb_uncertainty', 'fx.tant.fpb', 'lc50.tant.fpb', 
+keep.tant.fpb = c('muNq.tant.fpb_uncertainty', 'fx.tant.fpb', 'lc50.tant.fpb', 
                   'se.lc50.tant.fpb', 'slp.tant.fpb') 
 
 #keep vector #########  
-keep.muN.tantawy = c('muN.tant.but_uncertainty', 'lc50.tant.but', 
+keep.muN.tantawy = c('muNq.tant.but_uncertainty', 'lc50.tant.but', 
                      'se.lc50.tant.but', 'slp.tant.but',
-                     'muN.tant.fpb_uncertainty', 'lc50.tant.fpb', 
+                     'muNq.tant.fpb_uncertainty', 'lc50.tant.fpb', 
                      'se.lc50.tant.fpb', 'slp.tant.fpb')  

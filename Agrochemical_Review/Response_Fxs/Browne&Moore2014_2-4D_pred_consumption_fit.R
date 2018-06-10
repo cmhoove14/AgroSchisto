@@ -26,13 +26,13 @@ browne_ref_se <- browne_dat$se[1]
 #2,4D ###################
   browne_mod= betareg(per_con ~ conc, weights = 1/se, data = browne_dat)
 
-  psi_q_24D_browne14<-function(He, ref = browne_ref){
+  psiq_24D_browne14<-function(He, ref = browne_ref){
     predict(browne_mod, data.frame(conc = He/1000)) / ref
   }  
     
-  psi_q_24D_browne14_uncertainty<-function(He){
+  psiq_24D_browne14_uncertainty<-function(He){
     predict(browne_mod, newdata = data.frame(conc = He/1000)) / rnorm(1, browne_ref, browne_ref_se)
   }
     
-keep.24d.browne14 = c('psi_q_24D_browne14_uncertainty', 'browne_mod', 'browne_ref', "browne_ref_se")    
+keep.24d.browne14 = c('psiq_24D_browne14_uncertainty', 'browne_mod', 'browne_ref', "browne_ref_se")    
 

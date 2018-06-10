@@ -17,7 +17,7 @@ png("Agrochemical_Review/Response_Fxs/Plots/Omran&Salama2013/Omran&Salama2013_fu
 
   plotDE(atr.dat, xlab = "Dose (ppm)")
   predLines(fatr)
-  points(seq(0,500,1), sapply(seq(0,500000,1000), ons.munq.atr)*100,
+  points(seq(0,500,1), sapply(seq(0,500000,1000), ons.muNq.atr)*100,
          pch = 5, col = 4, cex = 0.5)
   
   legend('bottomright', pch = c(16,5), col = c(1,4), legend = c("observed", "simulated"),
@@ -30,7 +30,7 @@ png("Agrochemical_Review/Response_Fxs/Plots/Omran&Salama2013/Omran&Salama2013_fu
   
   plotDE(gly.dat)
   predLines(fgly)
-  points(seq(0,500,1), sapply(seq(0,500000,1000), ons.munq.gly)*100,
+  points(seq(0,500,1), sapply(seq(0,500000,1000), ons.muNq.gly)*100,
          pch = 5, col = 4, cex = 0.5)
   
   legend('bottomright', pch = c(16,5), col = c(1,4), legend = c("observed", "simulated"),

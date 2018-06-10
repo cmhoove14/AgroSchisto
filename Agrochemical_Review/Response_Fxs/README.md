@@ -93,9 +93,9 @@ Data from [Baxter et al 2011](http://onlinelibrary.wiley.com/doi/10.1002/etc.552
 + Figs 4&6: Snail direct effects (reproduction, size, and mortality)  
 #### Response functions fit  
 + Snail population carrying capacity as a function of atrazine concentration, produced via a log-linear glm relating log+1 atrazine to peak growth rate  
-  + Function: `phi_Nq_atr_baxrohr.no30`  
+  + Function: `phiNq_atr_baxrohr.no30`  
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Baxter_Rohr_2011/Baxter_rohr_atrazine_carrying_capacity_sim.png)
-+ Snail population carrying capacity as a function of any herbicide concentration, assuming response is proportional to its EEC value and is the same as the atrazine response `phi_Nq_rel_baxrohr.no30`  
++ Snail population carrying capacity as a function of any herbicide concentration, assuming response is proportional to its EEC value and is the same as the atrazine response `phiNq_rel_baxrohr.no30`  
   + no30 refers to exclusion of data point at 30ppb atrazine due to large influence of spatial block on results. See [Rohr et al 2012](https://www.researchgate.net/publication/224284702_The_herbicide_atrazine_algae_and_snail_populations?enrichId=rgreq-687b4b78-6cbe-4c48-9c04-d495370159ae&enrichSource=Y292ZXJQYWdlOzIyNDI4NDcwMjtBUzoxMDEyNDM0Njg5MTA1OTlAMTQwMTE0OTczMjY1Mg%3D%3D&el=1_x_3) for details  
   
 ### `Benli2007_2-4D_predators_plot.R`  
@@ -112,7 +112,7 @@ Data from [Bhavan et al 2010](https://www.ncbi.nlm.nih.gov/pubmed/22167951) inve
 + Table 1 - food consumed in grams per day across three concentrations and a control group  
 #### Response functions fit  
 + Predator feeding rate as a function of carbaryl concentration  
-  + Function: `psi_q_carb_bhavan10_uncertainty`  
+  + Function: `psiq_carb_bhavan10_uncertainty`  
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Bhavan2010/bhavan2010_carbaryl_feed_rate_data_sim.png)  
   
 ### `Browne&Moore2014_2-4D_pred_consumption_fit.R`   
@@ -120,7 +120,7 @@ Data from [Browne and Moore 2014](https://www.ncbi.nlm.nih.gov/pubmed/24799048) 
 #### Data reported  
 + Figure 6: consumption rate of crayfish measured as weight of gelatin fish food eaten across dose groups  
 #### Response functions fit  
-+ `psi_q_24D_browne14_uncertainty`  
++ `psiq_24D_browne14_uncertainty`  
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Browne2014/pred_consumption_2-4D_data_sim.png)
   
 ### `Fornstrom1997_terbufos_predators_fit.R`  
@@ -168,19 +168,19 @@ Data from [Abdel Ghaffar et al 2016](http://www.bioone.org/doi/abs/10.4002/040.0
 + This data is somewhat questionable and reproducing dose-response relationships from it relies on estimating d-r based on the reported LC values rather than LC and slope as for other studies (see `Models/d-r_function_compare_methods.R`. Cited method is Litchfield and Wilcoxon, but methods to reproduce d-r function from reported Litchfield and Wilcoxon parameters in other studies from the same authors are not working here. 
 #### Response functions fit  
 + Butralin  
-  + `mu_Nq_butr_gaf16_uncertainty` snail mortality  
+  + `muNq_butr_gaf16_uncertainty` snail mortality  
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/butralin_muN_simulate)  
-  + `fN.butr.fx.uncertainty` snail reproduction  
+  + `fNq.butr.fx.uncertainty` snail reproduction  
     + Sampling and data [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/butralin_fN_simulate.png)
 + Glyphosate    
-  + `mu_Nq_gly_gaf16_uncertainty` snail mortality  
+  + `muNq_gly_gaf16_uncertainty` snail mortality  
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/glyphosate_muN_simulate)  
-  + `fN.gly.fx.uncertainty` snail reproduction  
+  + `fNq.gly.fx.uncertainty` snail reproduction  
     + Sampling and data [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/glyphosate_fN_simulate.png)
 + Pendimethalin      
-  + `mu_Nq_pen_gaf16_uncertainty` snail mortality  
+  + `muNq_pen_gaf16_uncertainty` snail mortality  
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/pendimethalin_muN_simulate)  
-  + `fN.pen.fx.uncertainty` snail reproduction  
+  + `fNq.pen.fx.uncertainty` snail reproduction  
     + Sampling and data [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/pendimethalin_fN_simulate.png)
 
 ### `Griggs08_atrazine_metolachlor_cercariae_fit.R`  
@@ -234,8 +234,8 @@ Data from [Halstead et al 2018](https://www.nature.com/articles/s41467-018-03189
 + Received raw data on snail and predator populations in different mesocosm treatments from Neal Halstead (lead author)
 
 #### Response functions fit  
-+ `halstead17_phiN_fe_uncertainty`
-+ `halstead17_phiN_at_uncertainty`
++ `halstead17_phiNq_fe_uncertainty`
++ `halstead17_phiNq_at_uncertainty`
 
 ### `Hasheesh2011_chlorpyrifos_profenofos_larvae_fit.R`  
 Data from [Hasheesh & Mohamed 2011](https://www.sciencedirect.com/science/article/pii/S0048357511000186) investigating effects of **Chlorpyrifos** and **Profenofos** on survival of *S. haematobium* miracidia and cercarie and *Bulinus truncatus* snails (see below)  
@@ -266,12 +266,12 @@ Data from [Hasheesh & Mohamed 2011](https://www.sciencedirect.com/science/articl
 + Chlorpyrifos  
   + Function: `muNq_ch_hash11_uncertainty`  
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_chlorpyrifos_snail_mortality.png)  
-  + Function: `fN.hash.chlor.uncertainty` (samples measurement of eggs/snail/day in the chlorpyrifos group and in the control group and returns the ratio which is interpreted as relative change in snail reproduction when exposed to LC25 of chlorpyrifos)  
+  + Function: `fNq.hash.chlor.uncertainty` (samples measurement of eggs/snail/day in the chlorpyrifos group and in the control group and returns the ratio which is interpreted as relative change in snail reproduction when exposed to LC25 of chlorpyrifos)  
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_snail_reproduction_compare.png)  
 + Profenofos  
   + Function: `muNq_prof_hash11_uncertainty`  
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_profenofos_snail_mortality.png)  
-  + Function: `fN.hash.prof.uncertainty` (samples measurement of eggs/snail/day in the profenofos group and in the control group and returns the ratio which is interpreted as relative change in snail reproduction when exposed to LC25 of profenofos)  
+  + Function: `fNq.hash.prof.uncertainty` (samples measurement of eggs/snail/day in the profenofos group and in the control group and returns the ratio which is interpreted as relative change in snail reproduction when exposed to LC25 of profenofos)  
     + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_snail_reproduction_compare.png)     
 
 ### `Hua_insecticides_cercariae_fit.R`  
@@ -301,9 +301,9 @@ Data from [Ibrahim et al 1992](https://www.ncbi.nlm.nih.gov/pubmed/1379273) inve
 #### Data reported   
 + Lots of different series tested based on when chlorpyrifos was added/removed from tanks containing snails, series 1 with data contained in Table 1 is most applicable  
 #### Response functions fit  
-+ Function: `mu_N_chlor_ibr92_uncertainty`
++ Function: `muNq_chlor_ibr92_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ibrahim1992/ibrahim1992_chlorpyrifos_snail_mortality.png)
-+ Function: `f_N_chlor_ibr92_uncertainty`
++ Function: `fNq_chlor_ibr92_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ibrahim1992/ibrahim1992_chlorpyrifos_snail_reproduction.png)  
   
 ### `Johnson2007_fertilizer_fit.R`  
@@ -314,8 +314,8 @@ Data from [Johnson et al 2007](https://doi.org/10.1073/pnas.0707763104) investig
 + Total snail biomass over the course of the experiment
 #### Response functions fit  
 + Function: `johnson07_theta_uncertainty` (proportional increase in cercarial shedding in fertilizer group)
-+ Function: `johnson07_fN_uncertainty` (proportional increase in snail eggs sampled in fertilizer group)
-+ Function: `johnson07_phin_uncertainty` (proportional increase in snail biomass in fertilizer group)
++ Function: `johnson07_fNq_uncertainty` (proportional increase in snail eggs sampled in fertilizer group)
++ Function: `johnson07_phiNq_uncertainty` (proportional increase in snail biomass in fertilizer group)
 
 ### `Koprivnikar2006_atrazine_cercariae_fit.R`  
 Data from [Koprivnikar et al 2006](https://www.ncbi.nlm.nih.gov/pubmed/16729687) investigating effects of atrazine on survival of *Echinistoma trivolvis* cercariae  
@@ -441,9 +441,9 @@ Data from [Omran and Salama 2013](https://www.ncbi.nlm.nih.gov/pubmed/24215068) 
 #### Data reported  
 + Figure 1 log concentration vs probit mortality for 7 dose groups    
 #### Response functions fit  
-+ Function: `ons.munq.atr`
++ Function: `ons.muNq.atr`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Omran&Salama2013/Omran&Salama2013_function_simulate_muN_atrazine.png)
-+ Function: `ons.munq.gly`
++ Function: `ons.muNq.gly`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Omran&Salama2013/Omran&Salama2013_function_simulate_muN_glyphosate.png)
 
 ### `Ragab2006_fertilizers_snails_fit`  
@@ -451,11 +451,11 @@ Data from [Ragab and Shoukry 2006](https://www.ncbi.nlm.nih.gov/pubmed/17153706)
 #### Data reported  
 + Table 1 LC50, 95%CI of LC50, LC90, and slp parameters  
 #### Response functions fit  
-+ Function: `rag06_mun_amm`
++ Function: `rag06_muNq_amm`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ragab&Shoukry2006/Ragab&Shoukry2006_function_simulate_muN_ammonium_nitrate.png)
-+ Function: `rag06_mun_pot`
++ Function: `rag06_muNq_pot`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ragab&Shoukry2006/Ragab&Shoukry2006_function_simulate_muN_potassium_sulphate.png)
-+ Function: `rag06_mun_urea`
++ Function: `rag06_muNq_urea`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Ragab&Shoukry2006/Ragab&Shoukry2006_function_simulate_muN_urea.png)
 
 ### `Revathi2010_tributyltin_predator_reproduction_fit.R`  
@@ -471,8 +471,8 @@ Data from [Rohr et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/18972018) invest
 #### Data reported  
 + Table 1 data on snail population dynamics in mesocosm setting comparing control to atrazine treatment group  
 #### Response functions fit  
-+ `rohr08_fN_uncertainty` - function using snail eggs data
-+ `rohr08_fN_uncertainty2` - function using snail hatchlings data (preferred due to parameter interpretation)
++ `rohr08_fNq_uncertainty` - function using snail eggs data
++ `rohr08_fNq_uncertainty2` - function using snail hatchlings data (preferred due to parameter interpretation)
 
 ### `Rohr08_atrazine_cercariae_fit.R`   
 Data from [Rohr et al 2008](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1890/07-1429.1) investigating effects of **Atrazine** on survival of  *Echinistoma trivolvis* cercariae    
@@ -504,9 +504,9 @@ Data from [Satapornvanit et al 2009](https://www.ncbi.nlm.nih.gov/pubmed/1910345
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_profenofos_mupq.png)
 + Function: `muPq_zinc_satapornvanit09_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_zinc_mupq.png)
-+ Function: `psi_q_chlor_satapornvanit09_uncertainty`
++ Function: `psiq_chlor_satapornvanit09_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_chlorpyrifos_psiq.png)
-+ Function: `psi_q_zinc_satapornvanit09_uncertainty`
++ Function: `psiq_zinc_satapornvanit09_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_data_functions_zinc_psiq.png)
 
 ### `Shukla1985_quinalphos_dichlorvos_monocrotophos_carbaryl_predators_plot.R`  
@@ -540,9 +540,9 @@ Data from [Tantawy 2002](https://www.ncbi.nlm.nih.gov/pubmed/12512816) investiga
 #### Data reported  
 + **Snails -** Table 1: 24-hr LC50, 95%CI LC50, LC0, LC10, LC25, LC90, slp for *Biomphalaria alexandrina*  
 #### Response functions fit  
-+ `muN.tant.but_uncertainty`
++ `muNq.tant.but_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Snails/tantawy2002_butachlor_muN_data_sim.png)
-+ `muN.tant.fpb_uncertainty`
++ `muNq.tant.fpb_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Snails/tantawy2002_fpb_muN_data_sim.png)
 
 ### `Tantawy2002_butachlor_fpb_miracidia_fit.R`   

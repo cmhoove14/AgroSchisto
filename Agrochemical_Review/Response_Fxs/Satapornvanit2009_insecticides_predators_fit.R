@@ -187,12 +187,12 @@ sap.fr<-read.csv("Agrochemical_Review/Response_Fxs/Data/satapornvanit2009_m_rose
     
   par.tricksz = c(coef(zinc.fr), 'd' = max(fr.z$feed_rate))[c(1,3,2)]
     
-  psi_q_zinc_satapornvanit09_uncertainty<-function(In){
+  psiq_zinc_satapornvanit09_uncertainty<-function(In){
     rdrm(nosim = 1, fct = LL.3(), mpar = par.tricksz, yerror = 'rnorm', xerror = In,
          ypar = c(0, predict(zinc.fr, data.frame(dose = In), se.fit = T)[2]))$y / fr.z$feed_rate[1]
   }
     
-keep.zinc.sat09 = c(keep.zinc.sat09, 'psi_q_zinc_satapornvanit09_uncertainty', 
+keep.zinc.sat09 = c(keep.zinc.sat09, 'psiq_zinc_satapornvanit09_uncertainty', 
                     'par.tricksz', 'zinc.fr', 'fr.z')    
 #Chlorpyrifos ###################
   chlor.fr= drm(feed_rate ~ conc, data = fr.ch, type = 'continuous',
@@ -205,12 +205,12 @@ keep.zinc.sat09 = c(keep.zinc.sat09, 'psi_q_zinc_satapornvanit09_uncertainty',
   
   par.tricksc = c(coef(chlor.fr), 'd' = max(fr.ch$feed_rate))[c(1,3,2)]
     
-    psi_q_chlor_satapornvanit09_uncertainty<-function(In){
+    psiq_chlor_satapornvanit09_uncertainty<-function(In){
       rdrm(nosim = 1, fct = LL.3(), mpar = par.tricksc, yerror = 'rnorm', xerror = In,
            ypar = c(0, predict(chlor.fr, data.frame(dose = In), se.fit = T)[2]))$y / fr.ch$feed_rate[1]
     }
     
-keep.chlor.sat09 = c(keep.chlor.sat09, 'psi_q_chlor_satapornvanit09_uncertainty', 
+keep.chlor.sat09 = c(keep.chlor.sat09, 'psiq_chlor_satapornvanit09_uncertainty', 
                     'par.tricksc', 'chlor.fr', 'fr.ch')    
 
 keep.all.sat09 = c(keep.carb.sat09, keep.chlor.sat09, keep.dim.sat09, keep.prof.sat09, keep.zinc.sat09)

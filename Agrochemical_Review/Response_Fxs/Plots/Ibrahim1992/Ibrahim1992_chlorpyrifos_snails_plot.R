@@ -30,7 +30,7 @@ plot(snail.repro$dose, snail.repro$juvs.sn.day/snail.repro$juvs.sn.day[1], pch =
     
   set.seed(43093)
   
-    points(seq(0, 1000, 2), sapply(seq(0, 1000, 2), f_N_chlor_ibr92_uncertainty),
+    points(seq(0, 1000, 2), sapply(seq(0, 1000, 2), fNq_chlor_ibr92_uncertainty),
                pch = 5, cex = 0.5, col = 4)
     title(main = expression(paste('Ibrahim1992 - Chlorpyrifos reproductive toxicity to ',
                                   italic('Bi. alexandrina', sep = ''))))
@@ -61,7 +61,7 @@ png("Agrochemical_Review/Response_Fxs/Plots/Ibrahim1992/ibrahim1992_chlorpyrifos
           sapply(seq(0, 1000, 10), mu_N_chlor_ibr92, simplify = T)[3,],
           lty = 3, col = 2)
   
-    points(seq(0, 1000, 2), sapply(seq(0, 1000, 2), mu_N_chlor_ibr92_uncertainty, simplify = T),
+    points(seq(0, 1000, 2), sapply(seq(0, 1000, 2), muNq_chlor_ibr92_uncertainty, simplify = T),
                pch = 5, cex = 0.5, col = 4)
     title(main = expression(paste('Ibrahim1992 - Chlorpyrifos direct snail toxicity ',
                                   italic('Bi. alexandrina', sep = ''))))

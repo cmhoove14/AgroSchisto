@@ -33,7 +33,7 @@ muNq_but_Gaf16_lin <- function(He, b = gaf.b.lin){
   return(mun)
 }  
 
-mu_Nq_butr_gaf16_uncertainty = function(He){
+muNq_butr_gaf16_uncertainty = function(He){
     heu = (He/1000)
     lc50 = rnorm(1, gaf.b.lin, gaf.se.b.lin)
     mun = pnorm(lc50 + log10(He/1000)*gaf.m.lin)
@@ -42,7 +42,7 @@ mu_Nq_butr_gaf16_uncertainty = function(He){
 }
   
 #keep vector
-keep.gaf.but = c('mu_Nq_butr_gaf16_uncertainty',
+keep.gaf.but = c('muNq_butr_gaf16_uncertainty',
                  'gaf.b.lin', 'gaf.se.b.lin', 'gaf.m.lin')    
         
 #Glyphosate #############
@@ -67,7 +67,7 @@ muNq_gly_Gaf16_lin <- function(He, b = gaf.b.lin.gly){
   return(mun)
 }  
 
-mu_Nq_gly_gaf16_uncertainty = function(He){
+muNq_gly_gaf16_uncertainty = function(He){
   heu = (He/1000)
   lc50 = rnorm(1, gaf.b.lin.gly, gaf.se.b.lin.gly)
   mun = pnorm(lc50 + log10(He/1000)*gaf.m.lin.gly)
@@ -75,7 +75,7 @@ mu_Nq_gly_gaf16_uncertainty = function(He){
   return(mun)
 }
 
-keep.gaf.gly = c('mu_Nq_gly_gaf16_uncertainty', 
+keep.gaf.gly = c('muNq_gly_gaf16_uncertainty', 
                  'gaf.b.lin.gly', 'gaf.se.b.lin.gly', 'gaf.m.lin.gly')    
     
 #Pendimethalin ##############
@@ -101,7 +101,7 @@ muNq_pen_Gaf16_lin <- function(He, b = gaf.b.lin.pen){
 }  
 
 
-mu_Nq_pen_gaf16_uncertainty = function(He){
+muNq_pen_gaf16_uncertainty = function(He){
   heu = (He/1000)
   lc50 = rnorm(1, gaf.b.lin.pen, gaf.se.b.lin.pen)
   mun = pnorm(lc50 + log10(He/1000)*gaf.m.lin.pen)
@@ -109,7 +109,7 @@ mu_Nq_pen_gaf16_uncertainty = function(He){
   return(mun)
 }
 
-keep.gaf.pen = c('mu_Nq_pen_gaf16_uncertainty',
+keep.gaf.pen = c('muNq_pen_gaf16_uncertainty',
                  'gaf.b.lin.pen', 'gaf.se.b.lin.pen', 'gaf.m.lin.pen')    
   
 
@@ -158,7 +158,7 @@ keep.gaf.pen = c('mu_Nq_pen_gaf16_uncertainty',
     
   par.tricks.but.gaf = c(coef(but_repro_mod), 'd' = max(but_gafrep$but.rep))[c(1,3,2)]
     
-  fN.butr.fx.uncertainty<-function(He){
+  fNq.butr.fx.uncertainty<-function(He){
     fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.but.gaf, yerror = 'rnorm', xerror = He/1000,
                ypar = c(0, predict(but_repro_mod, data.frame(but.conc = He/1000), se.fit = T)[2]))$y / gafrep_ref
     
@@ -169,7 +169,7 @@ keep.gaf.pen = c('mu_Nq_pen_gaf16_uncertainty',
     }
   }
   
-   keep.gaf.but = c(keep.gaf.but, 'fN.butr.fx.uncertainty', 'par.tricks.but.gaf', 'gafrep_ref', "but_repro_mod")
+   keep.gaf.but = c(keep.gaf.but, 'fNq.butr.fx.uncertainty', 'par.tricks.but.gaf', 'gafrep_ref', "but_repro_mod")
 
 #Glyphosate #########
   gly_gafrep <- gafrep[c(1:4),c(2,5)]
@@ -184,7 +184,7 @@ keep.gaf.pen = c('mu_Nq_pen_gaf16_uncertainty',
     
   par.tricks.gly.gaf = c(coef(gly_repro_mod), 'd' = max(gly_gafrep$gly.rep))[c(1,3,2)]
     
-  fN.gly.fx.uncertainty<-function(He){
+  fNq.gly.fx.uncertainty<-function(He){
     fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.gly.gaf, yerror = 'rnorm', xerror = He/1000,
                ypar = c(0, predict(gly_repro_mod, data.frame(gly.conc = He/1000), se.fit = T)[2]))$y / gafrep_ref
     
@@ -195,7 +195,7 @@ keep.gaf.pen = c('mu_Nq_pen_gaf16_uncertainty',
     }
   }
   
-   keep.gaf.gly = c(keep.gaf.gly, 'fN.gly.fx.uncertainty', 'par.tricks.gly.gaf', 'gafrep_ref', "gly_repro_mod")
+   keep.gaf.gly = c(keep.gaf.gly, 'fNq.gly.fx.uncertainty', 'par.tricks.gly.gaf', 'gafrep_ref', "gly_repro_mod")
 
 #Pendimethalin #########
   pen_gafrep <- gafrep[c(1:4),c(3,6)]
@@ -210,7 +210,7 @@ keep.gaf.pen = c('mu_Nq_pen_gaf16_uncertainty',
     
   par.tricks.pen.gaf = c(coef(pen_repro_mod), 'd' = max(pen_gafrep$pen.rep))[c(1,3,2)]
     
-  fN.pen.fx.uncertainty<-function(He){
+  fNq.pen.fx.uncertainty<-function(He){
     fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.pen.gaf, yerror = 'rnorm', xerror = He/1000,
                ypar = c(0, predict(pen_repro_mod, data.frame(pen.conc = He/1000), se.fit = T)[2]))$y / gafrep_ref
     
@@ -221,7 +221,7 @@ keep.gaf.pen = c('mu_Nq_pen_gaf16_uncertainty',
     }
   }
   
-   keep.gaf.pen = c(keep.gaf.pen, 'fN.pen.fx.uncertainty', 'par.tricks.pen.gaf', 'gafrep_ref', "pen_repro_mod")
+   keep.gaf.pen = c(keep.gaf.pen, 'fNq.pen.fx.uncertainty', 'par.tricks.pen.gaf', 'gafrep_ref', "pen_repro_mod")
 
  
   

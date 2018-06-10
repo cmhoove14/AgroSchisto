@@ -18,7 +18,7 @@ se.lc50.amm.rag = mean(c(log10(507.6 / lc50.amm.rag), log10(lc50.amm.rag / 435.1
 
 lc90.amm.rag = 640
   
-rag06_mun_amm = function(Fe, lc = lc50.amm.rag){
+rag06_muNq_amm = function(Fe, lc = lc50.amm.rag){
   feu = Fe/1000
   lc50 = 10^(rnorm(1, log10(lc50.amm.rag), se.lc50.amm.rag)) #Estimate lc50 with uncertainty and backtransform from log10 scale
     
@@ -34,7 +34,7 @@ se.lc50.pot.rag = mean(c(log10(2280 / lc50.pot.rag),
                          log10(lc50.pot.rag / 1583.3))) / 1.96 
 lc90.pot.rag = 2600
 
-rag06_mun_pot = function(Fe){
+rag06_muNq_pot = function(Fe){
     feu = Fe/1000
     lc50 = 10^(rnorm(1, log10(lc50.pot.rag), se.lc50.pot.rag))
     mun = pnorm(slp.pot.rag * log10(feu / lc50))
@@ -49,7 +49,7 @@ se.lc50.urea.rag = mean(c(log10(24860 / lc50.urea.rag),
                           log10(lc50.urea.rag / 19469))) / 1.96 
 lc90.urea.rag = 31000
 
-rag06_mun_urea = function(Fe){
+rag06_muNq_urea = function(Fe){
     feu = Fe/1000
     lc50 = 10^(rnorm(1, log10(lc50.urea.rag), se.lc50.urea.rag))
     mun = pnorm((slp.urea.rag) * log10(feu / lc50))
@@ -58,6 +58,6 @@ rag06_mun_urea = function(Fe){
 }
 
 #Keep vector #################
-keep.ragab.mun = c('rag06_mun_urea', 'lc50.urea.rag', 'se.lc50.urea.rag', 'slp.urea.rag',
-                   'rag06_mun_pot', 'lc50.pot.rag', 'se.lc50.pot.rag', 'slp.pot.rag',
-                   'rag06_mun_amm', 'lc50.amm.rag', 'se.lc50.amm.rag', 'slp.amm.rag')
+keep.ragab.mun = c('rag06_muNq_urea', 'lc50.urea.rag', 'se.lc50.urea.rag', 'slp.urea.rag',
+                   'rag06_muNq_pot', 'lc50.pot.rag', 'se.lc50.pot.rag', 'slp.pot.rag',
+                   'rag06_muNq_amm', 'lc50.amm.rag', 'se.lc50.amm.rag', 'slp.amm.rag')

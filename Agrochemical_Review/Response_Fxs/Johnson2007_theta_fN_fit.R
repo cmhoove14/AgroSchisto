@@ -34,7 +34,7 @@ eggs_ctrl_se <- eggs$eggs_lo_se
 eggs_fert <- eggs$eggs_hi
 eggs_fert_se <- eggs$eggs_hi_se
 
-johnson07_fN_uncertainty = function(){
+johnson07_fNq_uncertainty = function(){
 
   fn = sum(rnorm(1, eggs_fert[1], eggs_fert_se[1]),
            rnorm(1, eggs_fert[2], eggs_fert_se[2]),
@@ -66,7 +66,7 @@ bm = read.csv('Agrochemical_Review/Response_Fxs/Data/Johnson2007_snail_biomass.c
   bm_fert = bm$bm[bm$treat == 'fert' & bm$Day == max(bm$Day[bm$treat == 'fert'])]
   bm_fert_se = bm$bmse[bm$treat == 'fert' & bm$Day == max(bm$Day[bm$treat == 'fert'])]
   
-johnson07_phin_uncertainty = function(){
+johnson07_phiNq_uncertainty = function(){
 
   phi_N = rnorm(1, bm_fert, bm_fert_se) /
           rnorm(1, bm_ctrl, bm_ctrl_se)
@@ -80,5 +80,5 @@ johnson07_phin_uncertainty = function(){
 }
 
 keep.johnson07 = c('johnson07_theta_uncertainty', 'cerc_ctrl', 'cerc_ctrl_se', 'cerc_fert', 'cerc_fert_se', 
-                   'johnson07_fN_uncertainty', 'eggs_ctrl', 'eggs_ctrl_se', 'eggs_fert', 'eggs_fert_se',
-                   'johnson07_phin_uncertainty', 'bm_ctrl', 'bm_ctrl_se', 'bm_fert', 'bm_fert_se')
+                   'johnson07_fNq_uncertainty', 'eggs_ctrl', 'eggs_ctrl_se', 'eggs_fert', 'eggs_fert_se',
+                   'johnson07_phiNq_uncertainty', 'bm_ctrl', 'bm_ctrl_se', 'bm_fert', 'bm_fert_se')

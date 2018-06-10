@@ -7,7 +7,6 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 
 require(tidyverse)
-require(corrr)
 ```
 
 ```{r}
@@ -22,7 +21,7 @@ RFxSum %>%
   rename("bottom_up" = !!names(.[2]),
          "direct_larvae" = !!names(.[3]),
          "direct_snail" = !!names(.[4]),
-         "top_down" = !!names(.[5]),) %>% 
+         "top_down" = !!names(.[5])) %>% 
   mutate(num_records = sum(bottom_up, direct_larvae, 
                            direct_snail, top_down, na.rm = TRUE)) %>% 
   filter(num_records > 1) %>% 

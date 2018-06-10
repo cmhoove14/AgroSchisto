@@ -101,7 +101,7 @@ png("Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_
     
     set.seed(43093)
     
-    points(seq(0,900,10), sapply(seq(0,900,10), psi_q_zinc_satapornvanit09_uncertainty, simplify = T), 
+    points(seq(0,900,10), sapply(seq(0,900,10), psiq_zinc_satapornvanit09_uncertainty, simplify = T), 
            pch=5, col=4, cex = 0.5)   
 
 dev.off()
@@ -121,7 +121,7 @@ png("Agrochemical_Review/Response_Fxs/Plots/Satapornvanit2009/Satapornvanit2009_
     
     set.seed(43093)
     
-    points(seq(0,5,0.05), sapply(seq(0,5,0.05), psi_q_chlor_satapornvanit09_uncertainty, simplify = T), 
+    points(seq(0,5,0.05), sapply(seq(0,5,0.05), psiq_chlor_satapornvanit09_uncertainty, simplify = T), 
            pch=5, col=4, cex = 0.5)   
 
 dev.off()

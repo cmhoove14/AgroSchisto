@@ -68,7 +68,7 @@ fn<-read.csv('Agrochemical_Review/Response_Fxs/Data/Hasheesh2011_snail_mort_repr
       return(fN)
     }
   
-    fN.hash.chlor.uncertainty = function(){ #function based on snail egg masses
+    fNq.hash.chlor.uncertainty = function(){ #function based on snail egg masses
       ctrl = sample(ctrl.eggs, 1)
       chlor = sample(chlor.eggs, 1)
       fN = chlor / ctrl
@@ -76,7 +76,7 @@ fn<-read.csv('Agrochemical_Review/Response_Fxs/Data/Hasheesh2011_snail_mort_repr
       return(fN)
     }
     
-    fN.hash.prof.uncertainty = function(){ #function based on snail hatchlings
+    fNq.hash.prof.uncertainty = function(){ #function based on snail hatchlings
       ctrl = sample(ctrl.eggs, 1)
       prof = sample(prof.eggs, 1)
       fN = prof / ctrl
@@ -84,8 +84,8 @@ fn<-read.csv('Agrochemical_Review/Response_Fxs/Data/Hasheesh2011_snail_mort_repr
       return(fN)
     }  
     
-keep.hsh.ch = c(keep.hsh.ch, 'fN.hash.chlor.uncertainty', 'chlor.eggs', 'ctrl.eggs')
+keep.hsh.ch = c(keep.hsh.ch, 'fNq.hash.chlor.uncertainty', 'chlor.eggs', 'ctrl.eggs')
 
-keep.hsh.prof = c(keep.hsh.prof, 'fN.hash.prof.uncertainty', 'prof.eggs', 'ctrl.eggs')
+keep.hsh.prof = c(keep.hsh.prof, 'fNq.hash.prof.uncertainty', 'prof.eggs', 'ctrl.eggs')
 
 keep.hsh.all = c(keep.hsh.ch, keep.hsh.prof)  

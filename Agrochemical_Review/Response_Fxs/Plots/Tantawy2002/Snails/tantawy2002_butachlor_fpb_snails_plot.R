@@ -22,7 +22,7 @@ png("Agrochemical_Review/Response_Fxs/Plots/Tantawy2002/Snails/tantawy2002_butac
   
   set.seed(43093)
   
-  points(seq(0, 50000, 100), sapply(seq(0, 50000, 100), muN.tant.but_uncertainty),
+  points(seq(0, 50000, 100), sapply(seq(0, 50000, 100), muNq.tant.but_uncertainty),
          pch = 5, cex = 0.5, col = 4)
 
 dev.off()    
@@ -37,6 +37,6 @@ plot(snail.fpb$conc, snail.fpb$mort, pch = 16, ylim = c(0,1), xlim = c(0,max(sna
 
   set.seed(43093)
   
-  points(seq(0, 60000, 100), sapply(seq(0, 60000, 100), muN.tant.fpb_uncertainty),
+  points(seq(0, 60000, 100), sapply(seq(0, 60000, 100), muNq.tant.fpb_uncertainty),
          pch = 5, cex = 0.5, col = 4)
 dev.off()

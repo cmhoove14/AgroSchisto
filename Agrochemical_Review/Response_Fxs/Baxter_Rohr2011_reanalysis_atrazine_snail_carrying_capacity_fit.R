@@ -20,7 +20,7 @@ bax.mod = lm(growthrate ~ logatra, weights = st.err^-1, data = atra.df)
                   type = 'response')
   
 #Function to estimate change in carrying capacity with uncertainty  
-phi_Nq_atr_baxrohr = function(He){
+phiNq_atr_baxrohr = function(He){
     u = predict(bax.mod, newdata = data.frame(logatra = log(He+1)), type = 'response',
                 se.fit = TRUE)[1:2]
     phiNq = rnorm(1, u$fit, u$se.fit) / base.growth   #Get proportional increase in peak growth as increase in carrying capacity
@@ -37,7 +37,7 @@ bax.mod.no30 = lm(growthrate ~ logatra, weights = st.err^-1, data = atra.df.no30
                         type = 'response')
   
 #Function to estimate change in carrying capacity with uncertainty  
-phi_Nq_atr_baxrohr.no30 = function(He){
+phiNq_atr_baxrohr.no30 = function(He){
     u = predict(bax.mod.no30, newdata = data.frame(logatra = log(He+1)), type = 'response',
                 se.fit = TRUE)[1:2]
     phiNq = rnorm(1, u$fit, u$se.fit) / base.growth.no30
@@ -49,7 +49,7 @@ phi_Nq_atr_baxrohr.no30 = function(He){
 
 #Function to use this info for any herbicide given its eec, assuming a proportional response of carrying capacity to atrazine conc
   eec.atr = 102
-  phi_Nq_rel_baxrohr = function(He, eec){
+  phiNq_rel_baxrohr = function(He, eec){
       prop = He / eec
       rel = prop*eec.atr
       
@@ -62,7 +62,7 @@ phi_Nq_atr_baxrohr.no30 = function(He){
   }
   
  
-  phi_Nq_rel_baxrohr.no30 = function(He, eec){
+  phiNq_rel_baxrohr.no30 = function(He, eec){
       prop = He / eec    #get proportion of input concentration to cehm's EEC
       rel = prop*eec.atr #get atrazine concentration equivalent  
       
@@ -74,4 +74,4 @@ phi_Nq_atr_baxrohr.no30 = function(He){
     
   }
   
-  keep.baxrohr = c('atra.df', 'phi_Nq_atr_baxrohr', 'bax.mod', 'base.growth', 'phi_Nq_atr_baxrohr.no30', 'bax.mod.no30', 'base.growth.no30', 'phi_Nq_rel_baxrohr', 'eec.atr')
+  keep.baxrohr = c('atra.df', 'phiNq_atr_baxrohr', 'bax.mod', 'base.growth', 'phiNq_atr_baxrohr.no30', 'bax.mod.no30', 'base.growth.no30', 'phiNq_rel_baxrohr', 'eec.atr')

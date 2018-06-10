@@ -51,8 +51,8 @@ plot(atra.df$atra, atra.df$growthrate / atra.df$growthrate[1],
            x1 = atra.df$atra, 
            y1 = (atra.df$growthrate - atra.df$st.err) / atra.df$growthrate[1])
 #add model predictions  
-    points(c(0:200), sapply(c(0:200), phi_Nq_atr_baxrohr), pch = 17, col=4, cex=0.6)
-    points(c(0:200), sapply(c(0:200), phi_Nq_atr_baxrohr.no30), pch = 17, col=2, cex=0.6)
+    points(c(0:200), sapply(c(0:200), phiNq_atr_baxrohr), pch = 17, col=4, cex=0.6)
+    points(c(0:200), sapply(c(0:200), phiNq_atr_baxrohr.no30), pch = 17, col=2, cex=0.6)
 
   legend('topleft', legend = c('30ppb included', '30ppb excluded'), pch = 17, col = c(4,2), cex = 0.7, bty='n')
   

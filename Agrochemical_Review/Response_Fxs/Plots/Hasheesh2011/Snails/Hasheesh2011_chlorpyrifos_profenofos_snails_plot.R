@@ -75,8 +75,8 @@ dev.off()
 #Sampling uncertainty functions in control and single dose groups
 set.seed(43093)
 fn_hash_ctrl_samp <- rnorm(10000, 1, 0.25) #just for comparison
-fn_hash_ch_samp <- replicate(10000, fN.hash.chlor.uncertainty())
-fn_hash_prof_samp <- replicate(10000, fN.hash.prof.uncertainty())
+fn_hash_ch_samp <- replicate(10000, fNq.hash.chlor.uncertainty())
+fn_hash_prof_samp <- replicate(10000, fNq.hash.prof.uncertainty())
 
 png("Agrochemical_Review/Response_Fxs/Plots/Hasheesh2011/Snails/hasheesh2011_snail_reproduction_compare.png")
 

@@ -24,7 +24,7 @@ plot(c(0,lc50.amm.rag, lc90.amm.rag)*1000, c(0,0.5, 0.9), pch = 16,
   set.seed(43093)
   
   points(seq(0, (lc90.amm.rag+100)*1000, 2500),
-         sapply(seq(0, (lc90.amm.rag+100)*1000, 2500), rag06_mun_amm),
+         sapply(seq(0, (lc90.amm.rag+100)*1000, 2500), rag06_muNq_amm),
          pch = 5, col = 4, cex = 0.5)
 
 dev.off()
@@ -41,7 +41,7 @@ segments(x0 = 1583.3*1000, x1 = 2280*1000, y0 = 0.5, y1 = 0.5)
 set.seed(43093)
 
 points(seq(0, (lc90.pot.rag+100)*1000, 5000),
-       sapply(seq(0, (lc90.pot.rag+100)*1000, 5000), rag06_mun_pot),
+       sapply(seq(0, (lc90.pot.rag+100)*1000, 5000), rag06_muNq_pot),
        pch = 5, col = 4, cex = 0.5)
 
 dev.off()
@@ -59,7 +59,7 @@ plot(c(0, lc50.urea.rag, lc90.urea.rag)*1000, c(0, 0.5, 0.9), pch = 16,
   set.seed(43093)
   
   points(seq(0, (lc90.urea.rag+100)*1000, 50000),
-         sapply(seq(0, (lc90.urea.rag+100)*1000, 50000), rag06_mun_urea),
+         sapply(seq(0, (lc90.urea.rag+100)*1000, 50000), rag06_muNq_urea),
          pch = 5, col = 4, cex = 0.5)
 
 dev.off()

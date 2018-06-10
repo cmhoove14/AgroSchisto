@@ -31,7 +31,7 @@ ons = read.csv('Agrochemical_Review/Response_Fxs/Data/Omran&Salama2013.csv')
     slp.ons.atr = as.numeric(fatr$params[2]) #1.362160 
     se.lc50.ons.atr = as.numeric(log10(fatr$LWest[3]/lc50.ons.atr) / qnorm(0.975)) #0.1459167 
     
-  ons.munq.atr = function(He){
+  ons.muNq.atr = function(He){
     heu = He/1000
     lc50 = 10^(rnorm(1, log10(lc50.ons.atr), se.lc50.ons.atr))
     mun = pnorm(slp.ons.atr * log10(heu/lc50)) 
@@ -39,7 +39,7 @@ ons = read.csv('Agrochemical_Review/Response_Fxs/Data/Omran&Salama2013.csv')
     return(mun)
   }
   
-keep.ons.atr = c('ons.munq.atr', 'lc50.ons.atr', 'slp.ons.atr', 'se.lc50.ons.atr')
+keep.ons.atr = c('ons.muNq.atr', 'lc50.ons.atr', 'slp.ons.atr', 'se.lc50.ons.atr')
 
 #Glyphosate mortality #########
   gly.dat = dataprep(dose = ons$ppm[ons$chem == 'glyphosate'],
@@ -53,7 +53,7 @@ keep.ons.atr = c('ons.munq.atr', 'lc50.ons.atr', 'slp.ons.atr', 'se.lc50.ons.atr
   slp.ons.gly = as.numeric(fgly$params[2]) #1.159889  
   se.lc50.ons.gly = as.numeric(log10(fgly$LWest[3]/lc50.ons.gly) / qnorm(0.975)) #0.1564323 
   
-  ons.munq.gly = function(He){
+  ons.muNq.gly = function(He){
     heu = He/1000
     lc50 = 10^(rnorm(1, log10(lc50.ons.gly), se.lc50.ons.gly))
     mun = pnorm(slp.ons.gly * log10(heu/lc50)) 
@@ -61,6 +61,6 @@ keep.ons.atr = c('ons.munq.atr', 'lc50.ons.atr', 'slp.ons.atr', 'se.lc50.ons.atr
     return(mun)
   }
   
-  keep.ons.gly = c('ons.munq.gly', 'lc50.ons.gly', 'slp.ons.gly', 'se.lc50.ons.gly')
+  keep.ons.gly = c('ons.muNq.gly', 'lc50.ons.gly', 'slp.ons.gly', 'se.lc50.ons.gly')
 
 keep.ons.all = c(keep.ons.atr, keep.ons.gly)   

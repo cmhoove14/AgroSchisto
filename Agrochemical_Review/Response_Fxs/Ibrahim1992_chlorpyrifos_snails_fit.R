@@ -23,14 +23,14 @@ chlor.fN.predict = drm(juvs.sn.day ~ dose, data = snail.repro, type = 'continuou
                        fct = LL.3(names = c("b", "d", "e"),
                                   fixed = c(NA, max(snail.repro$juvs.sn.day), NA)))
 
-  f_N_chlor_ibr92_uncertainty<-function(In){
+  fNq_chlor_ibr92_uncertainty<-function(In){
       init = predict(chlor.fN.predict, newdata = data.frame(mal = In), se.fit = T)
       fn = rnorm(1, init[1], init[2]) / snail.repro$juvs.sn.day[1]
 
     return(fn)
   }
   
-keep.ibr.fn.ch = c('snail.repro', 'chlor.fN.predict', 'f_N_chlor_ibr92_uncertainty')  
+keep.ibr.fn.ch = c('snail.repro', 'chlor.fN.predict', 'fNq_chlor_ibr92_uncertainty')  
 
 #Snail mortality #############
   #-- relative change in survival over entire experiment period (12 weeks)
@@ -47,11 +47,11 @@ keep.ibr.fn.ch = c('snail.repro', 'chlor.fN.predict', 'f_N_chlor_ibr92_uncertain
                 type = 'binomial', fct = LL.2(names = c('b', 'e'),
                                               fixed = c(NA, NA)))
   
-  mu_N_chlor_ibr92_uncertainty<-function(In){
+  muNq_chlor_ibr92_uncertainty<-function(In){
       init = predict(ibr_muNq, data.frame(dose = In), se.fit = T)
       mun = rnorm(1, init[1], init[2])
    
     return(mun)
   }
   
-keep.ibr.ch = c(keep.ibr.fn.ch, 'mu_N_chlor_ibr92_uncertainty', 'ibr_muNq', 'snail.mort')      
+keep.ibr.ch = c(keep.ibr.fn.ch, 'muNq_chlor_ibr92_uncertainty', 'ibr_muNq', 'snail.mort')      

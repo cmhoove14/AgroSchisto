@@ -37,7 +37,7 @@ png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/butralin_muN_sim
   
     set.seed(43093)
     
-    points(seq(0,13000,50), sapply(seq(0,13000,50), mu_Nq_butr_gaf16_uncertainty, simplify = T), 
+    points(seq(0,13000,50), sapply(seq(0,13000,50), muNq_butr_gaf16_uncertainty, simplify = T), 
            pch = 5, col = 4, cex = 0.5)
     
     legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), legend = c("Reported", "Sampled"), cex = 0.75)
@@ -59,7 +59,7 @@ plot(gafrep$but.conc, gafrep$but.rep, pch = 16, #ylim = c(0,6.25),
     set.seed(43093)
  
  points(seq(0,4.500,.01), 
-        sapply(seq(0,4500,10), fN.butr.fx.uncertainty, simplify = T)*gafrep_ref,
+        sapply(seq(0,4500,10), fNq.butr.fx.uncertainty, simplify = T)*gafrep_ref,
         pch = 5, col = 4, cex = 0.5) 
 
   legend("topright", bty="n", pch = c(16, 5), col = c(1,4), legend = c("Reported", "Sampled"), cex = 0.75)
@@ -91,7 +91,7 @@ plot(gly.dat$glyphosate, gly.dat$lcs/100, pch = 16, ylim = c(0,1), xlim = c(0,33
 
     set.seed(43093)
     
-  points(seq(0,33000,100), sapply(seq(0,33000,100), mu_Nq_gly_gaf16_uncertainty, simplify = T), 
+  points(seq(0,33000,100), sapply(seq(0,33000,100), muNq_gly_gaf16_uncertainty, simplify = T), 
          pch = 5, col = 4, cex = 0.5)
   
    legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), legend = c("Reported", "Sampled"), cex = 0.75)
@@ -113,7 +113,7 @@ png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/glyphosate_fN_si
     set.seed(43093)
  
  points(seq(0,10,0.1), 
-        sapply(seq(0,10,0.1)*1000, fN.gly.fx.uncertainty, simplify = T)*gafrep_ref,
+        sapply(seq(0,10,0.1)*1000, fNq.gly.fx.uncertainty, simplify = T)*gafrep_ref,
         pch = 5, col = 4, cex = 0.5) 
 
   legend("topright", bty="n", pch = c(16, 5), col = c(1,4), legend = c("Reported", "Sampled"), cex = 0.75)
@@ -146,7 +146,7 @@ png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/pendimethalin_mu
   
     set.seed(43093)
     
-    points(seq(0,7500,25), sapply(seq(0,7500,25), mu_Nq_pen_gaf16_uncertainty, simplify = T), 
+    points(seq(0,7500,25), sapply(seq(0,7500,25), muNq_pen_gaf16_uncertainty, simplify = T), 
            pch = 5, col = 4, cex = 0.5)
     
     legend("bottomright", bty="n", pch = c(16, 5), col = c(1,4), legend = c("Reported", "Sampled"), cex = 0.75)
@@ -168,7 +168,7 @@ png("Agrochemical_Review/Response_Fxs/Plots/Ghaffar_2016/Snails/pendimethalin_fN
     set.seed(43093)
  
  points(seq(0,1.3,0.01), 
-        sapply(seq(0,1.3,0.01)*1000, fN.pen.fx.uncertainty, simplify = T)*gafrep_ref,
+        sapply(seq(0,1.3,0.01)*1000, fNq.pen.fx.uncertainty, simplify = T)*gafrep_ref,
         pch = 5, col = 4, cex = 0.5) 
 
   legend("topright", bty="n", pch = c(16, 5), col = c(1,4), legend = c("Reported", "Sampled"), cex = 0.75)

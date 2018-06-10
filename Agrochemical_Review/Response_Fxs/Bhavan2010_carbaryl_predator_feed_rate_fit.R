@@ -23,15 +23,15 @@ bhavan_ref <- bhavan_dat$food_con[1]
                fct = LL.3(names = c('b', 'd', 'e'),
                           fixed = c(NA, max(bhavan_dat$food_con), NA)))
 
-  psi_q_carb_bhavan10<-function(In){
+  psiq_carb_bhavan10<-function(In){
     predict(carb_fr, data.frame(conc = In), interval = 'confidence', level = 0.95) / bhavan_ref
   }  
     
   par.tricks.carb = c(coef(carb_fr), 'd' = max(bhavan_dat$food_con))[c(1,3,2)]
     
-  psi_q_carb_bhavan10_uncertainty<-function(In){
+  psiq_carb_bhavan10_uncertainty<-function(In){
     rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.carb, yerror = 'rnorm', xerror = In,
          ypar = c(0, predict(carb_fr, data.frame(dose = In), se.fit = T)[2]))$y / bhavan_ref
   }
     
-keep.carb.bhavan10 = c('psi_q_carb_bhavan10_uncertainty', 'par.tricks.carb', 'carb_fr', "bhavan_ref")    
+keep.carb.bhavan10 = c('psiq_carb_bhavan10_uncertainty', 'par.tricks.carb', 'carb_fr', "bhavan_ref")    
