@@ -26,7 +26,7 @@ dat<-read.csv('Agrochemical_Review/Response_Fxs/Data/Halstead_meso_data.csv')
       ref.sd<-sd(refs)
     
 #Fertilizer bottom up effects  
-  halstead17_phiNq_fe_uncertainty = function(){ #function based on snail hatchlings
+  halstead18_phiNq_fe_uncertainty = function(){ #function based on snail hatchlings
     phin = rnorm(1, fe.mean, fe.sd) / ref.mean
     while(phin <= 0) phin = rnorm(1, fe.mean, fe.sd) / ref.mean
     phin
@@ -34,14 +34,14 @@ dat<-read.csv('Agrochemical_Review/Response_Fxs/Data/Halstead_meso_data.csv')
       
       
 #Atrazine bottom up effects  
-  halstead17_phiNq_at_uncertainty = function(){ #function based on snail hatchlings
+  halstead18_phiNq_at_uncertainty = function(){ #function based on snail hatchlings
     phin = rnorm(1, at.mean, at.sd) / ref.mean
     while(phin <= 0) phin = rnorm(1, at.mean, at.sd) / ref.mean
     phin
   }
 
-keep.halstead17 = c('halstead17_phiNq_at_uncertainty', 'at.mean', 'at.sd', 'ref.mean',
-                    'halstead17_phiNq_fe_uncertainty', 'fe.mean', 'fe.sd')    
+keep.halstead18 = c('halstead18_phiNq_at_uncertainty', 'at.mean', 'at.sd', 'ref.mean',
+                    'halstead18_phiNq_fe_uncertainty', 'fe.mean', 'fe.sd')    
   
 #mean(sapply(runif(5000, 0, 1000), halstead17_phiN_fe_uncertainty))
 #mean(sapply(runif(5000, 0, 1000), halstead17_phiN_at_uncertainty))
