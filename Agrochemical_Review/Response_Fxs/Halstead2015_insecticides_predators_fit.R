@@ -30,7 +30,7 @@ require(dplyr)
   
 #Malathion ******************************************************************************########
 mal <- data %>%
-    filter(Chem == "Mal") %>%
+    dplyr::filter(Chem == "Mal") %>%
     group_by(Conc) %>%
     summarise(nrx = sum(Dead)) %>%
     mutate(ntot = 5)
@@ -60,7 +60,7 @@ mal <- data %>%
   
 #Chlorpyrifos   *************************************************************************############
 chlor <- data %>%
-    filter(Chem == "Chlor") %>%
+    dplyr::filter(Chem == "Chlor") %>%
     group_by(Conc) %>%
     summarise(nrx = sum(Dead)) %>%
     mutate(ntot = 5)
@@ -90,7 +90,7 @@ chlor <- data %>%
 
 #Terbufos   *****************************************************************************########
 terb <- data %>%
-    filter(Chem == "Terb") %>%
+    dplyr::filter(Chem == "Terb") %>%
     group_by(Conc) %>%
     summarise(nrx = sum(Dead)) %>%
     mutate(ntot = 5)
@@ -127,7 +127,7 @@ terb <- data %>%
 
 #Lambda-cyhalothrin   *******************************************************************##########
 lamcy <- data %>%
-    filter(Chem == "Lambda") %>%
+    dplyr::filter(Chem == "Lambda") %>%
     group_by(Conc) %>%
     summarise(nrx = sum(Dead)) %>%
     mutate(ntot = 5,
@@ -159,7 +159,7 @@ lamcy <- data %>%
   
 #esfenvalerate  *************************************************************************#######
 esfen <- data %>%
-    filter(Chem == "Esfen") %>%
+    dplyr::filter(Chem == "Esfen") %>%
     group_by(Conc) %>%
     summarise(nrx = sum(Dead)) %>%
     mutate(ntot = 5,
@@ -191,7 +191,7 @@ esfen <- data %>%
       
 #Permethrin *****************************************************************************##########
 perm <- data %>%
-    filter(Chem == "Perm") %>%
+    dplyr::filter(Chem == "Perm") %>%
     group_by(Conc) %>%
     summarise(nrx = sum(Dead)) %>%
     mutate(ntot = 5,

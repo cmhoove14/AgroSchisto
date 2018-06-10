@@ -10,6 +10,8 @@
 #and indicate changes that were made.###############
 
 require(LW1949)
+require(drc)
+
 #Toxicity of Carbofuran to Macrobrachium olfersii from Barbieri et al 2016
 
 barb_dat <- dataprep(dose = c(0, 0.01, 0.1, 0.5, 1, 2, 3, 4),
@@ -22,7 +24,7 @@ barb_dat <- dataprep(dose = c(0, 0.01, 0.1, 0.5, 1, 2, 3, 4),
   
     summary(barb.mupq)
 
-  muPq_carb_barb16_uncertainty<-function(In){
+  muPq_carb_barb16_uncertainty_drc<-function(In){
       init = predict(barb.mupq, data.frame(conc=In/1000), se.fit = T)
       mup = rnorm(1, init[1], init[2])
 
@@ -39,7 +41,7 @@ barb_lw_pars <- LWestimate(fitLWauto(barb_dat), barb_dat)
   slp.barb.carb = as.numeric(barb_lw_pars$params[2])   
   se.barb.carb = as.numeric(log10(barb_lw_pars$LWest[3]/lc50.barb.carb) / qnorm(0.975))  
   
-  barb_carbofuran_muPq_uncertainty = function(In){
+  muPq_carb_barb16_uncertainty = function(In){
     ins = In/1000
     lc50 = 10^(rnorm(1, log10(lc50.barb.carb), se.barb.carb))
     mun = pnorm(slp.barb.carb * log10(ins/lc50)) 
@@ -47,5 +49,5 @@ barb_lw_pars <- LWestimate(fitLWauto(barb_dat), barb_dat)
     return(mun)
   }
 
-  keep.barb2016 <- c("barb_carbofuran_muPq_uncertainty", "slp.barb.carb", "lc50.barb.carb", "se.barb.carb",
+  keep.barb2016 <- c("muPq_carb_barb16_uncertainty_drc", "slp.barb.carb", "lc50.barb.carb", "se.barb.carb",
                      "muPq_carb_barb16_uncertainty", "barb.mupq")
