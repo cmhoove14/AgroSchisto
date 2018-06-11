@@ -56,7 +56,7 @@ Ibrahim1992,Ibrahim et al 1992,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemo
 Johnson2007,Johnson et al 2007,Fertilizer,,,Fertilizer,direct snail,Planorbella trivolvis,,reproduction,fNq
 Johnson2007,Johnson et al 2007,Fertilizer,,,Fertilizer,direct snail,Planorbella trivolvis,,cercariae production,theta
 Johnson2007,Johnson et al 2007,Fertilizer,,,Fertilizer,bottom-up,Planorbella trivolvis,,reproduction,phiNq
-Koprivnikar2006,Koprivnikar et al 2006,Atrazine,,,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC
+Koprivnikar2006,Koprivnikar et al 2006,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC
 Kristoff2011,Kristoff et al 2011,Azinphos-methyl,,,Insecticide,direct snail,Biomphalaria glabrata,,reproduction,muNq
 Lavarias2013,Lavarias et al 2013,Fenitrothion,36.6,https://archive.epa.gov/pesticides/reregistration/web/pdf/0445.pdf,Insecticide,top-down,Macrobrachium borellii,,mortality,muPq
 Leung1980,Leung et al 1980,Fenitrothion,36.6,https://archive.epa.gov/pesticides/reregistration/web/pdf/0445.pdf,Insecticide,top-down,Procambarus clarkii,,mortality,muPq
