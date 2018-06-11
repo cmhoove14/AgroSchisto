@@ -1,114 +1,114 @@
-Study,Chemical,Class,Pathway,Species,Type,Response
-Bajet2012,Lambda-cyhalothrin,Insecticide,top-down,Macrobrachium lar,,mortality
-Bajet2012,Deltamethrin,Insecticide,top-down,Macrobrachium lar,,mortality
-Bajet2012,Cypermethrin,Insecticide,top-down,Macrobrachium lar,,mortality
-Bajet2012,Chlorpyrifos,Insecticide,top-down,Macrobrachium lar,,mortality
-Bajet2012,Profenofos,Insecticide,top-down,Macrobrachium lar,,mortality
-Bajet2012,Malathion,Insecticide,top-down,Macrobrachium lar,,mortality
-Bajet2012,Carbaryl,Insecticide,top-down,Macrobrachium lar,,mortality
-Bajet2012,"2,4-D",Herbicide,top-down,Macrobrachium lar,,mortality
-Bajet2012,Butachlor,Herbicide,top-down,Macrobrachium lar,,mortality
-Bakry2011,Malathion,Insecticide,direct snail,Helisoma duryi,,mortality
-Bakry2011,Deltamethrin,Insecticide,direct snail,Helisoma duryi,,mortality
-Bakry2012,Atrazine,Herbicide,direct snail,Biomphalaria alexandrina,,mortality
-Bakry2012,Glyphosate,Herbicide,direct snail,Biomphalaria alexandrina,,mortality
-Bakry2016,Paraquat,Herbicide,direct snail,Lymnaea natalensis,,mortality
-Barbieri2016,Carbofuran,Insecticide,top-down,Macrobrachium olfersii,,mortality
-Baxter_Rohr2011,Atrazine,Herbicide,bottom-up,Physella spp,,reproduction
-Benli2007,"2,4-D",Herbicide,top-down,Astacus leptodactylus,,mortality
-Bhavan2010,Carbaryl,Insecticide,top-down,Macrobrachium malcomonii,,attack rate
-Browne&Moore2014,"2,4-D",Herbicide,top-down,Orconectes rusticus,,attack rate
-Fornstrom1997,Terbufos,Insecticide,top-down,Procambarus clarkii,,mortality
-Ghaffar2016,Butralin,Herbicide,direct larvae,Schistosoma mansoni,cercariae,mortality
-Ghaffar2016,Glyphosate,Herbicide,direct larvae,Schistosoma mansoni,cercariae,mortality
-Ghaffar2016,Pendimethalin,Herbicide,direct larvae,Schistosoma mansoni,cercariae,mortality
-Ghaffar2016,Butralin,Herbicide,direct larvae,Schistosoma mansoni,miracidia,mortality
-Ghaffar2016,Glyphosate,Herbicide,direct larvae,Schistosoma mansoni,miracidia,mortality
-Ghaffar2016,Pendimethalin,Herbicide,direct larvae,Schistosoma mansoni,miracidia,mortality
-Ghaffar2016,Butralin,Herbicide,direct snail,Biomphalaria alexandrina,,mortality
-Ghaffar2016,Glyphosate,Herbicide,direct snail,Biomphalaria alexandrina,,mortality
-Ghaffar2016,Pendimethalin,Herbicide,direct snail,Biomphalaria alexandrina,,mortality
-Ghaffar2016,Butralin,Herbicide,direct snail,Biomphalaria alexandrina,,reproduction
-Ghaffar2016,Glyphosate,Herbicide,direct snail,Biomphalaria alexandrina,,reproduction
-Ghaffar2016,Pendimethalin,Herbicide,direct snail,Biomphalaria alexandrina,,reproduction
-Griggs08,Atrazine,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality
-Griggs08,Metolachlor,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality
-Gustafson2016,Atrazine,Herbicide,direct snail,Physa acuta,,cercariae production
-Halstead2015,Malathion,Insecticide,top-down,Procambarus clarkii,,mortality
-Halstead2015,Chlorpyrifos,Insecticide,top-down,Procambarus clarkii,,mortality
-Halstead2015,Terbufos,Insecticide,top-down,Procambarus clarkii,,mortality
-Halstead2015,Esfenvalerate,Insecticide,top-down,Procambarus clarkii,,mortality
-Halstead2015,Lambda-cyhalothrin,Insecticide,top-down,Procambarus clarkii,,mortality
-Halstead2015,Permethrin,Insecticide,top-down,Procambarus clarkii,,mortality
-Halstead_meso2017,Atrazine,Herbicide,bottom-up,Bulinus truncatus,,reproduction
-Halstead_meso2017,Fertilizer,Fertilizer,bottom-up,Bulinus truncatus,,reproduction
-Hasheesh2011,Chlorpyrifos,Insecticide,direct larvae,Schistosoma haematobium,cercariae,mortality
-Hasheesh2011,Profenofos,Insecticide,direct larvae,Schistosoma haematobium,cercariae,mortality
-Hasheesh2011,Chlorpyrifos,Insecticide,direct larvae,Schistosoma haematobium,miracidia,mortality
-Hasheesh2011,Profenofos,Insecticide,direct larvae,Schistosoma haematobium,miracidia,mortality
-Hasheesh2011,Chlorpyrifos,Insecticide,direct snail,Bulinus truncatus,,mortality
-Hasheesh2011,Profenofos,Insecticide,direct snail,Bulinus truncatus,,mortality
-Hussein2016,Fertilizer,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality
-Hussein2016,Fertilizer,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality
-Hussein2016,Fertilizer,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality
-Ibrahim1992,Chlorpyrifos,Insecticide,direct snail,Biomphalaria alexandrina,,mortality
-Ibrahim1992,Chlorpyrifos,Insecticide,direct snail,Biomphalaria alexandrina,,reproduction
-Johnson2007,Fertilizer,Fertilizer,direct snail,Planorbella trivolvis,,reproduction
-Johnson2007,Fertilizer,Fertilizer,direct snail,Planorbella trivolvis,,cercariae production
-Johnson2007,Fertilizer,Fertilizer,bottom-up,Planorbella trivolvis,,reproduction
-Koprivnikar2006,Atrazine,Herbicide,direct larvae,Echinistoma trivolvis,,mortality
-Kristoff2011,Azinphos-methyl,Insecticide,direct snail,Biomphalaria glabrata,,reproduction
-Lavarias2013,Fenitrothion,Insecticide,top-down,Macrobrachium borellii,,mortality
-Leung1980,Fenitrothion,Insecticide,top-down,Procambarus clarkii,,mortality
-Mohamed2012,Profenofos,Insecticide,direct snail,Biomphalaria alexandrina,,mortality
-Mohamed2012,Profenofos,Insecticide,direct snail,Biomphalaria alexandrina,,reproduction
-Mohamed2012,Diazinon,Insecticide,direct snail,Biomphalaria alexandrina,,mortality
-Mohamed2012,Diazinon,Insecticide,direct snail,Biomphalaria alexandrina,,reproduction
-Monde2016,Endosulfan,Insecticide,direct snail,Bulinus globusus,,mortality
-Monte2016,Glyphosate,Herbicide,direct larvae,Echinistoma paraensei,cercariae,mortality
-Monte2016,Glyphosate,Herbicide,direct larvae,Echinistoma paraensei,miracidia,mortality
-Naqvi1983,Trifluralin,Herbicide,top-down,Procambarus clarkii,,mortality
-Naqvi1983,Oryzalin,Herbicide,top-down,Procambarus clarkii,,mortality
-Naqvi1987,Endosulfan,Insecticide,top-down,Procambarus clarkii,,mortality
-Naqvi1987,Trifluralin,Herbicide,top-down,Procambarus clarkii,,mortality
-Naqvi1987,MSMA,Herbicide,top-down,Procambarus clarkii,,mortality
-Oliveira,Endosulfan,Insecticide,direct snail,Biomphalaria tenagophila,,reproduction
-Omkar1985,Endosulfan,Insecticide,top-down,Macrobrachium dayanum,,mortality
-Omkar1985,Phosphamidon,Insecticide,top-down,Macrobrachium dayanum,,mortality
-Omkar1985,Carbaryl,Insecticide,top-down,Marcobrachium dayanum,,mortality
-Omran&Salama2013,Atrazine,Herbicide,direct snail,Biomphalaria alexandrina,,mortality
-Omran&Salama2013,Glyphosate,Herbicide,direct snail,Biomphalaria alexandrina,,mortality
-Ragab2006,Ammonium Phosphate,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality
-Ragab2006,Potassium Sulphate,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality
-Ragab2006,Urea,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality
-Revathi2010,Tributyltin,Insecticide,top-down,Macrobrachium rosenbergii,,reproduction
-Rohr2008_nature,Atrazine,Herbicide,bottom-up,Planorbella trivolvis,,reproduction
-Rohr2008_atrazine,Atrazine,Herbicide,direct larvae,Echinistoma trivolvis,,mortality
-Sarojini1986,Fenitrothion,Insecticide,top-down,Macrobrachium lamerii,,mortality
-Satapornvanit2009,Chlorpyrifos,Insecticide,top-down,Macrobrachium rosenbergii,,mortality
-Satapornvanit2009,Dimethoate,Insecticide,top-down,Macrobrachium rosenbergii,,mortality
-Satapornvanit2009,Profenofos,Insecticide,top-down,Macrobrachium rosenbergii,,mortality
-Satapornvanit2009,Chlorpyrifos,Insecticide,top-down,Macrobrachium rosenbergii,,attack rate
-Shukla1985,Quinalphos,Insecticide,top-down,Macrobrachium lamerii,,mortality
-Shukla1985,Dichlorvos,Insecticide,top-down,Macrobrachium lamerii,,mortality
-Shukla1985,Monocrotophos,Insecticide,top-down,Macrobrachium lamerii,,mortality
-Shukla1985,Carbaryl,Insecticide,top-down,Macrobrachium lamerii,,mortality
-Shukla1984,Endosulfan,Insecticide,top-down,Macrobrachium lamerii,,mortality
-Shukla1984,Methyldemeton,Insecticide,top-down,Macrobrachium lamerii,,mortality
-Shukla1984,Carbaryl,Insecticide,top-down,Macrobrachium lamerii,,mortality
-Tantawy2002,Butachlor,Herbicide,direct snail,Biomphalaria alexandrina,,mortality
-Tantawy2002,Fluazifop-p-butyl,Herbicide,direct snail,Biomphalaria alexandrina,,mortality
-Tantawy2002,Butachlor,Herbicide,direct larvae,Schistosoma mansoni,,mortality
-Tantawy2002,Fluazifop-p-butyl,Herbicide,direct larvae,Schistosoma mansoni,,mortality
-Tantawy2002,Butachlor,Herbicide,direct larvae,Schistosoma mansoni,,mortality
-Tantawy2002,Fluazifop-p-butyl,Herbicide,direct larvae,Schistosoma mansoni,,mortality
-Tchounwou91,Malathion,Insecticide,direct snail,Bulinus havanensis,,mortality
-Tchounwou91,Malathion,Insecticide,direct snail,Bulinus havanensis,,reproduction
-Tchounwou91,Malathion,Insecticide,direct snail,Planorbella trivolvis,,mortality
-Tchounwou91,Malathion,Insecticide,direct snail,Planorbella trivolvis,,reproduction
-Tchounwou91,Malathion,Insecticide,direct larvae,Schistosoma mansoni,miracidia,mortality
-Tchounwou91b,Ammonium Phosphate,Fertilizer,direct larvae,Schistosoma mansoni,miracidia,mortality
-Tchounwou91b,Urea,Fertilizer,direct larvae,Schistosoma mansoni,miracidia,mortality
-Tchounwou91b,Ammonium Phosphate,Fertilizer,direct larvae,Schistosoma mansoni,eggs,viability
-Tchounwou91b,Urea,Fertilizer,direct larvae,Schistosoma mansoni,eggs,viability
-Tchounwou92,Malathion,Insecticide,direct larvae,Schistosoma mansoni,cercariae,mortality
+Study,study_long,Chemical,eec,eec_source,Class,Pathway,Species,Type,Response,parameter
+Bajet2012,Bajet et al 2012,Lambda-cyhalothrin,1.77,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium lar,,mortality,muPq
+Bajet2012,Bajet et al 2012,Deltamethrin,4.52,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,top-down,Macrobrachium lar,,mortality,muPq
+Bajet2012,Bajet et al 2012,Cypermethrin,5.9,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,top-down,Macrobrachium lar,,mortality,muPq
+Bajet2012,Bajet et al 2012,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium lar,,mortality,muPq
+Bajet2012,Bajet et al 2012,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,top-down,Macrobrachium lar,,mortality,muPq
+Bajet2012,Bajet et al 2012,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium lar,,mortality,muPq
+Bajet2012,Bajet et al 2012,Carbaryl,33.5,https://doi.org/10.1645/GE-2078.1,Insecticide,top-down,Macrobrachium lar,,mortality,muPq
+Bajet2012,Bajet et al 2012,"2,4-D",762,https://archive.epa.gov/pesticides/reregistration/web/pdf/24d_red.pdf,Herbicide,top-down,Macrobrachium lar,,mortality,muPq
+Bajet2012,Bajet et al 2012,Butachlor,,,Herbicide,top-down,Macrobrachium lar,,mortality,muPq
+Bakry2011,Bakry et al 2011,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Helisoma duryi,,mortality,muNq
+Bakry2011,Bakry et al 2011,Deltamethrin,4.52,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct snail,Helisoma duryi,,mortality,muNq
+Bakry2012,Bakry et al 2012,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Bakry2012,Bakry et al 2012,Glyphosate,3700,https://doi.org/10.1645/GE-2078.1,Herbicide,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Bakry2016,Bakry et al 2016,Paraquat,4.8,https://archive.epa.gov/pesticides/reregistration/web/pdf/0262red.pdf,Herbicide,direct snail,Lymnaea natalensis,,mortality,muNq
+Barbieri2016,Barbieri et al 2016,Carbofuran,,,Insecticide,top-down,Macrobrachium olfersii,,mortality,muPq
+Baxter_Rohr2011,Baxter et al 2011,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,bottom-up,Physella spp,,reproduction,fNq
+Benli2007,Benli et al 2007,"2,4-D",762,https://archive.epa.gov/pesticides/reregistration/web/pdf/24d_red.pdf,Herbicide,top-down,Astacus leptodactylus,,mortality,muPq
+Bhavan2010,Bhavan etl 2010,Carbaryl,33.5,https://doi.org/10.1645/GE-2078.1,Insecticide,top-down,Macrobrachium malcomonii,,attack rate,psiq
+Browne&Moore2014,Browne & Moore 2014,"2,4-D",762,https://archive.epa.gov/pesticides/reregistration/web/pdf/24d_red.pdf,Herbicide,top-down,Orconectes rusticus,,attack rate,psiq
+Fornstrom1997,Fornstrom et al 1997,Terbufos,36.6,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq
+Ghaffar2016,Abdel-Ghaffar et al 2016,Butralin,16.89,Epa report,Herbicide,direct larvae,Schistosoma mansoni,cercariae,mortality,piC
+Ghaffar2016,Abdel-Ghaffar et al 2016,Glyphosate,3700,https://doi.org/10.1645/GE-2078.1,Herbicide,direct larvae,Schistosoma mansoni,cercariae,mortality,piC
+Ghaffar2016,Abdel-Ghaffar et al 2016,Pendimethalin,31,https://archive.epa.gov/pesticides/reregistration/web/pdf/0187red.pdf,Herbicide,direct larvae,Schistosoma mansoni,cercariae,mortality,piC
+Ghaffar2016,Abdel-Ghaffar et al 2016,Butralin,16.89,Epa report,Herbicide,direct larvae,Schistosoma mansoni,miracidia,mortality,piM
+Ghaffar2016,Abdel-Ghaffar et al 2016,Glyphosate,3700,https://doi.org/10.1645/GE-2078.1,Herbicide,direct larvae,Schistosoma mansoni,miracidia,mortality,piM
+Ghaffar2016,Abdel-Ghaffar et al 2016,Pendimethalin,31,https://archive.epa.gov/pesticides/reregistration/web/pdf/0187red.pdf,Herbicide,direct larvae,Schistosoma mansoni,miracidia,mortality,piM
+Ghaffar2016,Abdel-Ghaffar et al 2016,Butralin,16.89,Epa report,Herbicide,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Ghaffar2016,Abdel-Ghaffar et al 2016,Glyphosate,3700,https://doi.org/10.1645/GE-2078.1,Herbicide,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Ghaffar2016,Abdel-Ghaffar et al 2016,Pendimethalin,31,https://archive.epa.gov/pesticides/reregistration/web/pdf/0187red.pdf,Herbicide,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Ghaffar2016,Abdel-Ghaffar et al 2016,Butralin,16.89,Epa report,Herbicide,direct snail,Biomphalaria alexandrina,,reproduction,fNq
+Ghaffar2016,Abdel-Ghaffar et al 2016,Glyphosate,3700,https://doi.org/10.1645/GE-2078.1,Herbicide,direct snail,Biomphalaria alexandrina,,reproduction,fNq
+Ghaffar2016,Abdel-Ghaffar et al 2016,Pendimethalin,31,https://archive.epa.gov/pesticides/reregistration/web/pdf/0187red.pdf,Herbicide,direct snail,Biomphalaria alexandrina,,reproduction,fNq
+Griggs08,Griggs et al 2008,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC
+Griggs08,Griggs et al 2008,Metolachlor,186,https://archive.epa.gov/pesticides/reregistration/web/pdf/0001.pdf,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC
+Gustafson2016,Gustafson et al 2016,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct snail,Physa acuta,,cercariae production,theta
+Halstead2015,Halstead et al 2015,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq
+Halstead2015,Halstead et al 2015,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq
+Halstead2015,Halstead et al 2015,Terbufos,36.6,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq
+Halstead2015,Halstead et al 2015,Esfenvalerate,1.03,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq
+Halstead2015,Halstead et al 2015,Lambda-cyhalothrin,1.77,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq
+Halstead2015,Halstead et al 2015,Permethrin,5.98,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq
+Halstead_meso2018,Halstead et al 2018,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,bottom-up,Bulinus truncatus,,reproduction,fNq
+Halstead_meso2018,Halstead et al 2018,Fertilizer,,,Fertilizer,bottom-up,Bulinus truncatus,,reproduction,fNq
+Hasheesh2011,Hasheesh & Mohamed 2011,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma haematobium,cercariae,mortality,piC
+Hasheesh2011,Hasheesh & Mohamed 2011,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct larvae,Schistosoma haematobium,cercariae,mortality,piC
+Hasheesh2011,Hasheesh & Mohamed 2011,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma haematobium,miracidia,mortality,piM
+Hasheesh2011,Hasheesh & Mohamed 2011,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct larvae,Schistosoma haematobium,miracidia,mortality,piM
+Hasheesh2011,Hasheesh & Mohamed 2011,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Bulinus truncatus,,mortality,muNq
+Hasheesh2011,Hasheesh & Mohamed 2011,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct snail,Bulinus truncatus,,mortality,muNq
+Hussein2016,Hussein et al 2016,Fertilizer,,,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Hussein2016,Hussein et al 2016,Fertilizer,,,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Hussein2016,Hussein et al 2016,Fertilizer,,,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Ibrahim1992,Ibrahim et al 1992,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Ibrahim1992,Ibrahim et al 1992,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Biomphalaria alexandrina,,reproduction,fNq
+Johnson2007,Johnson et al 2007,Fertilizer,,,Fertilizer,direct snail,Planorbella trivolvis,,reproduction,fNq
+Johnson2007,Johnson et al 2007,Fertilizer,,,Fertilizer,direct snail,Planorbella trivolvis,,cercariae production,theta
+Johnson2007,Johnson et al 2007,Fertilizer,,,Fertilizer,bottom-up,Planorbella trivolvis,,reproduction,phiNq
+Koprivnikar2006,Koprivnikar et al 2006,Atrazine,,,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC
+Kristoff2011,Kristoff et al 2011,Azinphos-methyl,,,Insecticide,direct snail,Biomphalaria glabrata,,reproduction,muNq
+Lavarias2013,Lavarias et al 2013,Fenitrothion,36.6,https://archive.epa.gov/pesticides/reregistration/web/pdf/0445.pdf,Insecticide,top-down,Macrobrachium borellii,,mortality,muPq
+Leung1980,Leung et al 1980,Fenitrothion,36.6,https://archive.epa.gov/pesticides/reregistration/web/pdf/0445.pdf,Insecticide,top-down,Procambarus clarkii,,mortality,muPq
+Mohamed2012,Mohamed et al 2012,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Mohamed2012,Mohamed et al 2012,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct snail,Biomphalaria alexandrina,,reproduction,fNq
+Mohamed2012,Mohamed et al 2012,Diazinon,,,Insecticide,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Mohamed2012,Mohamed et al 2012,Diazinon,,,Insecticide,direct snail,Biomphalaria alexandrina,,reproduction,fNq
+Monde2016,Monde et al 2016,Endosulfan,7.6,https://archive.epa.gov/pesticides/chemicalsearch/chemical/foia/web/pdf/079401/079401-123.pdf,Insecticide,direct snail,Bulinus globusus,,mortality,muNq
+Monte2016,Monte et al 2016,Glyphosate,3700,https://doi.org/10.1645/GE-2078.1,Herbicide,direct larvae,Echinistoma paraensei,cercariae,mortality,piC
+Monte2016,Monte et al 2016,Glyphosate,3700,https://doi.org/10.1645/GE-2078.1,Herbicide,direct larvae,Echinistoma paraensei,miracidia,mortality,piM
+Naqvi1983,Naqvi et al 1983,Trifluralin,,,Herbicide,top-down,Procambarus clarkii,,mortality,muPq
+Naqvi1983,Naqvi et al 1983,Oryzalin,,,Herbicide,top-down,Procambarus clarkii,,mortality,muPq
+Naqvi1987,Naqvi et al 1987,Endosulfan,7.6,https://archive.epa.gov/pesticides/chemicalsearch/chemical/foia/web/pdf/079401/079401-123.pdf,Insecticide,top-down,Procambarus clarkii,,mortality,muPq
+Naqvi1987,Naqvi et al 1987,Trifluralin,,,Herbicide,top-down,Procambarus clarkii,,mortality,muPq
+Naqvi1987,Naqvi et al 1987,MSMA,,,Herbicide,top-down,Procambarus clarkii,,mortality,muPq
+Oliveira,Oliveira et al 2009,Endosulfan,7.6,https://archive.epa.gov/pesticides/chemicalsearch/chemical/foia/web/pdf/079401/079401-123.pdf,Insecticide,direct snail,Biomphalaria tenagophila,,reproduction,fNq
+Omkar1985,Omkar et al 1985,Endosulfan,7.6,https://archive.epa.gov/pesticides/chemicalsearch/chemical/foia/web/pdf/079401/079401-123.pdf,Insecticide,top-down,Macrobrachium dayanum,,mortality,muPq
+Omkar1985,Omkar et al 1985,Phosphamidon,,,Insecticide,top-down,Macrobrachium dayanum,,mortality,muPq
+Omkar1985,Omkar et al 1985,Carbaryl,33.5,https://doi.org/10.1645/GE-2078.1,Insecticide,top-down,Marcobrachium dayanum,,mortality,muPq
+Omran&Salama2013,Omran & Salama 2013,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Omran&Salama2013,Omran & Salama 2013,Glyphosate,3700,https://doi.org/10.1645/GE-2078.1,Herbicide,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Ragab2006,Ragab et al 2006,Ammonium Phosphate,,,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Ragab2006,Ragab et al 2006,Potassium Sulphate,,,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Ragab2006,Ragab et al 2006,Urea,,,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Revathi2010,Revathi & Munuswamy 2010,Tributyltin,,,Insecticide,top-down,Macrobrachium rosenbergii,,reproduction,fPq
+Rohr2008_nature,Rohr et al 2008,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,bottom-up,Planorbella trivolvis,,reproduction,phiNq
+Rohr2008_atrazine,Rohr et al 2008b,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC
+Sarojini1986,Sarojini et al 1986,Fenitrothion,36.6,https://archive.epa.gov/pesticides/reregistration/web/pdf/0445.pdf,Insecticide,top-down,Macrobrachium lamerii,,mortality,muPq
+Satapornvanit2009,Satapornvanit et al 2009,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq
+Satapornvanit2009,Satapornvanit et al 2009,Dimethoate,,,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq
+Satapornvanit2009,Satapornvanit et al 2009,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq
+Satapornvanit2009,Satapornvanit et al 2009,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,,attack rate,psiq
+Shukla1985,Omran & Shukla 1985,Quinalphos,,,Insecticide,top-down,Macrobrachium lamerii,,mortality,muPq
+Shukla1985,Omran & Shukla 1985,Dichlorvos,,,Insecticide,top-down,Macrobrachium lamerii,,mortality,muPq
+Shukla1985,Omran & Shukla 1985,Monocrotophos,,,Insecticide,top-down,Macrobrachium lamerii,,mortality,muPq
+Shukla1985,Omran & Shukla 1985,Carbaryl,33.5,https://doi.org/10.1645/GE-2078.1,Insecticide,top-down,Macrobrachium lamerii,,mortality,muPq
+Shukla1984,Omran & Shukla 1984,Endosulfan,7.6,https://archive.epa.gov/pesticides/chemicalsearch/chemical/foia/web/pdf/079401/079401-123.pdf,Insecticide,top-down,Macrobrachium lamerii,,mortality,muPq
+Shukla1984,Omran & Shukla 1984,Methyldemeton,,,Insecticide,top-down,Macrobrachium lamerii,,mortality,muPq
+Shukla1984,Omran & Shukla 1984,Carbaryl,33.5,https://doi.org/10.1645/GE-2078.1,Insecticide,top-down,Macrobrachium lamerii,,mortality,muPq
+Tantawy2002,Tantawy et al 2002,Butachlor,,,Herbicide,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Tantawy2002,Tantawy et al 2002,Fluazifop-p-butyl,,,Herbicide,direct snail,Biomphalaria alexandrina,,mortality,muNq
+Tantawy2002,Tantawy et al 2002,Butachlor,,,Herbicide,direct larvae,Schistosoma mansoni,cercariae,mortality,piC
+Tantawy2002,Tantawy et al 2002,Fluazifop-p-butyl,,,Herbicide,direct larvae,Schistosoma mansoni,miracidia,mortality,piM
+Tantawy2002,Tantawy et al 2002,Butachlor,,,Herbicide,direct larvae,Schistosoma mansoni,cercariae,mortality,piC
+Tantawy2002,Tantawy et al 2002,Fluazifop-p-butyl,,,Herbicide,direct larvae,Schistosoma mansoni,miracidia,mortality,piM
+Tchounwou91,Tchounwou et al 1991,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Bulinus havanensis,,mortality,muNq
+Tchounwou91,Tchounwou et al 1991,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Bulinus havanensis,,reproduction,fNq
+Tchounwou91,Tchounwou et al 1991,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Planorbella trivolvis,,mortality,muNq
+Tchounwou91,Tchounwou et al 1991,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Planorbella trivolvis,,reproduction,fNq
+Tchounwou91,Tchounwou et al 1991,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma mansoni,miracidia,mortality,piM
+Tchounwou91b,Tchounwou et al 1991b,Ammonium Phosphate,,,Fertilizer,direct larvae,Schistosoma mansoni,miracidia,mortality,piM
+Tchounwou91b,Tchounwou et al 1991b,Urea,,,Fertilizer,direct larvae,Schistosoma mansoni,miracidia,mortality,piM
+Tchounwou91b,Tchounwou et al 1991b,Ammonium Phosphate,,,Fertilizer,direct larvae,Schistosoma mansoni,eggs,viability,v
+Tchounwou91b,Tchounwou et al 1991b,Urea,,,Fertilizer,direct larvae,Schistosoma mansoni,eggs,viability,v
+Tchounwou92,Tchounwou et al 1992,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma mansoni,cercariae,mortality,piC
