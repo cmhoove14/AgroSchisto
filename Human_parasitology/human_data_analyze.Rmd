@@ -288,6 +288,8 @@ full_long <- rbind(dat1, dat2, dat3) %>%
             by = c("Child_ID" = "ID", "year" = "year")) %>% 
   mutate(School = factor(School),
          Child_ID = factor(Child_ID),
+         s_haem_bin_narm = ifelse(s_haem_mean_narm >0, 1, 0),
+         s_mans_bin_narm = ifelse(s_mans_mean_narm >0, 1, 0),
          year_fac = factor(year),
          year_2016 = ifelse(year == 2016, 1, 0),
          year_2017 = ifelse(year == 2017, 1, 0),
@@ -972,6 +974,7 @@ perm_result <- as.data.frame(t(perm_result))
 colnames(perm_result) <- c("Mod1_Veg", "Mod1_Net", "Mod1_Prawns",
                            "Mod2_Veg", "Mod2_Net", "Mod2_Prawns")
 
+#Model 1 results
 hist(perm_result$Mod1_Veg, col = "black", breaks = 100)
   abline(v = summary(mod1_haem_comm_all)$coef[,"Estimate"]["Veg"], 
          col = 4, lty = 2, lwd = 2)
@@ -990,6 +993,7 @@ hist(perm_result$Mod1_Prawns, col = "black", breaks = 100)
   length(which(perm_result$Mod1_Prawns > 
                  summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
 
+#Model 2 results
 hist(perm_result$Mod2_Veg, col = "black", breaks = 100)
   abline(v = summary(mod2_haem_comm_all)$coef[,"Estimate"]["Veg"], 
          col = 4, lty = 2, lwd = 2)
@@ -1011,6 +1015,36 @@ hist(perm_result$Mod2_Prawns, col = "black", breaks = 100)
 
 ```
 
+# GEE models  
+Doesn't appear to be an R package for negative binomially distributed GEE in `R`, so we'll use the binary infection outcomes. This is actually nice since it directly relates to the mixed effects models that Jason has been working on.
+
+```{r gee_haem}
+#Exchangeable correlation
+gee_ex <- gee(s_haem_bin_narm ~ Net + Veg + Prawns + School + pzq + sex, id = full_long$Child_ID,
+              family = "binomial", corstr = "exchangeable", data = full_long)
+  
+res_gee_ex = summary(gee_ex)$coefficients
+  gee_ex_sum = cbind(round(exp(res_gee_ex[,1]), digits = 4), 
+                     round(exp(res_gee_ex[,1] + qnorm(0.025)*res_gee_ex[,4]), digits = 4), 
+                     round(exp(res_gee_ex[,1] + qnorm(0.975)*res_gee_ex[,4]), digits = 4),
+                     round(sqrt(exp(coef(gee_ex))^2*diag(gee_ex$naive.variance)), digits = 4),
+                     round(sqrt(exp(coef(gee_ex))^2*diag(gee_ex$robust.variance)), digits = 4))
+  colnames(gee_ex_sum) = c('OR', 'OR.025', 'OR.975', 'Naive SE', 'Robust SE')
+
+as.data.frame(gee_ex_sum) %>%     
+  mutate(coefficient = rownames(gee_ex_sum)) %>% 
+  ggplot(aes(x = OR, y = coefficient)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = OR.025, xmax = OR.975, y = coefficient), height = 0.25) +
+    geom_vline(xintercept = 1, lty = 2) +
+    ylab("") + xlab("Odds Ratios") +
+    ggtitle("Berkeley model coefficients", 
+            subtitle = "95% CIs derived from robust standard errors")
+  
+```
+
+
+# Scratch  
 
 ## Individual level (not really valid since intervention is not defined at individual level)  
 ### Schistosoma haematobium  
@@ -1844,8 +1878,7 @@ rbind(mod1_mans_prawn_res_c["Prawn_biomass",], mod2_mans_prawn_res_c["Prawn_biom
 
 
 
-# Scratch  
-
+#Old  
 
 ```{r mod1_haem}
 #Global model
