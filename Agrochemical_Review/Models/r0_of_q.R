@@ -296,15 +296,16 @@ return(c(N.eq, P.eq, r0))
 
 }
 #r0 with fixed parameter values
-r0.fix = function(f_Nqx = 1, 
-                  mu_Pqx = 0,
-                  phi_Nqx = 1, 
-                  mu_Nqx = 0, 
-                  alpha_qx = 1,
-                  theta_qx = 1, 
-                  pi_Mqx = 1, 
-                  pi_Cqx = 1, 
-                  v_qx = 1)
+r0.fix = function(fNqx = 1, 
+                  muPqx = 0,
+                  fPqx = 1,
+                  phiNqx = 1, 
+                  muNqx = 0, 
+                  psiqx = 1,
+                  thetaqx = 1, 
+                  piMqx = 1, 
+                  piCqx = 1, 
+                  vqx = 1)
   
 { area = parameters['A']
 sigma = parameters['sigma']
@@ -329,18 +330,19 @@ Th = parameters['Th']
 f_N = parameters['f_N']
 phi_N = parameters['phi_N']
 
-f_Nq = f_N * f_Nqx
-muPq = mu_P + mu_Pqx
-phi_Nq = phi_N * phi_Nqx
-mu_Nq = mu_N + mu_Nqx
-alpha_q = alpha * alpha_qx
-theta_q = theta * theta_qx
-pi_Mq = pi_M * pi_Mqx
-pi_Cq = pi_C * pi_Cqx
-v_q = v * v_qx
+f_Nq = f_N * fNqx
+f_Pq = f_P * fPqx
+muPq = mu_P + muPqx
+phi_Nq = phi_N * phiNqx
+mu_Nq = mu_N + muNqx
+alpha_q = alpha * psiqx
+theta_q = theta * thetaqx
+pi_Mq = pi_M * piMqx
+pi_Cq = pi_C * piCqx
+v_q = v * vqx
 
 #Equilibrium estimate of P given prawn predator parameters and q
-P.eq = phi_P*(1 - muPq/f_P)         
+P.eq = phi_P*(1 - muPq/f_Pq)         
 
   if(P.eq<0){P.eq = 0}
 
