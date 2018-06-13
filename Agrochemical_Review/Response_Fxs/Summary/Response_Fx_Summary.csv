@@ -16,7 +16,7 @@ Bakry2016,Bakry et al 2016,Paraquat,4.8,https://archive.epa.gov/pesticides/rereg
 Barbieri2016,Barbieri et al 2016,Carbofuran,36,https://archive.epa.gov/pesticides/reregistration/web/pdf/carbofuran_red.pdf,Insecticide,top-down,Macrobrachium olfersii,,mortality,muPq,muPq_carb_barb16_uncertainty
 Baxter_Rohr2011,Baxter et al 2011,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,bottom-up,Physella spp,,reproduction,phiNq,phiNq_atr_baxrohr.no30
 Benli2007,Benli et al 2007,"2,4-D",762,https://archive.epa.gov/pesticides/reregistration/web/pdf/24d_red.pdf,Herbicide,top-down,Astacus leptodactylus,,mortality,muPq,muPq_24d_benli07_uncertainty
-Bhavan2010,Bhavan etl 2010,Carbaryl,33.5,https://doi.org/10.1645/GE-2078.1,Insecticide,top-down,Macrobrachium malcomonii,,attack rate,psiq,psiq_carb_bhavan10_uncertainty
+Bhavan2010,Bhavan et al 2010,Carbaryl,33.5,https://doi.org/10.1645/GE-2078.1,Insecticide,top-down,Macrobrachium malcomsonii,,attack rate,psiq,psiq_carb_bhavan10_uncertainty
 Browne&Moore2014,Browne & Moore 2014,"2,4-D",762,https://archive.epa.gov/pesticides/reregistration/web/pdf/24d_red.pdf,Herbicide,top-down,Orconectes rusticus,,attack rate,psiq,psiq_24D_browne14_uncertainty
 Fornstrom1997,Fornstrom et al 1997,Terbufos,36.6,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq,muPq_terb_Fornstrom_uncertainty
 Ghaffar2016,Abdel-Ghaffar et al 2016,Butralin,16.89,Epa report,Herbicide,direct larvae,Schistosoma mansoni,cercariae,mortality,piC,piC.ghaf_butr.exp_unc
