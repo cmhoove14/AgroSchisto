@@ -16,6 +16,7 @@ require(glmmTMB)
 require(ggeffects)
 require(GGally)
 require(tidyverse)
+require(ggpubr)
 
 ```
 # Background  
@@ -291,6 +292,8 @@ full_long <- rbind(dat1, dat2, dat3) %>%
          s_haem_bin_narm = ifelse(s_haem_mean_narm >0, 1, 0),
          s_mans_bin_narm = ifelse(s_mans_mean_narm >0, 1, 0),
          year_fac = factor(year),
+         Intervention_2018 = factor(Intervention_2018,
+                                    levels = c("control", "prawn", "veg_removal")),
          year_2016 = ifelse(year == 2016, 1, 0),
          year_2017 = ifelse(year == 2017, 1, 0),
          year_2018 = ifelse(year == 2018, 1, 0),
@@ -392,13 +395,13 @@ full_long %>% filter(extra_pzq != 1) %>%
 
 #### Intervention status log+1 egg burden over time  
 ```{r Intervention_boxplots, warning=FALSE}
-full_long %>% filter(extra_pzq != 1) %>% 
+full_long %>% filter(extra_pzq != 1 & School != "MB") %>% 
   ggplot(aes(x = factor(year), y = log(s_haem_mean_narm+1), col = Intervention_2018)) + 
     theme_bw() + geom_boxplot() + 
     ylab("log+1 S. haematobium egg burden") + 
     ggtitle("S. haematobium egg burden dist'n over time")
 
-full_long %>% filter(extra_pzq != 1) %>% 
+full_long %>% filter(extra_pzq != 1 & School != "MB") %>% 
   ggplot(aes(x = factor(year), y = log(s_mans_mean_narm+1), col = Intervention_2018)) + 
     theme_bw() + geom_boxplot() + 
     ylab("log+1 S. mansoni egg burden") + 
@@ -426,20 +429,36 @@ full_long %>% filter(extra_pzq != 1) %>%
 
 ```
 
-```{r spaghetti_cat, eval = FALSE, include = FALSE, echo = FALSE}
-full_long %>% filter(extra_pzq != 1) %>% 
-  ggplot(aes(x = year, y = s_haem1_cat, col = Child_ID)) + 
-  theme_bw(base_size = 10) + theme(legend.position = "none") + 
-  geom_line() + facet_grid(Region~Intervention_2018) + 
-  ylab("S. haematobium infection category") + ggtitle("Individual level infection category trajectories")
+#### Individual level mean egg burden over time (spaghetti plots) stratified by intervention   
+```{r spaghetti, warning=FALSE}
+spaghetti_ctrl <- full_long %>% filter(Intervention_2018 == "control") %>% 
+  ggplot(aes(x = as.integer(year), y = log(s_haem_mean_narm+1), col = Child_ID)) + 
+    geom_line(size = 0.25) + geom_point(size = 0.25) +
+    theme_bw(base_size = 10) + theme(legend.position = "none") + 
+    facet_wrap(~School, ncol = 4) + 
+    ylab("") + rremove("xlab")
 
-full_long %>%
-  ggplot(aes(x = year, y = s_mans1_cat, col = Child_ID)) + 
-  theme_bw(base_size = 10) + theme(legend.position = "none") + 
-  geom_line() + facet_grid(Region~Intervention) + 
-  ylab("S. mansoni infection category") + ggtitle("Individual level infection category trajectories")
+spaghetti_prwn <- full_long %>% filter(Intervention_2018 == "prawn") %>% 
+  ggplot(aes(x = as.integer(year), y = log(s_haem_mean_narm+1), col = Child_ID)) + 
+    geom_line(size = 0.25) + geom_point(size = 0.25) +
+    theme_bw(base_size = 10) + theme(legend.position = "none") + 
+    facet_wrap(~School) + 
+    ylab("") + rremove("xlab")
 
+spaghetti_vegr <- full_long %>% filter(Intervention_2018 == "veg_removal") %>% 
+  ggplot(aes(x = as.integer(year), y = log(s_haem_mean_narm+1), col = Child_ID)) + 
+    geom_line(size = 0.25) + geom_point(size = 0.25) +
+    theme_bw(base_size = 10) + theme(legend.position = "none") + 
+    facet_wrap(~School) + 
+    ylab("") + rremove("xlab")
+
+ggarrange(spaghetti_ctrl + rremove("x.axis"), 
+          spaghetti_prwn + rremove("x.axis"), 
+          spaghetti_vegr + rremove("x.axis"), 
+          ncol = 1, nrow = 3, 
+          labels = c("Control", " Prawn", "Veg_Removal"))
 ```
+
 
 #### Correlation between past infection and infection in 2018   
 ```{r change, warning=FALSE}
@@ -707,6 +726,15 @@ We'll again fit this model with $I_{jt}$ as a simple binary variable defined at 
 
 
 # Implementation
+Start with simple anova comparing log mean burden between intervention groups
+```{r anova}
+group_aov <- aov(log(s_haem_mean_narm + 1) ~ Intervention_2018, data = full_long)
+  summary(group_aov)
+  
+pairwise.t.test(log(full_long$s_haem_mean_narm + 1), full_long$Intervention_2018,
+                p.adjust.method = "bonferroni")  
+```
+
 Models 4 and 5 actually require a bit more data wrangling to add the lag variables:  
 ```{r dat_wrang}
 mod_comm <- full_long_comm %>% arrange(School, year) %>% group_by(School) %>% 
@@ -761,7 +789,7 @@ robust_fx <- function(mod_obj){
 ## Community level  
 ```{r comm_mod1}
 #Model 1
-mod1_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + School + pzq, 
+mod1_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + School + year_fac, 
                              weights = haem_samps,
                              data = mod_comm)
 
@@ -829,7 +857,6 @@ mod2_haem_comm_all_res %>%
   
 ```
 
-
 ```{r more_comm_mods, message = FALSE}
 #Model 0
 mod0_haem_comm_all <- glm.nb(round(haem_mean) ~ year_fac + extra_pzq, 
@@ -845,8 +872,17 @@ mod00_haem_comm_all <- glm.nb(round(haem_mean) ~ year_fac + School + extra_pzq,
                              data = mod_comm)
 
   mod00_haem_comm_all_res <- robust_fx(mod00_haem_comm_all)
-    mod00_haem_comm_all_res$model <- "Model 0"
+    mod00_haem_comm_all_res$model <- "Model 00"
 
+#Model 000
+mod000_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns, 
+                             weights = haem_samps,
+                             data = mod_comm)
+
+  mod000_haem_comm_all_res <- robust_fx(mod000_haem_comm_all)
+    mod000_haem_comm_all_res$model <- "Model 000"
+    
+    
 #Model 1
 mod1_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + year_fac + extra_pzq, 
                              weights = haem_samps,
@@ -946,8 +982,14 @@ permute <- function(){
   #Replace old values with randomly scrambled ones  
     select(-c(Veg, Net, Prawns)) %>% 
     separate(mix2, c("Veg", "Net", "Prawns"))
+ 
+  mod0_perm <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns, 
+                      weights = haem_samps,
+                      data = mod_perm)
   
-  mod1_perm <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + School + pzq, 
+  mod0_int_coef <- summary(mod0_perm)$coef[,"Estimate"][c("Veg1", "Net1", "Prawns1")]
+ 
+  mod1_perm <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + School + year_fac, 
                       weights = haem_samps,
                       data = mod_perm)
   
@@ -959,7 +1001,7 @@ permute <- function(){
   
   mod2_int_coef <- summary(mod2_perm)$coef[,"Estimate"][c("Veg1", "Net1", "Prawns1")]
   
-  return(c(mod1_int_coef, mod2_int_coef))
+  return(c(mod0_int_coef, mod1_int_coef, mod2_int_coef))
 }
 
 permute()
@@ -971,8 +1013,29 @@ set.seed(43093)
 perm_result <- replicate(10000, permute())
 
 perm_result <- as.data.frame(t(perm_result))
-colnames(perm_result) <- c("Mod1_Veg", "Mod1_Net", "Mod1_Prawns",
+colnames(perm_result) <- c("Mod0_Veg", "Mod0_Net", "Mod0_Prawns",
+                           "Mod1_Veg", "Mod1_Net", "Mod1_Prawns",
                            "Mod2_Veg", "Mod2_Net", "Mod2_Prawns")
+
+#Model 0 results
+hist(perm_result$Mod0_Veg, col = "black", breaks = 100)
+  abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod0_Veg > 
+                 summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
+  
+hist(perm_result$Mod0_Net, col = "black", breaks = 100)
+  abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod0_Net > 
+                 summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
+
+hist(perm_result$Mod0_Prawns, col = "black", breaks = 100)
+  abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod0_Prawns > 
+                 summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
+
 
 #Model 1 results
 hist(perm_result$Mod1_Veg, col = "black", breaks = 100)
@@ -1020,27 +1083,44 @@ Doesn't appear to be an R package for negative binomially distributed GEE in `R`
 
 ```{r gee_haem}
 #Exchangeable correlation
-gee_ex <- gee(s_haem_bin_narm ~ Net + Veg + Prawns + School + pzq + sex, id = full_long$Child_ID,
+gee_ex <- gee(s_haem_bin_narm ~ Net + Veg + Prawns + School + year_fac + sex, 
+              id = full_long$Child_ID,
               family = "binomial", corstr = "exchangeable", data = full_long)
   
 res_gee_ex = summary(gee_ex)$coefficients
   gee_ex_sum = cbind(round(exp(res_gee_ex[,1]), digits = 4), 
                      round(exp(res_gee_ex[,1] + qnorm(0.025)*res_gee_ex[,4]), digits = 4), 
                      round(exp(res_gee_ex[,1] + qnorm(0.975)*res_gee_ex[,4]), digits = 4),
+                     round(exp(res_gee_ex[,1] + qnorm(0.025)*res_gee_ex[,2]), digits = 4), 
+                     round(exp(res_gee_ex[,1] + qnorm(0.975)*res_gee_ex[,2]), digits = 4),
                      round(sqrt(exp(coef(gee_ex))^2*diag(gee_ex$naive.variance)), digits = 4),
                      round(sqrt(exp(coef(gee_ex))^2*diag(gee_ex$robust.variance)), digits = 4))
-  colnames(gee_ex_sum) = c('OR', 'OR.025', 'OR.975', 'Naive SE', 'Robust SE')
+  colnames(gee_ex_sum) = c('OR', 'Robust_OR.025', 'Robust_OR.975', 
+                           'Naive_OR.025', 'Naive_OR.975', 
+                           'Naive SE', 'Robust SE')
 
 as.data.frame(gee_ex_sum) %>%     
   mutate(coefficient = rownames(gee_ex_sum)) %>% 
   ggplot(aes(x = OR, y = coefficient)) + theme_bw() +
     geom_point() + 
-    geom_errorbarh(aes(xmin = OR.025, xmax = OR.975, y = coefficient), height = 0.25) +
+    geom_errorbarh(aes(xmin = Robust_OR.025, xmax = Robust_OR.975, y = coefficient), 
+                   height = 0.25, col = 1) +
     geom_vline(xintercept = 1, lty = 2) +
     ylab("") + xlab("Odds Ratios") +
-    ggtitle("Berkeley model coefficients", 
+    ggtitle("GEE model", 
             subtitle = "95% CIs derived from robust standard errors")
-  
+ 
+as.data.frame(gee_ex_sum) %>%     
+  mutate(coefficient = rownames(gee_ex_sum)) %>% 
+  ggplot(aes(x = OR, y = coefficient)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = Robust_OR.025, xmax = Robust_OR.975, y = coefficient), 
+                   height = 0.25, col = 1) +
+    geom_vline(xintercept = 1, lty = 2) +
+    ylab("") + xlab("Odds Ratios") + xlim(c(-1,8.5)) +
+    ggtitle("GEE model", 
+            subtitle = "95% CIs derived from robust standard errors")
+ 
 ```
 
 
