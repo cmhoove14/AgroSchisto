@@ -29,12 +29,10 @@ rfx_topdown <- rfx_sum %>% filter(Pathway == "top-down") %>% rename(Parameter = 
                                                                     study_abrev = Study)
 
 #Load all top-down response functions ######
-topdown_studies <- unique(rfx_topdown$Study)
+topdown_studies <- unique(rfx_topdown$study_abrev)
 
-for(i in 1:length(topdown_studies)){
-  source(paste0(rfx_dir, rfx_files[grep(topdown_studies[i], rfx_files, ignore.case = TRUE)]))
-  print(i)
-}
+sapply(paste0(rfx_dir, rfx_files[unlist(sapply(topdown_studies, grep, rfx_files, ignore.case = TRUE))]), source)
+
 
 #Function to simulate 5000 parameter values, estimate r0 for each, return median and IQR for muPq response functions
 muPq_r0 <- function(rfx, eec){
@@ -112,10 +110,10 @@ rfx_topdown_all <- rbind(rfx_topdown_muPq, rfx_topdown_psiq, rfx_topdown_fPq) %>
          r0_975_rel = (r0_975 / r0.fix()[3]) * 100)
 
 #make forestplot #######
-fp_studies <- c("Study",rfx_topdown_all %>% arrange(parameter, Chemical, study_long) %>% pull(study_long))
-fp_chems <- c("Agrochemical", rfx_topdown_all %>% arrange(parameter, Chemical, study_long) %>% pull(Chemical))
-fp_species <- c("Species",rfx_topdown_all %>% arrange(parameter, Chemical, study_long) %>% pull(Species))
-fp_pars <- c("Parameter",rfx_topdown_all %>% arrange(parameter, Chemical, study_long) %>% pull(parameter))
+fp_studies <- c("Study",rfx_topdown_all %>% arrange(Parameter, Chemical, Study) %>% pull(Study))
+fp_chems <- c("Agrochemical", rfx_topdown_all %>% arrange(Parameter, Chemical, Study) %>% pull(Chemical))
+fp_species <- c("Species",rfx_topdown_all %>% arrange(Parameter, Chemical, Study) %>% pull(Species))
+fp_pars <- c("Parameter",rfx_topdown_all %>% arrange(Parameter, Chemical, Study) %>% pull(Parameter))
 
 fp_text <- list(as.list(fp_studies),
                 as.list(fp_chems),
@@ -125,9 +123,9 @@ fp_text <- list(as.list(fp_studies),
   forestplot(labeltext = fp_text, 
              #fn.ci_norm = c(fpDrawNormalCI),
              line.margin = 0.1,
-             mean = matrix(c(NA, rfx_topdown_all %>% arrange(parameter, Chemical, study_long) %>% pull(r0_med))),
-             lower =matrix(c(NA, rfx_topdown_all %>% arrange(parameter, Chemical, study_long) %>% pull(r0_025))),
-             upper =matrix(c(NA, rfx_topdown_all %>% arrange(parameter, Chemical, study_long) %>% pull(r0_975))),
+             mean = matrix(c(NA, rfx_topdown_all %>% arrange(Parameter, Chemical, Study) %>% pull(r0_med))),
+             lower =matrix(c(NA, rfx_topdown_all %>% arrange(Parameter, Chemical, Study) %>% pull(r0_025))),
+             upper =matrix(c(NA, rfx_topdown_all %>% arrange(Parameter, Chemical, Study) %>% pull(r0_975))),
              new_page = TRUE,
              is.summary = c(TRUE, rep(FALSE, 40)),
              hrzl_lines = list('2' = gpar(col = 'grey')),
@@ -144,7 +142,7 @@ fp_text <- list(as.list(fp_studies),
 
 #Attempt to mkae forestplot-ish thing with ggplot ###########
 #Table of all topdown studies ###
-topdown_tab <- rfx_topdown %>% select(study_long, Species, Chemical) %>% 
+topdown_tab <- rfx_topdown %>% select(Study, Species, Chemical) %>% 
   ggtexttable(rows = NULL)
 
 my_labs <- list(bquote(mu[P]),bquote(Psi),bquote(f[P]))
