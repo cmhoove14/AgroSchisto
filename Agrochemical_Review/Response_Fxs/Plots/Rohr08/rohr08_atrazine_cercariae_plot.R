@@ -9,7 +9,7 @@
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
 
-source("Agrochemical_Review/Response_Fxs/rohr08_atrazine_cercariae_fit.R")
+source("Agrochemical_Review/Response_Fxs/rohr2008_atrazine_cercariae_fit.R")
 
 png("Agrochemical_Review/Response_Fxs/Plots/Rohr08/Rohr08_piC_atrazine_data.png")
 

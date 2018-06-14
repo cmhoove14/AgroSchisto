@@ -43,9 +43,9 @@ Halstead2015,Halstead et al 2015,Permethrin,5.98,http://dx.doi.org/10.1016/j.che
 Halstead_meso2018,Halstead et al 2018,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,bottom-up,Bulinus truncatus,,reproduction,phiNq,halstead18_phiNq_at_uncertainty
 Halstead_meso2018,Halstead et al 2018,Fertilizer,,,Fertilizer,bottom-up,Bulinus truncatus,,reproduction,phiNq,halstead18_phiNq_fe_uncertainty
 Hasheesh2011,Hasheesh & Mohamed 2011,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma haematobium,cercariae,mortality,piC,piC_ch_Hash11_uncertainty
-Hasheesh2011,Hasheesh & Mohamed 2011,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct larvae,Schistosoma haematobium,cercariae,mortality,piC,piC_prof_Hash11_uncertainty
+Hasheesh2011,Hasheesh & Mohamed 2011,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct larvae,Schistosoma haematobium,cercariae,mortality,piC,piC_pr_Hash11_uncertainty
 Hasheesh2011,Hasheesh & Mohamed 2011,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma haematobium,miracidia,mortality,piM,piM_ch_Hash11_uncertainty
-Hasheesh2011,Hasheesh & Mohamed 2011,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct larvae,Schistosoma haematobium,miracidia,mortality,piM,piM_prof_Hash11_uncertainty
+Hasheesh2011,Hasheesh & Mohamed 2011,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct larvae,Schistosoma haematobium,miracidia,mortality,piM,piM_pr_Hash11_uncertainty
 Hasheesh2011,Hasheesh & Mohamed 2011,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Bulinus truncatus,,mortality,muNq,muNq_ch_hash11_uncertainty
 Hasheesh2011,Hasheesh & Mohamed 2011,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct snail,Bulinus truncatus,,mortality,muNq,muNq_prof_hash11_uncertainty
 Hussein2016,Hussein et al 2016,NPK_20_20_20,,,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq,muNq_balanced_hussein16_uncertainty

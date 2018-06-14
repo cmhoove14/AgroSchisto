@@ -13,7 +13,7 @@
 # Roundup original has 41.0% active ingredient (gkyphosate) therefore we multiply concentrations by this proportion to get effective dose of glyphosate
 source("Agrochemical_Review/Response_Fxs/tchounwou92_malathion_cercariae_fit.R")
 
-rm(list = setdiff(ls(), c("parms.df", "tch92.piC.mal")))
+#rm(list = setdiff(ls(), c("parms.df", "tch92.piC.mal")))
 
 require(drc)
 
