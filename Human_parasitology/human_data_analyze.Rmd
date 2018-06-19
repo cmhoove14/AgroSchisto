@@ -365,10 +365,25 @@ Data is clearly overdispersed. Negative binomial distribution, maybe 0-inflated 
 
 #### Community level egg burden over time  
 
-```{r village_boxplots, warning=FALSE}
+```{r village_boxplots}
+full_long %>% #filter(extra_pzq != 1) %>% 
+  filter(!is.na(Region)) %>% 
+  ggplot(aes(x = factor(year), y = log(s_haem_mean_narm+1), col = School)) + 
+  theme_bw() + geom_boxplot() + ylim(c(0,7)) +
+    ylab("log+1 S. haematobium egg burden") + 
+  ggtitle("S. haematobium egg burden dist'n over time",
+          subtitle = "All data") +
+  facet_wrap(~Region, nrow = 2)
+
 full_long %>% filter(extra_pzq != 1) %>% 
-  ggplot(aes(x = factor(year), y = s_haem_mean_narm, col = School)) + theme_bw() + geom_boxplot() + 
-    ylab("S. haematobium egg burden") + ggtitle("S. haematobium egg burden dist'n over time")
+  filter(!is.na(Region)) %>% 
+  ggplot(aes(x = factor(year), y = log(s_haem_mean+1), col = School)) + 
+  theme_bw() + geom_boxplot() + ylim(c(0,7)) +
+    ylab("log+1 S. haematobium egg burden") + 
+  ggtitle("S. haematobium egg burden dist'n over time",
+          subtitle = "Individuals receiving extra PZQ and <2 samples removed") +
+  facet_wrap(~Region, nrow = 2)
+
 
 full_long %>% filter(extra_pzq != 1) %>% 
   ggplot(aes(x = factor(year), y = s_mans_mean_narm, col = School)) + theme_bw() + geom_boxplot() + 
@@ -395,11 +410,20 @@ full_long %>% filter(extra_pzq != 1) %>%
 
 #### Intervention status log+1 egg burden over time  
 ```{r Intervention_boxplots, warning=FALSE}
-full_long %>% filter(extra_pzq != 1 & School != "MB") %>% 
+full_long %>% filter(School != "MB") %>% 
   ggplot(aes(x = factor(year), y = log(s_haem_mean_narm+1), col = Intervention_2018)) + 
-    theme_bw() + geom_boxplot() + 
+    theme_bw() + geom_boxplot() + ylim(c(0,7)) +
     ylab("log+1 S. haematobium egg burden") + 
-    ggtitle("S. haematobium egg burden dist'n over time")
+    ggtitle("S. haematobium egg burden dist'n over time",
+            subtitle = "All data")
+
+full_long %>% filter(extra_pzq != 1 & School != "MB") %>% 
+  ggplot(aes(x = factor(year), y = log(s_haem_mean+1), col = Intervention_2018)) + 
+    theme_bw() + geom_boxplot() + ylim(c(0,7)) +
+    ylab("log+1 S. haematobium egg burden") + 
+    ggtitle("S. haematobium egg burden dist'n over time",
+            subtitle = "Individuals receiving extra PZQ and <2 samples removed")
+
 
 full_long %>% filter(extra_pzq != 1 & School != "MB") %>% 
   ggplot(aes(x = factor(year), y = log(s_mans_mean_narm+1), col = Intervention_2018)) + 
@@ -751,6 +775,8 @@ mod_comm <- full_long_comm %>% arrange(School, year) %>% group_by(School) %>%
          year_fac = factor(as.character(year), levels = c("2016", "2017", "2018")),
          pzq = ifelse(year != 2016, 1, 0))
 
+mod_comm_2018_2016 <- mod_comm %>% group_by(School) %>% summarise(diff = )
+
 mod4_dat <- full_long %>% arrange(Child_ID, year) %>% group_by(Child_ID) %>% 
   mutate(s_haem_mean_l1 = lag(s_haem_mean),
          log_s_haem_mean_l1 = lag(log(s_haem_mean+1)),
@@ -786,6 +812,7 @@ robust_fx <- function(mod_obj){
   return(out)
 }
 ```
+
 ## Community level  
 ```{r comm_mod1}
 #Model 1
@@ -820,6 +847,32 @@ mod1_haem_comm_all_res %>%
     ggtitle("Berkeley model coefficients", 
             subtitle = "95% CIs derived from robust standard errors")
    
+#Estimate risk difference 
+mod_comm_prawn <- mod_comm_veg <- mod_comm_ref <- mod_comm
+  mod_comm_ref <- mod_comm_ref %>% mutate(Prawns = 0,
+                                          Veg = 0,
+                                          Net = 0)
+  mod_comm_veg <- mod_comm_ref %>% mutate(Veg = ifelse(year == 2018, 1, 0))
+  mod_comm_prawn <- mod_comm_ref %>% mutate(Prawns = ifelse(year == 2018, 1, 0),
+                                            Net = ifelse(year == 2018, 1, 0))
+
+comm_ref_out <- predict(mod1_haem_comm_all, newdata = mod_comm_ref)
+
+comm_prawn_out <- predict(mod1_haem_comm_all, newdata = mod_comm_prawn)
+
+comm_veg_out <- predict(mod1_haem_comm_all, newdata = mod_comm_veg)
+
+mod1_counter <- data.frame(cbind(School = mod_comm$School, year = mod_comm$year, 
+                                 comm_ref_out, comm_prawn_out, comm_veg_out)) %>% 
+  gather(key = "intervention", value = "Prediction", comm_ref_out:comm_veg_out) %>% 
+  mutate(Prediction = as.numeric(Prediction))
+
+mod1_counter %>% filter(intervention != "comm_veg_out" & year == 2018) %>% 
+  ggplot(aes(x = intervention, y = Prediction, col = School, group = School)) +  
+    geom_point(stat='summary', fun.y=sum) +
+    stat_summary(fun.y=sum, geom="line") 
+
+#That's basically just showing the point estimate of the prawn coefficient across all villages which doesn't actually tell us much.
 ```
 
 ```{r comm_mod2}
@@ -857,7 +910,7 @@ mod2_haem_comm_all_res %>%
   
 ```
 
-```{r more_comm_mods, message = FALSE}
+```{r more_comm_mods, message = FALSE, eval = FALSE}
 #Model 0
 mod0_haem_comm_all <- glm.nb(round(haem_mean) ~ year_fac + extra_pzq, 
                              weights = haem_samps,
@@ -1019,22 +1072,22 @@ colnames(perm_result) <- c("Mod0_Veg", "Mod0_Net", "Mod0_Prawns",
 
 #Model 0 results
 hist(perm_result$Mod0_Veg, col = "black", breaks = 100)
-  abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"], 
-         col = 4, lty = 2, lwd = 2)
-  length(which(perm_result$Mod0_Veg > 
-                 summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
+  #abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"], 
+  #       col = 4, lty = 2, lwd = 2)
+  #length(which(perm_result$Mod0_Veg > 
+  #               summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
   
 hist(perm_result$Mod0_Net, col = "black", breaks = 100)
-  abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"], 
-         col = 4, lty = 2, lwd = 2)
-  length(which(perm_result$Mod0_Net > 
-                 summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
+  #abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"], 
+  #       col = 4, lty = 2, lwd = 2)
+  #length(which(perm_result$Mod0_Net > 
+  #               summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
 
 hist(perm_result$Mod0_Prawns, col = "black", breaks = 100)
-  abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
-         col = 4, lty = 2, lwd = 2)
-  length(which(perm_result$Mod0_Prawns > 
-                 summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
+  #abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
+  #       col = 4, lty = 2, lwd = 2)
+  #length(which(perm_result$Mod0_Prawns > 
+  #               summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
 
 
 #Model 1 results
@@ -1064,13 +1117,13 @@ hist(perm_result$Mod2_Veg, col = "black", breaks = 100)
                  summary(mod2_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
 
 hist(perm_result$Mod2_Net, col = "black", breaks = 100)
-  abline(v = summary(mod1_haem_comm_all)$coef[,"Estimate"]["Net"], 
+  abline(v = summary(mod2_haem_comm_all)$coef[,"Estimate"]["Net"], 
          col = 4, lty = 2, lwd = 2)
   length(which(perm_result$Mod2_Net > 
                  summary(mod2_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
   
 hist(perm_result$Mod2_Prawns, col = "black", breaks = 100)
-  abline(v = summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
+  abline(v = summary(mod2_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
          col = 4, lty = 2, lwd = 2)
   length(which(perm_result$Mod2_Prawns > 
                  summary(mod2_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
@@ -1121,6 +1174,16 @@ as.data.frame(gee_ex_sum) %>%
     ggtitle("GEE model", 
             subtitle = "95% CIs derived from robust standard errors")
  
+#Package for prediction with GEE models
+require(doBy)
+
+gee_predict_prawn <- gee_predict_veg <- gee_predict_ref <- full_long
+
+gee_predict_prawn <- gee_predict_prawn %>%
+  mutate(Prawns = ifelse(year_fac==2018,1,0),
+         Net = ifelse(year_fac==2018,1,0))
+
+gee_prawn_prediction <- prediction(gee_ex, newdata = gee_predict_prawn)
 ```
 
 
