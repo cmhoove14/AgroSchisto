@@ -11,6 +11,7 @@
 
 library(tidyverse)
 library(pals)
+library(forestplot)
 
 #load R0 function
 source("Agrochemical_Review/Models/r0_of_q.R")

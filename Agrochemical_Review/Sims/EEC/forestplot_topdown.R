@@ -11,6 +11,7 @@
 
 library(tidyverse)
 library(pals)
+library(forestplot)
 
 #load R0 function
 source("Agrochemical_Review/Models/r0_of_q.R")
@@ -156,7 +157,7 @@ rfx_topdown_all %>% #mutate(axis_lab = paste(study_long, Species, sep = "  ")) %
     geom_errorbar(aes(ymin = r0_025, ymax = r0_975, x = Chemical, width = 0.01), 
                   position = position_dodge(0.5)) +
     theme_bw() + ylim(0,4) + coord_flip() + ylab(expression(paste(R['0']))) +
-    ggtitle("Top-down effects")
+    ggtitle("Top-down effects") +
     scale_color_manual(values = glasbey()) + 
     scale_shape_manual(values = c(17,15,16), breaks = c("muPq", "psiq", "fPq"),
                        labels = my_labs)
