@@ -12,13 +12,13 @@
 #Rohr '08 nature paper comparison of control to atrazine treated mesocosms
 #snail reproduction parameter from table 1
 
-rohr08_fNq_uncertainty = function(){ #function based on snail egg masses
+rohr08_fNq_uncertainty = function(...){ #function based on snail egg masses
   fN = rnorm(1, 30.45, 3.03) / 12.37
   while(fN < 0) fN = rnorm(1, 30.45, 3.03) / 12.37
   fN
 }
 
-rohr08_fNq_uncertainty2 = function(){ #function based on snail hatchlings
+rohr08_fNq_uncertainty2 = function(...){ #function based on snail hatchlings
   fN = rnorm(1, 468.09, 205.85) / 110.64
   while(fN < 0) fN = rnorm(1, 468.09, 205.85) / 110.64
   fN
