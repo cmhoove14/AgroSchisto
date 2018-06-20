@@ -17,6 +17,8 @@ require(ggeffects)
 require(GGally)
 require(tidyverse)
 require(ggpubr)
+require(mice)
+require(multcomp)
 
 ```
 # Background  
@@ -29,7 +31,8 @@ Longitudinal data analysis of human parasitological data among communities in Se
 
 Our main question is: how do the interventions affect transmission?  The interventions were implemented in June/July 2017 following the 2017 PZQ administration and therefore only affect the 2018 survey data. An ideal analysis should therefore leverage the earlier surveys to account for individual, community, and regional variability while relying on the 2018 survey to identify the effects of each intervention. More formally, our statistical question may be framed as: 
 $$\mathbb{E}[Y_{ij3}|Y_{ij2},Y_{ij1}]=\mathbb{E}[Y_{ij3}|I_{j3},Y_{ij2},Y_{ij1}]$$
-where $Y_{ijt}$ is the egg burden of individual $i$ in community $j$ in year $t$ and $I_{j3}$ is the intervention that community $j$ receives in year 3 (2018). We would hope: $$\mathbb{E}[Y_{ij3}|Y_{ij2},Y_{ij1}]>\mathbb{E}[Y_{ij3}|I_{j3},Y_{ij2},Y_{ij1}]$$
+where $Y_{ijt}$ is the egg burden of individual $i$ in community $j$ in year $t$ and $I_{j3}$ is the intervention that community $j$ receives in year 3 (2018). We would hope: 
+$$\mathbb{E}[Y_{ij3}|Y_{ij2},Y_{ij1}]>\mathbb{E}[Y_{ij3}|I_{j3},Y_{ij2},Y_{ij1}]$$
 but what we want to be sure of is that the intervention is not harmful or:
 $$\mathbb{E}[Y_{ij3}|Y_{ij2},Y_{ij1}]<\mathbb{E}[Y_{ij3}|I_{j3},Y_{ij2},Y_{ij1}]$$
 
@@ -44,294 +47,10 @@ Better to use mean of multiple data points or single data point for less missing
 Giulio says ~80 children in Maka Diama (prawn village) and Ndiol Maure (control village) received PZQ in 2017 outside of our study and should therefore be excluded, but the 2017 dataset and the full dataset shared by Stanford has all children from Diokhor Tack, Malla, Gankette Guinth, Merina Guewal, Maka Diama, and Ndiol Maure coded as receiving extra PZQ in 2017  
 
 # Data loading, cleaning, and merging  
-```{r interventions_data, warning=FALSE}
-#My interventions data generated form interpretation of spreadsheets shared by Giulio
-interventions <- read_csv("~/RemaisWork/Schisto/Stanford/Human_Parasitology_data/Village_interventions.csv") %>% 
-  mutate(Intervention = factor(Intervention, levels = c("control", "net", "prawn", "veg_removal")),
-         Region = factor(Region),
-         Prawn_cat = factor(Prawn_cat, levels = c("No", "low", "high")))
+```{r data_load_clean, message = FALSE}
+source("data_load_clean.R")
 ```
 
-```{r read_data1, message = FALSE, warning=FALSE}
-dat1 <- read_csv("~/RemaisWork/Schisto/Stanford/Human_Parasitology_data/First_round_human_subject_analysis_APLS_POC_3.csv", na = c("DM", "NA"))
-#data munging
-  #sort(unique(dat1$P2_omega_total))
-
-# Get means from different samples, rename variables, and reorder    
-  dat1 <- dat1 %>% 
-    group_by(Child_ID) %>% 
-    mutate(year = 2016, School = as.character(School),
-          # Replace >200 with 200 then coerce to numeric
-           P2_omega_total = as.numeric(ifelse(P2_omega_total == ">200", 200, P2_omega_total)),
-          #Mean haematobium eggs/10mL
-           s_haem_mean2016 = mean(c(P1_omega_total, P2_omega_total)),  
-          #Mean haematobium eggs/10mL NAs removed
-           s_haem_mean2016_narm = mean(c(P1_omega_total, P2_omega_total), na.rm = TRUE), 
-          #Number of samples contributing to mean
-           s_haem_mean2016_w = length(which(!is.na(c(P1_omega_total, P2_omega_total)))),
-          #WHO infection intensity labels
-           s_haem_mean_cat2016 = cut(s_haem_mean2016_narm, 
-                                     breaks = c(0, 1, 50, Inf), 
-                                     labels = c("No", "Lo", "Hi"), right = FALSE), 
-          #Mean mansoni epg from 1st kato katz
-           s_mans_mean1 = mean(c(P1_kk1, P1_kk2)),           
-          ##Mean mansoni epg from 2nd kato katz
-           s_mans_mean2 = mean(c(P2_kk1, P2_kk2)),    
-          #Mean mansoni epg from 1st/2nd kato katz
-           s_mans_mean2016 = mean(c(P1_kk1, P1_kk2, P2_kk1, P2_kk2)), 
-          #Mean mansoni EPG NAs removed
-           s_mans_mean2016_narm = mean(c(P1_kk1, P1_kk2, P2_kk1, P2_kk2), na.rm = TRUE),  
-          #Number of non-NA measurements
-           s_mans_mean2016_w = length(which(!is.na(c(P1_kk1, P1_kk2, P2_kk1, P2_kk2)))),  
-          #WHO infection levels
-           s_mans_mean_cat2016 = cut(s_mans_mean2016_narm, 
-                                     breaks = c(0,1,100,400,Inf), 
-                                     labels = c("No", "Lo", "Md", "Hi"), right = FALSE),
-           pzq = 0, 
-           extra_pzq = 0) %>% 
-    select(Child_ID, year, School, pzq, extra_pzq,
-           s_haem1 = P1_omega_total,
-           s_haem2 = P2_omega_total,
-           s_haem_mean = s_haem_mean2016,
-           s_haem_mean_narm = s_haem_mean2016_narm,
-           s_haem_mean_w = s_haem_mean2016_w,
-           s_haem_mean_cat = s_haem_mean_cat2016,
-           s_mans1_1 = P1_kk1,
-           s_mans1_2 = P1_kk2,
-           s_mans2_1 = P2_kk1,
-           s_mans2_2 = P2_kk2,
-           s_mans_mean1,
-           s_mans_mean2,
-           s_mans_mean12 = s_mans_mean2016,
-           s_mans_mean_narm = s_mans_mean2016_narm,
-           s_mans_mean_w = s_mans_mean2016_w,
-           s_mans_mean_cat = s_mans_mean_cat2016) %>% ungroup()
-  
-#Data check
-  #make sure each subject only has one record:
-    bad_id_dat1 <- dat1 %>% 
-      group_by(Child_ID) %>% 
-      summarise(nobs = n()) %>% 
-      filter(nobs > 1) %>% 
-      pull(Child_ID)
-    
-    length(bad_id_dat1)
-```
-
-```{r read_data2, message = FALSE, warning=FALSE}
-dat2 <- read_csv("~/RemaisWork/Schisto/Stanford/Human_Parasitology_data/Second_round_human_subject_analysis_APLS_POC_2017_2.csv", na = c("DM", "SE", "NA"))
-
-# Get means from different samples, rename variables, and reorder    
-  dat2 <- dat2 %>% 
-    group_by(Child_ID) %>% 
-    mutate(year = 2017, School = as.character(School),
-          # Replace >200 with 200 then coerce to numeric
-           P4_omega_total = as.numeric(ifelse(P4_omega_total == ">200", 200, P4_omega_total)),
-           #Mean haematobium eggs/10mL
-           s_haem_mean2017 = mean(c(P3_omega_total, P4_omega_total)),  
-           #Mean haematobium eggs/10mL NAs removed
-           s_haem_mean2017_narm = mean(c(P3_omega_total, P4_omega_total), na.rm = TRUE), 
-           #Number of samples contributing to mean
-           s_haem_mean2017_w = length(which(!is.na(c(P3_omega_total, P4_omega_total)))),
-          #WHO infection intensity labels
-           s_haem_mean_cat2017 = cut(s_haem_mean2017_narm, 
-                                     breaks = c(0, 1, 50, Inf), 
-                                     labels = c("No", "Lo", "Hi"), right = FALSE), 
-          #Mean mansoni epg from 1st kato katz
-           s_mans_mean1 = mean(c(P3_kk1, P3_kk2)), 
-          #Mean mansoni epg from 2nd kato katz
-           s_mans_mean2 = mean(c(P4_kk1, P4_kk2)),      
-          #Mean mansoni epg from 1st/2nd kato katz
-           s_mans_mean2017 = mean(c(P3_kk1, P3_kk2, P4_kk1, P4_kk2)), 
-          #Mean mansoni epg NAs removed
-           s_mans_mean2017_narm = mean(c(P3_kk1, P3_kk2, P4_kk1, P4_kk2), na.rm = TRUE),  
-          #Number of non-NA measurements
-           s_mans_mean2017_w = length(which(!is.na(c(P3_kk1, P3_kk2, P4_kk1, P4_kk2)))),  
-          #Number of samples contributing to mean
-           s_mans_mean_cat2017 = cut(s_mans_mean2017_narm, 
-                                     breaks = c(0,1,100,400, Inf), 
-                                     labels = c("No", "Lo", "Md", "Hi"), right = FALSE),
-           pzq = 1,
-           extra_pzq = as.numeric(!is.na(PZQ_date_before_analyses)))  %>% 
-    select(Child_ID, year, School, pzq, extra_pzq,
-           s_haem1 = P3_omega_total,
-           s_haem2 = P4_omega_total,
-           s_haem_mean = s_haem_mean2017,
-           s_haem_mean_narm = s_haem_mean2017_narm,
-           s_haem_mean_w = s_haem_mean2017_w,
-           s_haem_mean_cat = s_haem_mean_cat2017,
-           s_mans1_1 = P3_kk1,
-           s_mans1_2 = P3_kk2,
-           s_mans2_1 = P4_kk1,
-           s_mans2_2 = P4_kk2,
-           s_mans_mean1,
-           s_mans_mean2,
-           s_mans_mean12 = s_mans_mean2017,
-           s_mans_mean_narm = s_mans_mean2017_narm,
-           s_mans_mean_w = s_mans_mean2017_w,
-           s_mans_mean_cat = s_mans_mean_cat2017) %>% ungroup()
-  
-#Data check
-  #make sure each subject only has one record:
-    bad_id_dat2 <- dat2 %>% 
-      group_by(Child_ID) %>% 
-      summarise(nobs = n()) %>% 
-      filter(nobs > 1) %>% 
-      pull(Child_ID)
-    
-    length(bad_id_dat2)
-```
-  
-```{r read_data3, message = FALSE, warning=FALSE}  
-dat3 <- read_csv("~/RemaisWork/Schisto/Stanford/Human_Parasitology_data/Third_round_human_subject_analysis_APLS_POC_2018_2.csv", na = c("DM", "SE", "NA"))
-# Replace **_ numbers with just number and coerce to numeric
-  dat3$P5_omega_total <- as.numeric(sub("**", "", dat3$P5_omega_total, fixed = TRUE))
-  dat3$P6_omega_total <- sub("**", "*", dat3$P6_omega_total, fixed = TRUE)
-  dat3$P6_omega_total <- as.numeric(sub("*", "", dat3$P6_omega_total, fixed = TRUE))
-
-# Get means from different samples, rename variables, and reorder    
-  dat3 <- dat3 %>% 
-    group_by(Child_ID) %>% 
-    mutate(year = 2018,
-           School = strsplit(Child_ID, "/")[[1]][1],
-           #Mean haematobium eggs/10mL
-           s_haem_mean2018 = mean(c(P5_omega_total, P6_omega_total)),  
-           #Mean haematobium eggs/10mL, NAs removed
-           s_haem_mean2018_narm = mean(c(P5_omega_total, P6_omega_total), na.rm = TRUE), 
-           #Number of samples contributing to mean
-           s_haem_mean2018_w = length(which(!is.na(c(P5_omega_total, P6_omega_total)))),
-           #WHO infection intensity labels
-           s_haem_mean_cat2018 = cut(s_haem_mean2018_narm, 
-                                     breaks = c(0, 1, 50, Inf), 
-                                     labels = c("No", "Lo", "Hi"), right = FALSE), 
-           #Mean mansoni epg from 1st kato katz
-           s_mans_mean1 = mean(c(P5_kk1_epg, P5_kk2_epg)),   
-           ##Mean mansoni epg from 2nd kato katz
-           s_mans_mean2 = mean(c(P6_kk1_epg, P6_kk2_epg)),        
-           #Mean mansoni epg from 1st/2nd kato katz
-           s_mans_mean2018 = mean(c(P5_kk1_epg, P5_kk2_epg, P6_kk1_epg, P6_kk2_epg)), 
-           #Mean mansoni epg from 1st/2nd kato katz, NAs removed
-           s_mans_mean2018_narm = mean(c(P5_kk1_epg, P5_kk2_epg, P6_kk1_epg, P6_kk2_epg), na.rm = TRUE), 
-           #Number of samples contributing to mean
-           s_mans_mean2018_w = length(which(!is.na(c(P5_kk1_epg, P5_kk2_epg, P6_kk1_epg, P6_kk2_epg)))),
-           #WHO infection categories
-           s_mans_mean_cat2018 = cut(s_mans_mean2018_narm, 
-                                     breaks = c(0,1,100,400, Inf), 
-                                     labels = c("No", "Lo", "Md", "Hi"), right = FALSE),
-           pzq = 1, 
-           #Individuals who received additional praziquantel influencing their 2018 egg burden
-           extra_pzq = ifelse(Child_ID %in% c("DT/1/008", "DT/1/021","DT/1/032",
-                                              "MD/3/015", "MD/3/023",
-                                              "MO/2/013", "MO/2/014", "MO/3/030"), 1, 0))  %>% 
-    select(Child_ID, year, School, pzq, extra_pzq,
-           s_haem1 = P5_omega_total,
-           s_haem2 = P6_omega_total,
-           s_haem_mean = s_haem_mean2018,
-           s_haem_mean_narm = s_haem_mean2018_narm,
-           s_haem_mean_w = s_haem_mean2018_w,
-           s_haem_mean_cat = s_haem_mean_cat2018,
-           s_mans1_1 = P5_kk1_epg,
-           s_mans1_2 = P5_kk2_epg,
-           s_mans2_1 = P6_kk1_epg,
-           s_mans2_2 = P6_kk2_epg,
-           s_mans_mean1,
-           s_mans_mean2,
-           s_mans_mean12 = s_mans_mean2018,
-           s_mans_mean_narm = s_mans_mean2018_narm,
-           s_mans_mean_w = s_mans_mean2018_w,
-           s_mans_mean_cat = s_mans_mean_cat2018) %>% ungroup()
-  
-#Data check
-  #make sure each subject only has one record:
-    bad_id_dat3 <- dat3 %>% 
-      group_by(Child_ID) %>% 
-      summarise(nobs = n()) %>% 
-      filter(nobs > 1) %>% 
-      pull(Child_ID)
-    
-      bad_id_dat3
-      
-  #This person ended up with two records somehow, going to take the safe route: remove both records
-    dat3 <- dat3 %>% filter(Child_ID != enquo(bad_id_dat3)[[2]])
-```
-
-```{r merge_dat, message = FALSE, warning=FALSE}
-#Full dataset (in long format) shared by Stanford, constructed by Isabel
-stanford <- read_csv("~/RemaisWork/Schisto/Stanford/Human_Parasitology_data/human_data_2018Mat1518.csv") %>% 
-  mutate(ID = factor(ID),    #Convert some variables to factors
-         School = factor(School),
-         Village = factor(Village),
-         year_fac = factor(year),
-         cluster = factor(cluster),
-         Intervention.type = factor(Intervention.type),
-         pzq = ifelse(year %in% c(2017, 2018), 1, 0))
-
-#same code as above to remove individual with multiple observation in the same year
-    stanford <- stanford %>% filter(ID != enquo(bad_id_dat3)[[2]])
-
-#Jason's full dataset 
-jason_dat <- read_csv("~/RemaisWork/Schisto/Stanford/Human_Parasitology_data/Jason_human_data_2018.csv") %>% 
-    mutate(ID = factor(ID),    #Convert some variables to factors
-           School = factor(School),
-           Village = factor(Village),
-           year_fac = factor(year),
-           sex = factor(sex),
-           cluster = factor(cluster),
-           Intervention.type = factor(Intervention.type),
-           pzq = ifelse(year %in% c(2017, 2018), 1, 0))
-
-
-#Full dataset in long format from data reads/manipulations above
-full_long <- rbind(dat1, dat2, dat3) %>% 
-  full_join(interventions, by = c("School", "year")) %>% 
-  #Join with stanford dataset to get cluster and sex
-  full_join(stanford %>% select(ID, year, sex, cluster),    
-            by = c("Child_ID" = "ID", "year" = "year")) %>% 
-  mutate(School = factor(School),
-         Child_ID = factor(Child_ID),
-         s_haem_bin_narm = ifelse(s_haem_mean_narm >0, 1, 0),
-         s_mans_bin_narm = ifelse(s_mans_mean_narm >0, 1, 0),
-         year_fac = factor(year),
-         Intervention_2018 = factor(Intervention_2018,
-                                    levels = c("control", "prawn", "veg_removal")),
-         year_2016 = ifelse(year == 2016, 1, 0),
-         year_2017 = ifelse(year == 2017, 1, 0),
-         year_2018 = ifelse(year == 2018, 1, 0),
-         pzq = factor(pzq))
-
-#Full community-level dataset in long format
-full_long_comm <- full_long %>% #filter(extra_pzq != 1) %>%
-  group_by(School, year) %>% 
-  summarise(haem_mean = mean(c(s_haem1, s_haem2), na.rm = TRUE),
-            haem_samps = length(na.omit(c(s_haem1, s_haem2))),
-            haem_pos = length(which(s_haem_mean_narm > 0)), 
-            haem_prev = haem_pos / length(na.omit(s_haem_mean_narm)),
-            mans_mean = mean(c(s_mans1_1, s_mans1_2,
-                               s_mans2_1, s_mans2_2), na.rm = TRUE),
-            mans_samps = length(na.omit(c(s_mans1_1, s_mans1_2,
-                                          s_mans2_1, s_mans2_2))),
-            mans_pos = length(which(s_mans_mean_narm > 0)),
-            mans_prev = mans_pos / length(na.omit(s_mans_mean_narm)),
-            extra_pzq = mean(extra_pzq)) %>% 
-  inner_join(interventions, by = c("School", "year")) %>% 
-  group_by(School) %>% 
-  mutate(vil_haem_mean = mean(haem_mean),
-         vil_mans_mean = mean(mans_mean)) %>% 
-  ungroup() %>% 
-  mutate(vil_haem_diff = haem_mean - vil_haem_mean,
-         vil_mans_diff = mans_mean - vil_mans_mean) %>% 
-  arrange(year, School)
-
-#Full dataset in wide format
-full_wide <- dat1 %>% 
-  full_join(dat2 %>% filter(extra_pzq != 1), 
-            by = c("Child_ID", "School"), 
-            suffix = c("_2016", "_2017")) %>% 
-  full_join(dat3, by = c("Child_ID", "School")) %>% 
-  full_join(interventions %>% filter(year == 2018), by = c("School"))
-
-
-```
 
 # Exploratory  
 
@@ -389,6 +108,18 @@ full_long %>% filter(extra_pzq != 1) %>%
   ggplot(aes(x = factor(year), y = s_mans_mean_narm, col = School)) + theme_bw() + geom_boxplot() + 
   ylab("S. mansoni egg burden") + ggtitle("S. mansoni egg burden dist'n over time")
 ```
+#### Village level prevalence over time  
+```{r}
+full_long_comm %>% #filter(extra_pzq != 1) %>% 
+  filter(!is.na(Region)) %>% 
+  ggplot(aes(x = factor(year), y = haem_prev, col = School, group = School)) + 
+  theme_bw() + geom_point() + geom_line() +
+    ylab("S. haematobium prevalence") + 
+  ggtitle("S. haematobium prevalence over time",
+          subtitle = "All data") +
+  facet_wrap(~Region, nrow = 2)
+
+```
 
 #### Intervention grouped infection level (WHO categories) over time  
 ```{r bars, warning=FALSE}
@@ -424,7 +155,6 @@ full_long %>% filter(extra_pzq != 1 & School != "MB") %>%
     ggtitle("S. haematobium egg burden dist'n over time",
             subtitle = "Individuals receiving extra PZQ and <2 samples removed")
 
-
 full_long %>% filter(extra_pzq != 1 & School != "MB") %>% 
   ggplot(aes(x = factor(year), y = log(s_mans_mean_narm+1), col = Intervention_2018)) + 
     theme_bw() + geom_boxplot() + 
@@ -451,6 +181,29 @@ full_long %>% filter(extra_pzq != 1) %>%
     ylab("log+1 S. mansoni egg burden") + 
     ggtitle("Individual egg burden trajectories", subtitle = "S. mansoni")
 
+```
+#### Individual level binary infection over time  
+```{r}
+full_long %>% filter(extra_pzq != 1) %>% 
+  ggplot(aes(x = year, y = s_haem_bin_narm, group = Child_ID)) + 
+    geom_line(alpha = 0.01, col = 2, size = 1.2) + 
+    theme_bw(base_size = 10) + theme(legend.position = "none") + 
+    facet_wrap(~Intervention_2018, ncol = 4) + 
+    ylab("S. haematobium infection status") + 
+    ggtitle("Individual infection status trajectories", subtitle = "S. haematobium")
+
+full_long_bin <- full_long %>% group_by(Child_ID) %>% summarise(Trajectory = toString(s_haem_bin_narm)) %>% 
+  full_join(full_long, by = "Child_ID") %>% filter(year == 2018) 
+
+table(full_long_bin$Trajectory, full_long_bin$Intervention_2018)
+
+table(full_long_bin$Trajectory[which(full_long_bin$Trajectory %in% c("0, 0, 1", "1, 1, 0"))], 
+      full_long_bin$Intervention_2018[which(full_long_bin$Trajectory %in% c("0, 0, 1", "1, 1, 0"))])
+
+table(full_long_bin$Trajectory[which(full_long_bin$Trajectory %in% c("0, 0, 1", "1, 1, 0", "1, 0, 1", "1, 0, 0"))], 
+      full_long_bin$Intervention_2018[which(full_long_bin$Trajectory %in% c("0, 0, 1", "1, 1, 0", "1, 0, 1", "1, 0, 0"))])
+
+full_long_bin %>% group_by(Intervention_2018) %>% summarise(n = n())
 ```
 
 #### Individual level mean egg burden over time (spaghetti plots) stratified by intervention   
@@ -576,8 +329,10 @@ mans_int_yr <- glm.nb(round(s_mans_mean_narm) ~ year_fac+School,
 # Others' models  
 ## Sanna: neg binomial egg output w/ individual and community (`school`) random effects  
 
-$$Y_{ijt}=\beta_0+\epsilon_{0i}+\epsilon_{0j}+\beta_1year_t+\beta_2Intervention_{jt}+\beta_3year_t\times Intervention_{jt}+\beta_4sex_i$$
-where $\beta_{0i}$ and $\beta_{0j}$ are individual and community level random effects
+$$Y_{ijt}=\beta_0+\beta_{0i}+\beta_{0j}+\beta_1year_t+\beta_2Intervention_{jt}+\beta_3year_t\times Intervention_{jt}+\beta_4sex_i+\epsilon_{ijt}$$
+$$\beta_{0i}\sim N(0,\sigma^2_{\beta_{0i}})$$ 
+and 
+$$\beta_{0j}\sim N(0,\sigma^2_{\beta_{0j}})$$ 
 
 ```{r sanna_mod}
 #Original code from Sanna's script:
@@ -600,8 +355,24 @@ mods_haem_stan <- glmmTMB(ShW~year_fac*Intervention.type+sex + (1|ID) + (1|Schoo
     ylab("") + xlab("Coefficient values") +
     ggtitle("Sanna model coefficients")
 
+#Extract random effects and check if normal dist'n assumption is correct    
+stan_mod_int <- ranef(mods_haem_stan) 
+
+#ID random effects
+  stan_mod_id_ints <- stan_mod_int$cond$ID$`(Intercept)`
+    hist(stan_mod_id_ints, breaks = 30, col = 1); lines(density(rnorm(1000,0,sqrt(2.087))))
+    qqnorm(stan_mod_id_ints); qqline(stan_mod_id_ints, col = 2, lty = 2)
+    shapiro.test(stan_mod_id_ints)
+
+  stan_mod_school_ints <- stan_mod_int$cond$School$`(Intercept)`
+    hist(stan_mod_school_ints, breaks = 30, col = 1)
+    qqnorm(stan_mod_school_ints); qqline(stan_mod_school_ints, col = 2, lty = 2)
+    shapiro.test(stan_mod_school_ints)
 
 ```
+
+$$\sigma^2_{\beta_{0i}}=2.087$$
+$$\sigma^2_{\beta_{0j}}=1.327$$
 
 ```{r stan_sum}
 #Stanford summary of interventions in villages    
@@ -775,8 +546,6 @@ mod_comm <- full_long_comm %>% arrange(School, year) %>% group_by(School) %>%
          year_fac = factor(as.character(year), levels = c("2016", "2017", "2018")),
          pzq = ifelse(year != 2016, 1, 0))
 
-mod_comm_2018_2016 <- mod_comm %>% group_by(School) %>% summarise(diff = )
-
 mod4_dat <- full_long %>% arrange(Child_ID, year) %>% group_by(Child_ID) %>% 
   mutate(s_haem_mean_l1 = lag(s_haem_mean),
          log_s_haem_mean_l1 = lag(log(s_haem_mean+1)),
@@ -803,7 +572,7 @@ mod4_dat <- full_long %>% arrange(Child_ID, year) %>% group_by(Child_ID) %>%
 robust_fx <- function(mod_obj){
   df_init <- as.data.frame(summary(mod_obj)$coef)
   
-  rob_se <- sqrt(diag(vcovHC(mod_obj, type = "HC0")))
+  rob_se <- sqrt(diag(vcovHC(mod_obj, type = "HC1")))
   rob_lo <- rob_se * qnorm(0.025) + df_init[,"Estimate"]
   rob_up <- rob_se * qnorm(0.975) + df_init[,"Estimate"]
   
@@ -813,29 +582,88 @@ robust_fx <- function(mod_obj){
 }
 ```
 
-## Community level  
-```{r comm_mod1}
-#Model 1
-mod1_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + School + year_fac, 
-                             weights = haem_samps,
-                             data = mod_comm)
+## Individual level  
+```{r id_mod_most}
+#Model which ewxludes children receiving extra pzq and those with <2 samples
+#NOTE, pseudoreplication present in these results, even robust standard errors don't account for clustering at village level. Village-level models below are more honest
+mod2_haem_most <- glm.nb(round(s_haem_mean) ~ Net + Veg + Prawns + year_fac + School + log_s_haem_mean_l1 + sex, 
+                        weights = haem_samps,
+                        data = mod4_dat %>% filter(extra_pzq == 0))
 
-  mod1_haem_comm_all_res <- robust_fx(mod1_haem_comm_all)
-  mod1_haem_comm_all_res <- cbind(mod1_haem_comm_all_res, confint(mod1_haem_comm_all))
-    mod1_haem_comm_all_res$model <- "Model 1"
+  mod2_haem_most_res <- robust_fx(mod2_haem_most)
+  mod2_haem_most_res <- cbind(mod2_haem_most_res, confint(mod2_haem_most))
+    mod2_haem_most_res$model <- "Model 2"
 
-mod1_haem_comm_all_res %>%     
-  mutate(coefficient = rownames(mod1_haem_comm_all_res)) %>% 
+mod2_haem_most_res %>%     
+  mutate(coefficient = rownames(mod2_haem_most_res)) %>% 
+  rename("naive_lo" = !!names(.[8]),
+         "naive_up" = !!names(.[9])) %>% 
   ggplot(aes(x = Estimate, y = coefficient)) + theme_bw() +
     geom_point() + 
     geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = coefficient), height = 0.25) +
+    #geom_errorbarh(aes(xmin = naive_lo, xmax = naive_up, y = coefficient), height = 0.25, col = 2) +
     geom_vline(xintercept = 0, lty = 2) +
     ylab("") + xlab("Coefficient values") +
-    ggtitle("Berkeley model coefficients", 
+    ggtitle("Extra pzq and <2 samples removed", 
             subtitle = "95% CIs derived from robust standard errors")
- 
-mod1_haem_comm_all_res %>%     
-  mutate(coefficient = rownames(mod1_haem_comm_all_res)) %>% 
+```
+
+```{r missingness_most}
+#Data in the model
+mod4_dat_used_most <- mod4_dat %>% 
+  filter(complete.cases(s_haem_mean, Net, Veg, Prawns, year_fac, School, log_s_haem_mean_l1, extra_pzq, haem_samps)) %>% 
+  mutate(missingness = 0) %>% 
+  select(s_haem_mean, Net, Veg, Prawns, year_fac, School, 
+         Intervention_2018, log_s_haem_mean_l1, extra_pzq, haem_samps, missingness)
+
+#Data not in the model (exclude 2016 since there's no lagged outcome for that year)
+mod4_dat_unused_most <- mod4_dat %>% filter(year_fac != "2016") %>% 
+  filter(!complete.cases(s_haem_mean, Net, Veg, Prawns, year_fac, School, log_s_haem_mean_l1, extra_pzq, haem_samps)) %>% 
+  mutate(missingness = 1) %>% 
+  select(s_haem_mean, Net, Veg, Prawns, year_fac, School, 
+         Intervention_2018, log_s_haem_mean_l1, extra_pzq, haem_samps, missingness)
+
+missingness_dat_most <- rbind(mod4_dat_used_most, mod4_dat_unused_most)
+
+nrow(mod4_dat_unused_most)/nrow(missingness_dat_most)
+#37% missingness, so what causes it?
+md.pattern(mod4_dat %>% filter(year_fac != "2016") %>% 
+             select(s_haem_mean, Net, Veg, Prawns, year_fac, School, log_s_haem_mean_l1, extra_pzq, sex))
+
+missing_ids_most <- unique(mod4_dat_unused_most %>% pull(Child_ID))
+
+#Data frame of 2016 (baseline) data with indicator for missingness
+missing2016_dat_most <- mod4_dat %>% filter(year_fac == "2016") %>% 
+  mutate(missing = as.numeric(Child_ID %in% missing_ids_most))
+
+  missing2016_dat_most %>% group_by(School) %>% summarise(tot_missing = sum(missing), tot = n(), not_missing = tot-tot_missing)
+
+#Logisitc regression for missingness
+missing_mod_most <- glm(missing ~ s_haem_mean_narm + Intervention_2018, 
+                        family = "binomial", data = missing2016_dat_most)
+
+#Plot probability of being missing
+missing_mod_most_df <- model.frame(missing_mod_most) %>% 
+  mutate(predicted = exp(predict(missing_mod_most)) / (1 + exp(predict(missing_mod_most))))
+
+missing_mod_most_df %>% 
+  ggplot(aes(x = s_haem_mean_narm, y = predicted, col = Intervention_2018)) + theme_bw() +
+  geom_line(size = 1.2) + ylab("Missing probability") + xlab("2016 S. haematobium egg burden")
+```
+
+```{r id_mod_all}
+#use na.rm for means, weight by number of samples, include extra pzq as covariate
+#NOTE, pseudoreplication present in these results, even robust standard errors don't account for clustering at village level. Village-level models below are more honest
+mod2_haem_all <- glm.nb(round(s_haem_mean_narm) ~ Net + Veg + Prawns + year_fac + School + log_s_haem_mean_narm_l1 + extra_pzq + sex, 
+                        weights = haem_samps,
+                        data = mod4_dat)
+
+  mod2_haem_all_res <- robust_fx(mod2_haem_all)
+  mod2_haem_all_res <- cbind(mod2_haem_all_res, confint(mod2_haem_all))
+    mod2_haem_all_res$model <- "Model 2"
+
+mod2_haem_all_res %>%     
+  mutate(coefficient = rownames(mod2_haem_all_res)) %>% 
   rename("naive_lo" = !!names(.[8]),
          "naive_up" = !!names(.[9])) %>% 
   ggplot(aes(x = Estimate, y = coefficient)) + theme_bw() +
@@ -844,40 +672,97 @@ mod1_haem_comm_all_res %>%
     geom_errorbarh(aes(xmin = naive_lo, xmax = naive_up, y = coefficient), height = 0.25, col = 2) +
     geom_vline(xintercept = 0, lty = 2) +
     ylab("") + xlab("Coefficient values") +
-    ggtitle("Berkeley model coefficients", 
+    ggtitle("Berkeley coefficients", 
             subtitle = "95% CIs derived from robust standard errors")
-   
-#Estimate risk difference 
-mod_comm_prawn <- mod_comm_veg <- mod_comm_ref <- mod_comm
-  mod_comm_ref <- mod_comm_ref %>% mutate(Prawns = 0,
-                                          Veg = 0,
-                                          Net = 0)
-  mod_comm_veg <- mod_comm_ref %>% mutate(Veg = ifelse(year == 2018, 1, 0))
-  mod_comm_prawn <- mod_comm_ref %>% mutate(Prawns = ifelse(year == 2018, 1, 0),
-                                            Net = ifelse(year == 2018, 1, 0))
 
-comm_ref_out <- predict(mod1_haem_comm_all, newdata = mod_comm_ref)
+#Data in the model
+mod4_dat_used <- model.frame(mod2_haem_all) %>% 
+  mutate(missingness = 0,
+         predicted = exp(predict(mod2_haem_all)))
 
-comm_prawn_out <- predict(mod1_haem_comm_all, newdata = mod_comm_prawn)
+#Plot predictions
+mod4_dat_used %>% full_join(interventions %>% select(School, Intervention_2018), by = "School") %>% 
+  #filter(year_fac == "2018") %>% 
+  ggplot(aes(x = year_fac, y = predicted, col = Intervention_2018)) + geom_boxplot()
 
-comm_veg_out <- predict(mod1_haem_comm_all, newdata = mod_comm_veg)
+mod2_haem_all_k_mat <- as.data.frame(model.matrix(round(s_haem_mean_narm) ~ Net + Veg + Prawns + year_fac + 
+                                      School + log_s_haem_mean_narm_l1 + extra_pzq + sex, 
+                                    data = mod4_dat)) 
 
-mod1_counter <- data.frame(cbind(School = mod_comm$School, year = mod_comm$year, 
-                                 comm_ref_out, comm_prawn_out, comm_veg_out)) %>% 
-  gather(key = "intervention", value = "Prediction", comm_ref_out:comm_veg_out) %>% 
-  mutate(Prediction = as.numeric(Prediction))
+#Get Village level estimates of mean worm burden
+schools <- paste0("School", unique(mod4_dat$School))[-c(1,2)] #Get rid of vil name associated with intercept
 
-mod1_counter %>% filter(intervention != "comm_veg_out" & year == 2018) %>% 
-  ggplot(aes(x = intervention, y = Prediction, col = School, group = School)) +  
-    geom_point(stat='summary', fun.y=sum) +
-    stat_summary(fun.y=sum, geom="line") 
+get_vil_est <- function(School){
+  vil <- as.name(School)
+  k_mat <- mod2_haem_all_k_mat %>% select(-year_fac2017) %>% filter(year_fac2018 == 1 & !!vil == 1) %>% 
+    summarise_all(funs(mean)) %>% mutate(sexM = 1)
+  
+  exp(confint(glht(mod2_haem_all, linfct = as.matrix(k_mat)))$confint[1,])
+}
 
-#That's basically just showing the point estimate of the prawn coefficient across all villages which doesn't actually tell us much.
+get_vil_est("SchoolFS")
+
+vil_ests <- t(sapply(schools, get_vil_est))
+
+as.data.frame(vil_ests) %>% mutate(Vil = rownames(vil_ests)) %>% 
+  ggplot(aes(x = Estimate, y = Vil)) + geom_point() + 
+  geom_errorbarh(aes(xmin = lwr, xmax = upr, y = Vil, height = 0.2)) +
+  theme_bw() + xlab("Predicted mean egg burden")
 ```
 
-```{r comm_mod2}
+What data is actually going into estimating this model?
+```{r missingness_all}
+#Data in the model
+mod4_dat_used <- model.frame(mod2_haem_all) %>% 
+  mutate(missingness = 0,
+         predicted = exp(predict(mod2_haem_all)))
+
+mod4_dat_used %>% filter(year_fac == "2018") %>% 
+  ggplot(aes(x = School, y = predicted)) + geom_boxplot() + facet_wrap(~Prawns)
+
+#Data not in the model (exclude 2016 since there's no lagged outcome for that year)
+mod4_dat_unused <- mod4_dat %>% filter(year_fac != "2016") %>% 
+  filter(!complete.cases(s_haem_mean_narm, Net, Veg, Prawns, year_fac, School, log_s_haem_mean_narm_l1, extra_pzq, haem_samps)) %>% 
+  mutate(missingness = 1) %>% 
+  select(s_haem_mean_narm, Net, Veg, Prawns, year_fac, School, 
+         Intervention_2018, log_s_haem_mean_narm_l1, extra_pzq, haem_samps, missingness)
+
+missingness_dat <- rbind(mod4_dat_used, mod4_dat_unused)
+
+nrow(mod4_dat_unused)/nrow(missingness_dat)
+#15% missingness, so what causes it?
+
+md.pattern(mod4_dat %>% filter(year_fac != "2016") %>% 
+             select(s_haem_mean_narm, Net, Veg, Prawns, year_fac, School, log_s_haem_mean_narm_l1, extra_pzq, sex))
+
+#Basically all missingness caused at least in part by some missing egg burden estimate
+missing_ids <- unique(mod4_dat_unused %>% pull(Child_ID))
+
+#Data frame of 2016 (baseline) data with indicator for missingness
+missing2016_dat <- mod4_dat %>% filter(year_fac == "2016") %>% 
+  mutate(missing = as.numeric(Child_ID %in% missing_ids))
+
+  missing2016_dat %>% group_by(School) %>% summarise(tot_missing = sum(missing), tot = n(), not_missing = tot-tot_missing)
+
+#Logisitc regression for missingness
+missing_mod <- glm(missing ~ s_haem_mean_narm + Intervention_2018, 
+                   family = "binomial", data = missing2016_dat)
+
+#Plot probability of being missing
+missing_mod_df <- model.frame(missing_mod) %>% 
+  mutate(predicted = exp(predict(missing_mod)) / (1 + exp(predict(missing_mod))))
+
+missing_mod_df %>% #full_join(interventions %>% select(School, Intervention_2018), by = "School") %>% 
+  ggplot(aes(x = s_haem_mean_narm, y = predicted, col = Intervention_2018)) + theme_bw() +
+  geom_line(size = 1.2) + ylab("Missing probability") + xlab("2016 S. haematobium egg burden")
+
+```
+
+
+## Community level  
+```{r comm_mod2_haem}
 #Model 2
-mod2_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + year_fac + haem_mean_l1, 
+mod2_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + year_fac + School + haem_mean_l1 + extra_pzq, 
                              weights = haem_samps,
                              data = mod_comm)
 
@@ -887,28 +772,177 @@ mod2_haem_comm_all <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + year_fac + 
 
 mod2_haem_comm_all_res %>%     
   mutate(coefficient = rownames(mod2_haem_comm_all_res)) %>% 
-  ggplot(aes(x = Estimate, y = coefficient)) + theme_bw() +
-    geom_point() + 
-    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = coefficient), height = 0.25) +
-    geom_vline(xintercept = 0, lty = 2) +
-    ylab("") + xlab("Coefficient values") +
-    ggtitle("Berkeley model2 coefficients", 
-            subtitle = "95% CIs derived from robust standard errors")
-  
-mod2_haem_comm_all_res %>%     
-  mutate(coefficient = rownames(mod2_haem_comm_all_res)) %>% 
   rename("naive_lo" = !!names(.[8]),
          "naive_up" = !!names(.[9])) %>% 
   ggplot(aes(x = Estimate, y = coefficient)) + theme_bw() +
     geom_point() + 
     geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = coefficient), height = 0.25) +
-    geom_errorbarh(aes(xmin = naive_lo, xmax = naive_up, y = coefficient), height = 0.25, col = 2) +
+    #geom_errorbarh(aes(xmin = naive_lo, xmax = naive_up, y = coefficient), height = 0.25, col = 2) +
     geom_vline(xintercept = 0, lty = 2) +
     ylab("") + xlab("Coefficient values") +
-    ggtitle("Berkeley model2 coefficients", 
+    ggtitle("Berkeley coefficients, S. haematobium", 
             subtitle = "95% CIs derived from robust standard errors")
   
 ```
+
+```{r comm_mod_mans}
+#Model 2
+mod2_mans_comm_all <- glm(round(mans_mean) ~ Net + Veg + Prawns + year_fac + School + mans_mean_l1 + extra_pzq, 
+                             weights = mans_samps, family = "poisson",
+                             data = mod_comm)
+
+#Glm.nb reaches the alternation limit which means theta (overdispersion parameter) is not fitting well. It goes towards inifinity, implying the dispersion parameter approaches 0 which is equivalent to a poisson distribution, so we use poisson glm here
+#glm.nb(round(mans_mean) ~ Net + Veg + Prawns + year_fac + School + mans_mean_l1 + extra_pzq, 
+#                             weights = mans_samps,
+#                             data = mod_comm, init.theta = 1.26, trace = 4)
+
+  mod2_mans_comm_all_res <- robust_fx(mod2_mans_comm_all)
+  mod2_mans_comm_all_res <- cbind(mod2_mans_comm_all_res, confint(mod2_mans_comm_all))
+    mod2_mans_comm_all_res$model <- "Model 2"
+
+mod2_mans_comm_all_res %>%     
+  mutate(coefficient = rownames(mod2_mans_comm_all_res)) %>% 
+  rename("naive_lo" = !!names(.[8]),
+         "naive_up" = !!names(.[9])) %>% 
+  ggplot(aes(x = Estimate, y = coefficient)) + theme_bw() +
+    geom_point() + 
+    geom_errorbarh(aes(xmin = rob_lo, xmax = rob_up, y = coefficient), height = 0.25) +
+    #geom_errorbarh(aes(xmin = naive_lo, xmax = naive_up, y = coefficient), height = 0.25, col = 2) +
+    geom_vline(xintercept = 0, lty = 2) +
+    ylab("") + xlab("Coefficient values") +
+    ggtitle("Berkeley coefficients, S. mansoni", 
+            subtitle = "95% CIs derived from robust standard errors")
+  
+```
+## Permutation test  
+Conduct permutation test to determine, given our data, the probability of finding a significant effect of treatment regardless of how the interventions were assigned to communities. Basically determines if any finding of a significant association is a true effect or was pre-ordained given our data.
+
+```{r permute_fx}
+#Function to randomly reallocate treatment among communities
+#Made tricky by the fact that treatments vary each year
+#and there's dependence between years since the four communities
+#that received nets in 2017 also received prawns in 2018
+#Approach is to take 9-digit binary treatment vector, scramble it,
+#and then reseaprate it for a new village
+
+permute <- function(){
+#Get full treatment vector
+  treats <- mod_comm %>% 
+    unite(int_vec, c(Veg, Net, Prawns)) %>% 
+    group_by(School) %>% 
+    summarise(full_hist = paste(int_vec, collapse = "-")) %>% 
+    pull(full_hist)
+  
+#Resample to scramble treatment 
+  mix <- sample(treats, replace = FALSE)
+  
+#Unlist to rebind with the full df
+  mix2 <- unlist(strsplit(mix, "-"))
+  
+  mod_perm <- mod_comm %>% ungroup() %>%  mutate(mix2 = mix2) %>% 
+  #Replace old values with randomly scrambled ones  
+    select(-c(Veg, Net, Prawns)) %>% 
+    separate(mix2, c("Veg", "Net", "Prawns"))
+ 
+  #Model with only intervetnion effects
+  mod0_perm <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns, 
+                      weights = haem_samps,
+                      data = mod_perm)
+  
+  mod0_int_coef <- summary(mod0_perm)$coef[,"Estimate"][c("Veg1", "Net1", "Prawns1")]
+ 
+  #Haematobium full model
+  mod2_perm <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + year_fac + School + haem_mean_l1 + extra_pzq, 
+                      weights = haem_samps,
+                      data = mod_perm)
+  
+  mod2_int_coef <- summary(mod2_perm)$coef[,"Estimate"][c("Veg1", "Net1", "Prawns1")]
+
+  #Mansoni full model
+  mod2_mans_perm <- glm(round(mans_mean) ~ Net + Veg + Prawns + year_fac + School + mans_mean_l1 + extra_pzq, 
+                        weights = mans_samps, family = "poisson",
+                        data = mod_perm)
+  
+  mod2_mans_coef <- summary(mod2_mans_perm)$coef[,"Estimate"][c("Veg1", "Net1", "Prawns1")]
+
+    
+  return(c(mod0_int_coef, mod2_int_coef, mod2_mans_coef))
+}
+
+permute()
+```
+
+
+```{r perm_run, cache = TRUE}
+set.seed(43093)
+perm_result <- replicate(10000, permute())
+
+perm_result <- as.data.frame(t(perm_result))
+colnames(perm_result) <- c("Mod0_Veg", "Mod0_Net", "Mod0_Prawns",
+                           "Mod2_Veg", "Mod2_Net", "Mod2_Prawns",
+                           "Mod2_mans_Veg", "Mod2_mans_Net", "Mod2_mans_Prawns")
+```
+
+```{r perm_resuts}
+#Model 0 results
+hist(perm_result$Mod0_Veg, col = "black", breaks = 100)
+  #abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"], 
+  #       col = 4, lty = 2, lwd = 2)
+  #length(which(perm_result$Mod0_Veg > 
+  #               summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
+  
+hist(perm_result$Mod0_Net, col = "black", breaks = 100)
+  #abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"], 
+  #       col = 4, lty = 2, lwd = 2)
+  #length(which(perm_result$Mod0_Net > 
+  #               summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
+
+hist(perm_result$Mod0_Prawns, col = "black", breaks = 100)
+  #abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
+  #       col = 4, lty = 2, lwd = 2)
+  #length(which(perm_result$Mod0_Prawns > 
+  #               summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
+
+#Model 2 results haematobium
+hist(perm_result$Mod2_Veg, col = "black", breaks = 100)
+  abline(v = summary(mod2_haem_comm_all)$coef[,"Estimate"]["Veg"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod2_Veg > 
+                 summary(mod2_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
+
+hist(perm_result$Mod2_Net, col = "black", breaks = 100)
+  abline(v = summary(mod2_haem_comm_all)$coef[,"Estimate"]["Net"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod2_Net > 
+                 summary(mod2_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
+  
+hist(perm_result$Mod2_Prawns, col = "black", breaks = 100)
+  abline(v = summary(mod2_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod2_Prawns > 
+                 summary(mod2_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
+
+#Model 2 results mansoni
+hist(perm_result$Mod2_mans_Veg, col = "black", breaks = 100)
+  abline(v = summary(mod2_mans_comm_all)$coef[,"Estimate"]["Veg"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod2_mans_Veg > 
+                 summary(mod2_mans_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
+
+hist(perm_result$Mod2_mans_Net, col = "black", breaks = 100)
+  abline(v = summary(mod2_mans_comm_all)$coef[,"Estimate"]["Net"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod2_mans_Net > 
+                 summary(mod2_mans_comm_all)$coef[,"Estimate"]["Net"])) / 10000
+  
+hist(perm_result$Mod2_mans_Prawns, col = "black", breaks = 100)
+  abline(v = summary(mod2_mans_comm_all)$coef[,"Estimate"]["Prawns"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod2_mans_Prawns > 
+                 summary(mod2_mans_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
+  
+```
+
 
 ```{r more_comm_mods, message = FALSE, eval = FALSE}
 #Model 0
@@ -1008,128 +1042,6 @@ mod4_haem_diff_comm_all_res %>%
 anova(mod0_haem_comm_all, mod00_haem_comm_all, 
       mod1_haem_comm_all, mod2_haem_comm_all, mod4_haem_comm_all)
 ```
-# Permutation test  
-Conduct permutation test to determine, given our data, the probability of finding a significant effect of treatment regardless of how the interventions were assigned to communities. Basically determines if any finding of a significant association is a true effect or was pre-ordained given our data.
-
-```{r permute_fx}
-#Function to randomly reallocate treatment among communities
-#Made tricky by the fact that treatments vary each year
-#and there's dependence between years since the four communities
-#that received nets in 2017 also received prawns in 2018
-
-permute <- function(){
-#Get full treatment vector
-  treats <- mod_comm %>% 
-    unite(int_vec, c(Veg, Net, Prawns)) %>% 
-    group_by(School) %>% 
-    summarise(full_hist = paste(int_vec, collapse = "-")) %>% 
-    pull(full_hist)
-  
-#Resample to scramble treatment 
-  mix <- sample(treats, replace = FALSE)
-  
-#Unlist to rebind with the full df
-  mix2 <- unlist(strsplit(mix, "-"))
-  
-  mod_perm <- cbind(mod_comm, mix2 = mix2) %>% 
-  #Replace old values with randomly scrambled ones  
-    select(-c(Veg, Net, Prawns)) %>% 
-    separate(mix2, c("Veg", "Net", "Prawns"))
- 
-  mod0_perm <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns, 
-                      weights = haem_samps,
-                      data = mod_perm)
-  
-  mod0_int_coef <- summary(mod0_perm)$coef[,"Estimate"][c("Veg1", "Net1", "Prawns1")]
- 
-  mod1_perm <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + School + year_fac, 
-                      weights = haem_samps,
-                      data = mod_perm)
-  
-  mod1_int_coef <- summary(mod1_perm)$coef[,"Estimate"][c("Veg1", "Net1", "Prawns1")]
-  
-  mod2_perm <- glm.nb(round(haem_mean) ~ Net + Veg + Prawns + year_fac + haem_mean_l1, 
-                      weights = haem_samps,
-                      data = mod_perm)
-  
-  mod2_int_coef <- summary(mod2_perm)$coef[,"Estimate"][c("Veg1", "Net1", "Prawns1")]
-  
-  return(c(mod0_int_coef, mod1_int_coef, mod2_int_coef))
-}
-
-permute()
-```
-
-
-```{r perm_run, cache = TRUE}
-set.seed(43093)
-perm_result <- replicate(10000, permute())
-
-perm_result <- as.data.frame(t(perm_result))
-colnames(perm_result) <- c("Mod0_Veg", "Mod0_Net", "Mod0_Prawns",
-                           "Mod1_Veg", "Mod1_Net", "Mod1_Prawns",
-                           "Mod2_Veg", "Mod2_Net", "Mod2_Prawns")
-
-#Model 0 results
-hist(perm_result$Mod0_Veg, col = "black", breaks = 100)
-  #abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"], 
-  #       col = 4, lty = 2, lwd = 2)
-  #length(which(perm_result$Mod0_Veg > 
-  #               summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
-  
-hist(perm_result$Mod0_Net, col = "black", breaks = 100)
-  #abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"], 
-  #       col = 4, lty = 2, lwd = 2)
-  #length(which(perm_result$Mod0_Net > 
-  #               summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
-
-hist(perm_result$Mod0_Prawns, col = "black", breaks = 100)
-  #abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
-  #       col = 4, lty = 2, lwd = 2)
-  #length(which(perm_result$Mod0_Prawns > 
-  #               summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
-
-
-#Model 1 results
-hist(perm_result$Mod1_Veg, col = "black", breaks = 100)
-  abline(v = summary(mod1_haem_comm_all)$coef[,"Estimate"]["Veg"], 
-         col = 4, lty = 2, lwd = 2)
-  length(which(perm_result$Mod1_Veg > 
-                 summary(mod1_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
-  
-hist(perm_result$Mod1_Net, col = "black", breaks = 100)
-  abline(v = summary(mod1_haem_comm_all)$coef[,"Estimate"]["Net"], 
-         col = 4, lty = 2, lwd = 2)
-  length(which(perm_result$Mod1_Net > 
-                 summary(mod1_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
-
-hist(perm_result$Mod1_Prawns, col = "black", breaks = 100)
-  abline(v = summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
-         col = 4, lty = 2, lwd = 2)
-  length(which(perm_result$Mod1_Prawns > 
-                 summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
-
-#Model 2 results
-hist(perm_result$Mod2_Veg, col = "black", breaks = 100)
-  abline(v = summary(mod2_haem_comm_all)$coef[,"Estimate"]["Veg"], 
-         col = 4, lty = 2, lwd = 2)
-  length(which(perm_result$Mod2_Veg > 
-                 summary(mod2_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
-
-hist(perm_result$Mod2_Net, col = "black", breaks = 100)
-  abline(v = summary(mod2_haem_comm_all)$coef[,"Estimate"]["Net"], 
-         col = 4, lty = 2, lwd = 2)
-  length(which(perm_result$Mod2_Net > 
-                 summary(mod2_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
-  
-hist(perm_result$Mod2_Prawns, col = "black", breaks = 100)
-  abline(v = summary(mod2_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
-         col = 4, lty = 2, lwd = 2)
-  length(which(perm_result$Mod2_Prawns > 
-                 summary(mod2_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
-
-
-```
 
 # GEE models  
 Doesn't appear to be an R package for negative binomially distributed GEE in `R`, so we'll use the binary infection outcomes. This is actually nice since it directly relates to the mixed effects models that Jason has been working on.
@@ -1174,16 +1086,15 @@ as.data.frame(gee_ex_sum) %>%
     ggtitle("GEE model", 
             subtitle = "95% CIs derived from robust standard errors")
  
-#Package for prediction with GEE models
-require(doBy)
+#Attempt at augmented GEE
+require(CRTgeeDR)
 
-gee_predict_prawn <- gee_predict_veg <- gee_predict_ref <- full_long
+crt_prawn_dat <- full_long %>% filter(Intervention_2018 != "veg_removal")
 
-gee_predict_prawn <- gee_predict_prawn %>%
-  mutate(Prawns = ifelse(year_fac==2018,1,0),
-         Net = ifelse(year_fac==2018,1,0))
-
-gee_prawn_prediction <- prediction(gee_ex, newdata = gee_predict_prawn)
+crt_gee_prawn <- geeDREstimation(s_haem_bin_narm ~ Net + Veg + Prawns + School + year_fac + sex, 
+                                 id = crt_prawn_dat$Child_ID,
+                                 family = "binomial", corstr = "exchangeable", data = crt_prawn_dat,
+                                 aug = crt_prawn_dat$Prawns)
 ```
 
 
