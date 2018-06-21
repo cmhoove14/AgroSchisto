@@ -482,6 +482,32 @@ Data from [Rohr et al 2008](https://esajournals.onlinelibrary.wiley.com/doi/full
 + Function: `piC.atr.rohr08.lin`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Rohr08/Rohr08_piC_atrazine_function_test.png)
 
+### `Rohr_unpublished_insecticides_macrobrachium_fit.R`  
+Unpublished data from Jason Rohr following same protocols and investigating same chemicals as in [Halstead et al 2015](https://www.sciencedirect.com/science/article/pii/S0045653515003410?via%3Dihub) but with *Macrobrachium rosenbergii* as test organism
+
+#### Data reported  
+Chemical concentration, time of death over five replicates for each concentration group  
+#### Response functions fit  
+  + malathion  
+    + function: `muPq_mal_mac_rohr_unpub_uncertainty`  
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Rohr_unpublished/rohr_macrobrachium_malathion.png)  
+  + chlorpyrifos  
+    + function: `muPq_chlor_mac_rohr_unpub_uncertainty`  
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Rohr_unpublished/rohr_macrobrachium_chlorpyrifos.png)  
+  + terbufos  
+    + function: `muPq_terb_mac_rohr_unpub_uncertainty`  
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Rohr_unpublished/rohr_macrobrachium_terbufos.png)  
+  + esfenvalerate  
+    + function: `muPq_esfen_mac_rohr_unpub_uncertainty`  
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Rohr_unpublished/rohr_macrobrachium_esfenvalerate.png)  
+  + lambda-cyhalothrin  
+    + function: `muPq_lamcy_mac_rohr_unpub_uncertainty`  
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Rohr_unpublished/rohr_macrobrachium_lambda-cyhalothrin.png)  
+  + permethrin  
+    + function: `muPq_perm_mac_rohr_unpub_uncertainty`  
+    + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Rohr_unpublished/rohr_macrobrachium_permethrin.png)  
+
+
 ### `Sarojini1986_fenitrothion_predators_fit.R`  
 Data from [Sarojini et al 1986](https://www.sciencedirect.com/science/article/pii/0147651386900989) investigating effects of **fenitrothion** on *Macrobrachium lamerii* survival  
 #### Data reported  
