@@ -8,6 +8,12 @@
 #Per the terms of this license, if you are making derivative use of this work, you must identify that 
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
+require(drc)
+
+L.3.fx = function(t, lc50 = lc50, slp = slp){
+  1 / (1+exp(slp*log(t / lc50)))
+}
+
 
 atr = read.csv('Agrochemical_Review/Response_Fxs/Data/rohr08_atr.csv')
 
@@ -25,6 +31,96 @@ rohr.atr.fx = function(He){
     
     return(piC)
   } 
+  
+#Time series data at single concnetrations  
+rohr_cerc <- read_csv("Agrochemical_Review/Response_Fxs/Data/rohr2008.csv") %>% 
+  group_by(chem, time_hrs) %>% 
+  summarise(ntot = sum(total),
+            nfx = sum(round(dead)),
+            conc = mean(conc)) %>% 
+  mutate(per_mort = nfx/ntot)
 
-#Vector of items to keep
-  keep.atr.rohr08 = c('atr', 'atr.lin', 'piC.atr.rohr08.lin')
+rohr_cerc_ts <- drm(nfx/ntot ~ time_hrs, weights = ntot, type = 'binomial', fct = LL2.2(), curveid = chem,
+                    data = rohr_cerc)
+#Control parameters
+  lc50_rohr08_ctrl <- summary(rohr_cerc_ts)$coef[which(grepl( "control", rownames(summary(rohr_cerc_ts)$coef))),][2,1]
+  lc50_rohr08_ctrl_se <- summary(rohr_cerc_ts)$coef[which(grepl( "control", rownames(summary(rohr_cerc_ts)$coef))),][2,2]
+  b_rohr08_ctrl <- summary(rohr_cerc_ts)$coef[which(grepl( "control", rownames(summary(rohr_cerc_ts)$coef))),][1,1]
+  b_rohr08_ctrl_se <- summary(rohr_cerc_ts)$coef[which(grepl( "control", rownames(summary(rohr_cerc_ts)$coef))),][1,2]
+  
+piC_ctrl_rohr08_ts_uncertainty <- function(...){
+  e0 = rnorm(1, lc50_rohr08_ctrl, lc50_rohr08_ctrl_se)
+  b0 = rnorm(1, b_rohr08_ctrl, b_rohr08_ctrl_se)
+    
+    auc0 = integrate(L.3.fx, lc50 = e0, slp = b0, lower=0, upper=24,
+                     stop.on.error = FALSE)[1]$value
+    
+  return(auc0)  
+}
+  
+#Atrazine parameters and function 
+  lc50_rohr08_atr201 <- summary(rohr_cerc_ts)$coef[which(grepl( "atrazine", rownames(summary(rohr_cerc_ts)$coef))),][2,1]
+  lc50_rohr08_atr201_se <- summary(rohr_cerc_ts)$coef[which(grepl( "atrazine", rownames(summary(rohr_cerc_ts)$coef))),][2,2]
+  b_rohr08_atr201 <- summary(rohr_cerc_ts)$coef[which(grepl( "atrazine", rownames(summary(rohr_cerc_ts)$coef))),][1,1]
+  b_rohr08_atr201_se <- summary(rohr_cerc_ts)$coef[which(grepl( "atrazine", rownames(summary(rohr_cerc_ts)$coef))),][1,2]
+  
+piC_atr201_rohr08_ts_uncertainty <- function(...){
+  e = rnorm(1, lc50_rohr08_atr201, lc50_rohr08_atr201_se)
+  b = rnorm(1, b_rohr08_atr201, b_rohr08_atr201_se)
+    
+    auc = integrate(L.3.fx, lc50 = e, slp = b, lower=0, upper=24,
+                     stop.on.error = FALSE)[1]$value
+    
+  return(auc / piC_ctrl_rohr08_ts_uncertainty())  
+}
+
+#carbaryl parameters and function 
+  lc50_rohr08_carb33.5 <- summary(rohr_cerc_ts)$coef[which(grepl( "carbaryl", rownames(summary(rohr_cerc_ts)$coef))),][2,1]
+  lc50_rohr08_carb33.5_se <- summary(rohr_cerc_ts)$coef[which(grepl( "carbaryl", rownames(summary(rohr_cerc_ts)$coef))),][2,2]
+  b_rohr08_carb33.5 <- summary(rohr_cerc_ts)$coef[which(grepl( "carbaryl", rownames(summary(rohr_cerc_ts)$coef))),][1,1]
+  b_rohr08_carb33.5_se <- summary(rohr_cerc_ts)$coef[which(grepl( "carbaryl", rownames(summary(rohr_cerc_ts)$coef))),][1,2]
+  
+piC_carb33.5_rohr08_ts_uncertainty <- function(...){
+        
+  e = rnorm(1, lc50_rohr08_carb33.5, lc50_rohr08_carb33.5_se)
+  b = rnorm(1, b_rohr08_carb33.5, b_rohr08_carb33.5_se)
+    
+    auc = integrate(L.3.fx, lc50 = e, slp = b, lower=0, upper=24,
+                     stop.on.error = FALSE)[1]$value
+    
+  return(auc / piC_ctrl_rohr08_ts_uncertainty())  
+}
+
+#glyphosate parameters and function 
+  lc50_rohr08_gly3700 <- summary(rohr_cerc_ts)$coef[which(grepl( "glyphosate", rownames(summary(rohr_cerc_ts)$coef))),][2,1]
+  lc50_rohr08_gly3700_se <- summary(rohr_cerc_ts)$coef[which(grepl( "glyphosate", rownames(summary(rohr_cerc_ts)$coef))),][2,2]
+  b_rohr08_gly3700 <- summary(rohr_cerc_ts)$coef[which(grepl( "glyphosate", rownames(summary(rohr_cerc_ts)$coef))),][1,1]
+  b_rohr08_gly3700_se <- summary(rohr_cerc_ts)$coef[which(grepl( "glyphosate", rownames(summary(rohr_cerc_ts)$coef))),][1,2]
+  
+piC_gly3700_rohr08_ts_uncertainty <- function(...){
+        
+  e = rnorm(1, lc50_rohr08_gly3700, lc50_rohr08_gly3700_se)
+  b = rnorm(1, b_rohr08_gly3700, b_rohr08_gly3700_se)
+    
+    auc = integrate(L.3.fx, lc50 = e, slp = b, lower=0, upper=24,
+                     stop.on.error = FALSE)[1]$value
+    
+  return(auc / piC_ctrl_rohr08_ts_uncertainty())  
+}
+
+#malathion parameters and function 
+  lc50_rohr08_mal9.6 <- summary(rohr_cerc_ts)$coef[which(grepl( "malathion", rownames(summary(rohr_cerc_ts)$coef))),][2,1]
+  lc50_rohr08_mal9.6_se <- summary(rohr_cerc_ts)$coef[which(grepl( "malathion", rownames(summary(rohr_cerc_ts)$coef))),][2,2]
+  b_rohr08_mal9.6 <- summary(rohr_cerc_ts)$coef[which(grepl( "malathion", rownames(summary(rohr_cerc_ts)$coef))),][1,1]
+  b_rohr08_mal9.6_se <- summary(rohr_cerc_ts)$coef[which(grepl( "malathion", rownames(summary(rohr_cerc_ts)$coef))),][1,2]
+
+piC_mal9.6_rohr08_ts_uncertainty <- function(...){
+        
+  e = rnorm(1, lc50_rohr08_mal9.6, lc50_rohr08_mal9.6_se)
+  b = rnorm(1, b_rohr08_mal9.6, b_rohr08_mal9.6_se)
+    
+    auc = integrate(L.3.fx, lc50 = e, slp = b, lower=0, upper=24,
+                     stop.on.error = FALSE)[1]$value
+    
+  return(auc / piC_ctrl_rohr08_ts_uncertainty())  
+}
