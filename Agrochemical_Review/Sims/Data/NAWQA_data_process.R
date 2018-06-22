@@ -21,9 +21,11 @@ rfx_sum <- read_csv("Agrochemical_Review/Response_Fxs/Summary/Response_Fx_Summar
 
 chems <- unique(rfx_sum$Chemical)
 
-#Add column whether chemical name from response function summary is in the observation of pestdat
-pestdat <- pestdat %>% 
-  mutate(keeper = ifelse(grepl(paste(chems, collapse = "|"), LONGNAME), 1, 0),
-         chem_short = ) 
-
-pestdat_keep <- pestdat %>% filter(keeper == 1)
+#Function to return NAWQA data matching a particular chemical name
+get_nawqa_dat <- function(chem_name){
+  dat <- pestdat %>% 
+    filter(grepl(chem_name, LONGNAME, ignore.case = T)) %>% 
+    filter(REMARK != "<") %>% select(CONCENTRATION,CONSTIT, LONGNAME, SITE_TYPE)
+  
+  return(dat)
+}
