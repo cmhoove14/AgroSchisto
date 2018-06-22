@@ -234,6 +234,7 @@ Data from [Halstead et al 2018](https://www.nature.com/articles/s41467-018-03189
 + Received raw data from Neal Halstead (lead author)
 
 #### Response functions fit  
+Functions just return estimates at EEC (used in study), not enough data for full dose response function  
 + `halstead18_phiNq_fe_uncertainty`
 + `halstead18_phiNq_at_uncertainty`
 
@@ -243,16 +244,33 @@ Data from [Halstead et al 2018](https://www.nature.com/articles/s41467-018-03189
 + Received raw data from Neal Halstead (lead author)
 
 #### Response functions fit  
+Functions just return estimates at EEC (used in study), not enough data for full dose response function  
 + `piC_atr102_halstead18_ts_uncertainty`
 + `piC_chlor64_halstead18_ts_uncertainty`
 + `piC_fer4400_halstead18_ts_uncertainty`
 
-### `Halstead_meso2018_cercariae_fit.R`   
+### `Halstead_meso2018_eggs_fit.R`   
 Data from [Halstead et al 2018](https://www.nature.com/articles/s41467-018-03189-w) investigating effects of **Atrazine**, **Chlorpyrifos**, and **Fertilizer** on snail populations and infection rates in a mesocosm setting. Supplementary info also contains information on larval survival and egg viability experiments for *S. mansoni* and *S. haematboium*  
 #### Data reported  
 + Received raw data from Neal Halstead (lead author)
 
 #### Response functions fit  
++ *S. mansoni*  
+  + Atrazine - `halstead_meso18_atr_mans_v_uncertainty` - [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead_meso2018/mansoni_egg_v_atrazine.png)  
+  + Chlorpyrifos - `halstead_meso18_chlor_mans_v_uncertainty` - [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead_meso2018/mansoni_egg_v_chlorpyrifos.png)  
+  + Fertilizer - `halstead_meso18_fert_mans_v_uncertainty` - [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead_meso2018/mansoni_egg_v_fertilizer.png)   
++ *S. haematobium*    
+  + Atrazine - `halstead_meso18_atr_haem_v_uncertainty` - [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead_meso2018/haematobium_egg_v_atrazine.png)  
+  + Chlorpyrifos - `halstead_meso18_chlor_haem_v_uncertainty` - [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead_meso2018/haematobium_egg_v_chlorpyrifos.png)  
+  + Fertilizer - `halstead_meso18_fert_haem_v_uncertainty` - [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead_meso2018/haematobium_egg_v_fertilizer.png)   
+
+### `Halstead_meso2018_predators_fit.R`   
+Data from [Halstead et al 2018](https://www.nature.com/articles/s41467-018-03189-w) investigating effects of **Atrazine**, **Chlorpyrifos**, and **Fertilizer** on snail populations and infection rates in a mesocosm setting. Supplementary info also contains information on larval survival and egg viability experiments for *S. mansoni* and *S. haematboium*  
+#### Data reported  
++ Received raw data from Neal Halstead (lead author)
+
+#### Response functions fit  
+Functions just return estimates at EEC (used in study), not enough data for full dose response function  
 + `muPq_halstead18_chlor64_uncertainty`
 + `muPq_halstead18_atr102_uncertainty`
 + `muPq_halstead18_fert4400_uncertainty`

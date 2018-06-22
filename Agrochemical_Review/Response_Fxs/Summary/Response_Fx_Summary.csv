@@ -33,7 +33,7 @@ Ghaffar2016,Abdel-Ghaffar et al 2016,Glyphosate,3700,https://doi.org/10.1645/GE-
 Ghaffar2016,Abdel-Ghaffar et al 2016,Pendimethalin,31,https://archive.epa.gov/pesticides/reregistration/web/pdf/0187red.pdf,Herbicide,direct snail,Biomphalaria alexandrina,,reproduction,fNq,fNq.pen.fx.uncertainty
 Griggs08,Griggs et al 2008,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC,piC.grg08_atr_unc2
 Griggs08,Griggs et al 2008,Metolachlor,186,https://archive.epa.gov/pesticides/reregistration/web/pdf/0001.pdf,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC,piC.grg08_atr_unc2
-Gustafson2016,Gustafson et al 2016,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,bottom-up,Physa acuta,,cercariae production,thetaq,gust_theta_uncertainty
+Gustafson2016,Gustafson et al 2016,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct snail,Physa acuta,,cercariae production,thetaq,gust_theta_uncertainty
 Halstead2015,Halstead et al 2015,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq,muPq_mal_Halstead_uncertainty
 Halstead2015,Halstead et al 2015,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq,muPq_chlor_Halstead_uncertainty
 Halstead2015,Halstead et al 2015,Terbufos,36.6,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq,muPq_terb_Halstead_uncertainty
@@ -41,21 +41,30 @@ Halstead2015,Halstead et al 2015,Esfenvalerate,1.03,http://dx.doi.org/10.1016/j.
 Halstead2015,Halstead et al 2015,Lambda-cyhalothrin,1.77,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq,muPq_lamcy_Halstead_uncertainty
 Halstead2015,Halstead et al 2015,Permethrin,5.98,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus clarkii,,mortality,muPq,muPq_perm_Halstead_uncertainty
 Halstead_meso2018,Halstead et al 2018,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,bottom-up,Bulinus truncatus,,reproduction,phiNq,halstead18_phiNq_at_uncertainty
-Halstead_meso2018,Halstead et al 2018,Fertilizer,0,NA-function estimates effect at single concentration,Fertilizer,bottom-up,Bulinus truncatus,,reproduction,phiNq,halstead18_phiNq_fe_uncertainty
+Halstead_meso2018,Halstead et al 2018,Fertilizer,4400,N-study,Fertilizer,bottom-up,Bulinus truncatus,,reproduction,phiNq,halstead18_phiNq_fe_uncertainty
+Halstead_meso2018,Halstead et al 2018,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Schistosoma mansoni,cercariae,mortality,piC,piC_atr102_halstead18_ts_uncertainty
+Halstead_meso2018,Halstead et al 2018,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma mansoni,cercariae,mortality,piC,piC_chlor64_halstead18_ts_uncertainty
+Halstead_meso2018,Halstead et al 2018,Fertilizer,4400,N-study,Fertilizer,direct larvae,Schistosoma mansoni,cercariae,mortality,piC,piC_fer4400_halstead18_ts_uncertainty
+Halstead_meso2018,Halstead et al 2018,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Schistosoma mansoni,eggs,viability,vq,
+Halstead_meso2018,Halstead et al 2018,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma mansoni,eggs,viability,vq,
+Halstead_meso2018,Halstead et al 2018,Fertilizer,4400,N-study,Fertilizer,direct larvae,Schistosoma mansoni,eggs,viability,vq,
+Halstead_meso2018,Halstead et al 2018,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Schistosoma haematobium,eggs,viability,vq,
+Halstead_meso2018,Halstead et al 2018,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma haematobium,eggs,viability,vq,
+Halstead_meso2018,Halstead et al 2018,Fertilizer,4400,N-study,Fertilizer,direct larvae,Schistosoma haematobium,eggs,viability,vq,
 Hasheesh2011,Hasheesh & Mohamed 2011,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma haematobium,cercariae,mortality,piC,piC_ch_Hash11_uncertainty
 Hasheesh2011,Hasheesh & Mohamed 2011,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct larvae,Schistosoma haematobium,cercariae,mortality,piC,piC_pr_Hash11_uncertainty
 Hasheesh2011,Hasheesh & Mohamed 2011,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma haematobium,miracidia,mortality,piM,piM_ch_Hash11_uncertainty
 Hasheesh2011,Hasheesh & Mohamed 2011,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct larvae,Schistosoma haematobium,miracidia,mortality,piM,piM_pr_Hash11_uncertainty
 Hasheesh2011,Hasheesh & Mohamed 2011,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Bulinus truncatus,,mortality,muNq,muNq_ch_hash11_uncertainty
 Hasheesh2011,Hasheesh & Mohamed 2011,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct snail,Bulinus truncatus,,mortality,muNq,muNq_prof_hash11_uncertainty
-Hussein2016,Hussein et al 2016,NPK_20_20_20,,,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq,muNq_balanced_hussein16_uncertainty
-Hussein2016,Hussein et al 2016,NPK_5_40_5,,,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq,muNq_highp_hussein16_uncertainty
-Hussein2016,Hussein et al 2016,NPK_35_5_5,,,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq,muNq_highn_hussein16_uncertainty
+Hussein2016,Hussein et al 2016,NPK_20_20_20,4400,PLACEHOLDER,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq,muNq_balanced_hussein16_uncertainty
+Hussein2016,Hussein et al 2016,NPK_5_40_5,4400,PLACEHOLDER,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq,muNq_highp_hussein16_uncertainty
+Hussein2016,Hussein et al 2016,NPK_35_5_5,4400,PLACEHOLDER,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq,muNq_highn_hussein16_uncertainty
 Ibrahim1992,Ibrahim et al 1992,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Biomphalaria alexandrina,,mortality,muNq,muNq_chlor_ibr92_uncertainty
 Ibrahim1992,Ibrahim et al 1992,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Biomphalaria alexandrina,,reproduction,fNq,fNq_chlor_ibr92_uncertainty
-Johnson2007,Johnson et al 2007,Ammonium Nitrate & Phosphoric Acid,,NA-function estimates effect at single concentration,Fertilizer,direct snail,Planorbella trivolvis,,reproduction,fNq,johnson07_fNq_uncertainty
-Johnson2007,Johnson et al 2007,Ammonium Nitrate & Phosphoric Acid,,NA-function estimates effect at single concentration,Fertilizer,bottom-up,Planorbella trivolvis,,cercariae production,thetaq,johnson07_theta_uncertainty
-Johnson2007,Johnson et al 2007,Ammonium Nitrate & Phosphoric Acid,,NA-function estimates effect at single concentration,Fertilizer,bottom-up,Planorbella trivolvis,,reproduction,phiNq,johnson07_phiNq_uncertainty
+Johnson2007,Johnson et al 2007,Ammonium Nitrate & Phosphoric Acid,1800,N-study,Fertilizer,direct snail,Planorbella trivolvis,,reproduction,fNq,johnson07_fNq_uncertainty
+Johnson2007,Johnson et al 2007,Ammonium Nitrate & Phosphoric Acid,1800,N-study,Fertilizer,bottom-up,Planorbella trivolvis,,cercariae production,thetaq,johnson07_theta_uncertainty
+Johnson2007,Johnson et al 2007,Ammonium Nitrate & Phosphoric Acid,1800,N-study,Fertilizer,bottom-up,Planorbella trivolvis,,reproduction,phiNq,johnson07_phiNq_uncertainty
 Koprivnikar2006,Koprivnikar et al 2006,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC,piC_kop_atr_unc
 Kristoff2011,Kristoff et al 2011,Azinphos-methyl,15.3,https://doi-org.libproxy.berkeley.edu/10.1016/S0045-6535(00)00601-9,Insecticide,direct snail,Biomphalaria glabrata,,reproduction,fNq,fNq_azmeth_kristoff11_uncertainty
 Lavarias2013,Lavarias et al 2013,Fenitrothion,36.6,https://archive.epa.gov/pesticides/reregistration/web/pdf/0445.pdf,Insecticide,top-down,Macrobrachium borellii,,mortality,muPq,muPq_fenitrothion_Lavarias13_uncertainty
@@ -91,6 +100,10 @@ Rohr_unpublished,Rohr (unpublished data),Esfenvalerate,1.03,http://dx.doi.org/10
 Rohr_unpublished,Rohr (unpublished data),Lambda-cyhalothrin,1.77,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq,muPq_lamcy_mac_rohr_unpub_uncertainty
 Rohr_unpublished,Rohr (unpublished data),Permethrin,5.98,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq,muPq_perm_mac_rohr_unpub_uncertainty
 Rohr2008_atrazine,Rohr et al 2008b,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC,piC.atr.rohr08.lin
+Rohr2008_atrazine,Rohr et al 2008b,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC,piC_atr201_rohr08_ts_uncertainty
+Rohr2008_atrazine,Rohr et al 2008b,Carbaryl,33.5,https://doi.org/10.1645/GE-2078.1,Insecticide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC,piC_carb33.5_rohr08_ts_uncertainty
+Rohr2008_atrazine,Rohr et al 2008b,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC,piC_mal9.6_rohr08_ts_uncertainty
+Rohr2008_atrazine,Rohr et al 2008b,Glyphosate,3700,https://doi.org/10.1645/GE-2078.1,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC,piC_gly3700_rohr08_ts_uncertainty
 Sarojini1986,Sarojini et al 1986,Fenitrothion,36.6,https://archive.epa.gov/pesticides/reregistration/web/pdf/0445.pdf,Insecticide,top-down,Macrobrachium lamerii,,mortality,muPq,muPq_fenitrothion_Sarojini86_uncertainty
 Satapornvanit2009,Satapornvanit et al 2009,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq,muPq_chlor_satapornvanit09_uncertainty
 Satapornvanit2009,Satapornvanit et al 2009,Dimethoate,33.4,https://archive.epa.gov/pesticides/reregistration/web/pdf/dimethoate_red.pdf,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq,muPq_dim_satapornvanit09_uncertainty
@@ -114,8 +127,8 @@ Tchounwou91,Tchounwou et al 1991,Malathion,18.4,http://dx.doi.org/10.1016/j.chem
 Tchounwou91,Tchounwou et al 1991,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Planorbella trivolvis,,mortality,muNq,muNq_trivolvis_mal_tch91_uncertainty
 Tchounwou91,Tchounwou et al 1991,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct snail,Planorbella trivolvis,,reproduction,fNq,fNq_trivolvis_mal_tch91_uncertainty
 Tchounwou91,Tchounwou et al 1991,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma mansoni,miracidia,mortality,piM,piM.tch91_mal_unc
-Tchounwou91b,Tchounwou et al 1991b,Ammonium Phosphate,,,Fertilizer,direct larvae,Schistosoma mansoni,miracidia,mortality,piM,piM.tch91_amm_unc
+Tchounwou91b,Tchounwou et al 1991b,Ammonium Phosphate,4400,PLACEHOLDER,Fertilizer,direct larvae,Schistosoma mansoni,miracidia,mortality,piM,piM.tch91_amm_unc
 Tchounwou91b,Tchounwou et al 1991b,Urea,3.46,https://doi.org/10.4319/lo.1971.16.5.0732,Fertilizer,direct larvae,Schistosoma mansoni,miracidia,mortality,piM,piM.tch91_ure_unc
-Tchounwou91b,Tchounwou et al 1991b,Ammonium Phosphate,,,Fertilizer,direct larvae,Schistosoma mansoni,eggs,viability,vq,tch91_amm_v_unc
+Tchounwou91b,Tchounwou et al 1991b,Ammonium Phosphate,4400,PLACEHOLDER,Fertilizer,direct larvae,Schistosoma mansoni,eggs,viability,vq,tch91_amm_v_unc
 Tchounwou91b,Tchounwou et al 1991b,Urea,3.46,https://doi.org/10.4319/lo.1971.16.5.0732,Fertilizer,direct larvae,Schistosoma mansoni,eggs,viability,vq,tch91_ure_v_unc
 Tchounwou92,Tchounwou et al 1992,Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma mansoni,cercariae,mortality,piC,piC.tch92_mal_unc
