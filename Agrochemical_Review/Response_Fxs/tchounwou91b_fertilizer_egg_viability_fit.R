@@ -30,9 +30,9 @@ tch91_amm_v_unc<-function(Fe){
   Fer = (Fe/1000)
   lc50 = rnorm(1, tch91_amm_lc50, tch91_amm_lc50_se)
   
-  fN = 1 / (1+exp(tch91_amm_slp*log(Fer / lc50)))
+  v = 1 / (1+exp(tch91_amm_slp*log(Fer / lc50)))
 
-  return(fN)
+  return(v)
 }
 
 keep.tch91.fe.egg <- c("tch91_amm_lc50", "tch91_amm_lc50_se", "tch91_amm_slp", "tch91_amm_v_unc")
