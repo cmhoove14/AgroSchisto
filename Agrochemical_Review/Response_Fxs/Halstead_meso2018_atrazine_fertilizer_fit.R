@@ -12,20 +12,20 @@
 
 #Step 1.1 Estimate change in snail carrying capacity by relative increases in final snail numbers
 meso_dat_botup<-read.csv('Agrochemical_Review/Response_Fxs/Data/Halstead_meso_data.csv')
-  #Bootstrapping to obtain distribution of bottom-up effects 
-    Fes<-meso_dat_botup$BtLive[meso_dat_botup$Ch==1 & 
+
+    Fes<-meso_dat_botup$Snails.Live[meso_dat_botup$Ch==1 & 
                                  meso_dat_botup$At==0 &
                                  meso_dat_botup$Fe==1]
       fe.mean = mean(Fes)
       fe.sd = sd(Fes)
       
-    Ats<-meso_dat_botup$BtLive[meso_dat_botup$Ch==1 & 
+    Ats<-meso_dat_botup$Snails.Live[meso_dat_botup$Ch==1 & 
                                  meso_dat_botup$At==1 &
                                  meso_dat_botup$Fe==0]
       at.mean = mean(Ats)
       at.sd = sd(Ats)
 
-    refs<-meso_dat_botup$BtLive[meso_dat_botup$Ch==1 & 
+    refs<-meso_dat_botup$Snails.Live[meso_dat_botup$Ch==1 & 
                                  meso_dat_botup$At==0 &
                                  meso_dat_botup$Fe==0]
       ref.mean<-mean(refs)
