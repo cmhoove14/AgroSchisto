@@ -228,14 +228,34 @@ Data from [Halstead et al 2015](https://www.sciencedirect.com/science/article/pi
     + function: `muPq_perm_Halstead_uncertainty`  
     + sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Halstead2015/halstead2015_permethrin_predator_mortality.png)  
     
-### `Halstead_meso2018_fit.R`   
-Data from [Halstead et al 2018](https://www.nature.com/articles/s41467-018-03189-w) investigating effects of **Atrazine**, **Chlorpyrifos**, and **Fertilizer** on snail populations and infection rates in a mesocosm setting  
+### `Halstead_meso2018_atrazine_fertilizer_fit.R`   
+Data from [Halstead et al 2018](https://www.nature.com/articles/s41467-018-03189-w) investigating effects of **Atrazine**, **Chlorpyrifos**, and **Fertilizer** on snail populations and infection rates in a mesocosm setting. Supplementary info also contains information on larval survival and egg viability experiments for *S. mansoni* and *S. haematboium*  
 #### Data reported  
-+ Received raw data on snail and predator populations in different mesocosm treatments from Neal Halstead (lead author)
++ Received raw data from Neal Halstead (lead author)
 
 #### Response functions fit  
 + `halstead18_phiNq_fe_uncertainty`
 + `halstead18_phiNq_at_uncertainty`
+
+### `Halstead_meso2018_cercariae_fit.R`   
+Data from [Halstead et al 2018](https://www.nature.com/articles/s41467-018-03189-w) investigating effects of **Atrazine**, **Chlorpyrifos**, and **Fertilizer** on snail populations and infection rates in a mesocosm setting. Supplementary info also contains information on larval survival and egg viability experiments for *S. mansoni* and *S. haematboium*  
+#### Data reported  
++ Received raw data from Neal Halstead (lead author)
+
+#### Response functions fit  
++ `piC_atr102_halstead18_ts_uncertainty`
++ `piC_chlor64_halstead18_ts_uncertainty`
++ `piC_fer4400_halstead18_ts_uncertainty`
+
+### `Halstead_meso2018_cercariae_fit.R`   
+Data from [Halstead et al 2018](https://www.nature.com/articles/s41467-018-03189-w) investigating effects of **Atrazine**, **Chlorpyrifos**, and **Fertilizer** on snail populations and infection rates in a mesocosm setting. Supplementary info also contains information on larval survival and egg viability experiments for *S. mansoni* and *S. haematboium*  
+#### Data reported  
++ Received raw data from Neal Halstead (lead author)
+
+#### Response functions fit  
++ `muPq_halstead18_chlor64_uncertainty`
++ `muPq_halstead18_atr102_uncertainty`
++ `muPq_halstead18_fert4400_uncertainty`
 
 ### `Hasheesh2011_chlorpyrifos_profenofos_larvae_fit.R`  
 Data from [Hasheesh & Mohamed 2011](https://www.sciencedirect.com/science/article/pii/S0048357511000186) investigating effects of **Chlorpyrifos** and **Profenofos** on survival of *S. haematobium* miracidia and cercarie and *Bulinus truncatus* snails (see below)  
@@ -475,12 +495,13 @@ Data from [Rohr et al 2008](https://www.ncbi.nlm.nih.gov/pubmed/18972018) invest
 + `rohr08_fNq_uncertainty2` - function using snail hatchlings data (preferred due to parameter interpretation)
 
 ### `Rohr08_atrazine_cercariae_fit.R`   
-Data from [Rohr et al 2008](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1890/07-1429.1) investigating effects of **Atrazine** on survival of  *Echinistoma trivolvis* cercariae    
+Data from [Rohr et al 2008](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1890/07-1429.1) investigating effects of **Atrazine**, **Malathion**, **Carbayl**, **Glyphosate** on survival of  *Echinistoma trivolvis* cercariae    
 #### Data reported  
 + Figure 3 %mortality in hours 14-18 of cercariae in 6 different dose groups  
 #### Response functions fit  
 + Function: `piC.atr.rohr08.lin`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Rohr08/Rohr08_piC_atrazine_function_test.png)
++ Functions based on time series data at single concentration (the EEC) for chems other than atrazine. Can't estimate fulld-r relationship for these, but can use in EEC forestplots 
 
 ### `Rohr_unpublished_insecticides_macrobrachium_fit.R`  
 Unpublished data from Jason Rohr following same protocols and investigating same chemicals as in [Halstead et al 2015](https://www.sciencedirect.com/science/article/pii/S0045653515003410?via%3Dihub) but with *Macrobrachium rosenbergii* as test organism

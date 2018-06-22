@@ -84,6 +84,12 @@ Ragab2006,Ragab et al 2006,Potassium Sulphate,,,Fertilizer,direct snail,Biomphal
 Ragab2006,Ragab et al 2006,Urea,3.46,https://doi.org/10.4319/lo.1971.16.5.0732,Fertilizer,direct snail,Biomphalaria alexandrina,,mortality,muNq,rag06_muNq_urea
 Revathi2010,Revathi & Munuswamy 2010,Tributyltin,13.7,https://archive.epa.gov/pesticides/reregistration/web/pdf/0099red.pdf,Insecticide,top-down,Macrobrachium rosenbergii,,reproduction,fPq,fPq_tbt_Revathi10_uncertainty
 Rohr2008_nature,Rohr et al 2008,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,bottom-up,Planorbella trivolvis,,reproduction,phiNq,rohr08_fNq_uncertainty2
+Rohr_unpublished,Rohr (unpublished data),Malathion,18.4,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq,muPq_mal_mac_rohr_unpub_uncertainty
+Rohr_unpublished,Rohr (unpublished data),Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq,muPq_chlor_mac_rohr_unpub_uncertainty
+Rohr_unpublished,Rohr (unpublished data),Terbufos,36.6,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq,muPq_terb_mac_rohr_unpub_uncertainty
+Rohr_unpublished,Rohr (unpublished data),Esfenvalerate,1.03,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq,muPq_esfen_mac_rohr_unpub_uncertainty
+Rohr_unpublished,Rohr (unpublished data),Lambda-cyhalothrin,1.77,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq,muPq_lamcy_mac_rohr_unpub_uncertainty
+Rohr_unpublished,Rohr (unpublished data),Permethrin,5.98,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq,muPq_perm_mac_rohr_unpub_uncertainty
 Rohr2008_atrazine,Rohr et al 2008b,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Echinistoma trivolvis,cercariae,mortality,piC,piC.atr.rohr08.lin
 Sarojini1986,Sarojini et al 1986,Fenitrothion,36.6,https://archive.epa.gov/pesticides/reregistration/web/pdf/0445.pdf,Insecticide,top-down,Macrobrachium lamerii,,mortality,muPq,muPq_fenitrothion_Sarojini86_uncertainty
 Satapornvanit2009,Satapornvanit et al 2009,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,,mortality,muPq,muPq_chlor_satapornvanit09_uncertainty
