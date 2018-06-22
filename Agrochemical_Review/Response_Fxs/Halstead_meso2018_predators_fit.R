@@ -13,27 +13,29 @@
 meso_dat_preds<-read_csv('Agrochemical_Review/Response_Fxs/Data/Halstead_meso_data.csv') %>%
   mutate(atr_conc = 102 * A2,
          chlor_conc = 64 * C2,
-         fert_conc = 4400 * F2) %>% 
-  group_by(Treat1) %>% 
-  summarize(p.all_tot = 3*n(),
-            p.all_dead = sum(P.all.24),
-            atr_conc = mean(atr_conc),
-            chlor_conc = mean(chlor_conc),
-            fert_conc = mean(fert_conc))
+         fert_conc = 4400 * F2,
+         p.all_tot = 3)
 
-chlor_muPq_rate <- meso_dat_preds$p.all_dead[which(meso_dat_preds$chlor_conc == 64)] / 
-  meso_dat_preds$p.all_tot[which(meso_dat_preds$chlor_conc == 64)]
+#Chlorpyrifos
+chlor_muPq_rate <- meso_dat_preds$P.all.24[which(meso_dat_preds$Treat1 == "C 1x")] / 
+  meso_dat_preds$p.all_tot[which(meso_dat_preds$Treat1 == "C 1x")]
   
 muPq_halstead18_chlor64_uncertainty <- function(...){
   sample(chlor_muPq_rate, 1)
 }
 
-#No evidence of excess mortality due to atrazine at EEC
+#Atrazine
+atr_muPq_rate <- meso_dat_preds$P.all.24[which(meso_dat_preds$Treat1 == "A 1x")] / 
+  meso_dat_preds$p.all_tot[which(meso_dat_preds$Treat1 == "A 1x")]
+
 muPq_halstead18_atr102_uncertainty <- function(...){
-  return(0)
+  sample(atr_muPq_rate, 1)
 }
 
-#No evidence of excess mortality due to fertilizer at EEC
+#Fertilizer
+fert_muPq_rate <- meso_dat_preds$P.all.24[which(meso_dat_preds$Treat1 == "F 1x")] / 
+  meso_dat_preds$p.all_tot[which(meso_dat_preds$Treat1 == "F 1x")]
+
 muPq_halstead18_fert4400_uncertainty <- function(...){
-  return(0)
+  sample(fert_muPq_rate, 1)
 }

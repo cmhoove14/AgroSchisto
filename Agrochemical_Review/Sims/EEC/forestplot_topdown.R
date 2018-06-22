@@ -13,6 +13,22 @@ library(tidyverse)
 library(pals)
 library(forestplot)
 
+#GGplot theme for manuscripts
+theme_ms <- function(base_size=12, base_family="Helvetica") {
+  library(grid)
+  (theme_bw(base_size = base_size, base_family = base_family)+
+      theme(text=element_text(color="black"),
+            axis.title=element_text(face="bold", size = rel(1.3)),
+            axis.text=element_text(size = rel(1), color = "black"),
+            legend.title=element_text(face="bold"),
+            legend.text=element_text(face="bold"),
+            legend.background=element_rect(fill="transparent"),
+            legend.key.size = unit(0.8, 'lines'),
+            panel.border=element_rect(color="black",size=1),
+            panel.grid=element_blank()
+    ))
+}
+
 #load R0 function
 source("Agrochemical_Review/Models/r0_of_q.R")
 
@@ -128,7 +144,7 @@ fp_text <- list(as.list(fp_studies),
              lower =matrix(c(NA, rfx_topdown_all %>% arrange(Parameter, Chemical, Study) %>% pull(r0_025))),
              upper =matrix(c(NA, rfx_topdown_all %>% arrange(Parameter, Chemical, Study) %>% pull(r0_975))),
              new_page = TRUE,
-             is.summary = c(TRUE, rep(FALSE, 40)),
+             is.summary = c(TRUE, rep(FALSE, nrow(rfx_topdown_all))),
              hrzl_lines = list('2' = gpar(col = 'grey')),
              txt_gp = fpTxtGp(xlab = gpar(cex = 1.2),
                               ticks = gpar(cex = 1.1)),
@@ -141,24 +157,20 @@ fp_text <- list(as.list(fp_studies),
              xticks = c(0, 1,2,3,4))
 
 
-#Attempt to mkae forestplot-ish thing with ggplot ###########
-#Table of all topdown studies ###
-topdown_tab <- rfx_topdown %>% select(Study, Species, Chemical) %>% 
-  ggtexttable(rows = NULL)
-
+#Forestplot-ish thing with ggplot ###########
 my_labs <- list(bquote(mu[P]),bquote(Psi),bquote(f[P]))
 
-tiff(paste('~/RemaisWork/Schisto/Agro_Review/Figures/EEC_forest/ggplot_forest_topdown', Sys.Date(), '.tiff', sep = ''),
-     width = 2480, height = 3508*0.55, res = 300)
-rfx_topdown_all %>% #mutate(axis_lab = paste(study_long, Species, sep = "  ")) %>% 
-  ggplot(aes(x = Chemical, y = r0_med, shape = Parameter, col = Study)) + 
+rfx_topdown_all %>% 
+  ggplot(aes(x = reorder(Chemical, desc(Chemical)), y = r0_med, shape = Parameter, col = Study)) + 
     geom_hline(yintercept = r0.fix()[3], lty = 2) +
-    geom_point(size = 2, position = position_dodge(0.5)) + 
+    geom_point(size = 2.5, position = position_dodge(0.9)) + 
     geom_errorbar(aes(ymin = r0_025, ymax = r0_975, x = Chemical, width = 0.01), 
-                  position = position_dodge(0.5)) +
-    theme_bw() + ylim(0,4) + coord_flip() + ylab(expression(paste(R['0']))) +
-    ggtitle("Top-down effects") +
+                  position = position_dodge(0.9)) +
+    theme_ms() + ylim(0,4) + coord_flip() + ylab(expression(paste(R['0']))) +
+    ggtitle("Top-down effects") + xlab("Chemical") +
     scale_color_manual(values = glasbey()) + 
     scale_shape_manual(values = c(17,15,16), breaks = c("muPq", "psiq", "fPq"),
-                       labels = my_labs)
-dev.off()
+                       labels = my_labs) 
+
+ggsave(paste('~/RemaisWork/Schisto/Agro_Review/Figures/EEC_forest/ggplot_forest_topdown', Sys.Date(), '.tiff', sep = ''),
+        width = 7.3, height = 7.3, dpi = 600)

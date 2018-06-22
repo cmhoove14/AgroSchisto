@@ -13,6 +13,22 @@ library(tidyverse)
 library(pals)
 library(forestplot)
 
+#GGplot theme for manuscripts
+theme_ms <- function(base_size=12, base_family="Helvetica") {
+  library(grid)
+  (theme_bw(base_size = base_size, base_family = base_family)+
+      theme(text=element_text(color="black"),
+            axis.title=element_text(face="bold", size = rel(1.3)),
+            axis.text=element_text(size = rel(1), color = "black"),
+            legend.title=element_text(face="bold"),
+            legend.text=element_text(face="bold"),
+            legend.background=element_rect(fill="transparent"),
+            legend.key.size = unit(0.8, 'lines'),
+            panel.border=element_rect(color="black",size=1),
+            panel.grid=element_blank()
+    ))
+}
+
 #load R0 function
 source("Agrochemical_Review/Models/r0_of_q.R")
 
@@ -81,26 +97,49 @@ fNq_r0 <- function(rfx, eec){
 rfx_dirsnail_fNq <- rfx_dirsnail %>% filter(Parameter == "fNq" & !is.na(eec)) %>% 
   cbind(map2_df(.x = .$rfx, .y = .$eec, fNq_r0))
 
+#Function to simulate 5000 parameter values, estimate r0 for each, return median and IQR for fNq response functions
+thetaq_r0 <- function(rfx, eec){
+  print(rfx)
+  thetaq_r0s <- sapply(replicate(5000, do.call(rfx, list(eec))), r0.fix, 
+                     fNqx = 1, 
+                     muPqx = 0,
+                     fPqx = 1,
+                     phiNqx = 1, 
+                     muNqx = 0, 
+                     psiqx = 1,
+                     #thetaqx = 1, 
+                     piMqx = 1, 
+                     piCqx = 1, 
+                     vqx = 1)[3,]
+  
+  return(data.frame(r0_med = median(thetaq_r0s),
+                    r0_025 = quantile(thetaq_r0s, 0.25),
+                    r0_975 = quantile(thetaq_r0s, 0.75)))
+}
+
+rfx_dirsnail_thetaq <- rfx_dirsnail %>% filter(Parameter == "thetaq") %>% 
+  cbind(map2_df(.x = .$rfx, .y = .$eec, thetaq_r0))
+
 #Put dfs back together
-rfx_dirsnail_all <- rbind(rfx_dirsnail_muNq, rfx_dirsnail_fNq) %>% 
+rfx_dirsnail_all <- rbind(rfx_dirsnail_muNq, rfx_dirsnail_fNq, rfx_dirsnail_thetaq) %>% 
   mutate(r0_med_rel = (r0_med / r0.fix()[3]) * 100,
          r0_025_rel = (r0_025 / r0.fix()[3]) * 100,
          r0_975_rel = (r0_975 / r0.fix()[3]) * 100)
 
 #Forestplotish thing with GGPlot
-my_labs <- list(bquote(mu[N]), bquote(f[N]))
+my_labs <- list(bquote(mu[N]), bquote(f[N]), bquote(theta))
 
-tiff(paste('~/RemaisWork/Schisto/Agro_Review/Figures/EEC_forest/ggplot_forest_dirsnail', Sys.Date(), '.tiff', sep = ''),
-     width = 2480, height = 3508*0.5, res = 300)
-rfx_dirsnail_all %>% #mutate(axis_lab = paste(study_long, Species, sep = "  ")) %>% 
-  ggplot(aes(x = Chemical, y = r0_med, shape = Parameter, col = Study)) + 
+rfx_dirsnail_all %>%
+  ggplot(aes(x = reorder(Chemical, desc(Chemical)), y = r0_med, shape = Parameter, col = Study)) + 
     geom_hline(yintercept = r0.fix()[3], lty = 2) +
-    geom_point(size = 2, position = position_dodge(0.5)) + 
+    geom_point(size = 3, position = position_dodge(0.9)) + 
     geom_errorbar(aes(ymin = r0_025, ymax = r0_975, x = Chemical, width = 0.01), 
-                  position = position_dodge(0.5)) +
-    theme_bw() + ylim(0,4) + coord_flip() + ylab(expression(paste(R['0']))) +
-    ggtitle("Direct snail effects") +
+                  position = position_dodge(0.9)) +
+    theme_ms() + ylim(0,4) + coord_flip() + ylab(expression(paste(R['0']))) +
+    ggtitle("Direct snail effects") + xlab("Chemical") +
     scale_color_manual(values = glasbey()) + 
-    scale_shape_manual(values = c(16,15), breaks = c("muNq", "fNq"),
+    scale_shape_manual(values = c(16,15, 17), breaks = c("muNq", "fNq", "thetaq"),
                        labels = my_labs)
-dev.off()
+
+ggsave(paste('~/RemaisWork/Schisto/Agro_Review/Figures/EEC_forest/ggplot_forest_dirsnail', Sys.Date(), '.tiff', sep = ''),
+       width = 7.3, height = 7.3, dpi = 600)

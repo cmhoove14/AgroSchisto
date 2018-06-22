@@ -13,37 +13,41 @@
 #Step 1.1 Estimate change in snail carrying capacity by relative increases in final snail numbers
 meso_dat_botup<-read.csv('Agrochemical_Review/Response_Fxs/Data/Halstead_meso_data.csv')
   #Bootstrapping to obtain distribution of bottom-up effects 
-    Fes<-meso_dat_botup$bt_liv_fin[meso_dat_botup$chlor==1 & 
-                                     meso_dat_botup$atra==0 &
-                                     meso_dat_botup$fert==1]
+    Fes<-meso_dat_botup$BtLive[meso_dat_botup$Ch==1 & 
+                                 meso_dat_botup$At==0 &
+                                 meso_dat_botup$Fe==1]
       fe.mean = mean(Fes)
       fe.sd = sd(Fes)
       
-    Ats<-meso_dat_botup$bt_liv_fin[meso_dat_botup$chlor==1 & 
-                                     meso_dat_botup$atra==1 &
-                                     meso_dat_botup$fert==0]
+    Ats<-meso_dat_botup$BtLive[meso_dat_botup$Ch==1 & 
+                                 meso_dat_botup$At==1 &
+                                 meso_dat_botup$Fe==0]
       at.mean = mean(Ats)
       at.sd = sd(Ats)
 
-    refs<-meso_dat_botup$bt_liv_fin[meso_dat_botup$chlor==1 & 
-                                      meso_dat_botup$atra==0 &
-                                      meso_dat_botup$fert==0]
+    refs<-meso_dat_botup$BtLive[meso_dat_botup$Ch==1 & 
+                                 meso_dat_botup$At==0 &
+                                 meso_dat_botup$Fe==0]
       ref.mean<-mean(refs)
       ref.sd<-sd(refs)
     
 #Fertilizer bottom up effects  
   halstead18_phiNq_fe_uncertainty = function(...){ #function based on snail hatchlings
-    phin = rnorm(1, fe.mean, fe.sd) / ref.mean
-    while(phin <= 0) phin = rnorm(1, fe.mean, fe.sd) / ref.mean
-    phin
+    sample(Fes, 1) / sample(refs,1)
+    
+    #phin = rnorm(1, fe.mean, fe.sd) / ref.mean
+    #while(phin <= 0) phin = rnorm(1, fe.mean, fe.sd) / ref.mean
+    #phin
   }
       
       
 #Atrazine bottom up effects  
   halstead18_phiNq_at_uncertainty = function(...){ #function based on snail hatchlings
-    phin = rnorm(1, at.mean, at.sd) / ref.mean
-    while(phin <= 0) phin = rnorm(1, at.mean, at.sd) / ref.mean
-    phin
+        sample(Ats, 1) / sample(refs,1)
+
+    #phin = rnorm(1, at.mean, at.sd) / ref.mean
+    #while(phin <= 0) phin = rnorm(1, at.mean, at.sd) / ref.mean
+    #phin
   }
 
 keep.halstead18 = c('halstead18_phiNq_at_uncertainty', 'at.mean', 'at.sd', 'ref.mean',

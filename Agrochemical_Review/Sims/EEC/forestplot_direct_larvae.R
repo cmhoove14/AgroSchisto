@@ -16,6 +16,22 @@ library(forestplot)
 #load R0 function
 source("Agrochemical_Review/Models/r0_of_q.R")
 
+#GGplot theme for manuscripts
+theme_ms <- function(base_size=12, base_family="Helvetica") {
+  library(grid)
+  (theme_bw(base_size = base_size, base_family = base_family)+
+      theme(text=element_text(color="black"),
+            axis.title=element_text(face="bold", size = rel(1.3)),
+            axis.text=element_text(size = rel(1), color = "black"),
+            legend.title=element_text(face="bold"),
+            legend.text=element_text(face="bold"),
+            legend.background=element_rect(fill="transparent"),
+            legend.key.size = unit(0.8, 'lines'),
+            panel.border=element_rect(color="black",size=1),
+            panel.grid=element_blank()
+    ))
+}
+
 #Response functions summary
 rfx_sum <- read_csv("Agrochemical_Review/Response_Fxs/Summary/Response_Fx_Summary.csv")
 
@@ -115,17 +131,17 @@ rfx_dirlarv_all <- rbind(rfx_dirlarv_piC, rfx_dirlarv_piM, rfx_dirlarv_v) %>%
 #Forestplotish thing with GGPlot
 my_labs <- list(bquote(pi[C]), bquote(pi[M]), bquote(v))
 
-tiff(paste('~/RemaisWork/Schisto/Agro_Review/Figures/EEC_forest/ggplot_forest_dirlarv', Sys.Date(), '.tiff', sep = ''),
-     width = 2480, height = 3508*0.5, res = 300)
-rfx_dirlarv_all %>% #mutate(axis_lab = paste(study_long, Species, sep = "  ")) %>% 
-  ggplot(aes(x = Chemical, y = r0_med, shape = Parameter, col = Study)) + 
+rfx_dirlarv_all %>% 
+  ggplot(aes(x = reorder(Chemical, desc(Chemical)), y = r0_med, shape = Parameter, col = Study)) + 
     geom_hline(yintercept = r0.fix()[3], lty = 2) +
-    geom_point(size = 2, position = position_dodge(0.5)) + 
+    geom_point(size = 3, position = position_dodge(0.9)) + 
     geom_errorbar(aes(ymin = r0_025, ymax = r0_975, x = Chemical, width = 0.01), 
-                  position = position_dodge(0.5)) +
-    theme_bw() + ylim(0,4) + coord_flip() + ylab(expression(paste(R['0']))) +
-    ggtitle("Direct larval effects") +
+                  position = position_dodge(0.9)) +
+    theme_ms() + ylim(0,4) + coord_flip() + ylab(expression(paste(R['0']))) +
+    ggtitle("Direct larval effects") + xlab("Chemical") +
     scale_color_manual(values = glasbey()) + 
     scale_shape_manual(values = c(15,16,17), breaks = c("piC", "piM", "vq"),
                        labels = my_labs)
-dev.off()
+
+ggsave(paste('~/RemaisWork/Schisto/Agro_Review/Figures/EEC_forest/ggplot_forest_dirlarv', Sys.Date(), '.tiff', sep = ''),
+       width = 7.3, height = 7.3, dpi = 600)

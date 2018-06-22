@@ -45,12 +45,15 @@ Halstead_meso2018,Halstead et al 2018,Fertilizer,4400,N-study,Fertilizer,bottom-
 Halstead_meso2018,Halstead et al 2018,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Schistosoma mansoni,cercariae,mortality,piC,piC_atr102_halstead18_ts_uncertainty
 Halstead_meso2018,Halstead et al 2018,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma mansoni,cercariae,mortality,piC,piC_chlor64_halstead18_ts_uncertainty
 Halstead_meso2018,Halstead et al 2018,Fertilizer,4400,N-study,Fertilizer,direct larvae,Schistosoma mansoni,cercariae,mortality,piC,piC_fer4400_halstead18_ts_uncertainty
-Halstead_meso2018,Halstead et al 2018,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Schistosoma mansoni,eggs,viability,vq,
-Halstead_meso2018,Halstead et al 2018,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma mansoni,eggs,viability,vq,
-Halstead_meso2018,Halstead et al 2018,Fertilizer,4400,N-study,Fertilizer,direct larvae,Schistosoma mansoni,eggs,viability,vq,
-Halstead_meso2018,Halstead et al 2018,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Schistosoma haematobium,eggs,viability,vq,
-Halstead_meso2018,Halstead et al 2018,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma haematobium,eggs,viability,vq,
-Halstead_meso2018,Halstead et al 2018,Fertilizer,4400,N-study,Fertilizer,direct larvae,Schistosoma haematobium,eggs,viability,vq,
+Halstead_meso2018,Halstead et al 2018,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Schistosoma mansoni,eggs,viability,vq,halstead_meso18_atr_mans_v_uncertainty
+Halstead_meso2018,Halstead et al 2018,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma mansoni,eggs,viability,vq,halstead_meso18_chlor_mans_v_uncertainty
+Halstead_meso2018,Halstead et al 2018,Fertilizer,4400,N-study,Fertilizer,direct larvae,Schistosoma mansoni,eggs,viability,vq,halstead_meso18_fert_mans_v_uncertainty
+Halstead_meso2018,Halstead et al 2018,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Schistosoma haematobium,eggs,viability,vq,halstead_meso18_atr_haem_v_uncertainty
+Halstead_meso2018,Halstead et al 2018,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma haematobium,eggs,viability,vq,halstead_meso18_chlor_haem_v_uncertainty
+Halstead_meso2018,Halstead et al 2018,Fertilizer,4400,N-study,Fertilizer,direct larvae,Schistosoma haematobium,eggs,viability,vq,halstead_meso18_fert_haem_v_uncertainty
+Halstead_meso2018,Halstead et al 2018,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,top-down,Procambarus alenii,,mortality,muPq,muPq_halstead18_atr102_uncertainty
+Halstead_meso2018,Halstead et al 2018,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Procambarus alenii,,mortality,muPq,muPq_halstead18_chlor64_uncertainty
+Halstead_meso2018,Halstead et al 2018,Fertilizer,4400,N-study,Fertilizer,top-down,Procambarus alenii,,mortality,muPq,muPq_halstead18_fert4400_uncertainty
 Hasheesh2011,Hasheesh & Mohamed 2011,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma haematobium,cercariae,mortality,piC,piC_ch_Hash11_uncertainty
 Hasheesh2011,Hasheesh & Mohamed 2011,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct larvae,Schistosoma haematobium,cercariae,mortality,piC,piC_pr_Hash11_uncertainty
 Hasheesh2011,Hasheesh & Mohamed 2011,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,direct larvae,Schistosoma haematobium,miracidia,mortality,piM,piM_ch_Hash11_uncertainty
