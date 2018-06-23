@@ -12,7 +12,8 @@ require(tidyverse)
 ```{r}
 RFxSum <- read_csv("Response_Fx_Summary.csv")
 
-table(RFxSum$Chemical, RFxSum$Pathway)
+table(RFxSum$Pathway)
+table(RFxSum$System)
 
 RFxSum %>% 
   group_by(Chemical, Pathway) %>% 
@@ -31,5 +32,16 @@ RFxSum %>%
                   "direct_snail" = 0,
                   "top_down" = 0)) %>% 
   knitr::kable()
+```
+
+```{r}
+# Find chemical-pathway pairs that have multiple response functions
+RFx_multis <- RFxSum %>% group_by(Chemical, parameter, System) %>% 
+  summarise(nfx = n(),
+            matches = paste(Study, collapse = " ; "),
+            species = paste(Species, collapse = " ; ")) %>% filter(nfx > 1)
+
+
+RFxSum <- RFxSum %>% full_join(RFx_multis, by = c("Chemical", "parameter", "System"))  
 ```
 
