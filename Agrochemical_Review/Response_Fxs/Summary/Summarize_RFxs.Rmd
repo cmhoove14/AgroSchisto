@@ -15,7 +15,7 @@ RFxSum <- read_csv("Response_Fx_Summary.csv")
 table(RFxSum$Pathway)
 table(RFxSum$System)
 
-RFxSum %>% 
+RFxSum %>% filter(System != "Other") %>% 
   group_by(Chemical, Pathway) %>% 
   summarise(n = n()) %>% 
   spread(key = Pathway, value = n) %>% 
@@ -35,8 +35,11 @@ RFxSum %>%
 ```
 
 ```{r}
-# Find chemical-pathway pairs that have multiple response functions
-RFx_multis <- RFxSum %>% group_by(Chemical, parameter, System) %>% 
+# For chemicals with adequate data, e.g. those that have evidence for approximately all hypthesized pathways, find those with multiple studies and determine which study (e.g. response function) is preferred
+RFx_multis <- RFxSum %>% filter(Chemical %in% c("Atrazine", "Butachlor", "Butralin", 
+                                                "Chlorpyrifos", "Glyphosate", "Malathion", "Profenofos") &
+                                  System != "Other") %>% 
+  group_by(Chemical, parameter, System) %>% 
   summarise(nfx = n(),
             matches = paste(Study, collapse = " ; "),
             species = paste(Species, collapse = " ; ")) %>% filter(nfx > 1)
