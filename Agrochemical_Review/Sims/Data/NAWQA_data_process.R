@@ -12,6 +12,9 @@ pestname <- fread("https://www.sciencebase.gov/catalog/file/get/595e6b16e4b0d1f9
 
 pestsites <- fread("https://www.sciencebase.gov/catalog/file/get/595e6b16e4b0d1f9f05702fd?f=__disk__a2%2F8e%2Fd2%2Fa28ed208752341daeaa642ae562657ed00df7a12", skip = 13)
 
+#Glyphosate data obtained from different source since not included in NAWQA master spreadsheet
+gly_dat <- fread("https://www.sciencebase.gov//catalog/file/get/5928a5dce4b016f7a93f8d7b?f=__disk__f7%2Ff0%2F8e%2Ff7f08ec5b316028dbe466c78e1159a196d1101db", skip = 1)
+
 pestdat <- pestsamp %>% 
   inner_join(pestname %>% select(-CONSTIT), by = "PARM_CD") %>% 
   inner_join(pestsites %>% select(-SITE_QW_ID), by = "SITE_ABB")
@@ -23,9 +26,18 @@ chems <- unique(rfx_sum$Chemical)
 
 #Function to return NAWQA data matching a particular chemical name
 get_nawqa_dat <- function(chem_name){
-  dat <- pestdat %>% 
-    filter(grepl(chem_name, LONGNAME, ignore.case = T)) %>% 
-    filter(REMARK != "<") %>% select(CONCENTRATION,CONSTIT, LONGNAME, SITE_TYPE)
+  if(chem_name == "glyphosate"){
+    dat <- gly_dat %>% 
+      filter(GLYPHOSATE_RMK_ELISA != "<") %>% select(SAMPLE_DATE, GLYPHOSATE_ELISA_ng_L) %>% 
+      mutate(GLYPHOSATE_ELISA_ug_L = GLYPHOSATE_ELISA_ng_L/1000)
+    
+  } else {
+    
+    dat <- pestdat %>% 
+      filter(grepl(chem_name, LONGNAME, ignore.case = T)) %>% 
+      filter(REMARK != "<") %>% select(CONCENTRATION,CONSTIT, LONGNAME, SITE_TYPE)
+  
+  }
   
   return(dat)
 }
