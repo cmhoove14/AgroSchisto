@@ -74,28 +74,7 @@ parameters=c(
   eff=0.95 # efficiency of the drug
 )
 
-#Null (default) functional responses ##############
-  nil1<-function(In){ #For proportional responses
-    return(1)
-  }
-  nil0<-function(In){ #For additive responses
-    return(0)
-  }
-
-#R0(q) functions ###############
-#r0 of insecticide function
-r0.In = function(In = 0,
-                f.f_Nq = nil1, 
-                f.mu_Pq = nil0,
-                f.phi_Nq = nil1, 
-                f.mu_Nq = nil0, 
-                f.alpha_q = nil1,
-                f.theta_q = nil1, 
-                f.pi_Mq = nil1, 
-                f.pi_Cq = nil1, 
-                f.v_q = nil1)
-  
-{ area = parameters['A']
+  area = parameters['A']
   sigma = parameters['sigma']
   lamda = parameters['lamda']
   omega = parameters['Om']
@@ -117,8 +96,30 @@ r0.In = function(In = 0,
   Th = parameters['Th']
   f_N = parameters['f_N']
   phi_N = parameters['phi_N']
+
+
+#Null (default) functional responses ##############
+  nil1<-function(In){ #For proportional responses
+    return(1)
+  }
+  nil0<-function(In){ #For additive responses
+    return(0)
+  }
+
+#R0(q) functions ###############
+#r0 of insecticide function
+r0.In = function(In = 0,
+                f.f_Nq = nil1, 
+                f.mu_Pq = nil0,
+                f.phi_Nq = nil1, 
+                f.mu_Nq = nil0, 
+                f.alpha_q = nil1,
+                f.theta_q = nil1, 
+                f.pi_Mq = nil1, 
+                f.pi_Cq = nil1, 
+                f.v_q = nil1)
   
-  f_Nq = f_N * f.f_Nq(In)
+{ f_Nq = f_N * f.f_Nq(In)
   muPq = mu_P + f.mu_Pq(In)
   phi_Nq = phi_N * f.phi_Nq(In)
   mu_Nq = mu_N + f.mu_Nq(In)
@@ -167,30 +168,7 @@ r0.He = function(He = 0,
                  f.pi_Cq = nil1, 
                  f.v_q = nil1)
   
-{ area = parameters['A']
-  sigma = parameters['sigma']
-  lamda = parameters['lamda']
-  omega = parameters['Om']
-  theta = parameters['theta']
-  pi_C = parameters['pi_C']
-  beta = parameters['beta']
-  H = parameters['H']
-  m = parameters['m']
-  v = parameters['v']
-  pi_M = parameters['pi_M']
-  mu_N = parameters['mu_N']
-  mu_I = parameters['mu_I']
-  mu_H = parameters['mu_H']
-  mu_W = parameters['mu_W']
-  mu_P = parameters['mu_P']
-  f_P = parameters['f_P']
-  phi_P = parameters['phi_P']
-  alpha = parameters['alpha']
-  Th = parameters['Th']
-  f_N = parameters['f_N']
-  phi_N = parameters['phi_N']
-  
-  f_Nq = f_N * f.f_Nq(He)
+{ f_Nq = f_N * f.f_Nq(He)
   muPq = mu_P + f.mu_Pq(He)
   phi_Nq = phi_N * f.phi_Nq(He)
   mu_Nq = mu_N + f.mu_Nq(He)
@@ -237,30 +215,7 @@ r0.Fe = function(Fe = 0,
                  f.pi_Cq = nil1, 
                  f.v_q = nil1)
   
-{ area = parameters['A']
-  sigma = parameters['sigma']
-  lamda = parameters['lamda']
-  omega = parameters['Om']
-  theta = parameters['theta']
-  pi_C = parameters['pi_C']
-  beta = parameters['beta']
-  H = parameters['H']
-  m = parameters['m']
-  v = parameters['v']
-  pi_M = parameters['pi_M']
-  mu_N = parameters['mu_N']
-  mu_I = parameters['mu_I']
-  mu_H = parameters['mu_H']
-  mu_W = parameters['mu_W']
-  mu_P = parameters['mu_P']
-  f_P = parameters['f_P']
-  phi_P = parameters['phi_P']
-  alpha = parameters['alpha']
-  Th = parameters['Th']
-  f_N = parameters['f_N']
-  phi_N = parameters['phi_N']
-  
-  f_Nq = f_N * f.f_Nq(Fe)
+{ f_Nq = f_N * f.f_Nq(Fe)
   muPq = mu_P + f.mu_Pq(Fe)
   phi_Nq = phi_N * f.phi_Nq(Fe)
   mu_Nq = mu_N + f.mu_Nq(Fe)
@@ -307,39 +262,16 @@ r0.fix = function(fNqx = 1,
                   piCqx = 1, 
                   vqx = 1)
   
-{ area = parameters['A']
-sigma = parameters['sigma']
-lamda = parameters['lamda']
-omega = parameters['Om']
-theta = parameters['theta']
-pi_C = parameters['pi_C']
-beta = parameters['beta']
-H = parameters['H']
-m = parameters['m']
-v = parameters['v']
-pi_M = parameters['pi_M']
-mu_N = parameters['mu_N']
-mu_I = parameters['mu_I']
-mu_H = parameters['mu_H']
-mu_W = parameters['mu_W']
-mu_P = parameters['mu_P']
-f_P = parameters['f_P']
-phi_P = parameters['phi_P']
-alpha = parameters['alpha']
-Th = parameters['Th']
-f_N = parameters['f_N']
-phi_N = parameters['phi_N']
-
-f_Nq = f_N * fNqx
-f_Pq = f_P * fPqx
-muPq = mu_P + muPqx
-phi_Nq = phi_N * phiNqx
-mu_Nq = mu_N + muNqx
-alpha_q = alpha * psiqx
-theta_q = theta * thetaqx
-pi_Mq = pi_M * piMqx
-pi_Cq = pi_C * piCqx
-v_q = v * vqx
+{ f_Nq = f_N * fNqx
+  f_Pq = f_P * fPqx
+  muPq = mu_P + muPqx
+  phi_Nq = phi_N * phiNqx
+  mu_Nq = mu_N + muNqx
+  alpha_q = alpha * psiqx
+  theta_q = theta * thetaqx
+  pi_Mq = pi_M * piMqx
+  pi_Cq = pi_C * piCqx
+  v_q = v * vqx
 
 #Equilibrium estimate of P given prawn predator parameters and q
 P.eq = phi_P*(1 - muPq/f_Pq)         
@@ -370,28 +302,7 @@ return(c(N.eq, P.eq, r0))
 #r0 with variable beta & lambda
 r0.bl = function(beta, lambda)
   
-{ area = parameters['A']
-sigma = parameters['sigma']
-lamda = lambda
-omega = parameters['Om']
-theta = parameters['theta']
-pi_C = parameters['pi_C']
-beta = beta
-H = parameters['H']
-m = parameters['m']
-v = parameters['v']
-pi_M = parameters['pi_M']
-mu_N = parameters['mu_N']
-mu_I = parameters['mu_I']
-mu_H = parameters['mu_H']
-mu_W = parameters['mu_W']
-mu_P = parameters['mu_P']
-f_P = parameters['f_P']
-phi_P = parameters['phi_P']
-alpha = parameters['alpha']
-Th = parameters['Th']
-f_N = parameters['f_N']
-phi_N = parameters['phi_N']
+{
 
 #Equilibrium estimate of P given prawn predator parameters and q
 P.eq = phi_P*(1 - mu_P/f_P)         
@@ -459,28 +370,7 @@ r0.Ag = function(In = 0,
                  f.he.v_q = nil1,
                  f.fe.v_q = nil1)
 
-{ area = parameters['A']
-sigma = parameters['sigma']
-lamda = parameters['lamda']
-omega = parameters['Om']
-theta = parameters['theta']
-pi_C = parameters['pi_C']
-beta = parameters['beta']
-H = parameters['H']
-m = parameters['m']
-v = parameters['v']
-pi_M = parameters['pi_M']
-mu_N = parameters['mu_N']
-mu_I = parameters['mu_I']
-mu_H = parameters['mu_H']
-mu_W = parameters['mu_W']
-mu_P = parameters['mu_P']
-f_P = parameters['f_P']
-phi_P = parameters['phi_P']
-alpha = parameters['alpha']
-Th = parameters['Th']
-f_N = parameters['f_N']
-phi_N = parameters['phi_N']
+{
 
 f_Nq = f_N * (1-sum(1-c(f.in.f_Nq(In), f.he.f_Nq(He), f.fe.f_Nq(Fe))))
   if(f_Nq < 0) f_Nq = 0
