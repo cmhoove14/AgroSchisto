@@ -11,6 +11,8 @@
 
 #Data extraction and model fitting to Ghaffar 2016 SNAIL (B. alexandrina) data
 #Snail (30 B. alexandrina 6-8mm shell width) toxicity ##########
+require(drc)
+
 #Butralin ##############
 but.dat = data.frame(lcs = c(0, 10, 25, 50, 90),
                      butralin = c(556, 2417, 3906, 5560, 8703))
