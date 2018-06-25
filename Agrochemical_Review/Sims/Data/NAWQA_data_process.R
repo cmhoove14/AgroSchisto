@@ -26,18 +26,37 @@ chems <- unique(rfx_sum$Chemical)
 
 #Function to return NAWQA data matching a particular chemical name
 get_nawqa_dat <- function(chem_name){
-  if(chem_name == "glyphosate"){
+  if(chem_name %in% c("glyphosate", "Glyphosate")){
     dat <- gly_dat %>% 
-      filter(GLYPHOSATE_RMK_ELISA != "<") %>% select(SAMPLE_DATE, GLYPHOSATE_ELISA_ng_L) %>% 
+      select(SAMPLE_DATE, GLYPHOSATE_RMK_ELISA, GLYPHOSATE_ELISA_ng_L) %>% 
       mutate(GLYPHOSATE_ELISA_ug_L = GLYPHOSATE_ELISA_ng_L/1000)
     
   } else {
     
     dat <- pestdat %>% 
       filter(grepl(chem_name, LONGNAME, ignore.case = T)) %>% 
-      filter(REMARK != "<") %>% select(CONCENTRATION,CONSTIT, LONGNAME, SITE_TYPE)
+      select(CONCENTRATION, CONSTIT, LONGNAME, REMARK, SITE_TYPE)
   
   }
   
   return(dat)
 }
+
+get_nawqa_max <- function(chem_name){
+  if(chem_name %in% c("glyphosate", "Glyphosate")){
+    dat <- gly_dat %>% 
+      mutate(GLYPHOSATE_ELISA_ug_L = GLYPHOSATE_ELISA_ng_L/1000) %>% 
+      pull(GLYPHOSATE_ELISA_ug_L)
+    
+  } else {
+    
+    dat <- pestdat %>% 
+      filter(grepl(chem_name, LONGNAME, ignore.case = T)) %>% 
+      pull(CONCENTRATION)
+  
+  }
+  
+  return(max(as.numeric(dat)))
+}
+
+save.image("~/RemaisWork/Schisto/R Codes/ag_schist/Agrochemical_Review/Sims/Data/NAWQA_dat_functions.RData")
