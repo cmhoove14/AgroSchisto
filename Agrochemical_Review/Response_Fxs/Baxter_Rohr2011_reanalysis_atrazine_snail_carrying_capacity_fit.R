@@ -73,5 +73,18 @@ phiNq_atr_baxrohr.no30 = function(He){
     return(phiNq)
     
   }
+
+phiNq_gly_baxrohr.no30 = function(He){
+      prop = He / 3700    #get proportion of input concentration to cehm's EEC
+      rel = prop*eec.atr #get atrazine concentration equivalent  
+      
+      u = predict(bax.mod.no30, newdata = data.frame(logatra = log(rel+1)), type = 'response',
+                  se.fit = TRUE)[1:2]
+      phiNq = rnorm(1, u$fit, u$se.fit) / base.growth.no30
+
+    return(phiNq)
+    
+  }
+    
   
   keep.baxrohr = c('atra.df', 'phiNq_atr_baxrohr', 'bax.mod', 'base.growth', 'phiNq_atr_baxrohr.no30', 'bax.mod.no30', 'base.growth.no30', 'phiNq_rel_baxrohr', 'eec.atr')
