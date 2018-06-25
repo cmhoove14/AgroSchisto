@@ -150,78 +150,60 @@ keep.gaf.pen = c('muNq_pen_gaf16_uncertainty',
   
   but_repro_mod= drm(but.rep ~ but.conc, data = but_gafrep, type = 'continuous',
                       fct = LL.3(names = c('b', 'd', 'e'),
-                                 fixed = c(NA, max(but_gafrep$but.rep), NA)))
+                                 fixed = c(NA,NA, NA)))
 
   but.r0.pred<-function(He){
     predict(but_repro_mod, data.frame(conc = He/1000), interval = 'confidence', level = 0.95)
   }  
     
-  par.tricks.but.gaf = c(coef(but_repro_mod), 'd' = max(but_gafrep$but.rep))[c(1,3,2)]
+fNq.butr.fx.uncertainty<-function(He){
+    init = predict(but_repro_mod, data.frame(conc = He/1000), se.fit = TRUE)
     
-  fNq.butr.fx.uncertainty<-function(He){
-    fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.but.gaf, yerror = 'rnorm', xerror = He/1000,
-               ypar = c(0, predict(but_repro_mod, data.frame(but.conc = He/1000), se.fit = T)[2]))$y / gafrep_ref
-    
-    if(fn < 0){
-      return(0)
-    } else {
-      return(fn)
-    }
-  }
+    r = rnorm(1, init[1], init[2]) / gafrep_ref
   
-   keep.gaf.but = c(keep.gaf.but, 'fNq.butr.fx.uncertainty', 'par.tricks.but.gaf', 'gafrep_ref', "but_repro_mod")
+    r 
 
+}
+  
 #Glyphosate #########
   gly_gafrep <- gafrep[c(1:4),c(2,5)]
 
   gly_repro_mod= drm(gly.rep ~ gly.conc, data = gly_gafrep, type = 'continuous',
                       fct = LL.3(names = c('b', 'd', 'e'),
-                                 fixed = c(NA, max(gly_gafrep$gly.rep), NA)))
+                                 fixed = c(NA, NA, NA)))
 
   gly.r0.pred<-function(He){
     predict(gly_repro_mod, data.frame(conc = He/1000), interval = 'confidence', level = 0.95)
   }  
     
-  par.tricks.gly.gaf = c(coef(gly_repro_mod), 'd' = max(gly_gafrep$gly.rep))[c(1,3,2)]
-    
-  fNq.gly.fx.uncertainty<-function(He){
-    fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.gly.gaf, yerror = 'rnorm', xerror = He/1000,
-               ypar = c(0, predict(gly_repro_mod, data.frame(gly.conc = He/1000), se.fit = T)[2]))$y / gafrep_ref
-    
-    if(fn < 0){
-      return(0)
-    } else {
-      return(fn)
-    }
-  }
+fNq.gly.fx.uncertainty<-function(He){
+  init = predict(gly_repro_mod, data.frame(conc = He/1000), se.fit = T)
   
-   keep.gaf.gly = c(keep.gaf.gly, 'fNq.gly.fx.uncertainty', 'par.tricks.gly.gaf', 'gafrep_ref', "gly_repro_mod")
+  r = rnorm(1, init[1], init[2]) / gafrep_ref
+  
+  r 
+}
 
 #Pendimethalin #########
   pen_gafrep <- gafrep[c(1:4),c(3,6)]
   
   pen_repro_mod= drm(pen.rep ~ pen.conc, data = pen_gafrep, type = 'continuous',
                       fct = LL.3(names = c('b', 'd', 'e'),
-                                 fixed = c(NA, max(pen_gafrep$pen.rep), NA)))
+                                 fixed = c(NA, NA, NA)))
 
   pen.r0.pred<-function(He){
     predict(pen_repro_mod, data.frame(conc = He/1000), interval = 'confidence', level = 0.95)
   }  
     
-  par.tricks.pen.gaf = c(coef(pen_repro_mod), 'd' = max(pen_gafrep$pen.rep))[c(1,3,2)]
-    
-  fNq.pen.fx.uncertainty<-function(He){
-    fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.pen.gaf, yerror = 'rnorm', xerror = He/1000,
-               ypar = c(0, predict(pen_repro_mod, data.frame(pen.conc = He/1000), se.fit = T)[2]))$y / gafrep_ref
-    
-    if(fn < 0){
-      return(0)
-    } else {
-      return(fn)
-    }
-  }
+
+fNq.pen.fx.uncertainty<-function(He){
+  init = predict(pen_repro_mod, data.frame(conc = He/1000), se.fit = TRUE)
   
-   keep.gaf.pen = c(keep.gaf.pen, 'fNq.pen.fx.uncertainty', 'par.tricks.pen.gaf', 'gafrep_ref', "pen_repro_mod")
+  r = rnorm(1, init[1], init[2]) / gafrep_ref
+  
+  r 
+}
+  
 
  
   
