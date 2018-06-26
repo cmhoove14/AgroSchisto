@@ -62,6 +62,12 @@ get_nawqa_max <- function(chem_name){
 
 #Function to return range to use in r0 simulations
 get_range <- function(nawqa_vals, peak_eec){
+  if(length(nawqa_vals) < 1){
+    
+    ac_range <- c(0, exp(seq(log(0.001), log(peak_eec*1.25), length.out = 115)))
+    
+  } else {
+    
   max_ac <- max(c(nawqa_vals, peak_eec))
   
   ac_range <- c(0, 
@@ -70,7 +76,8 @@ get_range <- function(nawqa_vals, peak_eec){
                         length.out = 100)),
                 seq(ceiling(max_ac+0.01),
                     ceiling(max_ac+0.01)*1.25,
-                    length.out = 10))
+                    length.out = 10)) 
+  }
   
   return(ac_range)
 }
