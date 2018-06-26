@@ -14,11 +14,15 @@ library(tidyverse)
 #Get NAWQA data and function
 load("~/RemaisWork/Schisto/R Codes/ag_schist/Agrochemical_Review/Sims/Data/NAWQA_dat_functions.RData")
 
+#Get malathion EEC
+rfx_sum <- read_csv("Agrochemical_Review/Response_Fxs/Summary/Response_Fx_Summary.csv")
+  mal_eec <- unique(rfx_sum %>% filter(Chemical == "Malathion") %>% pull(eec))
+
 #Get range of Malathion concentration to focus on based on NAWQA values
 mal_vals <- as.numeric(get_nawqa_dat("malathion") %>% 
                            filter(SITE_TYPE == "Agriculture" & REMARK != "<") %>% 
                            pull(CONCENTRATION))
 
-mal_range <- c(0, exp(seq(log(min(mal_vals)), log(max(mal_vals)), length.out = 100)), seq(0.4, 1, by = 0.05))
+mal_range <- get_range(mal_vals, mal_eec)
 
 save(mal_vals, mal_range, file = "Agrochemical_Review/Sims/Range/Malathion/mal_range.RData")

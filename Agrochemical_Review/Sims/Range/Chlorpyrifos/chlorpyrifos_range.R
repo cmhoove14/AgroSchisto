@@ -14,11 +14,15 @@ library(tidyverse)
 #Get NAWQA data and function
 load("~/RemaisWork/Schisto/R Codes/ag_schist/Agrochemical_Review/Sims/Data/NAWQA_dat_functions.RData")
 
+#Get chlorpyrifos EEC
+rfx_sum <- read_csv("Agrochemical_Review/Response_Fxs/Summary/Response_Fx_Summary.csv")
+  chlor_eec <- unique(rfx_sum %>% filter(Chemical == "Chlorpyrifos") %>% pull(eec))
+
 #Get range of Chlorpyrifos concentration to focus on based on NAWQA values
 chlor_vals <- as.numeric(get_nawqa_dat("Chlorpyrifos") %>% 
                            filter(SITE_TYPE == "Agriculture" & REMARK != "<") %>% 
                            pull(CONCENTRATION))
 
-chlor_range <- c(0, exp(seq(log(min(chlor_vals)), log(max(chlor_vals)), length.out = 100)), seq(0.5, 1, by = 0.05))
+chlor_range <- get_range(chlor_vals, chlor_eec)
 
 save(chlor_vals, chlor_range, file = "Agrochemical_Review/Sims/Range/Chlorpyrifos/chlor_range.RData")

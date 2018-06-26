@@ -14,11 +14,15 @@ library(tidyverse)
 #Get NAWQA data and function
 load("~/RemaisWork/Schisto/R Codes/ag_schist/Agrochemical_Review/Sims/Data/NAWQA_dat_functions.RData")
 
+#Get glyphosate EEC
+rfx_sum <- read_csv("Agrochemical_Review/Response_Fxs/Summary/Response_Fx_Summary.csv")
+  gly_eec <- unique(rfx_sum %>% filter(Chemical == "Glyphosate") %>% pull(eec))
+
 #Get range of Glyphosate concentration to focus on based on NAWQA values
 gly_vals <- as.numeric(get_nawqa_dat("glyphosate") %>% 
                            filter(GLYPHOSATE_RMK_ELISA != "<") %>% 
                            pull(GLYPHOSATE_ELISA_ug_L))
 
-gly_range <- c(0, exp(seq(log(min(gly_vals)), log(max(gly_vals)), length.out = 100)), seq(28, 40, by = 2))
+gly_range <- get_range(gly_vals, gly_eec)
 
 save(gly_vals, gly_range, file = "Agrochemical_Review/Sims/Range/Glyphosate/gly_range.RData")

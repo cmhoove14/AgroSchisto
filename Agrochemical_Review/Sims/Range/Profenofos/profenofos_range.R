@@ -14,11 +14,15 @@ library(tidyverse)
 #Get NAWQA data and function
 load("~/RemaisWork/Schisto/R Codes/ag_schist/Agrochemical_Review/Sims/Data/NAWQA_dat_functions.RData")
 
+#Get profenofos EEC
+rfx_sum <- read_csv("Agrochemical_Review/Response_Fxs/Summary/Response_Fx_Summary.csv")
+  prof_eec <- unique(rfx_sum %>% filter(Chemical == "Profenofos") %>% pull(eec))
+
 #Get range of Profenofos concentration to focus on based on NAWQA values
 prof_vals <- as.numeric(get_nawqa_dat("profenofos") %>% 
-                           filter(SITE_TYPE == "Agriculture" & REMARK != "<") %>% 
+                           filter(SITE_TYPE == "Agriculture") %>% 
                            pull(CONCENTRATION))
 
-prof_range <- c(0, exp(seq(log(min(prof_vals)), log(max(prof_vals)), length.out = 100)), seq(0.4, 1, by = 0.05))
+prof_range <- get_range(prof_vals, prof_eec)
 
 save(prof_vals, prof_range, file = "Agrochemical_Review/Sims/Range/Profenofos/prof_range.RData")

@@ -14,11 +14,15 @@ library(tidyverse)
 #Get NAWQA data and function
 load("~/RemaisWork/Schisto/R Codes/ag_schist/Agrochemical_Review/Sims/Data/NAWQA_dat_functions.RData")
 
+#Get profenofos EEC
+rfx_sum <- read_csv("Agrochemical_Review/Response_Fxs/Summary/Response_Fx_Summary.csv")
+  atr_eec <- unique(rfx_sum %>% filter(Chemical == "Atrazine") %>% pull(eec))
+
 #Get range of atrazine concentration to focus on based on NAWQA values
 atr_vals <- as.numeric(get_nawqa_dat("Atrazine") %>% 
                          filter(SITE_TYPE == "Agriculture" & REMARK != "<") %>% 
                          pull(CONCENTRATION))
 
-atr_range <- c(0, exp(seq(log(min(atr_vals)), log(max(atr_vals)), length.out = 100)), seq(130, 200, by = 5))
+atr_range <- get_range(atr_vals, atr_eec)
 
 save(atr_vals, atr_range, file = "Agrochemical_Review/Sims/Range/Atrazine/atr_range.RData")
