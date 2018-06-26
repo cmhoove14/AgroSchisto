@@ -25,8 +25,7 @@ rfx_files <- list.files(path = "Agrochemical_Review/Response_Fxs",
                         pattern = "_fit.R", recursive = TRUE)
 
 #Profenofos response functions for S. mansoni
-rfx_profenofos <- rfx_sum %>% filter(Chemical == "Profenofos" & 
-                                     best == 1) %>% 
+rfx_profenofos <- rfx_sum %>% filter(Chemical == "Profenofos") %>% 
   rename(Parameter = parameter,
          Study = study_long,
          study_abrev = Study)
@@ -52,14 +51,14 @@ r0_prof <- function(prof){
   r0_profs <- parSapply(cl = clust, 
                        rep(prof, nsims), 
                        r0.In,
-                       f.f_Nq = fNq_prof_tch91_uncertainty, 
-                       f.mu_Pq = muPq_prof_mac_rohr_unpub_uncertainty,
+                       f.f_Nq = fNq_moh_prof_moh12_uncertainty, 
+                       f.mu_Pq = muPq_profenofos_Bajet12_uncertainty,
                        f.phi_Nq = nil1,
-                       f.mu_Nq = muNq_prof_tch91_uncertainty,
+                       f.mu_Nq = muNq_prof_mohamed_uncertainty,
                        f.alpha_q = nil1,
                        f.theta_q = nil1, 
-                       f.pi_Mq = piM.tch91_prof_unc, 
-                       f.pi_Cq = piC.tch92_prof_unc,
+                       f.pi_Mq = piM_pr_Hash11_uncertainty, 
+                       f.pi_Cq = piC_pr_Hash11_uncertainty,
                        f.v_q = nil1)[3,]
 
   return(c(median(r0_profs),
