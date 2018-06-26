@@ -25,4 +25,4 @@ atr_vals <- as.numeric(get_nawqa_dat("Atrazine") %>%
 
 atr_range <- get_range(atr_vals, atr_eec)
 
-save(atr_vals, atr_range, file = "Agrochemical_Review/Sims/Range/Atrazine/atr_range.RData")
+save(atr_vals, atr_range,atr_eec, file = "Agrochemical_Review/Sims/Range/Atrazine/atr_range.RData")

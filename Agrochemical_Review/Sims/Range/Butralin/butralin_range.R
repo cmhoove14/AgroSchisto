@@ -25,4 +25,4 @@ btr_vals <- as.numeric(get_nawqa_dat("Butralin") %>%
 
 btr_range <- get_range(btr_vals, btr_eec)
 
-save(btr_vals, btr_range, file = "Agrochemical_Review/Sims/Range/Butralin/btr_range.RData")
+save(btr_vals, btr_range, btr_eec, file = "Agrochemical_Review/Sims/Range/Butralin/btr_range.RData")

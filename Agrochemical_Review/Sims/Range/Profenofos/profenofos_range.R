@@ -25,4 +25,4 @@ prof_vals <- as.numeric(get_nawqa_dat("profenofos") %>%
 
 prof_range <- get_range(prof_vals, prof_eec)
 
-save(prof_vals, prof_range, file = "Agrochemical_Review/Sims/Range/Profenofos/prof_range.RData")
+save(prof_vals, prof_range, prof_eec, file = "Agrochemical_Review/Sims/Range/Profenofos/prof_range.RData")

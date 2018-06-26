@@ -25,4 +25,4 @@ but_vals <- as.numeric(get_nawqa_dat("Butachlor") %>%
 
 but_range <- get_range(but_vals, but_eec)
 
-save(but_vals, but_range, file = "Agrochemical_Review/Sims/Range/Butachlor/but_range.RData")
+save(but_vals, but_range, but_eec, file = "Agrochemical_Review/Sims/Range/Butachlor/but_range.RData")

@@ -25,4 +25,4 @@ mal_vals <- as.numeric(get_nawqa_dat("malathion") %>%
 
 mal_range <- get_range(mal_vals, mal_eec)
 
-save(mal_vals, mal_range, file = "Agrochemical_Review/Sims/Range/Malathion/mal_range.RData")
+save(mal_vals, mal_range, mal_eec, file = "Agrochemical_Review/Sims/Range/Malathion/mal_range.RData")

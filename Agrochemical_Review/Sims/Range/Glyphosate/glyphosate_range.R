@@ -25,4 +25,4 @@ gly_vals <- as.numeric(get_nawqa_dat("glyphosate") %>%
 
 gly_range <- get_range(gly_vals, gly_eec)
 
-save(gly_vals, gly_range, file = "Agrochemical_Review/Sims/Range/Glyphosate/gly_range.RData")
+save(gly_vals, gly_range, gly_eec, file = "Agrochemical_Review/Sims/Range/Glyphosate/gly_range.RData")

@@ -25,4 +25,4 @@ chlor_vals <- as.numeric(get_nawqa_dat("Chlorpyrifos") %>%
 
 chlor_range <- get_range(chlor_vals, chlor_eec)
 
-save(chlor_vals, chlor_range, file = "Agrochemical_Review/Sims/Range/Chlorpyrifos/chlor_range.RData")
+save(chlor_vals, chlor_range, chlor_eec, file = "Agrochemical_Review/Sims/Range/Chlorpyrifos/chlor_range.RData")
