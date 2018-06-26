@@ -165,7 +165,7 @@ plot(log(W.seq), (dwdt.seq*365)/W.seq, type='l', lwd=3, ylim=c(-1, 1.2), xlim =c
          labels = c('-1.0', '-0.5',  '', '0', '',  '0.5', '1.0'), mgp = c(3,0.75,0))
     
     mtext(side = 2, text = expression(italic(BBR)), line = 2.75, cex = 1.5)
-    text(x=5.25, y=0.99, labels='a', pos=1, cex=3)
+    text(x=5.25, y=1.3, labels='a', pos=1, cex=2.5)
     
         
 #plot dwdt trajectories ############
@@ -181,8 +181,8 @@ plot(log(W.seq), dwdt.seq, type = 'l', lwd = 3, ylim = c(-0.002, 0.035), xlim = 
          mgp = c(3,0.75,0), cex.axis = 1.25)
     
     lines(log(W.seq), dwdt.seq2, lwd = 3, lty = 2)
-    text(x=4.4, y=0.03, labels='b', pos=1, cex=3)
-    legend(x = 2, y = -0.0005, legend = c(expression(italic(PDD-free)), expression(italic(PDD))),
+    text(x=4.5, y=0.035, labels='b', pos=1, cex=2.5)
+    legend(x = 1.2, y = 0.01, legend = c(expression(italic(PDD-free)), expression(italic(PDD))),
            lwd = 2, lty = c(2,1), bty = 'n', cex = 1.25)
     
 #zoom to y axis ##########
@@ -256,7 +256,7 @@ plot(log(W.seq), (dwdt.seq*365)/W.seq, type='l', lwd=3, ylim=c(-1, 1.2), xlim =c
          labels = c('-1.0', '-0.5',  '', '0', '',  '0.5', '1.0'), mgp = c(3,0.75,0))
     
     mtext(side = 2, text = expression(italic(BBR)), line = 2.75, cex = 1.5)
-    text(x=5.25, y=0.99, labels='a', pos=1, cex=3)
+    text(x=5.25, y=1.3, labels='a', pos=1, cex=2.5)
     
         
 #plot dwdt trajectories ############
@@ -272,8 +272,8 @@ plot(log(W.seq), dwdt.seq, type = 'l', lwd = 3, ylim = c(-0.002, 0.035), xlim = 
          mgp = c(3,0.75,0), cex.axis = 1.25)
     
     lines(log(W.seq), dwdt.seq2, lwd = 3, lty = 2)
-    text(x=4.4, y=0.03, labels='b', pos=1, cex=3)
-    legend(x = 2, y = -0.0005, legend = c(expression(italic(PDD-free)), expression(italic(PDD))),
+    text(x=4.5, y=0.035, labels='b', pos=1, cex=2.5)
+    legend(x = 1.7, y = 0.01, legend = c(expression(italic(PDD-free)), expression(italic(PDD))),
            lwd = 2, lty = c(2,1), bty = 'n', cex = 1.25)
     
 #zoom to y axis ##########

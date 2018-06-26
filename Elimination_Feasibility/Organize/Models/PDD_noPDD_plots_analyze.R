@@ -11,8 +11,8 @@
 
 require(deSolve)
 require(graphics)
-require(tidyverse)
 require(Rmisc)
+require(tidyverse)
 
 #Define some plot functions ################
 get_prev <- function(W, k = k.fit) {
@@ -286,7 +286,7 @@ w.ggp<- add_ndd_comps %>%
            y = expression(paste('Mean Worm Burden (', italic('W'), ')', sep = ''))) +
       scale_color_manual(values = c('black', 'red')) +
       geom_line() +
-      annotate('text', x = 0.25, y = 35, label = 'a', size = 5)
+      annotate('text', x = 60, y = 35, label = 'a', size = 5)
 
 #Bounce back rates  
 bbr_PDD_NDD_gg <- as.data.frame(bbr_PDD_NDD) %>%
@@ -310,7 +310,7 @@ bbr.ggp <- bbr.gg %>%
     geom_point() +
     geom_errorbar(aes(x = time, ymin = (mean_bbr - sd_bbr), ymax = (mean_bbr + sd_bbr)), 
                   width = 0.1) +
-    annotate('text', x = 0, y = 0.34, label = 'b', size = 5)
+    annotate('text', x = 20, y = 0.44, label = 'b', size = 5)
 
 #epsilon estimates
 eps_noPDD_NDD_sum <- as.data.frame(eps_noPDD_NDD) %>%
@@ -342,7 +342,7 @@ eps.ggp <- eps.gg %>%
     geom_errorbar(aes(x = time, ymin = (mean_eps - sd_eps), ymax = (mean_eps + sd_eps)), 
                   width = 0.1, position = position_dodge(width = 0.8)) +
     #geom_vline(xintercept = 4.5, lty=2) +
-    annotate('text', x = 0, y = 0.019, label = 'c', size = 5)
+    annotate('text', x = 20, y = 0.019, label = 'c', size = 5)
 
 
 #combine plots with multiplot
@@ -390,7 +390,7 @@ prev.ggp<- add_ndd_comps_prev %>%
            y = "Prevalence (%)") +
       scale_color_manual(values = c('black', 'red')) +
       geom_line() +
-      annotate('text', x = 0.25, y = 35, label = 'a', size = 5)
+      annotate('text', x = 60, y = 35, label = 'a', size = 5)
 
 #Bounce back rates  
 bbr_prev_PDD_NDD_gg <- as.data.frame(bbr_prev_PDD_NDD) %>%
@@ -414,7 +414,7 @@ bbr_prev.ggp <- bbr_prev.gg %>%
     geom_point() +
     geom_errorbar(aes(x = time, ymin = (mean_bbr - sd_bbr), ymax = (mean_bbr + sd_bbr)), 
                   width = 0.1) +
-    annotate('text', x = 0, y = 0.34, label = 'b', size = 5)
+    annotate('text', x = 20, y = 0.34, label = 'b', size = 5)
 
 #epsilon estimates
 eps_prev_noPDD_NDD_sum <- as.data.frame(eps_prev_noPDD_NDD) %>%
@@ -446,7 +446,7 @@ eps_prev.ggp <- eps_prev.gg %>%
     geom_errorbar(aes(x = time, ymin = (mean_eps - sd_eps), ymax = (mean_eps + sd_eps)), 
                   width = 0.1, position = position_dodge(width = 0.8)) +
     geom_vline(xintercept = 7.5, lty=2) +
-    annotate('text', x = 0, y = 0.009, label = 'c', size = 5)
+    annotate('text', x = 20, y = 0.012, label = 'c', size = 5)
 
 
 #combine plots with multiplot

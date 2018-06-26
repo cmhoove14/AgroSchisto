@@ -130,8 +130,8 @@ par.mat2 = par.mat
 #plot P(e) across eps
 par.mat2 %>% 
   ggplot(aes(x = eps, y = pe)) + geom_point(pch = 18, cex = 0.8) + 
-    labs(x = expression(epsilon), 
-         y = expression(italic('P(e)'))) +
+    labs(x = expression(paste("Elimination Feasibility Estimator, ", epsilon)), 
+         y = expression(paste("Probability of Elimination, ", italic('P(e)')))) +
     theme_bw()
 
 #Save plot as tiff
@@ -139,8 +139,8 @@ tiff("Elimination_Feasibility/plots/PLoS_Figs_PostReview/Fig5.tiff",
      height = 13.2, width = 13.2, units = 'cm', compression = "lzw", res = 300) 
 par.mat2 %>% 
   ggplot(aes(x = eps, y = pe)) + geom_point(pch = 18, cex = 0.8) + 
-    labs(x = expression(epsilon), 
-         y = expression(italic('P(e)'))) +
+    labs(x = expression(paste("Elimination Feasibility Estimator, ", epsilon)), 
+         y = expression(paste("Probability of Elimination, ", italic('P(e)')))) +
     theme_bw()
 dev.off()
 
