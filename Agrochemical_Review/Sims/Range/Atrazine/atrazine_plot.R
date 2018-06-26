@@ -20,24 +20,13 @@ load("Agrochemical_Review/Sims/Range/Atrazine/atr_range.RData")
 load("Agrochemical_Review/Sims/Range/Atrazine/atr_r0_sims.RData")
 
 #GGplot theme for manuscripts
-theme_ms <- function(base_size=12, base_family="Helvetica") {
-  library(grid)
-  (theme_bw(base_size = base_size, base_family = base_family)+
-      theme(text=element_text(color="black"),
-            axis.title=element_text(face="bold", size = rel(1.3)),
-            axis.text=element_text(size = rel(1), color = "black"),
-            legend.title=element_text(face="bold"),
-            legend.text=element_text(face="bold"),
-            legend.background=element_rect(fill="transparent"),
-            legend.key.size = unit(0.8, 'lines'),
-            panel.border=element_rect(color="black",size=1)
-    ))
-}
+source("Agrochemical_Review/Sims/ggplot_theme.R")
 
 #Boxplot of atrazine values from NAWQA
 atr_box <- data.frame(Chem = "Atrazine",
            Concentration = log(atr_vals)) %>% 
-  ggplot(aes(x = Chem, y = Concentration)) + geom_boxplot(outlier.shape = 1) + 
+  ggplot(aes(x = Chem, y = Concentration)) + 
+  geom_boxplot(outlier.shape = 1) + geom_hline(yintercept = log(atr_eec), lty = 2) +
   theme_ms() + 
   theme(panel.border = element_blank(), 
         axis.title.y = element_blank(), 
@@ -53,7 +42,8 @@ atr_box
 #R0 over atrazine concentration plot
 atr_r0 <- atr_sims %>% 
   ggplot(aes(x = log(atr), y = rollmean(r0_med, k = 10, align = "left", fill = c(NA,NA,NA)))) + 
-  geom_line() + theme_ms() + ylab(expression(R[0])) +
+  geom_line() + geom_vline(xintercept = log(atr_eec), lty = 2) +
+  theme_ms() + ylab(expression(R[0])) +
   geom_ribbon(aes(x = log(atr), 
                   ymin = rollmean(r0_25, k = 10, align = "left", fill = c(NA,NA,NA)), 
                   ymax = rollmean(r0_75, k = 10, align = "left", fill = c(NA,NA,NA))), alpha = 0.4) + 
