@@ -14,7 +14,7 @@ require(tidyverse)
 source("Agrochemical_Review/Models/r0_of_q.R")
 
 #Load glyphosate concentration values from NAWQA and sample range for r0 simulation
-load("Agrochemical_Review/Sims/Range/Glyphosate/chlor_range.RData")
+load("Agrochemical_Review/Sims/Range/Glyphosate/gly_range.RData")
 
 #Response functions summary
 rfx_sum <- read_csv("Agrochemical_Review/Response_Fxs/Summary/Response_Fx_Summary.csv")
@@ -38,6 +38,9 @@ rfx_glyphosate <- rfx_sum %>% filter(Chemical == "Glyphosate" &
 
 sapply(paste0(rfx_dir, glyphosate_files), source)
 
+#Get phiNq function from baxter et al reanalysis
+source("Agrochemical_Review/Response_Fxs/Baxter_Rohr2011_reanalysis_atrazine_snail_carrying_capacity_fit.R")
+
 #Function to simulate n times parameter draws from each relevant response function, estimate net r0 incorporating all response fxs, and retunr median and IQR
 nsims = 5000
 
@@ -48,32 +51,32 @@ n_cores <- detectCores() - 1
 clust <- makeCluster(n_cores)
 clusterExport(clust, varlist = c(ls(), "uniroot.all"), envir = .GlobalEnv)
 
-r0_chlor <- function(chlor){
-  r0_chlors <- parSapply(cl = clust, 
-                       rep(chlor, nsims), 
-                       r0.In,
-                       f.f_Nq = nil1, 
-                       f.mu_Pq = muPq_chlor_mac_rohr_unpub_uncertainty,
-                       f.phi_Nq = nil1,
-                       f.mu_Nq = muNq_chlor_ibr92_uncertainty,
+r0_gly <- function(gly){
+  r0_glys <- parSapply(cl = clust, 
+                       rep(gly, nsims), 
+                       r0.He,
+                       f.f_Nq = fNq.gly.fx.uncertainty, 
+                       f.mu_Pq = nil0,
+                       f.phi_Nq = phiNq_gly_baxrohr.no30,
+                       f.mu_Nq = ons.muNq.gly,
                        f.alpha_q = nil1,
                        f.theta_q = nil1, 
-                       f.pi_Mq = piM_ch_Hash11_uncertainty, 
-                       f.pi_Cq = piC_ch_Hash11_uncertainty,
-                       f.v_q = halstead_meso18_chlor_mans_v_uncertainty)[3,]
+                       f.pi_Mq = piM.ghaf_gly.exp_unc, 
+                       f.pi_Cq = piC.ghaf_gly.exp_unc,
+                       f.v_q = nil1)[3,]
 
-  return(c(median(r0_chlors),
-           quantile(r0_chlors, 0.25),
-           quantile(r0_chlors, 0.75)))
+  return(c(median(r0_glys),
+           quantile(r0_glys, 0.25),
+           quantile(r0_glys, 0.75)))
 }
 
 clusterSetRNGStream(clust, 43093)
 
-chlor_sims <- data.frame(t(sapply(chlor_range, r0_chlor, simplify = T)))
+gly_sims <- data.frame(t(sapply(gly_range, r0_gly, simplify = T)))
 
 stopCluster(clust)
 
-chlor_sims <- cbind(chlor_sims, chlor = chlor_range)
-colnames(chlor_sims)[c(1:3)] <- c("r0_med", "r0_25", "r0_75")
+gly_sims <- cbind(gly_sims, gly = gly_range)
+colnames(gly_sims)[c(1:3)] <- c("r0_med", "r0_25", "r0_75")
 
-save(chlor_sims, file = "Agrochemical_Review/Sims/Range/glyphosate/chlor_r0_sims.RData")
+save(gly_sims, file = "Agrochemical_Review/Sims/Range/Glyphosate/gly_r0_sims.RData")
