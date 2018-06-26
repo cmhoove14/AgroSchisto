@@ -88,7 +88,7 @@ plot(prof_conc, prof_rate, pch = 16, xlab = "Profenofos concentration", ylab = "
   
   set.seed(43093)
   
-  points(seq(0,3,0.05), sapply(seq(0,3,0.05)*1000, fNq_moh_prof_moh12_uncertainty, simplify = TRUE)*moh_repro_ref,
+  points(seq(0,3,0.025), sapply(seq(0,3,0.025)*1000, fNq_moh_prof_moh12_uncertainty, simplify = TRUE)*moh_repro_ref,
          pch = 5, cex = 0.5, col = 4)
   
   legend("topright", bty="n", pch = c(16, 5), col = c(1,4), legend = c("Reported", "Sampled"), cex = 0.75)

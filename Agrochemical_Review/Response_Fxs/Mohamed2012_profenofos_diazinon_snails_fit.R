@@ -100,27 +100,22 @@ muNq_prof_mohamed_uncertainty = function(In){
 #Estimate d-r function with drc: eggs/snail/week over entire study period as a function of diazinon concentration
   diaz_repro_mod= drm(rate ~ conc, data = diaz_repro_df, type = 'continuous',
                       fct = LL.3(names = c('b', 'd', 'e'),
-                                 fixed = c(NA, max(diaz_repro_df$rate), NA)))
+                                 fixed = c(NA, NA, NA)))
 
   fNq_moh_diaz_moh12<-function(In){
-    predict(diaz_repro_mod, data.frame(conc = In/1000), interval = 'confidence', level = 0.95)
+    predict(diaz_repro_mod, newdata = data.frame(conc = In/1000), interval = 'confidence', level = 0.95)
   }  
     
-  par.tricks.diaz = c(coef(diaz_repro_mod), 'd' = max(diaz_repro_df$rate))[c(1,3,2)]
-    
   fNq_moh_diaz_moh12_uncertainty<-function(In){
-    fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.diaz, yerror = 'rnorm', xerror = In/1000,
-               ypar = c(0, predict(diaz_repro_mod, data.frame(conc = In/1000), se.fit = T)[2]))$y / moh_repro_ref
     
-    if(fn < 0){
-      return(0)
-    } else {
-      return(fn)
-    }
+    init = predict(diaz_repro_mod, newdata = data.frame(conc = In/1000), se.fit = T) 
+    
+    fN = rnorm(1, init[1], init[2]) / moh_repro_ref
+    
+    return(fN)
+    
   }
   
-keep.moh.diaz <- c(keep.moh.diaz, "fNq_moh_diaz_moh12_uncertainty", "diaz_repro_mod", "moh_repro_ref", "par.tricks.diaz")  
-
 #Profenofos (selecron)  
 #Concentrations tested  
   prof_conc <- c(0, 0.40, 2.44, 3.11)
@@ -146,26 +141,18 @@ keep.moh.diaz <- c(keep.moh.diaz, "fNq_moh_diaz_moh12_uncertainty", "diaz_repro_
 #Estimate d-r function with drc: eggs/snail/week over entire study period as a function of profenofos concentration  
   prof_repro_mod= drm(rate ~ conc, data = prof_repro_df, type = 'continuous',
                       fct = LL.3(names = c('b', 'd', 'e'),
-                                 fixed = c(NA, max(prof_repro_df$rate), NA)))
+                                 fixed = c(NA, NA, NA)))
 
   fNq_moh_prof_moh12<-function(In){
     predict(prof_repro_mod, data.frame(conc = In/1000), interval = 'confidence', level = 0.95)
   }  
     
-  par.tricks.prof = c(coef(prof_repro_mod), 'd' = max(prof_repro_df$rate))[c(1,3,2)]
-    
   fNq_moh_prof_moh12_uncertainty<-function(In){
-    fn <- rdrm(nosim = 1, fct = LL.3(), mpar = par.tricks.prof, yerror = 'rnorm', xerror = In/1000,
-               ypar = c(0, predict(prof_repro_mod, data.frame(conc = In/1000), se.fit = T)[2]))$y / moh_repro_ref
     
-    if(fn < 0){
-      return(0)
-    } else {
-      return(fn)
-    }
+    init = predict(prof_repro_mod, newdata = data.frame(conc = In/1000), se.fit = T) 
+    
+    fN = rnorm(1, init[1], init[2]) / moh_repro_ref
+    
+    return(fN)
   }
-
-keep.moh.prof <- c(keep.moh.prof, "fNq_moh_prof_moh12_uncertainty", "par.tricks.prof", "moh_repro_ref", "prof_repro_mod")
-
-keep.moh12_all <- c(keep.moh.diaz, keep.moh.prof)
 
