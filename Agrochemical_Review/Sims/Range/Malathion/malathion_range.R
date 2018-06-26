@@ -19,6 +19,6 @@ mal_vals <- as.numeric(get_nawqa_dat("malathion") %>%
                            filter(SITE_TYPE == "Agriculture" & REMARK != "<") %>% 
                            pull(CONCENTRATION))
 
-mal_range <- c(0, exp(seq(log(min(mal_vals)), log(max(mal_vals)), length.out = 100)), seq(0.5, 1, by = 0.05))
+mal_range <- c(0, exp(seq(log(min(mal_vals)), log(max(mal_vals)), length.out = 100)), seq(0.4, 1, by = 0.05))
 
 save(mal_vals, mal_range, file = "Agrochemical_Review/Sims/Range/Malathion/mal_range.RData")

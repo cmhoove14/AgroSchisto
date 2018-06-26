@@ -8,74 +8,72 @@
 #Per the terms of this license, if you are making derivative use of this work, you must identify that 
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
+require(tidyverse)
 
-library(gridExtra)
-library(zoo)
-library(tidyverse)
+#load R0 function
+source("Agrochemical_Review/Models/r0_of_q.R")
 
 #Load malathion concentration values from NAWQA and sample range for r0 simulation
 load("Agrochemical_Review/Sims/Range/Malathion/mal_range.RData")
 
-#Load malathion r0 simulations
-load("Agrochemical_Review/Sims/Range/Malathion/mal_r0_sims.RData")
+#Response functions summary
+rfx_sum <- read_csv("Agrochemical_Review/Response_Fxs/Summary/Response_Fx_Summary.csv")
 
-#GGplot theme for manuscripts
-theme_ms <- function(base_size=12, base_family="Helvetica") {
-  library(grid)
-  (theme_bw(base_size = base_size, base_family = base_family)+
-      theme(text=element_text(color="black"),
-            axis.title=element_text(face="bold", size = rel(1.3)),
-            axis.text=element_text(size = rel(1), color = "black"),
-            legend.title=element_text(face="bold"),
-            legend.text=element_text(face="bold"),
-            legend.background=element_rect(fill="transparent"),
-            legend.key.size = unit(0.8, 'lines'),
-            panel.border=element_rect(color="black",size=1)
-    ))
+rfx_dir <- "Agrochemical_Review/Response_Fxs/"
+
+rfx_files <- list.files(path = "Agrochemical_Review/Response_Fxs",
+                        pattern = "_fit.R", recursive = TRUE)
+
+#Malathion response functions for S. mansoni
+rfx_malathion <- rfx_sum %>% filter(Chemical == "Malathion" & 
+                                     best == 1) %>% 
+  rename(Parameter = parameter,
+         Study = study_long,
+         study_abrev = Study)
+
+#Load relevant Malathion response functions ######
+  malathion_studies <- unique(rfx_malathion$study_abrev)
+  malathion_functions <- rfx_malathion$rfx
+  malathion_files <- rfx_files[unlist(sapply(malathion_studies, grep, rfx_files, ignore.case = TRUE))]
+
+sapply(paste0(rfx_dir, malathion_files), source)
+
+#Function to simulate n times parameter draws from each relevant response function, estimate net r0 incorporating all response fxs, and retunr median and IQR
+nsims = 5000
+
+require(parallel)
+
+n_cores <- detectCores() - 1
+
+clust <- makeCluster(n_cores)
+clusterExport(clust, varlist = c(ls(), "uniroot.all"), envir = .GlobalEnv)
+
+r0_mal <- function(mal){
+  r0_mals <- parSapply(cl = clust, 
+                       rep(mal, nsims), 
+                       r0.In,
+                       f.f_Nq = fNq_mal_tch91_uncertainty, 
+                       f.mu_Pq = muPq_mal_mac_rohr_unpub_uncertainty,
+                       f.phi_Nq = nil1,
+                       f.mu_Nq = muNq_mal_tch91_uncertainty,
+                       f.alpha_q = nil1,
+                       f.theta_q = nil1, 
+                       f.pi_Mq = piM.tch91_mal_unc, 
+                       f.pi_Cq = piC.tch92_mal_unc,
+                       f.v_q = nil1)[3,]
+
+  return(c(median(r0_mals),
+           quantile(r0_mals, 0.25),
+           quantile(r0_mals, 0.75)))
 }
 
-#Boxplot of malathion values from NAWQA
-mal_box <- data.frame(Chem = "Malathion",
-           Concentration = log(mal_vals)) %>% 
-  ggplot(aes(x = Chem, y = Concentration)) + geom_boxplot(outlier.shape = 1) + 
-  theme_ms() + 
-  theme(panel.border = element_blank(), 
-        axis.title.y = element_blank(), 
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank()) + 
-  coord_flip() + scale_y_continuous(breaks = log(c(0.0001, 0.001, 0.01, 0.1, 1)),
-                                    labels = c(0.0001, 0.001, 0.01, 0.1, 1),
-                                    limits = log(c(0.0001, 1))) +
-  ylab("Malathion Concentration")
+clusterSetRNGStream(clust, 43093)
 
-mal_box
+mal_sims <- data.frame(t(sapply(mal_range, r0_mal, simplify = T)))
 
-#R0 over malathion concentration plot
-mal_r0 <- mal_sims %>% 
-  ggplot(aes(x = log(mal), y = rollmean(r0_med, k = 10, align = "left", fill = c(NA,NA,NA)))) + 
-  geom_line() + theme_ms() + ylab(expression(R[0])) +
-  geom_ribbon(aes(x = log(mal), 
-                  ymin = rollmean(r0_25, k = 10, align = "left", fill = c(NA,NA,NA)), 
-                  ymax = rollmean(r0_75, k = 10, align = "left", fill = c(NA,NA,NA))), alpha = 0.4) + 
-  scale_x_continuous(breaks = log(c(0.0001, 0.001, 0.01, 0.1, 1)),
-                                    labels = c(0.0001, 0.001, 0.01, 0.1, 1),
-                                    limits = log(c(0.0001, 1))) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank())
+stopCluster(clust)
 
-mal_r0
+mal_sims <- cbind(mal_sims, mal = mal_range)
+colnames(mal_sims)[c(1:3)] <- c("r0_med", "r0_25", "r0_75")
 
-#Put plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/)
-mal1 <- ggplotGrob(mal_r0)
-mal2 <- ggplotGrob(mal_box)
-# stack the two plots
-mal <- rbind(mal1, mal2, size="first") 
-# use the largest widths
-mal$widths <- unit.pmax(mal1$widths, mal2$widths) 
-#Adjust the heights
-panels <- mal$layout$t[grep("panel", mal$layout$name)]
-mal$heights[panels[1]] <- unit(5, "null") 
-mal$heights[panels[2]] <- unit(1,"null") 
-
-#Print the plot
-grid.draw(mal)  
+save(mal_sims, file = "Agrochemical_Review/Sims/Range/Malathion/mal_r0_sims.RData")
