@@ -42,6 +42,7 @@ get_nawqa_dat <- function(chem_name){
   return(dat)
 }
 
+#Function to return max value in NAWQA data for particular chemical
 get_nawqa_max <- function(chem_name){
   if(chem_name %in% c("glyphosate", "Glyphosate")){
     dat <- gly_dat %>% 
@@ -57,6 +58,21 @@ get_nawqa_max <- function(chem_name){
   }
   
   return(max(as.numeric(dat)))
+}
+
+#Function to return range to use in r0 simulations
+get_range <- function(nawqa_vals, peak_eec){
+  max_ac <- max(c(nawqa_vals, peak_eec))
+  
+  ac_range <- c(0, 
+                exp(seq(log(min(nawqa_vals)),
+                        log(max_ac),
+                        length.out = 100)),
+                seq(ceiling(max_ac+0.01),
+                    ceiling(max_ac+0.01)*1.25,
+                    length.out = 10))
+  
+  return(ac_range)
 }
 
 save.image("~/RemaisWork/Schisto/R Codes/ag_schist/Agrochemical_Review/Sims/Data/NAWQA_dat_functions.RData")
