@@ -64,7 +64,8 @@ get_nawqa_max <- function(chem_name){
 get_range <- function(nawqa_vals, peak_eec){
   if(length(nawqa_vals) < 1){
     
-    ac_range <- c(0, exp(seq(log(0.001), log(peak_eec*1.25), length.out = 115)))
+    ac_range <- c(0, exp(seq(log(0.001), log(peak_eec), length.out = 100)), 
+                  exp(seq(log(peak_eec*1.05), log(peak_eec*1.5),length.out = 15)))
     
   } else {
     
