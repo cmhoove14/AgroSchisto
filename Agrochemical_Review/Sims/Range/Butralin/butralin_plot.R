@@ -13,63 +13,63 @@ library(gridExtra)
 library(zoo)
 library(tidyverse)
 
-#Load atrazine concentration values from NAWQA and sample range for r0 simulation
-load("Agrochemical_Review/Sims/Range/Atrazine/atr_range.RData")
+#Load butralin concentration values from NAWQA and sample range for r0 simulation
+load("Agrochemical_Review/Sims/Range/Butralin/btr_range.RData")
 
-#Load atrazine r0 simulations
-load("Agrochemical_Review/Sims/Range/Atrazine/atr_r0_sims.RData")
+#Load butralin r0 simulations
+load("Agrochemical_Review/Sims/Range/Butralin/btr_r0_sims.RData")
 
 #GGplot theme for manuscripts
 source("Agrochemical_Review/Sims/ggplot_theme.R")
 
-#Boxplot of atrazine values from NAWQA
-atr_box <- data.frame(Chem = "Atrazine",
-           Concentration = log(atr_vals)) %>% 
+#Boxplot of butralin values from NAWQA
+btr_box <- data.frame(Chem = "Butralin",
+           Concentration = log(btr_vals)) %>% 
   ggplot(aes(x = Chem, y = Concentration)) + 
-  geom_boxplot(outlier.shape = 1) + geom_hline(yintercept = log(atr_eec), lty = 2) +
+  geom_boxplot(outlier.shape = 1) + geom_hline(yintercept = log(btr_eec), lty = 2) +
   theme_ms() + 
   theme(panel.border = element_blank(), 
         axis.title.y = element_blank(), 
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank()) + 
-  coord_flip() + scale_y_continuous(breaks = log(c(0.0001, 0.001, 0.01, 0.1, 1, 10, 50, 100, 150)),
-                                    labels = c(0.0001, 0.001, 0.01, 0.1, 1, 10, 50, 100, 150),
-                                    limits = log(c(0.0001, 150))) +
-  ylab(expression(paste("Atrazine Concentration (", mu, "g/L)")))
+  coord_flip() + scale_y_continuous(breaks = log(c(0.001, 0.01, 0.1, 1, 20)),
+                                    labels = c(0.001, 0.01, 0.1, 1, 20),
+                                    limits = log(c(0.0001, 20))) +
+  ylab(expression(paste("Butralin Concentration (", mu, "g/L)")))
 
-atr_box
+btr_box
 
-#R0 over atrazine concentration plot
-atr_r0 <- atr_sims %>% 
-  ggplot(aes(x = log(atr), y = rollmean(r0_med, k = 10, align = "left", fill = c(NA,NA,NA)))) + 
-  geom_line() + geom_vline(xintercept = log(atr_eec), lty = 2) +
+#R0 over butralin concentration plot
+btr_r0 <- btr_sims %>% 
+  ggplot(aes(x = log(btr), y = rollmean(r0_med, k = 10, align = "left", fill = c(NA,NA,NA)))) + 
+  geom_line() + geom_vline(xintercept = log(btr_eec), lty = 2) +
   theme_ms() + ylab(expression(R[0])) +
-  geom_ribbon(aes(x = log(atr), 
+  geom_ribbon(aes(x = log(btr), 
                   ymin = rollmean(r0_25, k = 10, align = "left", fill = c(NA,NA,NA)), 
                   ymax = rollmean(r0_75, k = 10, align = "left", fill = c(NA,NA,NA))), alpha = 0.4) + 
-  scale_x_continuous(breaks = log(c(0.0001, 0.001, 0.01, 0.1, 1, 10, 50, 100, 150)),
-                     labels = c(0.0001, 0.001, 0.01, 0.1, 1, 10, 50, 100, 150),
-                     limits = log(c(0.0001, 150))) +
+  scale_x_continuous(breaks = log(c(0.001, 0.01, 0.1, 1, 20)),
+                     labels = c(0.001, 0.01, 0.1, 1, 20),
+                     limits = log(c(0.0001, 20))) +
   scale_y_continuous(breaks = c(1.5, 1.75, 2.0, 2.25),
                      labels = c(1.5, 1.75, 2.0, 2.25),
                      limits = (c(1.5, 2.25))) +
-  geom_hline(yintercept = atr_sims$r0_med[1], lty = 3) +
+  geom_hline(yintercept = btr_sims$r0_med[1], lty = 3) +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank())
 
-atr_r0
+btr_r0
 
 #Put plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/)
-atr1 <- ggplotGrob(atr_r0)
-atr2 <- ggplotGrob(atr_box)
+btr1 <- ggplotGrob(btr_r0)
+btr2 <- ggplotGrob(btr_box)
 # stack the two plots
-atr <- rbind(atr1, atr2, size="first") 
+btr <- rbind(btr1, btr2, size="first") 
 # use the largest widths
-atr$widths <- unit.pmax(atr1$widths, atr2$widths) 
+btr$widths <- unit.pmax(btr1$widths, btr2$widths) 
 #Adjust the heights
-panels <- atr$layout$t[grep("panel", atr$layout$name)]
-atr$heights[panels[1]] <- unit(5, "null") 
-atr$heights[panels[2]] <- unit(1,"null") 
+panels <- btr$layout$t[grep("panel", btr$layout$name)]
+btr$heights[panels[1]] <- unit(5, "null") 
+btr$heights[panels[2]] <- unit(1,"null") 
 
 #Print the plot
-grid.draw(atr)  
+grid.draw(btr)  

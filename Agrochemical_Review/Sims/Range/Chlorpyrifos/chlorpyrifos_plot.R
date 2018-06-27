@@ -20,46 +20,39 @@ load("Agrochemical_Review/Sims/Range/Chlorpyrifos/chlor_range.RData")
 load("Agrochemical_Review/Sims/Range/Chlorpyrifos/chlor_r0_sims.RData")
 
 #GGplot theme for manuscripts
-theme_ms <- function(base_size=12, base_family="Helvetica") {
-  library(grid)
-  (theme_bw(base_size = base_size, base_family = base_family)+
-      theme(text=element_text(color="black"),
-            axis.title=element_text(face="bold", size = rel(1.3)),
-            axis.text=element_text(size = rel(1), color = "black"),
-            legend.title=element_text(face="bold"),
-            legend.text=element_text(face="bold"),
-            legend.background=element_rect(fill="transparent"),
-            legend.key.size = unit(0.8, 'lines'),
-            panel.border=element_rect(color="black",size=1)
-    ))
-}
+source("Agrochemical_Review/Sims/ggplot_theme.R")
 
 #Boxplot of chlorpyrifos values from NAWQA
 chlor_box <- data.frame(Chem = "Chlorpyrifos",
            Concentration = log(chlor_vals)) %>% 
   ggplot(aes(x = Chem, y = Concentration)) + geom_boxplot(outlier.shape = 1) + 
-  theme_ms() + 
+  theme_ms() + geom_hline(yintercept = log(chlor_eec), lty = 2) +
   theme(panel.border = element_blank(), 
         axis.title.y = element_blank(), 
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank()) + 
-  coord_flip() + scale_y_continuous(breaks = log(c(0.0001, 0.001, 0.01, 0.1, 1)),
-                                    labels = c(0.0001, 0.001, 0.01, 0.1, 1),
-                                    limits = log(c(0.0001, 1))) +
-  ylab("Chlorpyrifos Concentration")
+  coord_flip() + scale_y_continuous(breaks = log(c(0.0001, 0.001, 0.01, 0.1, 1, 10, 100)),
+                                    labels = c(0.0001, 0.001, 0.01, 0.1, 1, 10, 100),
+                                    limits = log(c(0.0001, 100))) +
+  ylab(expression(paste("Chlorpyrifos Concentration (", mu, "g/L)")))
 
 chlor_box
 
 #R0 over chlorpyrifos concentration plot
 chlor_r0 <- chlor_sims %>% 
   ggplot(aes(x = log(chlor), y = rollmean(r0_med, k = 10, align = "left", fill = c(NA,NA,NA)))) + 
-  geom_line() + theme_ms() + ylab(expression(R[0])) +
+  geom_line() + geom_vline(xintercept = log(chlor_eec), lty = 2) +
+  theme_ms() + ylab(expression(R[0])) +
   geom_ribbon(aes(x = log(chlor), 
                   ymin = rollmean(r0_25, k = 10, align = "left", fill = c(NA,NA,NA)), 
                   ymax = rollmean(r0_75, k = 10, align = "left", fill = c(NA,NA,NA))), alpha = 0.4) + 
-  scale_x_continuous(breaks = log(c(0.0001, 0.001, 0.01, 0.1, 1)),
-                                    labels = c(0.0001, 0.001, 0.01, 0.1, 1),
-                                    limits = log(c(0.0001, 1))) +
+  scale_x_continuous(breaks = log(c(0.0001, 0.001, 0.01, 0.1, 1, 10, 100)),
+                     labels = c(0.0001, 0.001, 0.01, 0.1, 1, 10, 100),
+                     limits = log(c(0.0001, 100))) +
+  scale_y_continuous(breaks = c(1.25, 1.75, 2.25, 2.75, 3.25),
+                     labels = c(1.25, 1.75, 2.25, 2.75, 3.25),
+                     limits = (c(1.25, 3.25))) +
+  geom_hline(yintercept = chlor_sims$r0_med[1], lty = 3) +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank())
 
