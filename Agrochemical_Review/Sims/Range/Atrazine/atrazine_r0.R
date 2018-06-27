@@ -27,7 +27,7 @@ rfx_files <- list.files(path = "Agrochemical_Review/Response_Fxs",
 #Atrazine response functions for S. mansoni
 rfx_atrazine <- rfx_sum %>% filter(Chemical == "Atrazine" & 
                                      best == 1 & 
-                                     System %in% c("Mansoni", "Any")) %>% 
+                                     System != "Other") %>% 
   rename(Parameter = parameter,
          Study = study_long,
          study_abrev = Study)
