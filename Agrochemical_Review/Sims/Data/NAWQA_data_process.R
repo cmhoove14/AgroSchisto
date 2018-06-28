@@ -60,6 +60,42 @@ get_nawqa_max <- function(chem_name){
   return(max(as.numeric(dat)))
 }
 
+#Function to return median and IQR in NAWQA for each chem
+get_nawqa_sum <- function(chem_name, which_obs = "obs_obs"){
+  if(chem_name %in% c("glyphosate", "Glyphosate")){
+    dat <- gly_dat %>% 
+      mutate(GLYPHOSATE_ELISA_ug_L = GLYPHOSATE_ELISA_ng_L/1000)
+    
+    #All observations
+    all_obs <- as.numeric(dat %>% pull(GLYPHOSATE_ELISA_ug_L))
+    #Observations aboe detectable limit
+    obs_obs <- as.numeric(dat %>% filter(GLYPHOSATE_RMK_ELISA != "<") %>% pull(GLYPHOSATE_ELISA_ug_L))
+    
+    all_sum <- c(median(all_obs), quantile(all_obs, 0.25), quantile(all_obs, 0.75))
+    obs_sum <- c(median(obs_obs), quantile(obs_obs, 0.25), quantile(obs_obs, 0.75))
+    
+  } else {
+    
+    dat <- pestdat %>% filter(grepl(chem_name, LONGNAME, ignore.case = T)) 
+    
+    #All observations
+    all_obs <- as.numeric(dat %>% pull(CONCENTRATION))
+    #Observations aboe detectable limit
+    obs_obs <- as.numeric(dat %>% filter(REMARK != "<") %>% pull(CONCENTRATION))
+    
+    all_sum <- c(median(all_obs), quantile(all_obs, 0.25), quantile(all_obs, 0.75))
+    obs_sum <- c(median(obs_obs), quantile(obs_obs, 0.25), quantile(obs_obs, 0.75))
+
+  }
+  
+  if(which_obs == "obs_obs"){
+    return(obs_sum)
+  } else {
+    return(all_sum)
+  }
+  
+}
+
 #Function to return range to use in r0 simulations
 get_range <- function(nawqa_vals, peak_eec){
   if(length(nawqa_vals) < 1){
