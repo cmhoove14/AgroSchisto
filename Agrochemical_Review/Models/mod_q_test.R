@@ -8,6 +8,8 @@
 #Per the terms of this license, if you are making derivative use of this work, you must identify that 
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
+
+require(tidyverse)
 source('Agrochemical_Review/Models/mod_q.R')
 
 ac.sim = as.data.frame(ode(ac.start, ac.time, agrochem_mod, ac.pars))
@@ -23,10 +25,10 @@ ac.sim %>% ggplot(aes(x = time)) +
   geom_line(aes(y = E.A), size = 1.25, col = 'orange') +
   geom_line(aes(y = I.A), size = 1.25, col = 'red') 
 
-ggplot(ac.sim, aes(x = time)) +
+ac.sim %>% ggplot(aes(x = time)) +
   theme_bw() +
   geom_line(aes(y = P.A), size = 1.25, col = 'blue') 
 
-ggplot(ac.sim, aes(x = time)) +
+ac.sim %>% ggplot(aes(x = time)) +
   theme_bw() +
   geom_line(aes(y = W), size = 1.25, col = 'purple') 
