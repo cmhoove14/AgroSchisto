@@ -97,7 +97,8 @@ agroc_plot <- rbind(chlor_sims, prof_sims, mal_sims,
                     atr_sims, but_sims, btr_sims, gly_sims) %>% 
   ggplot(aes(x = EEC, y = r0_smooth, col = Agrochemical)) + 
   geom_line(size = 1) + facet_grid(Class ~ .) +
-  geom_ribbon(aes(x = EEC, ymin = r025_smooth, ymax = r075_smooth, fill = Agrochemical), alpha = 0.25) + 
+  geom_ribbon(aes(x = EEC, ymin = r025_smooth, ymax = r075_smooth, fill = Agrochemical), 
+              alpha = 0.25, size = 0.01) + 
   theme_ms() +
   ylab(expression(R[0])) + xlab("Agrochemical Concentration Normalized to Peak EEC") +
   ggtitle(expression(paste("Combined effects of key agrochemicals on estimates of ", R[0]))) +
@@ -107,3 +108,6 @@ agroc_plot <- rbind(chlor_sims, prof_sims, mal_sims,
   geom_hline(yintercept = r0.fix()[3], lty = 2)
   
 agroc_plot
+
+ggsave(paste('~/RemaisWork/Schisto/Agro_Review/Figures/r0_ConcRange/ins&herb_net_response', Sys.Date(), '.tiff', sep = ''),
+       width = 7.3, height = 3.5, dpi = 600)
