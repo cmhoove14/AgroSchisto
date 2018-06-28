@@ -14,20 +14,7 @@ library(pals)
 library(forestplot)
 
 #GGplot theme for manuscripts
-theme_ms <- function(base_size=12, base_family="Helvetica") {
-  library(grid)
-  (theme_bw(base_size = base_size, base_family = base_family)+
-      theme(text=element_text(color="black"),
-            axis.title=element_text(face="bold", size = rel(1.3)),
-            axis.text=element_text(size = rel(1), color = "black"),
-            legend.title=element_text(face="bold"),
-            legend.text=element_text(face="bold"),
-            legend.background=element_rect(fill="transparent"),
-            legend.key.size = unit(0.8, 'lines'),
-            panel.border=element_rect(color="black",size=1),
-            panel.grid=element_blank()
-    ))
-}
+source("Agrochemical_Review/Sims/ggplot_theme.R")
 
 #load R0 function
 source("Agrochemical_Review/Models/r0_of_q.R")
@@ -125,6 +112,8 @@ rfx_dirsnail_all <- rbind(rfx_dirsnail_muNq, rfx_dirsnail_fNq, rfx_dirsnail_thet
   mutate(r0_med_rel = (r0_med / r0.fix()[3]) * 100,
          r0_025_rel = (r0_025 / r0.fix()[3]) * 100,
          r0_975_rel = (r0_975 / r0.fix()[3]) * 100)
+
+save(rfx_dirsnail_all, file = "Agrochemical_Review/Sims/EEC/all_dirsnail_summary.RData")
 
 #Forestplotish thing with GGPlot
 my_labs <- list(bquote(mu[N]), bquote(f[N]), bquote(theta))
