@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 require(tidyverse)
 ```
 
-```{r}
+```{r rfx_sum}
 RFxSum <- read_csv("Response_Fx_Summary.csv")
 
 table(RFxSum$Pathway)
@@ -46,5 +46,25 @@ RFx_multis <- RFxSum %>% filter(Chemical %in% c("Atrazine", "Butachlor", "Butral
 
 
 RFxSum <- RFxSum %>% full_join(RFx_multis, by = c("Chemical", "parameter", "System"))  
+```
+
+```{r nawqa_sum}
+#Get NAWQA data, functions, and response functions summary
+load("~/RemaisWork/Schisto/R Codes/ag_schist/Agrochemical_Review/Sims/Data/NAWQA_dat_functions.RData")
+
+nawqa_sum <- t(sapply(chems, get_nawqa_sum))
+  colnames(nawqa_sum) <- c("nawqa.50", "nawqa.25", "nawqa.75")
+  
+study_sum <- RFxSum %>% 
+  inner_join(as.data.frame(cbind(Chemical = chems, nawqa_sum)), by = "Chemical") %>%   
+  group_by(study_long) %>% 
+  summarise(Chemicals = paste(unique(Chemical), collapse = ","),
+            #Chemical_Class = paste(unique(Class), collapse = ","),
+            #Peak_EEC = paste(unique(eec), collapse = ","),
+            #NAWQA.50 = paste(unique(nawqa.50), collapse = ","),
+            #NAWQA.25 = paste(unique(nawqa.25), collapse = ","),
+            #NAWQA.75 = paste(unique(nawqa.75), collapse = ","),
+            Species = paste(unique(Species), collapse = ","),
+            Model_parameter = paste(unique(parameter), collapse = ","))
 ```
 
