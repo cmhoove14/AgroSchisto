@@ -11,21 +11,21 @@
 source('Agrochemical_Review/Models/mod_q.R')
 
 ac.sim = as.data.frame(ode(ac.start, ac.time, agrochem_mod, ac.pars))
-  ac.sim$N = ac.sim$S + ac.sim$E + ac.sim$I
+  ac.sim$N = ac.sim$S.A + ac.sim$E.A + ac.sim$I.A
   ac.sim$Wf = ac.sim$W * sapply(ac.sim$W, mateprob, k=ac.pars['k']) * 0.5
   
   ac.eqbm = ac.sim[dim(ac.sim)[1],]
     
-ggplot(ac.sim, aes(x = time)) +
+ac.sim %>% ggplot(aes(x = time)) +
   theme_bw() +
   geom_line(aes(y = N), size = 1.25, col = 'black') +
-  geom_line(aes(y = S), size = 1.25, col = 'green') +
-  geom_line(aes(y = E), size = 1.25, col = 'orange') +
-  geom_line(aes(y = I), size = 1.25, col = 'red') 
+  geom_line(aes(y = S.A), size = 1.25, col = 'green') +
+  geom_line(aes(y = E.A), size = 1.25, col = 'orange') +
+  geom_line(aes(y = I.A), size = 1.25, col = 'red') 
 
 ggplot(ac.sim, aes(x = time)) +
   theme_bw() +
-  geom_line(aes(y = P), size = 1.25, col = 'blue') 
+  geom_line(aes(y = P.A), size = 1.25, col = 'blue') 
 
 ggplot(ac.sim, aes(x = time)) +
   theme_bw() +
