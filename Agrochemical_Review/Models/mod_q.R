@@ -30,10 +30,13 @@ agrochem_mod = function(t, n, parameters) {
     S=n[1]
     E=n[2]
     I=n[3]
-    W=n[4]
-    P=n[5]
+    Wu=n[4]
+    Wt=n[5]
+    P=n[6]
     
 #Dynamic variables
+    W = cvrg*Wt + (1-cvrg)*Wu  #Overall mean worm burden
+    
     N = S+E+I                                                                       #Total number of snails
     
     gamma = mateprob(W = W, k = k)           
@@ -69,17 +72,21 @@ agrochem_mod = function(t, n, parameters) {
     
     dIdt= sigma*E - (mu_N + mu_I)*I - pred_Iadj*P                                       #Infected snails
     
-    dWdt= lamda*Om*C - (mu_W+mu_H)*W                                                       #mean worm burden in human population
+    dWudt= lamda*Om*C - (mu_W+mu_H)*Wu
+    
+    dWtdt= lamda*Om*C - (mu_W+mu_H)*Wt                                      #mean worm burden in human population
     
     dPdt= f_P*(1-(P/phi_P))*P - mupadj*P                                      #prawn population (number individuals)
 
     
-    return(list(c(dSdt, dEdt, dIdt, dWdt, dPdt)))
+    return(list(c(dSdt, dEdt, dIdt, dWudt, dWtdt, dPdt)))
   }) 
 }
 
 ac.pars = parameters
+cvrg = 0.8
 
+ac.pars['cvrg'] = 0.8
 ac.pars['phinq'] = 1
 ac.pars['fnq'] = 1
 ac.pars['munq'] = 0
@@ -96,7 +103,8 @@ ac.pars['psiq'] = 1
 ac.start = c(S = 20*area,
              E = 5*area,
              I = 1*area,
-             W = 30,
+             Wu = 30,
+             Wt = 30,
              P = 0.1*area)
 
 ac.time = seq(0, (365*50), 5)

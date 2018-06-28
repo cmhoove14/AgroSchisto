@@ -14,6 +14,7 @@ source('Agrochemical_Review/Models/mod_q.R')
 
 ac.sim = as.data.frame(ode(ac.start, ac.time, agrochem_mod, ac.pars))
   ac.sim$N = ac.sim$S.A + ac.sim$E.A + ac.sim$I.A
+  ac.sim$W = (1-cvrg)*ac.sim$Wu + cvrg*ac.sim$Wt
   ac.sim$Wf = ac.sim$W * sapply(ac.sim$W, mateprob, k=ac.pars['k']) * 0.5
   
   ac.eqbm = ac.sim[dim(ac.sim)[1],]
