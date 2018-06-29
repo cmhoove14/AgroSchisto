@@ -68,3 +68,10 @@ study_sum <- RFxSum %>%
             Model_parameter = paste(unique(parameter), collapse = ","))
 ```
 
+```{r eec_sum}
+RFxSum %>% group_by(Chemical) %>% 
+  summarise(EEC = mean(eec),
+            Source = first(eec_source)) %>% 
+  knitr::kable()
+```
+
