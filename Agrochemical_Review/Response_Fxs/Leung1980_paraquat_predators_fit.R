@@ -9,7 +9,7 @@
 #your work is a derivative work, give credit to the original work, provide a link to the license, 
 #and indicate changes that were made.###############
 
-#Data extraction and model fitting to Leung 1980 P. clarkii fenitrothion toxicity
+#Data extraction and model fitting to Leung 1980 P. clarkii paraquat toxicity
 require(drc)
 
 #Adults ##########
@@ -20,18 +20,18 @@ leung_dat <- data.frame(conc = c(0, 15, 25, 35, 50, 75, 100), #ppm
 leung_dat$dead <- round(leung_dat$mort * leung_dat$tot)
 
 #DRC model  
-leung_fen_mod <- drm(dead / tot ~ conc, 
+leung_par_mod <- drm(dead / tot ~ conc, 
                      weights = tot, type = 'binomial',  
                      data = leung_dat, fct = LL2.2())
   
-  leung_fen_lc50 <- summary(leung_fen_mod)$coef[2,1]   # Lc50 estimate from model
-  leung_fen_lc50_se <- summary(leung_fen_mod)$coef[2,2]  #SE of lc50 estimate from model
-  leung_fen_b <- summary(leung_fen_mod)$coef[1,1]  #slope parameter of log-logistic fitted here
+  leung_par_lc50 <- summary(leung_par_mod)$coef[2,1]   # Lc50 estimate from model
+  leung_par_lc50_se <- summary(leung_par_mod)$coef[2,2]  #SE of lc50 estimate from model
+  leung_par_b <- summary(leung_par_mod)$coef[1,1]  #slope parameter of log-logistic fitted here
     
-muPq_fenitrothion_Leung_uncertainty<-function(In){
-  b = leung_fen_b
-  lc50 = leung_fen_lc50
-  lc50_se = leung_fen_lc50_se
+muPq_paraquat_Leung_uncertainty<-function(In){
+  b = leung_par_b
+  lc50 = leung_par_lc50
+  lc50_se = leung_par_lc50_se
   
   e = rnorm(1, lc50, lc50_se)
   
@@ -48,18 +48,18 @@ leung_dat_juv <- data.frame(conc = c(0, 0.5, 2, 4, 7, 8), #ppm
 leung_dat_juv$dead <- round(leung_dat_juv$mort * leung_dat_juv$tot)
 
 #DRC model  
-leung_juv_fen_mod <- drm(dead / tot ~ conc, 
+leung_juv_par_mod <- drm(dead / tot ~ conc, 
                          weights = tot, type = 'binomial',  
                          data = leung_dat_juv, fct = LL2.2())
   
-  leung_juv_fen_lc50 <- summary(leung_juv_fen_mod)$coef[2,1]   # Lc50 estimate from model
-  leung_juv_fen_lc50_se <- summary(leung_juv_fen_mod)$coef[2,2]  #SE of lc50 estimate from model
-  leung_juv_fen_b <- summary(leung_juv_fen_mod)$coef[1,1]  #slope parameter of log-logistic fitted here
+  leung_juv_par_lc50 <- summary(leung_juv_par_mod)$coef[2,1]   # Lc50 estimate from model
+  leung_juv_par_lc50_se <- summary(leung_juv_par_mod)$coef[2,2]  #SE of lc50 estimate from model
+  leung_juv_par_b <- summary(leung_juv_par_mod)$coef[1,1]  #slope parameter of log-logistic fitted here
     
-muPq_juv_fenitrothion_Leung_uncertainty<-function(In){
-  b = leung_juv_fen_b
-  lc50 = leung_juv_fen_lc50
-  lc50_se = leung_juv_fen_lc50_se
+muPq_juv_paraquat_Leung_uncertainty<-function(In){
+  b = leung_juv_par_b
+  lc50 = leung_juv_par_lc50
+  lc50_se = leung_juv_par_lc50_se
   
   e = rnorm(1, lc50, lc50_se)
   
@@ -69,6 +69,6 @@ muPq_juv_fenitrothion_Leung_uncertainty<-function(In){
 }
 
 
-keep.leung13 <- c("muPq_fenitrothion_Leung_uncertainty", "leung_fen_b", 
-                  "leung_fen_lc50", "leung_fen_lc50_se", "muPq_juv_fenitrothion_Leung_uncertainty",
-                  "leung_juv_fen_b", "leung_juv_fen_lc50", "leung_juv_fen_lc50_se")
+keep.leung13 <- c("muPq_paraquat_Leung_uncertainty", "leung_par_b", 
+                  "leung_par_lc50", "leung_par_lc50_se", "muPq_juv_paraquat_Leung_uncertainty",
+                  "leung_juv_par_b", "leung_juv_par_lc50", "leung_juv_par_lc50_se")

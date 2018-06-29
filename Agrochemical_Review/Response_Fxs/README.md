@@ -379,14 +379,14 @@ Data from [Lavarias et al 2013](https://www.ncbi.nlm.nih.gov/pubmed/23876938) in
 + `muPq_fenitrothion_Lavarias13_uncertainty`  
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Lavarias13/Lavarias13_fenitrothion_m_borellii.png)
 
-### `Leung1980_fenitrothion_predators_fit.R`  
-Data from [Leung et al 1980](https://www.ncbi.nlm.nih.gov/pubmed/7426798) investigating effects of **fenitrothion** on mortality of adult and juvenile *Procambarus clarkii*  
+### `Leung1980_paraquat_predators_fit.R`  
+Data from [Leung et al 1980](https://www.ncbi.nlm.nih.gov/pubmed/7426798) investigating effects of **paraquat** on mortality of adult and juvenile *Procambarus clarkii*  
 #### Data reported  
 + Tables 2 and 3: cohort size and mortality rate (24-hr mortality endpoint used)
 #### Response functions fit  
-+ `muPq_fenitrothion_Leung_uncertainty`
++ `muPq_paraquat_Leung_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Leung1980/Leung1980_pred_mortality_data&sim.png)
-+ `muPq_juv_fenitrothion_Leung_uncertainty`
++ `muPq_juv_paraquat_Leung_uncertainty`
   + Sampling and data: [Image](https://github.com/cmhoove14/AgroSchisto/blob/master/Agrochemical_Review/Response_Fxs/Plots/Leung1980/Leung1980_juv_pred_mortality_data&sim.png)
 
 ### `Mohamed2012_profenofos_diazinon_snails_fit.R`  
