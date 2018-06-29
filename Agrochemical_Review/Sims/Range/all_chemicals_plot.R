@@ -96,12 +96,12 @@ load("Agrochemical_Review/Sims/Range/Chlorpyrifos/chlor_r0_sims.RData")
 agroc_plot <- rbind(chlor_sims, prof_sims, mal_sims, 
                     atr_sims, but_sims, btr_sims, gly_sims) %>% 
   ggplot(aes(x = EEC, y = r0_smooth, col = Agrochemical)) + 
-  geom_line(size = 1) + facet_grid(Class ~ .) +
+  geom_line(size = 0.75) + facet_grid(Class ~ .) +
   geom_ribbon(aes(x = EEC, ymin = r025_smooth, ymax = r075_smooth, fill = Agrochemical), 
               alpha = 0.25, size = 0.01) + 
-  theme_ms() +
-  ylab(expression(R[0])) + xlab("Agrochemical Concentration Normalized to Peak EEC") +
-  ggtitle(expression(paste("Combined effects of key agrochemicals on estimates of ", R[0]))) +
+  theme_ms() + ylim(-0.0001,4) +
+  ylab(expression(paste(R[0], "(q)"))) + xlab("Agrochemical Concentration Normalized to Peak EEC") +
+  ggtitle(expression(paste("Combined effects of key agrochemicals on estimates of ", R[0], "(q)"))) +
   scale_x_continuous(breaks = seq(0,1,0.5),
                      labels = c("0", "0.5 Peak EEC", "Peak EEC"),
                      limits = c(0, 1.001)) +
