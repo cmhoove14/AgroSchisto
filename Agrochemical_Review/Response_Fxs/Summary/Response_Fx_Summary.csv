@@ -71,7 +71,7 @@ Johnson2007,Johnson et al 2007,Ammonium Fertilizer,1800,N-study,Fertilizer,botto
 Koprivnikar2006,Koprivnikar et al 2006,Atrazine,102,https://doi:10.1038/s41467-018-03189-w,Herbicide,direct larvae,Echinistoma trivolvis,Other,cercariae,mortality,piC,piC_kop_atr_unc,1,
 Kristoff2011,Kristoff et al 2011,Azinphos-methyl,15.3,https://doi-org.libproxy.berkeley.edu/10.1016/S0045-6535(00)00601-9,Insecticide,direct snail,Biomphalaria glabrata,Mansoni,,reproduction,fNq,fNq_azmeth_kristoff11_uncertainty,1,
 Lavarias2013,Lavarias et al 2013,Fenitrothion,36.6,https://archive.epa.gov/pesticides/reregistration/web/pdf/0445.pdf,Insecticide,top-down,Macrobrachium borellii,Any,,mortality,muPq,muPq_fenitrothion_Lavarias13_uncertainty,1,
-Leung1980,Leung et al 1980,Fenitrothion,36.6,https://archive.epa.gov/pesticides/reregistration/web/pdf/0445.pdf,Insecticide,top-down,Procambarus clarkii,Any,,mortality,muPq,muPq_fenitrothion_Leung_uncertainty,1,
+Leung1980,Leung et al 1980,Paraquat,4.8,https://archive.epa.gov/pesticides/reregistration/web/pdf/0262red.pdf,Insecticide,top-down,Procambarus clarkii,Any,,mortality,muPq,muPq_paraquat_Leung_uncertainty,1,
 Mohamed2012,Mohamed et al 2012,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct snail,Biomphalaria alexandrina,Mansoni,,mortality,muNq,muNq_prof_mohamed_uncertainty,1,
 Mohamed2012,Mohamed et al 2012,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,direct snail,Biomphalaria alexandrina,Mansoni,,reproduction,fNq,fNq_moh_diaz_moh12_uncertainty,1,
 Mohamed2012,Mohamed et al 2012,Diazinon,429,https://archive.epa.gov/pesticides/reregistration/web/pdf/diazinon_red.pdf,Insecticide,direct snail,Biomphalaria alexandrina,Mansoni,,mortality,muNq,muNq_diaz_mohamed_uncertainty,1,
