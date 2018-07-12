@@ -886,22 +886,22 @@ colnames(perm_result) <- c("Mod0_Veg", "Mod0_Net", "Mod0_Prawns",
 ```{r perm_resuts}
 #Model 0 results
 hist(perm_result$Mod0_Veg, col = "black", breaks = 100)
-  #abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"], 
-  #       col = 4, lty = 2, lwd = 2)
-  #length(which(perm_result$Mod0_Veg > 
-  #               summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
+  abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod0_Veg > 
+                 summary(mod000_haem_comm_all)$coef[,"Estimate"]["Veg"])) / 10000
   
 hist(perm_result$Mod0_Net, col = "black", breaks = 100)
-  #abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"], 
-  #       col = 4, lty = 2, lwd = 2)
-  #length(which(perm_result$Mod0_Net > 
-  #               summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
+  abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod0_Net > 
+                 summary(mod000_haem_comm_all)$coef[,"Estimate"]["Net"])) / 10000
 
 hist(perm_result$Mod0_Prawns, col = "black", breaks = 100)
-  #abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
-  #       col = 4, lty = 2, lwd = 2)
-  #length(which(perm_result$Mod0_Prawns > 
-  #               summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
+  abline(v = summary(mod000_haem_comm_all)$coef[,"Estimate"]["Prawns"], 
+         col = 4, lty = 2, lwd = 2)
+  length(which(perm_result$Mod0_Prawns > 
+                 summary(mod1_haem_comm_all)$coef[,"Estimate"]["Prawns"])) / 10000
 
 #Model 2 results haematobium
 hist(perm_result$Mod2_Veg, col = "black", breaks = 100)
