@@ -1,0 +1,87 @@
+---
+title: "Reproduction number derivations"
+author: "Chris Hoover"
+date: "December 17, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Basic Reproduction Number ($R_0$)
+Expanding on the model presented in [Halstead et al 2018](https://www.nature.com/articles/s41467-018-03189-w#Sec15), we incorporate additional model parameters and agrochemical sensitivities to arrive at the following model of schistosomiasis transmission in the presence of agrochemical pollution:
+\begin{align}
+  \frac{dS}{dt}&=f_N(q)\bigg(1-\frac{N}{K_N(q)}\bigg)\big(S+E\big)-\mu_N(q)S-P\psi S^n-\beta MS \\
+  \frac{dE}{dt}&=\beta MS-\mu_N(q)E-P\psi E^n-\sigma E  \\
+  \frac{dI}{dt}&=\sigma E-(\mu_N(q)+\mu_I)I-P\psi I^n \\
+  \frac{dW}{dt}&=\lambda C-(\mu_H+\mu_W)W \\
+  \frac{dP}{dt}&=f_P\bigg(1-\frac{P}{K_P}\bigg)P-\mu_P(q)P
+\end{align}
+where:
+\begin{align}
+  M(t)&=W_Fmv(q)\pi_M(q) \\
+    &W_F=0.5WH\phi(W,\kappa) \\
+  C(t)&=I\theta(q)\pi_C(q) \\
+  \psi&=\frac{\alpha(q)}{1+\alpha T_hN^n} \\
+  N&=S+E+I
+\end{align}
+
+We employ the next generation matrix methodology to develop an analytic expression for $R_0(q)$, the agrochemical-sensitive basic reproduction number. We define $R_0(q)$ as the expected number of mated adult female worms, $W_F$, produced by a single mated adult female worm in an entirely susceptible human host population within an ecosystem where agrochemical concentration is equal to $q$. We begin by linearizing the disease system about the disease free steady state, implying $S=N$ and $E=I=W=0$, by solving for the equilibrium number of snails, $N^*$, and predators, $P^*$, respectively. Assuming $n=1$, implying a Holling's type II functional response, we have:
+\begin{align}
+  0&=f_P\bigg(1-\frac{P^*}{K_P}\bigg)-\mu_P(q) \\
+  0&=f_N(q)\bigg(1-\frac{N^*}{K_N(q)}\bigg)-\mu_N(q)-P^*\psi^* \\
+  &\psi^*=\frac{\alpha(q)}{1+\alpha T_hN^*}
+\end{align}
+
+We subsequently restrict our attention to the linearized subsystem of equations governing infectious state dynamics:
+\begin{align}
+  \frac{dE}{dt}&=\beta MN^*-(\mu_N(q)+P\psi+\sigma)E  \\
+  \frac{dI}{dt}&=\sigma E-(\mu_N(q)+\mu_I+P\psi)I \\
+  \frac{dW}{dt}&=\lambda C-(\mu_H+\mu_W)W \\
+\end{align}
+We next build matrices $\mathbf{T}$ and $\mathbf{\Sigma}$ corresponding to the generation of new infections and transitions between infected states, respectively, and we take the product $\mathbf{T}(-\mathbf{\Sigma}^-)$ to produce the system’s next generation matrix with large domain, $K_L$.
+\begin{equation}
+  \mathbf{T}=
+    \begin{bmatrix}
+      0 & 0 & 0.5\beta Hmv(q)\pi_M(q)N^* \\
+      0 & 0 & 0 \\
+      0 & \lambda\theta(q)\pi_C(q) & 0 \\
+    \end{bmatrix}
+\end{equation}    
+  
+\begin{equation}  
+  \mathbf{\Sigma}=
+    \begin{bmatrix}
+      -(\mu_N(q)+P^*\psi^*+\sigma) & 0 & 0 \\
+      \sigma & -(\mu_N(q)+P^*\psi^*+\mu_I) & 0 \\
+      0 & 0 & -(\mu_H+\mu_W) \\
+    \end{bmatrix}
+\end{equation}
+
+\begin{equation}  
+  \mathbf{K_L}=
+    \begin{bmatrix}
+      0 & 0 & \frac{0.5\beta Hmv(q)\pi_M(q)N^*}{(\mu_W+\mu_H)}\\
+      0 & 0 & 0 \\
+      \frac{\sigma\lambda\theta(q)\pi_C(q)}{(\mu_N(q)+P^*\psi^*+\sigma)(\mu_N(q)+P^*\psi^*+\mu_I)} & \frac{\lambda\theta(q)\pi_C(q)}{\mu_N(q)+P^*\psi^*+\mu_I} & 0 \\
+    \end{bmatrix}
+\end{equation}
+
+Next, $\mathbf{K_L}$ reduces to $\mathbf{K}$ (shown below) the next generation matrix for only those states which are states at infections, E and W. 
+
+\begin{equation}  
+  \mathbf{K}=
+    \begin{bmatrix}
+      0 & \frac{0.5\beta Hmv(q)\pi_M(q)N^*}{(\mu_W+\mu_H)}\\
+      \frac{\sigma\lambda\theta(q)\pi_C(q)}{(\mu_N(q)+P^*\psi^*+\sigma)(\mu_N(q)+P^*\psi^*+\mu_I)} & 0 \\
+    \end{bmatrix}
+\end{equation}
+
+Given $\mathbf{K}$, we can then compute the spectral radius which is interpreted as $R_0(q)$:
+
+\begin{equation}  
+  R_0(q)=\Bigg(\frac{0.5\sigma\lambda\theta(q)\pi_C(q)\beta Hmv(q)\pi_M(q)N^*}{(\mu_N(q)+P^*\psi^*+\sigma)(\mu_N(q)+P^*\psi^*+\mu_I)(\mu_W+\mu_H)} \Bigg)^\frac{1}{2}
+\end{equation}
+
+In addition, we don’t consider any density dependence, setting $\phi(W)=1$, as these functions are not relevant at a disease free state. $R_0$ is a measure of disease spread within a completely susceptible population and is therefore inadequate when the interest lies in studying an established pathogen in a setting where density dependence within the pathogen population regulates transmission.
