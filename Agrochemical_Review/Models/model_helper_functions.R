@@ -38,10 +38,10 @@ st.er <- function(x) {
   sd(x)/sqrt(length(x))
 } #Function to calculate standard error of the mean
 
-#Prevalence from worm burden and clumping parameter 
-Prevalence <- function(W, k) {
-  p=1 - (1/(1+W/k)^(k))*(1+W/(1+W/k)) # fraction of humans with at least 2 parasites
-  return(p)
+#Function to estimate prevalence given mean worm burden and clumping parameter assuming neg. binomial dist'n
+get_prev <- function(clump, 
+                     burden){
+  pnbinom(1, size = clump, mu = burden, lower.tail = FALSE)
 }
 
 #Get distributions for Epi datapoints given estimated W and k 
@@ -59,3 +59,39 @@ Prob_gaussian<-function(y, mu, sd){
   p<-(1/(sqrt(2*pi)*sd) ) * exp( -((y-mu)^2)/(2*sd^2) )
   p
 }
+
+
+#Function to estimate schisto DALYs
+est_dalys <- function(burden,     # mean worm burden of NB
+                      clump,      # clumping parameter of NB
+                      weights_lo, # disability weight for low infection intensity 
+                      weights_hi, # disability weight for high infection intensity >=50 eggs/10mL
+                      epmL,       # estimate of eggs/10mL per mated female worm
+                      pop,        # human population
+                      daily = TRUE){  # estimating DALYs on a daily basis?
+  eggs_mL <- rnbinom(pop, size = clump, mu = burden) * phi_Wk(burden, clump) * 0.5 * epmL # estimate of egg burden converted from worm burden
+  
+  n_lo <- length(eggs_mL[eggs_mL > 0 & eggs_mL < 50])
+  n_hi <- length(eggs_mL[eggs_mL >= 50])
+  
+  if(daily){
+    
+    dalys_lo <- n_lo * weights_lo/365
+    dalys_hi <- n_hi * weights_hi/365
+    
+  } else {
+    
+    dalys_lo <- n_lo * weights_lo
+    dalys_hi <- n_hi * weights_hi
+
+  }
+  
+  return(dalys_hi + dalys_lo)
+}
+
+#Function to return summary of a vector as median (IQR)
+get_sum <- function(vec){
+  paste0(round(median(vec, na.rm = T), 2), 
+         " (", round(quantile(vec, 0.25, na.rm = T), 2), 
+         " - ", round(quantile(vec, 0.75, na.rm = T), 2), ")"  )
+} 
