@@ -25,52 +25,93 @@ This document describes the epidemiological model, data, and fitting procedure u
 
 # Initial model simulations  
 ## $R_0$ Check  
-First estimate R0 from initial parameters in predator-free model
+First estimate $R_0$ from initial parameters then get equilibirum values of state variables for same parameter set
 ```{r r0_init}
-init_pars_pred_free <- init_pars
-init_pars_pred_free["phi_P"] <- 0
-r0.Ag(parameters = init_pars_pred_free)
+r0.Ag(parameters = init_pars)
+
+ac.start = c(S = 40*area,
+             E = 0,
+             I = 0,
+             W = 2,
+             P = 0.1*area)
+
+eq_vals <- runsteady(y = ac.start, func = agrochem_mod, parms = init_pars)$y
+
+eq_vals
 ```
 
-$R_0$ estimate here is clearly too high, but we can resolve that by fitting to some actual data to temper the transmission parameters
+```{r base_mod}
+r0.Base(init_pars)
 
-##TODO: Run model simulation with pedator free parameter set  
+base.start = c(S = 40*area,
+               E = 0,
+               I = 0,
+               W = 2)
 
+base_eq <- runsteady(y = base.start, func = base_mod, parms = init_pars)$y
+
+base_eq
+```
+
+
+```{r r0_increase}
+#Increase transmission parameters to try and get R0 >1
+sec_pars <- init_pars
+sec_pars["beta"] <- init_pars["beta"]*5
+sec_pars["lambda"] <- init_pars["lambda"]*5
+
+r0.Ag(parameters = sec_pars)
+
+sec_vals <- runsteady(y = ac.start, func = agrochem_mod, parms = sec_pars)$y
+
+sec_vals
+```
+
+```{r comp_r0_w}
+test_pars <- init_pars
+test_r0s <- numeric()
+test_ws <- numeric()
+base_r0s <- numeric()
+base_ws <- numeric()
+
+for(i in seq(1, 20, 0.1)){
+  test_pars["beta"] <- init_pars["beta"]/i
+  test_pars["lambda"] <- init_pars["lambda"]/i
+
+  test_r0s[i*10-9] <- r0.Ag(parameters = test_pars)[3]
+  test_ws[i*10-9] <- runsteady(y = ac.start, func = agrochem_mod, parms = test_pars)$y["W"]
+
+  base_r0s[i*10-9] <- r0.Base(parameters = test_pars)
+  base_ws[i*10-9] <- runsteady(y = base.start, func = base_mod, parms = test_pars)$y["W"]
+  
+  print(i*10-9)
+}
+
+plot(test_r0s, test_ws, 
+     xlab = "R0", ylab = "equilibrium worm burden")
+
+plot(base_r0s, base_ws, 
+     xlab = "R0", ylab = "equilibrium worm burden")
+
+```
+
+
+Something isn't right: despite $R_0$ being less than one, the equilibrium worm burden is >>0 and the euilibrium snail population from running the model is much bigger than the equilibrium estimate from the r0 function
+
+Next run model with same parameters
 ```{r mod_sim}
-#Make copy of parameters to use in initial simulations
-ac.pars = parameters
-cvrg = 0.75
-
-ac.pars['cvrg'] = cvrg
-
-#Set agrochemical sensitive parameters to their null values
-ac.pars['phinq'] = 1
-ac.pars['fnq'] = 1
-ac.pars['munq'] = 0
-ac.pars['vq'] = 1
-ac.pars['pimq'] = 1
-ac.pars['thetaq'] = 1
-ac.pars['picq'] = 1
-ac.pars['mupq'] = 0
-ac.pars['psiq'] = 1
-
-#Starting values of state variables
 ac.start = c(S = 20*area,
              E = 5*area,
              I = 1*area,
-             Wu = 30,
-             Wt = 30,
+             W = 30,
              P = 0.1*area)
 
 #Time to run simulation
 ac.time = seq(0, (365*50), 5)
 
 #Run simulation and add a couple estimates
-ac.sim = as.data.frame(ode(ac.start, ac.time, agrochem_mod, ac.pars))
+ac.sim = as.data.frame(ode(ac.start, ac.time, agrochem_mod, init_pars))
   ac.sim$N = ac.sim$S + ac.sim$E + ac.sim$I
-  ac.sim$W = (1-cvrg)*ac.sim$Wu + cvrg*ac.sim$Wt
-  ac.sim$Wf = ac.sim$W * sapply(ac.sim$W, phi_Wk, k=ac.pars['k']) * 0.5
-  
   ac.eqbm = ac.sim[dim(ac.sim)[1],]
     
 ac.sim %>% ggplot(aes(x = time)) +
@@ -89,13 +130,60 @@ ac.sim %>% ggplot(aes(x = time)) +
   geom_line(aes(y = W), size = 1.25, col = 'purple') 
 
 ```
-So infection is clearly way to high with thos starting parameters. Let's bring in the $R_0$ function and use it to find a resonable starting parameter set.
+
+
+$R_0$ estimate here is clearly too low, but we can resolve that by fitting to some actual data to temper the transmission parameters
+
+##TODO: Run model simulation with predator free parameter set  
+
+```{r mod_sim}
+#Make copy of parameters to use in initial simulations
+ac.pars = init_pars
+r0.Ag(parameters = ac.pars)
+
+cvrg = 0.75
+
+ac.pars['cvrg'] = cvrg
+
+
+#Starting values of state variables
+ac.start = c(S = 20*area,
+             E = 5*area,
+             I = 1*area,
+             W = 30,
+             P = 0.1*area)
+
+#Time to run simulation
+ac.time = seq(0, (365*50), 5)
+
+#Run simulation and add a couple estimates
+ac.sim = as.data.frame(ode(ac.start, ac.time, agrochem_mod, ac.pars))
+  ac.sim$N = ac.sim$S + ac.sim$E + ac.sim$I
+  ac.eqbm = ac.sim[dim(ac.sim)[1],]
+    
+ac.sim %>% ggplot(aes(x = time)) +
+  theme_bw() +
+  geom_line(aes(y = N), size = 1.25, col = 'black') +
+  geom_line(aes(y = S), size = 1.25, col = 'green') +
+  geom_line(aes(y = E), size = 1.25, col = 'orange') +
+  geom_line(aes(y = I), size = 1.25, col = 'red') 
+
+ac.sim %>% ggplot(aes(x = time)) +
+  theme_bw() +
+  geom_line(aes(y = P), size = 1.25, col = 'blue') 
+
+ac.sim %>% ggplot(aes(x = time)) +
+  theme_bw() +
+  geom_line(aes(y = W), size = 1.25, col = 'purple') 
+
+```
+So infection is clearly way to high with those starting parameters. Let's bring in the $R_0$ function and use it to find a resonable starting parameter set.
 
 ```{r r0_parameters}
 source("r0_of_q.R")
 
-test_betas <- seq(0.1,2,0.05)*parameters["beta"]
-test_lambdas <- seq(0.1,2,0.05)*parameters["lambda"]
+test_betas <- seq(0.1,2,0.05)*init_pars["beta"]
+test_lambdas <- seq(0.1,2,0.05)*init_pars["lambda"]
 
 test_pars <- expand.grid(beta = test_betas,
                          lambda = test_lambdas)
