@@ -1,0 +1,200 @@
+---
+title: "Model fit"
+author: "Chris Hoover"
+date: "November 26, 2018"
+output: pdf_document
+geometry:margin=1cm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+require(deSolve)
+require(rootSolve)
+require(coda)
+require(viridis)
+require(tidyverse)
+
+source("initial_parameters.R")
+source("model_helper_functions.R")
+source("r0_ag_function.R")
+source("mod_q.R")
+```
+
+This document describes the epidemiological model, data, and fitting procedure used to derive estimates of snail-to-man and man-to-snail transmission parameters for a baseline model used to estimate the effect of agrochemical pollution on schistosomiasis transmission
+
+# Initial model simulations  
+## $R_0$ Check  
+First estimate R0 from initial parameters in predator-free model
+```{r r0_init}
+init_pars_pred_free <- init_pars
+init_pars_pred_free["phi_P"] <- 0
+r0.Ag(parameters = init_pars_pred_free)
+```
+
+$R_0$ estimate here is clearly too high, but we can resolve that by fitting to some actual data to temper the transmission parameters
+
+##TODO: Run model simulation with pedator free parameter set  
+
+```{r mod_sim}
+#Make copy of parameters to use in initial simulations
+ac.pars = parameters
+cvrg = 0.75
+
+ac.pars['cvrg'] = cvrg
+
+#Set agrochemical sensitive parameters to their null values
+ac.pars['phinq'] = 1
+ac.pars['fnq'] = 1
+ac.pars['munq'] = 0
+ac.pars['vq'] = 1
+ac.pars['pimq'] = 1
+ac.pars['thetaq'] = 1
+ac.pars['picq'] = 1
+ac.pars['mupq'] = 0
+ac.pars['psiq'] = 1
+
+#Starting values of state variables
+ac.start = c(S = 20*area,
+             E = 5*area,
+             I = 1*area,
+             Wu = 30,
+             Wt = 30,
+             P = 0.1*area)
+
+#Time to run simulation
+ac.time = seq(0, (365*50), 5)
+
+#Run simulation and add a couple estimates
+ac.sim = as.data.frame(ode(ac.start, ac.time, agrochem_mod, ac.pars))
+  ac.sim$N = ac.sim$S + ac.sim$E + ac.sim$I
+  ac.sim$W = (1-cvrg)*ac.sim$Wu + cvrg*ac.sim$Wt
+  ac.sim$Wf = ac.sim$W * sapply(ac.sim$W, phi_Wk, k=ac.pars['k']) * 0.5
+  
+  ac.eqbm = ac.sim[dim(ac.sim)[1],]
+    
+ac.sim %>% ggplot(aes(x = time)) +
+  theme_bw() +
+  geom_line(aes(y = N), size = 1.25, col = 'black') +
+  geom_line(aes(y = S), size = 1.25, col = 'green') +
+  geom_line(aes(y = E), size = 1.25, col = 'orange') +
+  geom_line(aes(y = I), size = 1.25, col = 'red') 
+
+ac.sim %>% ggplot(aes(x = time)) +
+  theme_bw() +
+  geom_line(aes(y = P), size = 1.25, col = 'blue') 
+
+ac.sim %>% ggplot(aes(x = time)) +
+  theme_bw() +
+  geom_line(aes(y = W), size = 1.25, col = 'purple') 
+
+```
+So infection is clearly way to high with thos starting parameters. Let's bring in the $R_0$ function and use it to find a resonable starting parameter set.
+
+```{r r0_parameters}
+source("r0_of_q.R")
+
+test_betas <- seq(0.1,2,0.05)*parameters["beta"]
+test_lambdas <- seq(0.1,2,0.05)*parameters["lambda"]
+
+test_pars <- expand.grid(beta = test_betas,
+                         lambda = test_lambdas)
+
+test_pars$r0 <- mapply(r0.bl,test_pars$beta, test_pars$lambda)[3,]
+
+#Plot heatmap
+test_pars %>%   
+  ggplot(aes(x = beta, y = lambda, fill = r0, z = r0)) + 
+    geom_tile() +
+    geom_contour(breaks = c(1), col = "white") +
+    scale_fill_viridis(option = "magma", direction = 1) +
+    labs(y = expression(lambda),
+         x = expression(beta)) +
+    theme_bw() + 
+    theme(axis.ticks=element_blank(), 
+          axis.text=element_text(size=12), 
+          axis.title=element_text(size=14),
+          legend.title=element_text(size=15), 
+          legend.text=element_text(size=12)) +
+    guides(fill=guide_legend(title=expression(R[0]),
+                             reverse = T))
+
+```
+We'll choose a parameter set with $R_0\sim1.02$ as starting estimates for fitting
+
+```{r update_parameters}
+test_pars_r01.01 <- test_pars %>% filter(round(r0, 2) == 1.02)
+
+ac.pars2 <- ac.pars
+
+ac.pars2["beta"] <- test_pars_r01.01$beta[1]
+ac.pars2["lambda"] <- test_pars_r01.01$lambda[1]
+
+#Run simulation and add a couple estimates
+ac.sim2 = as.data.frame(ode(ac.start, ac.time, agrochem_mod, ac.pars2))
+  ac.sim2$N = ac.sim2$S + ac.sim2$E + ac.sim2$I
+  ac.sim2$W = (1-cvrg)*ac.sim2$Wu + cvrg*ac.sim2$Wt
+  ac.sim2$Wf = ac.sim2$W * sapply(ac.sim2$W, phi_Wk, k=ac.pars2['k']) * 0.5
+  
+  ac.eqbm2 = ac.sim2[dim(ac.sim2)[1],]
+    
+ac.sim2 %>% ggplot(aes(x = time)) +
+  theme_bw() +
+  geom_line(aes(y = N), size = 1.25, col = 'black') +
+  geom_line(aes(y = S), size = 1.25, col = 'green') +
+  geom_line(aes(y = E), size = 1.25, col = 'orange') +
+  geom_line(aes(y = I), size = 1.25, col = 'red') 
+
+ac.sim2 %>% ggplot(aes(x = time)) +
+  theme_bw() +
+  geom_line(aes(y = P), size = 1.25, col = 'blue') 
+
+ac.sim2 %>% ggplot(aes(x = time)) +
+  theme_bw() +
+  geom_line(aes(y = W), size = 1.25, col = 'purple') 
+
+```
+
+That's still way too high... Maybe the $R_0$ function is not right? Let's check to see if a transmission parameter set with $R_0<1$ leads to infection.
+
+```{r}
+test_pars_r0lt1 <- test_pars %>% filter(round(r0, 2) == 0.95)
+
+ac.pars3 <- ac.pars
+
+ac.pars3["beta"] <- test_pars_r0lt1$beta[1]
+ac.pars3["lambda"] <- test_pars_r0lt1$lambda[1]
+
+#Run simulation and add a couple estimates
+ac.sim3 = as.data.frame(ode(ac.start, ac.time, agrochem_mod, ac.pars3))
+  ac.sim3$N = ac.sim3$S + ac.sim3$E + ac.sim3$I
+  ac.sim3$W = (1-cvrg)*ac.sim3$Wu + cvrg*ac.sim3$Wt
+  ac.sim3$Wf = ac.sim3$W * sapply(ac.sim3$W, phi_Wk, k=ac.pars3['k']) * 0.5
+  
+  ac.eqbm2 = ac.sim3[dim(ac.sim3)[1],]
+    
+ac.sim3 %>% ggplot(aes(x = time)) +
+  theme_bw() +
+  geom_line(aes(y = N), size = 1.25, col = 'black') +
+  geom_line(aes(y = S), size = 1.25, col = 'green') +
+  geom_line(aes(y = E), size = 1.25, col = 'orange') +
+  geom_line(aes(y = I), size = 1.25, col = 'red') 
+
+ac.sim3 %>% ggplot(aes(x = time)) +
+  theme_bw() +
+  geom_line(aes(y = P), size = 1.25, col = 'blue') 
+
+ac.sim3 %>% ggplot(aes(x = time)) +
+  theme_bw() +
+  geom_line(aes(y = W), size = 1.25, col = 'purple') 
+
+```
+
+Yeahhhh so that ain't right.
+
+
+# Gather epi data to fit to  
+
+# Fit model to epi data  
+
+
