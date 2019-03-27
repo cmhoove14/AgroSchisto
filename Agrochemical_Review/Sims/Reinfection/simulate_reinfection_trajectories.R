@@ -1,4 +1,5 @@
-source('Agrochemical_Review/Models/mod_q.R')
+source('Agrochemical_Review/Models/models.R')
+require(tidyverse)
 
 ac.sim = as.data.frame(ode(ac.start, ac.time, agrochem_mod, ac.pars))
   ac.sim$N = ac.sim$S.A + ac.sim$E.A + ac.sim$I.A
@@ -14,7 +15,7 @@ base.start = c(S = ac.eqbm$S.A,
                Wt = ac.eqbm$Wt,
                P = ac.eqbm$P.A)
 
-base.time = c(0:(365+30))
+base.time = c(0:(365*30))
 
 mda.eff = 0.92
 
