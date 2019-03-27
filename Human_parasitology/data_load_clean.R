@@ -1,5 +1,7 @@
 #Data load and clean
 
+require(tidyverse)
+
 #My interventions data generated form interpretation of spreadsheets shared by Giulio
 interventions <- read_csv("~/RemaisWork/Schisto/Stanford/Human_Parasitology_data/Village_interventions.csv") %>% 
   mutate(Intervention = factor(Intervention, levels = c("control", "net", "prawn", "veg_removal")),
