@@ -113,7 +113,7 @@ Satapornvanit2009,Satapornvanit et al 2009,Dimethoate,33.4,https://archive.epa.g
 Satapornvanit2009,Satapornvanit et al 2009,Profenofos,15.38,https://doi.org/10.1016/j.agwat.2012.01.009,Insecticide,top-down,Macrobrachium rosenbergii,Any,,mortality,muPq,muPq_prof_satapornvanit09_uncertainty,0,
 Satapornvanit2009,Satapornvanit et al 2009,Chlorpyrifos,64,http://dx.doi.org/10.1016/j.chemosphere.2015.03.091,Insecticide,top-down,Macrobrachium rosenbergii,Any,,attack rate,psiq,psiq_chlor_satapornvanit09_uncertainty,1,
 Shukla1985,Omran & Shukla 1985,Quinalphos,4,https://pubs.acs.org/doi/pdf/10.1021/es00174a001,Insecticide,top-down,Macrobrachium lamerii,Any,,mortality,muPq,muPq_quin_shukla85_uncertainty,1,
-Shukla1985,Omran & Shukla 1985,Dichlorvos,2.33,https://archive.epa.gov/pesticides/reregistration/web/pdf/ddvp_ired.pdf,Insecticide,top-down,Macrobrachium lamerii,Any,,mortality,muPq,muPq_dich_shukla85_uncertainty,1,
+Shukla1985,Omran & Shukla 1985,Dichlorvos,7.5,https://setac.onlinelibrary.wiley.com/doi/epdf/10.1002/ieam.1534,Insecticide,top-down,Macrobrachium lamerii,Any,,mortality,muPq,muPq_dich_shukla85_uncertainty,1,
 Shukla1985,Omran & Shukla 1985,Monocrotophos,21.3,https://archive.epa.gov/pesticides/reregistration/web/pdf/dicrotophos_red.pdf,Insecticide,top-down,Macrobrachium lamerii,Any,,mortality,muPq,muPq_mono_shukla85_uncertainty,1,
 Shukla1985,Omran & Shukla 1985,Carbaryl,33.5,https://doi.org/10.1645/GE-2078.1,Insecticide,top-down,Macrobrachium lamerii,Any,,mortality,muPq,muPq_carb_shukla85_uncertainty,1,
 Shukla1984,Omran & Shukla 1984,Endosulfan,7.6,https://archive.epa.gov/pesticides/chemicalsearch/chemical/foia/web/pdf/079401/079401-123.pdf,Insecticide,top-down,Macrobrachium lamerii,Any,,mortality,muPq,muPq_endo_shuk84_uncertainty,1,
