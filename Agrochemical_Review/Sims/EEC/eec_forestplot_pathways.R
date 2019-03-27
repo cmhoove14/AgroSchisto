@@ -12,110 +12,65 @@
 require(forestplot)
 source('Review_models/fin/r0_of_q_fin.R')
 
-date = '2018-02-20'  #updated functions across the board
-date000 = '2017-12-11'  #updated functions across the board
-date00 = '2017-11-27'  #runs as below, but with no implied 3rd data points for any d-r functions
-date0 = '2017-11-22'  #Runs with 5000 sims and median/IQR values & Glyphosate EEC = 3700
-date1 = '2017-11-11' #Runs with 5000 sims and median/IQR values
-date2 = '2017-11-10' #Runs with 5000 sims
-date3 = '2017-11-09' #Runs with 1000 sims
+#Load data frames for inclusion in forestplot ##########
+  load("Agrochemical_Review/Sims/EEC/all_bottomup_summary.RData")
+  load("Agrochemical_Review/Sims/EEC/all_dirlarv_summary.RData")
+  load("Agrochemical_Review/Sims/EEC/all_dirsnail_summary.RData")
+  load("Agrochemical_Review/Sims/EEC/all_topdown_summary.RData")
 
-#Load the eec data frames and reorder for inclusion in forestplot ##########
-#EEC data frames
-load(paste('Review_models/r0_EECs/eec.p1.df', date, '.RData', sep = ''))
-  eec.p1.df = eec.p1.df[-1,] #Get rid of simulation with atrazine d-r function that excludes 30ppb datapoint
-  eec.p1.df = eec.p1.df[c(1,5,4,2,6,3),]
-  eec.p1.df$relr0.025 = (eec.p1.df$r0 - 1.96*eec.p1.df$r0.sd) / r0.He()[3] * 100 - 100
-  eec.p1.df$relr0.975 = (eec.p1.df$r0 + 1.96*eec.p1.df$r0.sd) / r0.He()[3] * 100 - 100
+#Function to replace parameter names with expressions to render greek parameter symbols
+  get_greek <- function(x){
+    if(x == "phiNq") {
+      
+      return(substitute(x[y], list(x = as.name("Phi"),
+                                                 y = as.name("N"))))
+      
+    } else if(x == "thetaq"){
+      
+      return(substitute(x, list(x = as.name("theta"))))
+      
+    }
+  }
+#Text lists for forest plot ########
+# Snail studies  
+  snail_studies_text = list(as.list(c("Study", rfx_bottomup_all$Study, " ", rfx_dirsnail_all$Study, " ")))
+  snail_chems_text = list(as.list(c("Agrochemical", rfx_bottomup_all$Chemical, " ", rfx_dirsnail_all$Chemical, " ")))
+  snail_species_text = list(as.list(c("Species", rfx_bottomup_all$Species, " ", rfx_dirsnail_all$Species, " ")))
+  snail_pars_text = list(as.list(c(case_when(rfx_bottomup_all$Parameter == "phiNq" ~ as.expression(substitute(x[y], 
+                                                                                                      list(x = as.name("Phi"), 
+                                                                                                           y = as.name("N")))),
+                                     rfx_bottomup_all$Parameter == "thetaq" ~ as.expression(substitute(x, 
+                                                                                                       list(x = as.name("theta"))))),
+                           " ",
+                           case_when(rfx_dirsnail_all$Parameter == "muNq" ~ as.expression(substitute(x[y], 
+                                                                                                      list(x = as.name("mu"), 
+                                                                                                           y = as.name("N")))),
+                                     rfx_dirsnail_all$Parameter == "fNq" ~ as.expression(substitute(x[y], 
+                                                                                                      list(x = as.name("f"), 
+                                                                                                           y = as.name("N")))),
+                                     rfx_dirsnail_all$Parameter == "thetaq" ~ as.expression(substitute(x, 
+                                                                                                       list(x = as.name("theta"))))))))
+  snail_text_list = list(snail_studies_text, 
+                         snail_chems_text,
+                         snail_species_text,
+                         snail_pars_text)
+# Predator studies  
+  pred_studies_text = list(as.list(c("Study", rfx_topdown_all$Study, " ")))
+  pred_chems_text = list(as.list(c("Agrochemical", rfx_topdown_all$Chemical, " ")))
+  pred_species_text = list(as.list(c("Species", rfx_topdown_all$Species, " ")))
+  pred_pars_text = list(as.list(case_when(rfx_topdown_all$Parameter == "muPq" ~ expression(mu[P]),
+                                  rfx_topdown_all$Parameter == "psiq" ~ expression(psi),
+                                  rfx_topdown_all$Parameter == "fPq" ~ expression(f[P]))))
   
-load(paste('Review_models/r0_EECs/eec.p2.df', date,'.RData', sep = ''))
-  ind = sapply(eec.p2.df, is.factor)
-  eec.p2.df[ind] = lapply(eec.p2.df[ind], as.character)
-  eec.p2.df = eec.p2.df[order(eec.p2.df[,1], eec.p2.df[,4], eec.p2.df[,2]),]
-  
-  eec.p2.df$relr0.025 = (eec.p2.df$r0 - 1.96*eec.p2.df$r0.sd) / r0.He()[3] * 100 - 100
-  eec.p2.df$relr0.975 = (eec.p2.df$r0 + 1.96*eec.p2.df$r0.sd) / r0.He()[3] * 100 - 100
-  
-  eec.p2.df = rbind(subset(eec.p2.df, study != 'Ragab & Shoukry 2006'), #reorder to put fertilizer estimates at the bottom
-                    subset(eec.p2.df, study == 'Ragab & Shoukry 2006'))
-  
-load(paste('Review_models/r0_EECs/eec.p3.df', date,'.RData', sep = ''))
-  ind = sapply(eec.p3.df, is.factor)
-  eec.p3.df[ind] = lapply(eec.p3.df[ind], as.character)
-  eec.p3.df = eec.p3.df[order(eec.p3.df[,1], eec.p3.df[,4], eec.p3.df[,2]),]
+# Trematode studies 
+  trem_studies_text = list(c("Study", rfx_dirlarv_all$Study, " "))
+  trem_chems_text = list(c("Agrochemical", rfx_dirlarv_all$Chemical, " "))
+  trem_species_text = list(c("Species", rfx_dirlarv_all$Species, " "))
+  trem_pars_text = list(case_when(rfx_$Parameter == "muPq" ~ expression(mu[P]),
+                                  rfx_topdown_all$Parameter == "psiq" ~ expression(psi),
+                                  rfx_topdown_all$Parameter == "fPq" ~ expression(f[P])))
 
-  eec.p3.df$relr0.025 = (eec.p3.df$r0 - 1.96*eec.p3.df$r0.sd) / r0.He()[3] * 100 - 100
-  eec.p3.df$relr0.975 = (eec.p3.df$r0 + 1.96*eec.p3.df$r0.sd) / r0.He()[3] * 100 - 100
   
-  eec.p3.df = subset(eec.p3.df, chem != 'Zinc')
-  
-load(paste('Review_models/r0_EECs/eec.p4.df', date,'.RData', sep = ''))
-  ind = sapply(eec.p4.df, is.factor)
-  eec.p4.df[ind] = lapply(eec.p4.df[ind], as.character)
-  eec.p4.df = eec.p4.df[order(eec.p4.df[,1], eec.p4.df[,4], eec.p4.df[,2]),]
-
-  eec.p4.df = subset(eec.p4.df, study != 'Meta')
-  
-  eec.p4.df$relr0.025 = (eec.p4.df$r0 - 1.96*eec.p4.df$r0.sd) / r0.He()[3] * 100 - 100
-  eec.p4.df$relr0.975 = (eec.p4.df$r0 + 1.96*eec.p4.df$r0.sd) / r0.He()[3] * 100 - 100
-  
-  eec.p4.df = rbind(subset(eec.p4.df, study != 'Tchounwou et al 1991b'), #reorder to put fertilizer estimates at the bottom
-                    subset(eec.p4.df, study == 'Tchounwou et al 1991b')[c(3,4,1,2),])
-  
-  eec.all = rbind(eec.p1.df, eec.p2.df, eec.p3.df, eec.p4.df)
-
-#10% EEC data frames  
-load(paste('Review_models/r0_EECs/eec0.1.p1.df', date,'.RData', sep = ''))
-  eec0.1.p1.df = eec0.1.p1.df[-1,] #Get rid of simulation with atrazine d-r function that excludes 30ppb datapoint
-  eec0.1.p1.df = eec0.1.p1.df[c(1,5,4,2,3,6),]
-  
-  eec0.1.p1.df$relr0.025 = (eec0.1.p1.df$r0 - 1.96*eec0.1.p1.df$r0.sd) / r0.He()[3] * 100 - 100
-  eec0.1.p1.df$relr0.975 = (eec0.1.p1.df$r0 + 1.96*eec0.1.p1.df$r0.sd) / r0.He()[3] * 100 - 100
-  
-  eec0.1.p1.df[c(2:6),c(7:23)] = NA  #replace estimates with NAs for studies tested at one dose (no d-r fucntion)
-  
-  
-load(paste('Review_models/r0_EECs/eec0.1.p2.df', date,'.RData', sep = ''))
-  ind = sapply(eec0.1.p2.df, is.factor)
-  eec0.1.p2.df[ind] = lapply(eec0.1.p2.df[ind], as.character)
-  eec0.1.p2.df = eec0.1.p2.df[order(eec0.1.p2.df[,1], eec0.1.p2.df[,4], eec0.1.p2.df[,2]),]
-  eec0.1.p2.df$relr0.025 = (eec0.1.p2.df$r0 - 1.96*eec0.1.p2.df$r0.sd) / r0.He()[3] * 100 - 100
-  eec0.1.p2.df$relr0.975 = (eec0.1.p2.df$r0 + 1.96*eec0.1.p2.df$r0.sd) / r0.He()[3] * 100 - 100
-  
-    eec0.1.p2.df$relr0.lo[eec0.1.p2.df$relr0.lo < -100] = -100
-  
-    eec0.1.p2.df = rbind(subset(eec0.1.p2.df, study != 'Ragab & Shoukry 2006'), #reorder to put fertilizer estimates at the bottom
-                         subset(eec0.1.p2.df, study == 'Ragab & Shoukry 2006'))
-    
-    eec0.1.p2.df[c(1, 7, 11, 15, 19, 25),c(7:23)] = NA   #replace estimates with NAs for studies tested at one dose (no d-r fucntion)
-    
-    
-load(paste('Review_models/r0_EECs/eec0.1.p3.df', date,'.RData', sep = ''))
-  ind = sapply(eec0.1.p3.df, is.factor)
-  eec0.1.p3.df[ind] = lapply(eec0.1.p3.df[ind], as.character)
-  eec0.1.p3.df = eec0.1.p3.df[order(eec0.1.p3.df[,1], eec0.1.p3.df[,4], eec0.1.p3.df[,2]),]
-  
-  eec0.1.p3.df$relr0.025 = (eec0.1.p3.df$r0 - 1.96*eec0.1.p3.df$r0.sd) / r0.He()[3] * 100 - 100
-  eec0.1.p3.df$relr0.975 = (eec0.1.p3.df$r0 + 1.96*eec0.1.p3.df$r0.sd) / r0.He()[3] * 100 - 100
-  
-  eec0.1.p3.df = subset(eec0.1.p3.df, chem != 'Zinc')
-  
-load(paste('Review_models/r0_EECs/eec0.1.p4.df', date,'.RData', sep = ''))
-  ind = sapply(eec0.1.p4.df, is.factor)
-  eec0.1.p4.df[ind] = lapply(eec0.1.p4.df[ind], as.character)
-  eec0.1.p4.df = eec0.1.p4.df[order(eec0.1.p4.df[,1], eec0.1.p4.df[,4], eec0.1.p4.df[,2]),]
-
-  eec0.1.p4.df = subset(eec0.1.p4.df, study != 'Meta')
-  
-  eec0.1.p4.df$relr0.025 = (eec0.1.p4.df$r0 - 1.96*eec0.1.p4.df$r0.sd) / r0.He()[3] * 100 - 100
-  eec0.1.p4.df$relr0.975 = (eec0.1.p4.df$r0 + 1.96*eec0.1.p4.df$r0.sd) / r0.He()[3] * 100 - 100
-  
-  eec0.1.p4.df = rbind(subset(eec0.1.p4.df, study != 'Tchounwou et al 1991b'), #reorder to put fertilizer estimates at the bottom
-                       subset(eec0.1.p4.df, study == 'Tchounwou et al 1991b')[c(3,4,1,2),])
-  
-dev.off()  
-
-#Text list for forest plot ########
 tabtext =list(list('Study', #Studies ##############
                    
                    'Pathway 1: Bottom-up ecological effects',
