@@ -1,0 +1,30 @@
+---
+title: "Full Analysis"
+author: "Chris Hoover"
+date: "April 15, 2019"
+output: pdf_document
+  toc: TRUE
+geometry: margin=0.5in  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+require(deSolve)
+require(ggplot2)
+require(tidyverse)
+```
+
+# Quantitative Framework  
+The quantitative framework consists of two main parts: agrochemical response functions and functions that take those response functions and use them to estimate the effect of the agrochemical on schistosomiasis transmission. We're interested in two summary estimates of agrochemical effects on transmission: $R_0$ and $DALYs Averted$ generated from simulating the model through time under different intervention and agrochemical application scenarios.
+
+## Response functions  
+All data and code necessary to fit dose-response functions relating agrochemical concentrations to model parameter responses are found in the `Responce_Fxs` folder.
+
+## Dynamic Model  
+Several dynamic models play a role in this analysis and all can be found in the `Models` folder. A schistosomiasis model with snail population and infection dynamics, a compartment for mean worm burden in the human population, and a dynamic predator population was fit to epidemiological data from a community in Senegal in the `model_fit` document. Resulting parameters were saved as `fit_pars.Rdata` and all transmission parameters in the 95% CI of the best fit parameter set were saved as `trans_pars_fit.Rdata`. An additional model incorporating agrochemical effects is used to derive the $R_0$ function (details below) and also simulate transmission in different scenarios to determine the impact of agrochemical pollution on routine interventions such as community wide MDA.
+
+## $R_0$ function  
+The $R_0$ function is derived from the agrochemical-influenced model using the next generation matrix method. Details can be found in the `Analysis` folder in the `R_0_derivation` documents. To generate forestplots, $R_0$ is estimated from 5000 parameter draws from each dose-response function at the agrochemical's peak expected environmental concentration (EEC)
+
+# Simulations 
