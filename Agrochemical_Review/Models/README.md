@@ -22,3 +22,4 @@ Small functions used in the R0 and dynamic model code to make things a bit more 
 
 ## `mod_q_test.R`  
 Exploration of full model    
+
