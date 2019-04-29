@@ -19,59 +19,82 @@ source("../Models/model_helper_functions.R")
 source("../Models/r0_functions.R")
 source("../Models/models.R")
 
+load("../Models/trans_pars_fit.Rdata")
+load("../Models/fit_pars.Rdata")
+
 ```
 
 # Initial model simulations  
 ## $R_0$ Check  
-First estimate $R_0$ from initial parameters then get equilibirum values of state variables for same parameter set
-```{r r0_init}
-r0.Ag(parameters = init_pars)[3]
-r0.Base(init_pars)
-r0.pred(init_pars)[3]
 
+First estimate $R_0$ from models with increasing complexity, basically to make sure no typos or anything in the more complex functions. 
+
+```{r r0_init}
+fit_pars_no_pred <- fit_pars
+fit_pars_no_pred["mu_P"] <- fit_pars["f_P"]
+
+r0.Base(fit_pars_no_pred)
+r0.pred(fit_pars_no_pred)
+r0.Ag(parameters = fit_pars_no_pred)
+
+
+r0.pred(fit_pars)
+r0.Ag(parameters = fit_pars)
+
+```
+
+## Equilibrium check  
+Now check that the models' equilibria are the same
+
+```{r state_vars_check}
+#Base model
 base.start = c(S = 40*area,
                E = 0,
                I = 0,
                W = 2)
 
+base_eq <- runsteady(y = base.start, func = base_mod, parms = fit_pars)$y
+
+base_eq
+
+#Base model with predators added
 base_pred.start = c(S = 40*area,
                     E = 0,
                     I = 0,
                     W = 2,
                     P = 0)
 
-base_eq <- runsteady(y = base.start, func = base_mod, parms = init_pars)$y
+pred_eq <- runsteady(y = base_pred.start, func = pred_mod, parms = fit_pars)$y
 
-base_eq
+pred_eq
 
-eq_vals <- runsteady(y = base_pred.start, func = agrochem_mod, parms = init_pars)$y
+#full agrochem model
+agro_eq <- runsteady(y = base_pred.start, func = agrochem_mod, parms = fit_pars)$y
 
-eq_vals
+agro_eq
 
-pred_vals <- runsteady(y = base_pred.start, func = pred_mod, parms = init_pars)$y
-
-pred_vals
-
+#Base model with predators, with predators added
 pred.start = c(S = 40*area,
              E = 0,
              I = 0,
              W = 2,
              P = 0.1*area)
 
-eq_vals <- runsteady(y = pred.start, func = agrochem_mod, parms = init_pars)$y
+pred_eq_add_pred <- runsteady(y = pred.start, func = agrochem_mod, parms = fit_pars)$y
 
-eq_vals
+pred_eq_add_pred
 
-pred_vals <- runsteady(y = pred.start, func = pred_mod, parms = init_pars)$y
+agro_eq_add_pred <- runsteady(y = pred.start, func = pred_mod, parms = fit_pars)$y
 
-pred_vals
+agro_eq_add_pred
 
 ```
 
+
 ## $R_0$ and dynamics check  
 Ensure that equilibrium worm burden is in qualitative agreement with estimates of $R_0$ (i.e. not getting rampant infection when $R_0<1$)
-```{r comp_r0_w}
-test_pars <- init_pars
+```{r comp_r0_w, cache = T}
+test_pars <- fit_pars_no_pred
 
 test_r0s <- numeric()
 test_ws <- numeric()
@@ -82,9 +105,9 @@ pred_ws <- numeric()
 base_r0s <- numeric()
 base_ws <- numeric()
 
-for(i in seq(1, 20, 0.1)){
-  test_pars["beta"] <- init_pars["beta"]/i
-  test_pars["lambda"] <- init_pars["lambda"]/i
+for(i in seq(1, 10, 0.1)){
+  test_pars["beta"] <- fit_pars["beta"]/i
+  test_pars["lambda"] <- fit_pars["lambda"]/i
 
   test_r0s[i*10-9] <- r0.Ag(parameters = test_pars)[3]
   test_ws[i*10-9] <- runsteady(y = pred.start, func = agrochem_mod, parms = test_pars)$y["W"]
@@ -92,21 +115,128 @@ for(i in seq(1, 20, 0.1)){
   pred_r0s[i*10-9] <- r0.pred(parameters = test_pars)[3]
   pred_ws[i*10-9] <- runsteady(y = pred.start, func = pred_mod, parms = test_pars)$y["W"]
   
-  base_r0s[i*10-9] <- r0.Base(parameters = test_pars)
+  base_r0s[i*10-9] <- r0.Base(parameters = test_pars)[3]
   base_ws[i*10-9] <- runsteady(y = base.start, func = base_mod, parms = test_pars)$y["W"]
   
   #print(i*10-9)
 }
 
-plot(test_r0s, test_ws, 
-     xlab = "R0", ylab = "equilibrium worm burden")
+plot(base_r0s, base_ws, 
+     xlab = "R0", ylab = "equilibrium worm burden", main = "base model")
 
 plot(pred_r0s, pred_ws, 
-     xlab = "R0", ylab = "equilibrium worm burden")
+     xlab = "R0", ylab = "equilibrium worm burden", main = "pred model")
 
-plot(base_r0s, base_ws, 
-     xlab = "R0", ylab = "equilibrium worm burden")
+plot(test_r0s, test_ws, 
+     xlab = "R0", ylab = "equilibrium worm burden", main = "agrochem model")
+
 
 ```
 
-Looks good. Since $R_0$ doesn't consider the mating function, it make sense that $R_0$ has to be slightly above 1 for infection to occur. Furthermore, with the addition of predators, the threshold becomes even higher due to predation on infected and exposed snails that further reduces transmission
+Looks good. Since $R_0$ doesn't consider the mating function, it make sense that $R_0$ has to be slightly above 1 for infection to occur. 
+
+## Check that MDA model with agrochemical influence responds the same as non-MDA model in the absence of MDA  
+```{r mda_mod_comp}
+sim_time <- seq(0,365*50, 5)
+  
+coverage = fit_pars["cvrg"]
+
+base_mda.start = c(S = 40*area,
+                   E = 0,
+                   I = 0,
+                   Wt = 2*coverage,
+                   Wu = 2*(1-coverage),
+                   P = 0)
+
+#Run mda model and non-mda models in absence of predaotrs
+  #Sim MDA model without MDA
+  no_mda_sim_mda_model <- data.frame(ode(base_mda.start, sim_time, agrochem_mda_mod,  
+                                         fit_pars)) %>% 
+    mutate(N = S + E + I,
+           W = Wt.cvrg*coverage + Wu.cvrg * (1-coverage))
+  
+  no_mda_sim_mda_model %>% ggplot(aes(x = time, y = W)) +
+      geom_line(size = 1.2, col = "purple") +
+      theme_classic()
+  
+  #Sim non MDA model (w/o MDA, obviously)
+  no_mda_sim_base_model <- data.frame(ode(base_pred.start, sim_time, agrochem_mod,  
+                                         fit_pars)) %>% 
+    mutate(N = S + E + I)
+  
+  no_mda_sim_base_model %>% ggplot(aes(x = time, y = W)) +
+      geom_line(size = 1.2, col = "purple") +
+      theme_classic()
+
+  no_mda_sim_mda_model$W[dim(no_mda_sim_mda_model)[1]]
+  no_mda_sim_base_model$W[dim(no_mda_sim_base_model)[1]]
+  
+#Run mda model and non-mda models with predators
+base_pred_mda.start = c(S = 40*area,
+                        E = 0,
+                        I = 0,
+                        Wt = 2*coverage,
+                        Wu = 2*(1-coverage),
+                        P = 0.1*area)
+
+  #Sim MDA model without MDA
+  no_mda_sim_mda_model_preds <- data.frame(ode(base_pred_mda.start, sim_time, agrochem_mda_mod,  
+                                               fit_pars)) %>% 
+    mutate(N = S + E + I,
+           W = Wt.cvrg*coverage + Wu.cvrg * (1-coverage))
+  
+  no_mda_sim_mda_model_preds %>% ggplot(aes(x = time, y = W)) +
+      geom_line(size = 1.2, col = "purple") +
+      theme_classic()
+  
+  #Sim non MDA model (w/o MDA, obviously)
+  no_mda_sim_base_model_preds <- data.frame(ode(pred.start, sim_time, agrochem_mod,  
+                                                fit_pars)) %>% 
+    mutate(N = S + E + I)
+  
+  no_mda_sim_base_model_preds %>% ggplot(aes(x = time, y = W)) +
+      geom_line(size = 1.2, col = "purple") +
+      theme_classic()
+  
+  no_mda_sim_mda_model_preds$W[dim(no_mda_sim_mda_model_preds)[1]]
+  no_mda_sim_base_model_preds$W[dim(no_mda_sim_base_model_preds)[1]]
+
+```
+
+## That checks out, now let's simulate MDA and make sure the model responds as expected  
+```{r sim_mda_mod}
+#Events data frame containing timepoints at which MDA occurs
+mda_years = 20
+
+  mdas <- data.frame(var = rep('Wt.cvrg', mda_years),
+                     time = 365*c(1:mda_years)+3650, #Start MDA after 10 years
+                     value = rep(0.06, mda_years),     #94% efficacy
+                     method = rep('mult', mda_years))
+
+  
+#Sim MDA model with annual MDA for mda_years
+  mda_sim_mda_eq <- runsteady(y = base_mda.start, func = agrochem_mda_mod, parms = fit_pars)$y
+  
+  sim_mda_model <- data.frame(ode(mda_sim_mda_eq, sim_time, agrochem_mda_mod,  
+                                         fit_pars, events = list(data = mdas))) %>% 
+    mutate(W = Wt.cvrg*coverage + Wu.cvrg * (1-coverage))
+  
+  sim_mda_model %>% gather("Treatment group","Burden", Wt.cvrg, Wu.cvrg, W) %>% 
+    ggplot(aes(x = time, y = Burden, lty = `Treatment group`)) +
+      geom_line(size = 1.2, col = "purple") +
+      theme_classic()
+
+#Sim MDA model with annual MDA for mda_years and presence of predators
+  mda_pred_sim_mda_eq <- runsteady(y = base_pred_mda.start, func = agrochem_mda_mod, parms = fit_pars)$y
+  
+  sim_mda_pred_model <- data.frame(ode(mda_pred_sim_mda_eq, sim_time, agrochem_mda_mod,  
+                                         fit_pars, events = list(data = mdas))) %>% 
+    mutate(W = Wt.cvrg*coverage + Wu.cvrg * (1-coverage))
+  
+  sim_mda_pred_model %>% gather("Treatment group","Burden", Wt.cvrg, Wu.cvrg, W) %>% 
+    ggplot(aes(x = time, y = Burden, lty = `Treatment group`)) +
+      geom_line(size = 1.2, col = "purple") +
+      theme_classic()
+    
+```
+
