@@ -106,8 +106,8 @@ r0.Ag = function(In = 0,
                     0,lambda*theta_q*pi_Cq,0), nrow = 3)
   
   #transition matrix
-  S_mat <- matrix(c(-(mu_Nq+((pred_red*alpha*eps)/(area+alpha*eps*Th*N.eq))+sigma),0,0,
-                    sigma, -(mu_Nq+((pred_red*alpha*eps)/(area+alpha*eps*Th*N.eq))+mu_I),0,
+  S_mat <- matrix(c(-(mu_Nq+P.eq*((pred_red*alpha*eps)/(area+alpha*eps*Th*N.eq))+sigma),0,0,
+                    sigma, -(mu_Nq+P.eq*((pred_red*alpha*eps)/(area+alpha*eps*Th*N.eq))+mu_I),0,
                     0,0,-(mu_H+mu_W)), nrow = 3)
   
   #Next generation matrix with large domain (K_L = T*-S^-1), dominant eigenvalue of which is R0
@@ -120,6 +120,75 @@ return(c("N_eq" = N.eq,
          "R0" = r0))
 
   })
+}
+
+r0.Ag.pars <- function(A, H, f_N, K_N, z, mu_N, mu_I,
+                       f_P, K_P, mu_P, alpha, eps, Th, nn, 
+                       m, v, pi_M, theta, pi_C,
+                       beta, sigma, lambda, kappa, 
+                       mu_W, mu_H, cvrg, eff, 
+                       Knq, fnq, munq, vq, pimq, thetaq, picq, mupq, psiq){
+  
+# get agrochemical-influenced parameters #######
+
+  #Snail birth rate  
+    f_Nq = f_N * fnq
+    
+  #Predator mortality rate    
+    muPq = mu_P + mupq
+  
+  #Snail carrying capacity
+    K_Nq = K_N * Knq
+  
+  #Snail mortality rate
+    mu_Nq = mu_N + munq
+  
+  #Predator consumption rate
+    pred_red = psiq
+  
+  #Cercarial shedding rate
+    theta_q = theta * thetaq
+  
+  #Miracidial survival
+    pi_Mq = pi_M * pimq
+  
+  #Cercarial survival
+    pi_Cq = pi_C * picq
+  
+#Equilibrium estimates of pred pop, snail pop, and predation rate #########
+  P.eq = K_P*(1 - muPq/f_P)         
+  
+  if(P.eq<0){P.eq = 0}
+
+#Equilibrium estimate of N given snail parameters
+  N.eq = get_N.eq(f_Nq, K_Nq, mu_Nq, P.eq, area, alpha, eps, Th, n=nn, q_red=pred_red)
+  
+  if(N.eq<0){N.eq = 0}
+
+#Equilibrium predation rate estimate
+  psi.eq = pred_consumption_rate_mod(target = N.eq, S = N.eq, E = 0, I = 0, 
+                                     area, alpha, eps, Th, n=nn, q_red = pred_red)
+
+#R_0 of q estimate ##########
+  #Transmission matrix
+  T_mat <- matrix(c(0,0,0.5*beta*H*m*v_q*pi_Mq*N.eq,
+                    0,0,0,
+                    0,lambda*theta_q*pi_Cq,0), nrow = 3)
+  
+  #transition matrix
+  S_mat <- matrix(c(-(mu_Nq+P.eq*((pred_red*alpha*eps)/(area+alpha*eps*Th*N.eq))+sigma),0,0,
+                    sigma, -(mu_Nq+P.eq*((pred_red*alpha*eps)/(area+alpha*eps*Th*N.eq))+mu_I),0,
+                    0,0,-(mu_H+mu_W)), nrow = 3)
+  
+  #Next generation matrix with large domain (K_L = T*-S^-1), dominant eigenvalue of which is R0
+  K_L <- T_mat %*% -solve(S_mat)
+  
+  r0 <- max(eigen(K_L)$values)
+  
+return(c("N_eq" = N.eq, 
+         "P_eq" = P.eq, 
+         "R0" = r0))
+
 }
 
 r0.Base = function(parameters)
@@ -144,7 +213,9 @@ r0.Base = function(parameters)
   
   r0 <- max(eigen(K_L)$values)
   
-return("R0_base" = r0)
+return(c("N_eq" = N.eq,
+       "P_eq" = NA,
+       "R0_base" = r0))
 
   })
 }
@@ -165,8 +236,8 @@ r0.pred = function(parameters)
                     0,lambda*theta*pi_C,0), nrow = 3)
   
   #transition matrix
-  S_mat <- matrix(c(-(mu_N+((alpha*eps)/(area+alpha*eps*Th*N.eq))+sigma),0,0,
-                    sigma, -(mu_N+((alpha*eps)/(area+alpha*eps*Th*N.eq))+mu_I),0,
+  S_mat <- matrix(c(-(mu_N+P.eq*((alpha*eps)/(area+alpha*eps*Th*N.eq))+sigma),0,0,
+                    sigma, -(mu_N+P.eq*((alpha*eps)/(area+alpha*eps*Th*N.eq))+mu_I),0,
                     0,0,-(mu_H+mu_W)), nrow = 3)
   
   #Next generation matrix with large domain (K_L = T*-S^-1), dominant eigenvalue of which is R0
