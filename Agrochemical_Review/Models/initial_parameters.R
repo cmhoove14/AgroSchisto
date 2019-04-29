@@ -26,7 +26,7 @@ init_pars=c(
   
   # Predation parameters
   alpha = 2,       # Predator attack rate at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
-  eps = 0.1,       #Attack rate penalty estimated as 90% reduction from lab conditions  
+  eps = 1,       #Attack rate penalty estimated as 90% reduction from lab conditions  
   Th = 0.1,        # Predator handling time at high prawn/snail weight ratio per Sokolow 2014 Acta Tropica
   nn = 1,          # exponent of the Holling's type III functional response
   
@@ -40,10 +40,10 @@ init_pars=c(
   pi_C = 14.21,        # mean cercariae-hrs in agrochemical-free water
   
   # transmission parameters
-  beta = 1.6e-5/24,       # Human-to-snail infection probability in reference area (exposed snails/susceptible snail/miracidi-hr/day); 
+  beta = 1.6e-6/24,       # Human-to-snail infection probability in reference area (exposed snails/susceptible snail/miracidi-hr/day); 
                         #     divided by 24 to account for hourly scale of miracidial survival; from fitting procedure in Halstead et al
   sigma = 1/40,         # Latent period for exposed snails (infectious snails/exposed snail/day))
-  lambda = 3.7e-6/24, # Snail-to-human infection probability in reference area (adult worms/cercariae-hr); 
+  lambda = 1.8e-6/24, # Snail-to-human infection probability in reference area (adult worms/cercariae-hr); 
                         #     divided by 24 to account for hourly scale of miracidial survival; from fitting procedure in Halstead et al
   kappa = 0.08,               # Clumping parameter of negative binomial distribution of worms in humans
   
