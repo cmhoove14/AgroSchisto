@@ -154,7 +154,10 @@ r0.Ag.pars <- function(A, H, f_N, K_N, z, mu_N, mu_I,
   
   #Cercarial survival
     pi_Cq = pi_C * picq
-  
+    
+  #Schisto egg viability
+    v_q = v * vq
+
 #Equilibrium estimates of pred pop, snail pop, and predation rate #########
   P.eq = K_P*(1 - muPq/f_P)         
   
@@ -185,9 +188,9 @@ r0.Ag.pars <- function(A, H, f_N, K_N, z, mu_N, mu_I,
   
   r0 <- max(eigen(K_L)$values)
   
-return(c("N_eq" = N.eq, 
-         "P_eq" = P.eq, 
-         "R0" = r0))
+return(data.frame("N_eq" = N.eq, 
+                  "P_eq" = P.eq, 
+                  "R0" = r0))
 
 }
 
