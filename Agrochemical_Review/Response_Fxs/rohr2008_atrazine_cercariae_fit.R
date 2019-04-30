@@ -124,3 +124,39 @@ piC_mal9.6_rohr08_ts_uncertainty <- function(...){
     
   return(auc / piC_ctrl_rohr08_ts_uncertainty())  
 }
+
+#Effects on snail reproduction at tested concentrations from same study
+rohr08_ctrl_eggs_per_day <- 27.83
+rohr08_ctrl_eggs_per_day_se <- 2.60
+
+rohr08_atr_eggs_per_day <- 23.79
+rohr08_atr_eggs_per_day_se <- 3.90
+
+fNq_atr201_rohr08_uncertainty <- function(...){
+  rnorm(1, rohr08_atr_eggs_per_day, rohr08_atr_eggs_per_day_se) / 
+    rnorm(1, rohr08_ctrl_eggs_per_day, rohr08_ctrl_eggs_per_day_se)
+}
+
+rohr08_gly_eggs_per_day <- 29.93
+rohr08_gly_eggs_per_day_se <- 3.90
+
+fNq_gly3700_rohr08_uncertainty <- function(...){
+  rnorm(1, rohr08_gly_eggs_per_day, rohr08_gly_eggs_per_day_se) / 
+    rnorm(1, rohr08_ctrl_eggs_per_day, rohr08_ctrl_eggs_per_day_se)
+}
+
+rohr08_carb_eggs_per_day <- 28.53
+rohr08_carb_eggs_per_day_se <- 3.79
+
+fNq_carb33.5_rohr08_uncertainty <- function(...){
+  rnorm(1, rohr08_carb_eggs_per_day, rohr08_carb_eggs_per_day_se) / 
+    rnorm(1, rohr08_ctrl_eggs_per_day, rohr08_ctrl_eggs_per_day_se)
+}
+
+rohr08_mal_eggs_per_day <- 28.40
+rohr08_mal_eggs_per_day_se <- 3.49
+
+fNq_mal9.6_rohr08_uncertainty <- function(...){
+  rnorm(1, rohr08_mal_eggs_per_day, rohr08_mal_eggs_per_day_se) / 
+    rnorm(1, rohr08_ctrl_eggs_per_day, rohr08_ctrl_eggs_per_day_se)
+}
