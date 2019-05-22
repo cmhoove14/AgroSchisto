@@ -9,13 +9,13 @@ knitr::opts_chunk$set(echo = TRUE)
 require(tidyverse)
 ```
 
-```{r rfx_sum}
+```{r rfx_sum, echo=FALSE}
 RFxSum <- read_csv("Response_Fx_Summary.csv")
 
 table(RFxSum$Pathway)
 table(RFxSum$System)
 
-RFxSum %>% filter(System != "Other") %>% 
+RFxSum %>% #filter(System != "Other") %>% 
   group_by(Chemical, Pathway) %>% 
   summarise(n = n()) %>% 
   spread(key = Pathway, value = n) %>% 
@@ -26,11 +26,16 @@ RFxSum %>% filter(System != "Other") %>%
   mutate(num_records = sum(bottom_up, direct_larvae, 
                            direct_snail, top_down, na.rm = TRUE)) %>% 
   filter(num_records > 1) %>% 
-  select(-num_records) %>% 
+  #select(-num_records) %>% 
   replace_na(list("bottom_up" = 0,
                   "direct_larvae" = 0,
                   "direct_snail" = 0,
                   "top_down" = 0)) %>% 
+  rename("Total Records" = "num_records",
+         "Bottom Up" = "bottom_up",
+         "Direct Larvae" = "direct_larvae",
+         "Direct Snail" = "direct_snail",
+         "Top Down" = "top_down") %>% 
   knitr::kable()
 ```
 
