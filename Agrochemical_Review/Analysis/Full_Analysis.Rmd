@@ -2,29 +2,411 @@
 title: "Full Analysis"
 author: "Chris Hoover"
 date: "April 15, 2019"
-output: pdf_document
+output: 
+  pdf_document:
   toc: TRUE
-geometry: margin=0.5in  
+  geometry: margin=0.5in  
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 require(deSolve)
+require(rootSolve)
+require(zoo)
+require(grid)
+require(gridExtra)
+require(data.table)
 require(ggplot2)
 require(tidyverse)
+
+source("../Sims/ggplot_theme.R")
 ```
 
-# Quantitative Framework  
-The quantitative framework consists of two main parts: agrochemical response functions and functions that take those response functions and use them to estimate the effect of the agrochemical on schistosomiasis transmission. We're interested in two summary estimates of agrochemical effects on transmission: $R_0$ and $DALYs Averted$ generated from simulating the model through time under different intervention and agrochemical application scenarios.
+# Setup  
 
-## Response functions  
-All data and code necessary to fit dose-response functions relating agrochemical concentrations to model parameter responses are found in the `Responce_Fxs` folder.
+## Model Fit  
+Data, process, and plots of the model fitting procedure can be found in `Models/model_fit.Rmd`. Checks to see that the dynamics of the model respond in a reasonable way can be found in the `model_checks.Rmd` document in this folder. Functions to simulate the model through time are found in `Models/models.R` with some small helper functions found in `Models/model_helper_functions.R`. Initial parameters were pulled from previous publications (see e.g. [Halstead et al](https://www.nature.com/articles/s41467-018-03189-w) and [Arakala et al](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0006794)) and fit parameters are used in subsequent simulations. 
 
-## Dynamic Model  
-Several dynamic models play a role in this analysis and all can be found in the `Models` folder. A schistosomiasis model with snail population and infection dynamics, a compartment for mean worm burden in the human population, and a dynamic predator population was fit to epidemiological data from a community in Senegal in the `model_fit` document. Resulting parameters were saved as `fit_pars.Rdata` and all transmission parameters in the 95% CI of the best fit parameter set were saved as `trans_pars_fit.Rdata`. An additional model incorporating agrochemical effects is used to derive the $R_0$ function (details below) and also simulate transmission in different scenarios to determine the impact of agrochemical pollution on routine interventions such as community wide MDA.
+```{r models_setup, message=FALSE, warning=FALSE}
+load("../Models/trans_pars_fit.Rdata")
+load("../Models/fit_pars.Rdata")
 
-## $R_0$ function  
-The $R_0$ function is derived from the agrochemical-influenced model using the next generation matrix method. Details can be found in the `Analysis` folder in the `R_0_derivation` documents. To generate forestplots, $R_0$ is estimated from 5000 parameter draws from each dose-response function at the agrochemical's peak expected environmental concentration (EEC)
+source("../Models/model_helper_functions.R")
+source("../Models/models.R")
+source("../Models/initial_parameters.R")
+```
 
-# Simulations 
+## $R_0$ Derivation  
+The $R_0$ function was derived from the dynamic model using the next generation matrix method as described in the `R_0_derivation.Rmd` document in this folder. Functions to estimate $R_0$ are found in `Models/r0_functions`.
+
+```{r r0_setup, message=FALSE, warning=FALSE}
+source("../Models/r0_functions.R")
+```
+
+## Response Functions  
+All studies with experiments deriving a quantitative relationship between an agrochemical and a model parameter were included in subsequent analyses. Experiments are summarized in `Response_Fxs/Summary/Response_Fx_Summary.csv` while the `Response_Fxs` contains all code used to fit dose response functions, `Response_Fxs/Data` contains the source data extracted from studies identified in the literature review, and `Response_Fxs/Plots` contains plots displaying the resulting fits of dose-response fucntions to the underlying data and simulated points generated from sampling from the dose response function.  
+
+```{r response_function_setup, message=FALSE, warning = FALSE, echo = FALSE}
+RFxSum <- read_csv("../Response_Fxs/Summary/Response_Fx_Summary.csv") %>% 
+  arrange(Study) %>% 
+  group_by(Study) %>% 
+  mutate(ID = row_number(),
+         Study_ID_Unique = paste0(Study, "_", ID)) %>% ungroup()
+
+RFxSum %>% group_by(Chemical, Pathway) %>% summarise(n = n()) %>% 
+  spread(key = Pathway, value = n) %>% 
+  rename("bottom_up" = !!names(.[2]),
+         "direct_larvae" = !!names(.[3]),
+         "direct_snail" = !!names(.[4]),
+         "top_down" = !!names(.[5])) %>% 
+  mutate(num_records = sum(bottom_up, direct_larvae, 
+                           direct_snail, top_down, na.rm = TRUE)) %>% 
+  filter(num_records > 1) %>% 
+  replace_na(list("bottom_up" = 0,
+                  "direct_larvae" = 0,
+                  "direct_snail" = 0,
+                  "top_down" = 0)) %>% 
+  arrange(-num_records) %>% 
+  rename("Total Records" = "num_records",
+         "Bottom Up" = "bottom_up",
+         "Direct Larvae" = "direct_larvae",
+         "Direct Snail" = "direct_snail",
+         "Top Down" = "top_down") %>% 
+  knitr::kable(caption = "Chemicals with >1 response function divided by pathway they affect")
+
+```
+
+# Analyses  
+## Relevant environmental concentrations  
+Many ways to identify concentrations of each agrochemical that are relevant from an ecological risk perspective. Contained in the summary data frame are estimates of the peak EEC that were identified in a literature review specific to each chemcial, but these estimates come from a variety of publications including EPA reports, journal articles, risk assessment documents, etc. The USGS National Water Quality Assessment (NAWQA) project provides a couple sources of observed pesticide concentration data from streams in the U.S. There's a [national database](https://www.sciencebase.gov/catalog/item/5af49c2ae4b0da30c1b44e2b) of pesticide monitoring in a variety of surface water sources across the contiguous US and [a more targeted database](https://www.sciencebase.gov/catalog/item/5928a5dce4b016f7a93f8d7b) of weekly pesticide concentrations in the midwest in the summer of 2013. 
+
+```{r obs_pest_dat, message=FALSE, warning = FALSE, echo = FALSE, cache = TRUE}
+source("../Sims/Data/NAWQA_functions.R")
+midwest_pest_2013_fin <- readRDS("../Sims/Data/midwest_pesticides_2013.rds")
+pestdat <- readRDS("../Sims/Data/NAWQA_pesticides.rds")
+
+#Add estimates of peak concentrations for each chem found in each dataset
+RFxSum <- RFxSum %>% 
+  mutate(nawqa_peak = map_dbl(Chemical, get_nawqa_max),
+         midwest_pest2013_peak = map_dbl(Chemical, get_midwest_pest2013_max)/1000)
+
+#Look at relationship between observed values and peak EECs found in literature
+RFxSum %>% group_by(Chemical) %>% 
+  summarise(eec = first(eec),
+            nawqa_peak = first(nawqa_peak),
+            usgs_midwest_2013_peak = first(midwest_pest2013_peak)) %>% 
+  knitr::kable(caption = "Comparison of literature-derived peak EEC values with peak observed values in NAWQA databases")
+
+```
+
+Looks clear that for most chemicals, the peak EEC from the literature, often derived from modeling software, is higher than the peak observed in the NAWQA datasets. This makes sense as these observations are weekly at best in terms of their temporal resolution and observations are unlikely to coincide with times when peak surface water contamination occurs, e.g. right after a heavy runoff event. The summer 2013 weekly sampling is also extremely valuable as we can use it to force a model that simulates transmission through time under the influence of agrochemical pollution. More on that later, but initial time series visualization below
+
+```{r obs_pest_viz, message=FALSE, warning = FALSE, echo = FALSE}
+#Vector of chemicals that have response functions and are found in observed datasets
+midwest_pest2013_obs_chems <- RFxSum %>% 
+  filter(!is.na(midwest_pest2013_peak)) %>% 
+  pull(Chemical) %>% unique()
+
+nawqa_obs_chems <- RFxSum %>% 
+  filter(!is.na(nawqa_peak)) %>% 
+  pull(Chemical) %>% unique()
+
+#plot summer 2013 time series of chemicals with response functions 
+midwest_pest_2013_fin %>% 
+  filter(grepl(paste(midwest_pest2013_obs_chems, collapse = "|"), PARM_NM)) %>% 
+  mutate(logp1_conc_mugL = log(1+RESULT_CEN/1000)) %>% 
+  ggplot(aes(x = SAMPLE_DATE, y = logp1_conc_mugL, col = PARM_NM)) +
+    geom_line() +
+    theme_classic() +
+    theme(legend.position = "bottom") +
+    ggtitle("Agrochemical concentrations in U.S. Midwest surface waters, summer 2013", 
+            subtitle = "Only chemicals with response functions shown")
+
+```
+
+## Agrochemical effects at peak Estimated Environmental Concentrations (EECs)  
+Sample parameter sets for each response function at its EEC are generated in `Sims/EEC/generate_eec_parameter_sets.R` and stored in the `Sims/EEC/Parameter_Sets` folder. These parameter sets are generated from 1000 random draws of the transmission parameters generated from the fitting procedure and from the response functions themselves.
+
+```{r forestplot_eec, message = FALSE, cache=TRUE}
+#Store EECs for key chemicals as objects
+atr_eec <- RFxSum %>% filter(Chemical == "Atrazine") %>%  slice(1) %>% pull(eec)
+chlor_eec <- RFxSum %>% filter(Chemical == "Chlorpyrifos") %>%  slice(1) %>% pull(eec)
+gly_eec <- RFxSum %>% filter(Chemical == "Glyphosate") %>%  slice(1) %>% pull(eec)
+mal_eec <- RFxSum %>% filter(Chemical == "Malathion") %>%  slice(1) %>% pull(eec)
+prof_eec <- RFxSum %>% filter(Chemical == "Profenofos") %>%  slice(1) %>% pull(eec)
+
+#Create labels field for complex axis labels of forestplot
+  max_study_string <- max(str_length(RFxSum$study_long))
+  max_chem_string <- max(str_length(RFxSum$Chemical))
+  max_species_string <- max(str_length(RFxSum$Species))
+  
+  RFxSum <- RFxSum %>% 
+    mutate(parameters_unicode = case_when(parameter == "mupq" ~ "expression(mu[P])",
+                                          parameter == "munq" ~ "expression(mu[N])",
+                                          parameter == "Knq" ~ "expression(K[N])",
+                                          parameter == "psiq" ~ "expression(psi[P])",
+                                          parameter == "picq" ~ "expression(pi[C])",
+                                          parameter == "pimq" ~ "expression(pi[M])",
+                                          parameter == "fnq" ~ "expression(f[N])",
+                                          parameter == "thetaq" ~ "expression(theta)",
+                                          parameter == "vq" ~ "expression(v)",
+                                          parameter == "fpq" ~ "expression(f[P])") ,
+           labels = str_c(str_pad(study_long, 
+                                  max_study_string+1, "right"),
+                          str_pad(Chemical, 
+                                  max_chem_string+1, "left"),
+                          str_pad(Species, 
+                                  max_species_string+3, "left")))
+  
+#Load all parameter sets into one dataframe
+all_eec_pars <- 
+  do.call(rbind,
+          lapply(paste0("../Sims/EEC/Parameter_Sets/",
+                       list.files(path = "../Sims/EEC/Parameter_Sets/")), readRDS))
+
+#Apply r0 function to all parameter sets
+  r0s <- pmap_df(all_eec_pars %>% dplyr::select(-Study_ID_Unique), r0.Ag.pars)
+  
+#bind parameters and results together
+  all_eec_sims <- cbind(all_eec_pars, r0s) %>% 
+    left_join(RFxSum)
+  
+#Separate baseline sims from all other sims
+  baseline_eec_sims <- all_eec_sims %>% filter(Study_ID_Unique == "baseline_eec_parameters")
+  
+#Baseline summary statistics  
+  base_r0_median <- median(baseline_eec_sims$R0)
+  base_r0_q25 <- quantile(baseline_eec_sims$R0, 0.25)
+  base_r0_q75 <- quantile(baseline_eec_sims$R0, 0.75)
+
+  base_r0_q025 <- quantile(baseline_eec_sims$R0, 0.025)
+  base_r0_q975 <- quantile(baseline_eec_sims$R0, 0.975)
+
+#All other sims  
+  eec_sims <- all_eec_sims %>% filter(Study_ID_Unique != "baseline_eec_parameters")
+
+#Ggplot classic forestplot figure  #######
+gg_forest_df <-  eec_sims %>% 
+    group_by(Study_ID_Unique) %>% 
+    summarise(med_R0 = median(R0),
+              R0_25 = quantile(R0, 0.25),
+              R0_75 = quantile(R0, 0.75),
+              Pathway = first(Pathway),
+              Class = first(Class),
+              parameter = first(parameter),
+              parameters_unicode = first(parameters_unicode),
+              label = first(labels)) %>% 
+    filter(med_R0 >= base_r0_q75 | med_R0 <= base_r0_q25) %>% 
+    arrange(Class, med_R0) %>% 
+    mutate(order = row_number())
+  
+gg_forest <- gg_forest_df %>%
+    ggplot(aes(y = as.factor(order), 
+               x = med_R0, xmin = R0_25, xmax = R0_75, 
+               col = Pathway)) + 
+      theme_classic() +
+      theme(axis.title.y = element_blank(),
+            axis.text.y = element_text(hjust = 0, family = "mono",
+                                       size = 8),
+            axis.ticks.y = element_blank(),
+            legend.position = c(0.85, 0.15),
+            legend.background = element_rect(fill="grey90", color = "black",
+                                             size=0.5, linetype="solid")) +
+      geom_rect(xmin = base_r0_q25, xmax = base_r0_q75,
+                ymin = 0, ymax = nrow(eec_sims), 
+                alpha = 0.2, fill = "grey80", col = "grey80") +
+      geom_vline(xintercept = base_r0_median, size = 1.1) +
+      geom_point() +
+      geom_errorbarh(height = 0.2) +
+      scale_color_manual(values = c("bottom-up" = "#42B54099",
+                                    "direct larvae" = "#925E9F99",
+                                    "direct snail" = "#0099B499",
+                                    "top-down" = "#ED000099")) +
+      scale_y_discrete(breaks = as.factor(gg_forest_df$order), 
+                       labels = gg_forest_df$label) +
+      facet_grid(Class~., scales = "free", space = "free") +
+      labs(x = expression(paste(R[0], " estimates", sep = " ")))
+  
+ggsave("../Plots/Forestplot_sig_effects.pdf",
+       width = 11.5, height = 8, units = "in")
+```
+
+![Forestplot of agrochemical effects with median effect outside of IQR of baseline $R_0$ estimates](../Plots/Forestplot_sig_effects.pdf)
+
+## Agrochemical effects across a range of reasonable environmental concentrations (from 0-2EEC)  
+For chemicals with multiple response functions and multiple parameters affected, estimate the net effect of the agrochemical across a broad range of environmentally relevant concentrations.  
+
+### Distribution of observed concentrations  
+```{r obs_range, message=FALSE, warning = FALSE, echo = FALSE}
+#Get observed values for each chemical from NAWQA databases
+full_chems = c("Atrazine", "Chlorpyrifos", "Glyphosate", "Malathion", "Profenofos")
+
+#All observations in NAWQA dataset
+nawqa_obs_full_chems <- bind_rows(lapply(full_chems, get_nawqa_dat))
+
+#All observations in midwest 2013 database
+midwest_pest2013_obs_full_chems <- bind_rows(lapply(full_chems, get_midwest_pest2013_dat))
+
+#Compare the two
+nawqa_obs_full_chems %>% filter(SAMPLE_DATE >= as.Date("2010-01-01")) %>% 
+  group_by(CONSTIT) %>% 
+  summarise(n_obs_nawqa = n(),
+            n_obs_above_detection_limit = length(CONCENTRATION[which(REMARK != "<")]),
+            mean_nawqa = mean(CONCENTRATION),
+            med_nawqa = median(CONCENTRATION),
+            max_nawqa = max(CONCENTRATION)) %>% 
+  knitr::kable(caption = "Summary of observations since 2010 for key chemicals in NAWQA database")
+
+midwest_pest2013_obs_full_chems %>% 
+  group_by(PARM_NM) %>% 
+  summarise(n_obs_mp2013 = n(),
+            n_obs_above_detection_limit = length(RESULT_CEN[which(REMARK_CEN != "<")]),
+            mean_mp2013 = mean(RESULT_CEN/1000),
+            med_mp2013 = median(RESULT_CEN/1000),
+            max_mp_2013 = max(RESULT_CEN/1000)) %>% 
+  knitr::kable(caption = "Summary of observations in summer 2013 midwest surface water weekly survey")
+
+#Full nawqa data base doesn't have glyphosate, and there's not a huge difference in other so focus on summer 2013 dataset
+midwest_pest2013_obs_full_chems <- midwest_pest2013_obs_full_chems %>% 
+  mutate(chem = case_when(grepl("Atrazine", PARM_NM) ~ "Atrazine",
+                          grepl("Chlorpyrifos", PARM_NM) ~ "Chlorpyrifos",
+                          grepl("Glyphosate", PARM_NM) ~ "Glyphosate",
+                          grepl("Malathion", PARM_NM) ~ "Malathion",
+                          grepl("Profenofos", PARM_NM) ~ "Profenofos"),
+         Concentration = RESULT_CEN/1000,
+         conc_rel_eec = case_when(chem == "Atrazine" ~ Concentration / atr_eec,
+                                  chem == "Chlorpyrifos" ~ Concentration / chlor_eec,
+                                  chem == "Glyphosate" ~ Concentration / gly_eec,
+                                  chem == "Malathion" ~ Concentration / mal_eec,
+                                  chem == "Profenofos" ~ Concentration / prof_eec))
+
+obs_boxplot <- midwest_pest2013_obs_full_chems %>% 
+  filter(REMARK_CEN != "<") %>% 
+  ggplot(aes(x = chem, y = conc_rel_eec, fill = chem)) +
+    geom_boxplot(varwidth = TRUE) +
+    scale_y_continuous(trans = "log", 
+                       breaks = c(0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1),
+                       limits = c(0.000001,1.1)) +
+    coord_flip() +
+    scale_fill_manual(values = c("Atrazine" = "#FDAF91FF",
+                                  "Chlorpyrifos" = "#ED000099",
+                                  "Glyphosate" = "#42B54099",
+                                  "Malathion" = "#925E9F99",
+                                  "Profenofos" = "#0099B499")) +
+    ylab("Agrochemical Concentration Normalized to Peak EEC") +
+    theme_classic()
+
+obs_boxplot
+```
+
+### Effects on $R_0$ over relevant concentrations  
+```{r r0_range, cache=TRUE}
+#Get parameter sets and estimate R0 across concentration range tested
+atr_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/atrazine_net_parameters.rds")
+chlor_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/chlorpyrifos_net_parameters.rds")
+gly_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/glyphosate_net_parameters.rds")
+mal_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/malathion_net_parameters.rds")
+prof_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/profenofos_net_parameters.rds")
+
+#Apply r0 function to all parameter sets
+  atr_r0s <- pmap_df(atr_conc_range_pars %>% dplyr::select(-c(logp1_conc, conc)), r0.Ag.pars)
+    atr_conc_range_fin <- cbind(atr_conc_range_pars, atr_r0s) %>% 
+      mutate(Chemical = "Atrazine",
+             EEC_conc = conc/atr_eec)
+  
+  chlor_r0s <- pmap_df(chlor_conc_range_pars %>% dplyr::select(-c(logp1_conc, conc)), r0.Ag.pars)
+    chlor_conc_range_fin <- cbind(chlor_conc_range_pars, chlor_r0s) %>% 
+      mutate(Chemical = "Chlorpyrifos",
+             EEC_conc = conc/chlor_eec)
+
+  gly_r0s <- pmap_df(gly_conc_range_pars %>% dplyr::select(-c(logp1_conc, conc)), r0.Ag.pars)
+    gly_conc_range_fin <- cbind(gly_conc_range_pars, gly_r0s) %>% 
+      mutate(Chemical = "Glyphosate",
+             EEC_conc = conc/gly_eec)
+
+  mal_r0s <- pmap_df(mal_conc_range_pars %>% dplyr::select(-c(logp1_conc, conc)), r0.Ag.pars)
+    mal_conc_range_fin <- cbind(mal_conc_range_pars, mal_r0s) %>% 
+      mutate(Chemical = "Malathion",
+             EEC_conc = conc/mal_eec)
+
+  prof_r0s <- pmap_df(prof_conc_range_pars %>% dplyr::select(-c(logp1_conc, conc)), r0.Ag.pars)
+    prof_conc_range_fin <- cbind(prof_conc_range_pars, prof_r0s) %>% 
+      mutate(Chemical = "Profenofos",
+             EEC_conc = conc/prof_eec)
+
+  #Put them all together and plot  
+    range_plot <- bind_rows(atr_conc_range_fin,
+                            chlor_conc_range_fin,
+                            gly_conc_range_fin,
+                            mal_conc_range_fin,
+                            prof_conc_range_fin) %>% 
+      group_by(Chemical, EEC_conc) %>% 
+      summarise(med_r0 = median(R0),
+                r0_25 = quantile(R0, 0.25),
+                r0_75 = quantile(R0, 0.75)) %>% 
+      mutate(r0_smooth = rollmean(med_r0, k = 7, align = "left", fill = c(NA,NA,NA)),
+             r025_smooth = rollmean(r0_25, k = 7, align = "left", fill = c(NA,NA,NA)),
+             r075_smooth = rollmean(r0_75, k = 7, align = "left", fill = c(NA,NA,NA))) %>% 
+      ggplot(aes(x = EEC_conc, 
+                 y = r0_smooth, ymin = r025_smooth, ymax = r075_smooth, 
+                 col = Chemical, fill = Chemical)) +
+        geom_line(size = 0.75) +
+        geom_ribbon(alpha = 0.25, size = 0.01) +
+        geom_hline(yintercept = base_r0_median, lty = 2) +
+        ylab(expression(paste(R[0], "(q)"))) + 
+        #ggtitle(expression(paste("Combined effects of key agrochemicals on estimates of ", R[0], "(q)"))) +
+        scale_x_continuous(trans = "log",
+                           breaks = c(0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1),
+                           limits = c(0.000001,1.1)) +
+        scale_color_manual(values = c("Atrazine" = "#FDAF91FF",
+                                      "Chlorpyrifos" = "#ED000099",
+                                      "Glyphosate" = "#42B54099",
+                                      "Malathion" = "#925E9F99",
+                                      "Profenofos" = "#0099B499")) +
+        scale_fill_manual(values = c("Atrazine" = "#FDAF91FF",
+                                      "Chlorpyrifos" = "#ED000099",
+                                      "Glyphosate" = "#42B54099",
+                                      "Malathion" = "#925E9F99",
+                                      "Profenofos" = "#0099B499")) +
+        theme_classic()
+
+    range_plot
+```
+
+### Final Figure  
+```{r range_fin_fig}
+#Put plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/)
+range_plot <- ggplotGrob(range_plot + 
+                           theme(axis.title.x = element_blank(),
+                                 axis.text.x = element_blank(),
+                                 legend.position = c(0.2, 0.8),
+                                 legend.background = element_rect(fill="grey90", color = "black",
+                                                                  size=0.5, linetype="solid")))
+range_box <- ggplotGrob(obs_boxplot + 
+                          theme(axis.title.y = element_blank(),
+                                axis.text.y = element_blank(),
+                                axis.ticks.y = element_blank(),
+                                axis.line.y = element_blank(),
+                                legend.position = "none"))
+# stack the two plots
+range_fig <- rbind(range_plot, range_box, size="first") 
+# use the largest widths
+range_fig$widths <- unit.pmax(range_plot$widths, range_box$widths) 
+#Adjust the heights
+panels <- range_fig$layout$t[grep("panel", range_fig$layout$name)]
+range_fig$heights[panels[1]] <- unit(5, "null") 
+range_fig$heights[panels[2]] <- unit(1,"null") 
+
+#save the plot
+pdf("../Plots/r0_range_plot.pdf", height = 6, width = 8.5)
+
+#Print the plot
+grid.draw(range_fig)  
+
+dev.off()
+```
+
+![Effect of agrochemicals with sufficient information on $R_0$ estimates over a range of feasible environmental concentrations and distribution of observed agrochemical concentrations from NAWQA dataset](../Plots/r0_range_plot.pdf)
+
+## Agrochemical effects on DALYs averted in a routine annual MDA campaign  
