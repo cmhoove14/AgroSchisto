@@ -1,122 +1,43 @@
 #Get pesticide monitoring data from USGS website <https://www.sciencebase.gov/catalog/item/595e6b16e4b0d1f9f05702fd>
 
 require(data.table)
+require(tidyverse)
 
-pestsamp <- fread("https://www.sciencebase.gov/catalog/file/get/595e6b16e4b0d1f9f05702fd?f=__disk__1f%2F1b%2Ff1%2F1f1bf16aadeab0625b4ecc967d01f1dba0b80300", skip = 12)
+pestsamp <- fread("https://www.sciencebase.gov/catalog/file/get/5af49c2ae4b0da30c1b44e2b?f=__disk__94%2F66%2Fc7%2F9466c74b9a0f3b509950d893ee0b310455fec3ad", skip = 12)
 
-  pestsamp_meta <- read.csv(url("https://www.sciencebase.gov/catalog/file/get/595e6b16e4b0d1f9f05702fd?f=__disk__1f%2F1b%2Ff1%2F1f1bf16aadeab0625b4ecc967d01f1dba0b80300"), nrows = 12)
+pestname <- fread("https://www.sciencebase.gov/catalog/file/get/5af49c2ae4b0da30c1b44e2b?f=__disk__0f%2F03%2F30%2F0f0330574a9a25b1712677efe64ce9cc565dfe9f", skip = 6)
 
-pestname <- fread("https://www.sciencebase.gov/catalog/file/get/595e6b16e4b0d1f9f05702fd?f=__disk__95%2F9c%2F6c%2F959c6c9b8343a3ea72ae2384a76a8359ff2ea08d", skip = 6)
+pestsites <- fread("https://www.sciencebase.gov/catalog/file/get/5af49c2ae4b0da30c1b44e2b?f=__disk__24%2F2e%2Fb2%2F242eb2ee19e8c2f6c70e0aafe7071638159ed146", skip = 13)
 
-  pestname_meta <- read.csv(url("https://www.sciencebase.gov/catalog/file/get/595e6b16e4b0d1f9f05702fd?f=__disk__95%2F9c%2F6c%2F959c6c9b8343a3ea72ae2384a76a8359ff2ea08d"), nrows = 6)
-
-pestsites <- fread("https://www.sciencebase.gov/catalog/file/get/595e6b16e4b0d1f9f05702fd?f=__disk__a2%2F8e%2Fd2%2Fa28ed208752341daeaa642ae562657ed00df7a12", skip = 13)
-
-#Glyphosate data obtained from different source since not included in NAWQA master spreadsheet
-gly_dat <- fread("https://www.sciencebase.gov//catalog/file/get/5928a5dce4b016f7a93f8d7b?f=__disk__f7%2Ff0%2F8e%2Ff7f08ec5b316028dbe466c78e1159a196d1101db", skip = 1)
+pestmetadata <- xmlParse(fread("https://www.sciencebase.gov/catalog/file/get/5af49c2ae4b0da30c1b44e2b?f=__disk__cf%2F5d%2Fe8%2Fcf5de87bd66ea59184465d87c0ae56dd8689ed7e"))
 
 pestdat <- pestsamp %>% 
-  inner_join(pestname %>% select(-CONSTIT), by = "PARM_CD") %>% 
-  inner_join(pestsites %>% select(-SITE_QW_ID), by = "SITE_ABB")
+  inner_join(pestname %>% dplyr::select(-CONSTIT), by = "PARM_CD") %>% 
+  inner_join(pestsites %>% dplyr::select(-SITE_QW_ID), by = "SITE_ABB") %>% 
+  mutate(SAMPLE_DATE = ymd(str_split(DATETIME, " ", simplify = TRUE)[,1]))
 
-#Get response function summary to access relevant agrochemicals
-rfx_sum <- read_csv("Agrochemical_Review/Response_Fxs/Summary/Response_Fx_Summary.csv")
+saveRDS(pestdat, "Agrochemical_Review/Sims/Data/NAWQA_pesticides.rds")
 
-chems <- unique(rfx_sum$Chemical)
+#Another USGS source for pesticide data from monitoring of midwest Ag streams in 2013 <https://www.sciencebase.gov/catalog/item/5928a5dce4b016f7a93f8d7b>
 
-#Function to return NAWQA data matching a particular chemical name
-get_nawqa_dat <- function(chem_name){
-  if(chem_name %in% c("glyphosate", "Glyphosate")){
-    dat <- gly_dat %>% 
-      select(SAMPLE_DATE, GLYPHOSATE_RMK_ELISA, GLYPHOSATE_ELISA_ng_L) %>% 
-      mutate(GLYPHOSATE_ELISA_ug_L = GLYPHOSATE_ELISA_ng_L/1000)
-    
-  } else {
-    
-    dat <- pestdat %>% 
-      filter(grepl(chem_name, LONGNAME, ignore.case = T)) %>% 
-      select(CONCENTRATION, CONSTIT, LONGNAME, REMARK, SITE_TYPE)
-  
-  }
-  
-  return(dat)
-}
+midwest_pest_2013_dictionary <- fread("https://www.sciencebase.gov/catalog/file/get/5928a5dce4b016f7a93f8d7b?f=__disk__8f%2F4b%2F6e%2F8f4b6e114731e7efa99e2a1455d8b46e2ac47ef9", skip = 1)
 
-#Function to return max value in NAWQA data for particular chemical
-get_nawqa_max <- function(chem_name){
-  if(chem_name %in% c("glyphosate", "Glyphosate")){
-    dat <- gly_dat %>% 
-      mutate(GLYPHOSATE_ELISA_ug_L = GLYPHOSATE_ELISA_ng_L/1000) %>% 
-      pull(GLYPHOSATE_ELISA_ug_L)
-    
-  } else {
-    
-    dat <- pestdat %>% 
-      filter(grepl(chem_name, LONGNAME, ignore.case = T)) %>% 
-      pull(CONCENTRATION)
-  
-  }
-  
-  return(max(as.numeric(dat)))
-}
+midwest_pest_2013_all_dat <- fread("https://www.sciencebase.gov/catalog/file/get/5928a5dce4b016f7a93f8d7b?f=__disk__81%2Fab%2Fe2%2F81abe26219aba700c4d9bce0419812ff439128f4", skip = 1)
 
-#Function to return median and IQR in NAWQA for each chem
-get_nawqa_sum <- function(chem_name, which_obs = "obs_obs"){
-  if(chem_name %in% c("glyphosate", "Glyphosate")){
-    dat <- gly_dat %>% 
-      mutate(GLYPHOSATE_ELISA_ug_L = GLYPHOSATE_ELISA_ng_L/1000)
-    
-    #All observations
-    all_obs <- as.numeric(dat %>% pull(GLYPHOSATE_ELISA_ug_L))
-    #Observations aboe detectable limit
-    obs_obs <- as.numeric(dat %>% filter(GLYPHOSATE_RMK_ELISA != "<") %>% pull(GLYPHOSATE_ELISA_ug_L))
-    
-    all_sum <- c(median(all_obs), quantile(all_obs, 0.25), quantile(all_obs, 0.75))
-    obs_sum <- c(median(obs_obs), quantile(obs_obs, 0.25), quantile(obs_obs, 0.75))
-    
-  } else {
-    
-    dat <- pestdat %>% filter(grepl(chem_name, LONGNAME, ignore.case = T)) 
-    
-    #All observations
-    all_obs <- as.numeric(dat %>% pull(CONCENTRATION))
-    #Observations aboe detectable limit
-    obs_obs <- as.numeric(dat %>% filter(REMARK != "<") %>% pull(CONCENTRATION))
-    
-    all_sum <- c(median(all_obs), quantile(all_obs, 0.25), quantile(all_obs, 0.75))
-    obs_sum <- c(median(obs_obs), quantile(obs_obs, 0.25), quantile(obs_obs, 0.75))
+midwest_pest_2013_gly_dat <- fread("https://www.sciencebase.gov/catalog/file/get/5928a5dce4b016f7a93f8d7b?f=__disk__f7%2Ff0%2F8e%2Ff7f08ec5b316028dbe466c78e1159a196d1101db", skip = 1)
 
-  }
-  
-  if(which_obs == "obs_obs"){
-    return(obs_sum)
-  } else {
-    return(all_sum)
-  }
-  
-}
+#Clean glyphosate and all other data and put together
+midwest_pest_2013_gly <- midwest_pest_2013_gly_dat %>% 
+  mutate(SAMPLE_DATE = as.Date(SAMPLE_DATE, format = "%m/%d/%Y"),
+         PARM_NM = "Glyphosate, wf") %>% 
+  rename("RESULT_CEN" = "GLYPHOSATE_ELISA_ng_L",
+         "REMARK_CEN" = "GLYPHOSATE_RMK_ELISA") %>% 
+  select(-c(SAMPLE_TIME_HHMM,MDL_ELISA_ng_L))
 
-#Function to return range to use in r0 simulations
-get_range <- function(nawqa_vals, peak_eec){
-  if(length(nawqa_vals) < 1){
-    
-    ac_range <- c(0, exp(seq(log(0.001), log(peak_eec), length.out = 100)), 
-                  exp(seq(log(peak_eec*1.05), log(peak_eec*1.5),length.out = 15)))
-    
-  } else {
-    
-  max_ac <- max(c(nawqa_vals, peak_eec))
-  
-  ac_range <- c(0, 
-                exp(seq(log(min(nawqa_vals)),
-                        log(max_ac),
-                        length.out = 100)),
-                seq(ceiling(max_ac+0.01),
-                    ceiling(max_ac+0.01)*1.25,
-                    length.out = 10)) 
-  }
-  
-  return(ac_range)
-}
+midwest_pest_2013_fin <- midwest_pest_2013_all_dat %>% 
+  mutate(SAMPLE_DATE = as.Date(DATE2, format = "%m/%d/%Y")) %>% 
+  select(SITE_NO, SHORT_NAME, SAMPLE_DATE, PARM_CD, PARM_NM, RESULT_CEN, REMARK_CEN) %>% 
+  bind_rows(., midwest_pest_2013_gly) %>% 
+  arrange(SAMPLE_DATE)
 
-save.image("~/RemaisWork/Schisto/R Codes/ag_schist/Agrochemical_Review/Sims/Data/NAWQA_dat_functions.RData")
+saveRDS(midwest_pest_2013_fin, "Agrochemical_Review/Sims/Data/midwest_pesticides_2013.rds")
