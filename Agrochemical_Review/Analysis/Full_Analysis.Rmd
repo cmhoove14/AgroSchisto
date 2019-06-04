@@ -1084,7 +1084,10 @@ To demonstrate how agrochemical pollution may affect ongoing/routine interventio
 ### Setup  
 ```{r sim_setup}
 #Clear everything except for agrochemical time series for simulations
-rm(list = setdiff(ls(), c("atr_mw2013_ts", "chlor_ca_surf_ts", "gly_ca_surf_ts", "mal_ca_surf_ts")))
+rm(list = setdiff(ls(), c("atr_mw2013_ts", 
+                          "chlor_ca_surf_ts", 
+                          "gly_ca_surf_ts", 
+                          "mal_ca_surf_ts")))
 
 source("../Models/model_helper_functions.R")
 source("../Models/models.R")
@@ -1428,6 +1431,17 @@ stopCluster(cl)
 
 #### Dataframes of DALYs accumulated for each sim  
 ```{r sim_dalys_dfs, cache=T}
+rm(list = setdiff(ls(), c("atr_mw2013_ts", 
+                          "atr_annual_simulation", "atr_biannual_simulation",
+                          "chlor_ca_surf_ts", 
+                          "chlor_annual_simulation", "chlor_biannual_simulation",
+                          "gly_ca_surf_ts", 
+                          "gly_annual_simulation", "gly_biannual_simulation",
+                          "mal_ca_surf_ts",
+                          "mal_annual_simulation", "mal_biannual_simulation")))
+
+source("../Models/agrochem_sim_functions.R")
+
 # Atrazine annual simulations
 comp_dalys_atr_annual <- comp_dalys_across_sims(atr_annual_simulation) %>% 
   mutate(Chemical = "Atrazine",
@@ -1670,7 +1684,10 @@ atr_annual_snail_ts_plot
 
 atr_annual_dalys_ts_plot <- atr_annual_ts %>% 
   filter(Variable == "DALYs_W") %>% 
-  ggplot(aes(x = time, y = Value, group = sim_run)) +
+  group_by(sim_type, sim_run) %>% 
+  mutate(dalys_cum = cumsum(Value)) %>% 
+  filter(sim_run==1, time %% 10 == 0) %>% 
+  ggplot(aes(x = time, y = dalys_cum, col = sim_type, group = sim_run)) +
     geom_line(alpha = 0.3) +
     theme_classic()
 
