@@ -14,22 +14,22 @@ get_N.eq <- function(f_Nq, K_Nq, mu_Nq, P.eq, area, alpha, eps, Th, n, q_red){
 }
 
 #Mating probability given worm burden, W, and clumping parameter, k
+
 phi_Wk <- function(W, k) {
-  if(W <= 0){
-    val = 1
-  } 
+  #if(W <= 0){
+  #  val = 1
+  #} 
   #print(c(W,k))
-  else{
-    func <- function(x) {
+  #else{
+
+  val = integrate(function(x, W, k){
     a <- ( W / (W + k) )
     b <- ((1-a)^(1+k))/(2*pi)
     return(( b*( 1-cos(x) ) / (( 1 + a*cos(x) )^(1+k)) ))
-    }
-    
-  val = integrate(func, 0, 2*pi, subdivisions = 10000,
-                  rel.tol = 1e-10, stop.on.error = FALSE)$value
+  }, 
+  0, 2*pi, W = W, k = k)$value
 
-  }  
+  #}  
     return(1-val)
 }
 
@@ -95,3 +95,12 @@ get_sum <- function(vec){
          " (", round(quantile(vec, 0.25, na.rm = T), 2), 
          " - ", round(quantile(vec, 0.75, na.rm = T), 2), ")"  )
 } 
+
+#Functions to return 1 or 0 to serve as placeholders when no agrochem function is acting
+nil1 <- function(...){
+  return(1)
+}
+
+nil0 <-function(...){
+  return(0)
+}
