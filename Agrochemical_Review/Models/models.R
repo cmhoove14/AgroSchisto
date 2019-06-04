@@ -217,3 +217,91 @@ agrochem_mda_mod = function(t, n, parameters) {
     return(list(c(dSdt, dEdt, dIdt, dWtdt, dWudt, dPdt)))
   }) 
 }
+
+# mda model code to investigate influence of predators, mda and their interactions on schisto transmission
+mda_mod = function(t, n, parameters) {
+  
+    S=n[1]
+    E=n[2]
+    I=n[3]
+    Wt=n[4]
+    Wu=n[5]
+    P=n[6]
+    
+#Dynamic variables
+    N = S+E+I  #Total number of snails
+    
+    W = parameters["cvrg"]*Wt + (1-parameters["cvrg"])*Wu
+    
+    phi = phi_Wk(W, parameters["kappa"])           
+
+    pred_S = ((parameters["alpha"]*parameters["eps"])*(S/parameters["A"])^parameters["nn"]) / 
+      (1 + sum((parameters["alpha"]*parameters["eps"])*parameters["Th"]*(S/parameters["A"])^parameters["nn"],
+               (parameters["alpha"]*parameters["eps"])*parameters["Th"]*(E/parameters["A"])^parameters["nn"],
+               (parameters["alpha"]*parameters["eps"])*parameters["Th"]*(I/parameters["A"])^parameters["nn"]))
+    
+    pred_E = ((parameters["alpha"]*parameters["eps"])*(E/parameters["A"])^parameters["nn"]) / 
+      (1 + sum((parameters["alpha"]*parameters["eps"])*parameters["Th"]*(S/parameters["A"])^parameters["nn"],
+               (parameters["alpha"]*parameters["eps"])*parameters["Th"]*(E/parameters["A"])^parameters["nn"],
+               (parameters["alpha"]*parameters["eps"])*parameters["Th"]*(I/parameters["A"])^parameters["nn"]))
+    
+    pred_I = ((parameters["alpha"]*parameters["eps"])*(I/parameters["A"])^parameters["nn"]) / 
+      (1 + sum((parameters["alpha"]*parameters["eps"])*parameters["Th"]*(S/parameters["A"])^parameters["nn"],
+               (parameters["alpha"]*parameters["eps"])*parameters["Th"]*(E/parameters["A"])^parameters["nn"],
+               (parameters["alpha"]*parameters["eps"])*parameters["Th"]*(I/parameters["A"])^parameters["nn"]))    
+    
+#Schistosome larval concentration equations
+    M = 0.5*W*parameters["H"]*phi*parameters["m"]*parameters["v"]*parameters["pi_M"] #- (mu_M + mu_Mq)*M - beta*M*N 
+    C = parameters["theta"]*I*parameters["pi_C"] #- (mu_C + mu_Cq)*C - lambda*H*C
+    
+    #differential equations
+    
+    dSdt= parameters["f_N"]*(1-(N/parameters["K_N"]))*(S+E) - parameters["mu_N"]*S - pred_S*P - parameters["beta"]*M*S  #Susceptible snails
+    
+    dEdt= parameters["beta"]*M*S - parameters["mu_N"]*E - pred_E*P - parameters["sigma"]*E                                     #Exposed snails
+    
+    dIdt= parameters["sigma"]*E - (parameters["mu_N"] + parameters["mu_I"])*I - pred_I*P                                       #Infected snails
+    
+    dWtdt= parameters["lambda"]*C - (parameters["mu_W"]+parameters["mu_H"])*Wt  #mean worm burden in treated human population
+    dWudt= parameters["lambda"]*C - (parameters["mu_W"]+parameters["mu_H"])*Wu  #mean worm burden in untreated human population
+
+    dPdt= parameters["f_P"]*(1-(P/parameters["K_P"]))*P - parameters["mu_P"]*P  #prawn population (number individuals)
+
+    
+    return(list(c(dSdt, dEdt, dIdt, dWtdt, dWudt, dPdt)))
+}
+
+# mda model code to investigate influence of predators, mda and their interactions on schisto transmission
+mda_pred_free_mod = function(t, n, parameters) {
+  
+    S=n[1]
+    E=n[2]
+    I=n[3]
+    Wt=n[4]
+    Wu=n[5]
+
+#Dynamic variables
+    N = S+E+I  #Total number of snails
+    
+    W = parameters["cvrg"]*Wt + (1-parameters["cvrg"])*Wu
+    
+    phi = phi_Wk(W, parameters["kappa"])           
+
+#Schistosome larval concentration equations
+    M = 0.5*W*parameters["H"]*phi*parameters["m"]*parameters["v"]*parameters["pi_M"] #- (mu_M + mu_Mq)*M - beta*M*N 
+    C = parameters["theta"]*I*parameters["pi_C"] #- (mu_C + mu_Cq)*C - lambda*H*C
+    
+    #differential equations
+    
+    dSdt= parameters["f_N"]*(1-(N/parameters["K_N"]))*(S+E) - parameters["mu_N"]*S - parameters["beta"]*M*S  #Susceptible snails
+    
+    dEdt= parameters["beta"]*M*S - parameters["mu_N"]*E - parameters["sigma"]*E                                     #Exposed snails
+    
+    dIdt= parameters["sigma"]*E - (parameters["mu_N"] + parameters["mu_I"])*I                                    #Infected snails
+    
+    dWtdt= parameters["lambda"]*C - (parameters["mu_W"]+parameters["mu_H"])*Wt  #mean worm burden in treated human population
+    dWudt= parameters["lambda"]*C - (parameters["mu_W"]+parameters["mu_H"])*Wu  #mean worm burden in untreated human population
+
+    
+    return(list(c(dSdt, dEdt, dIdt, dWtdt, dWudt)))
+}
