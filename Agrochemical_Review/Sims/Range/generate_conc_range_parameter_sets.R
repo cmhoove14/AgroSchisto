@@ -96,6 +96,21 @@ atr_conc_range_pars <- gen_conc_range_par_set(conc_range = get_conc_range(RFxSum
 saveRDS(atr_conc_range_pars, file = paste0("Agrochemical_Review/Sims/Range/Parameter_Sets/", 
                                            "atrazine_net_parameters_eec.rds"))
 
+# With EEC as ONLY concentration
+atr_eec_pars <- gen_conc_range_par_set(conc_range = RFxSum %>% 
+                                                filter(Chemical == "Atrazine") %>% 
+                                                slice(1) %>% 
+                                                pull(eec),
+                                              nsims = num_sims,
+                                              f.Knq = phiNq_atr_baxrohr.no30,
+                                              f.munq = ons.muNq.atr,
+                                              f.vq = halstead_meso18_atr_mans_v_uncertainty,
+                                              f.picq = piC.atr.rohr08.lin)
+
+#Save data frame of simulation parameter set
+saveRDS(atr_eec_pars, file = paste0("Agrochemical_Review/Sims/Range/Parameter_Sets/", 
+                                           "atrazine_eec_pars.rds"))
+
 #With peak observed concentration as peak concentration
 atr_conc_range_pars2 <- gen_conc_range_par_set(conc_range = get_conc_range(RFxSum %>% 
                                                                             filter(Chemical == "Atrazine") %>% 
@@ -128,6 +143,23 @@ chlor_conc_range_pars <- gen_conc_range_par_set(conc_range = get_conc_range(RFxS
 #Save data frame of simulation parameter set
 saveRDS(chlor_conc_range_pars, file = paste0("Agrochemical_Review/Sims/Range/Parameter_Sets/", 
                                              "chlorpyrifos_net_parameters_eec.rds"))
+
+# With EEC as ONLY concentration
+chlor_eec_pars <- gen_conc_range_par_set(conc_range = RFxSum %>% 
+                                           filter(Chemical == "Chlorpyrifos") %>% 
+                                           slice(1) %>% 
+                                           pull(eec),
+                                         nsims = num_sims,
+                                         f.fnq = fNq_chlor_ibr92_uncertainty, 
+                                         f.munq = muNq_ch_hash11_uncertainty,  
+                                         f.vq = halstead_meso18_chlor_mans_v_uncertainty, 
+                                         f.pimq = piM_ch_Hash11_uncertainty,
+                                         f.picq = piC_ch_Hash11_uncertainty, 
+                                         f.mupq = muPq_chlor_mac_rohr_unpub_uncertainty)
+
+#Save data frame of simulation parameter set
+saveRDS(chlor_eec_pars, file = paste0("Agrochemical_Review/Sims/Range/Parameter_Sets/", 
+                                      "chlorpyrifos_eec_pars.rds"))
 
 #With peak observed concentration as peak
 chlor_conc_range_pars2 <- gen_conc_range_par_set(conc_range = get_conc_range(RFxSum %>% 
@@ -163,6 +195,22 @@ gly_conc_range_pars <- gen_conc_range_par_set(conc_range = get_conc_range(RFxSum
 saveRDS(gly_conc_range_pars, file = paste0("Agrochemical_Review/Sims/Range/Parameter_Sets/", 
                                              "glyphosate_net_parameters_eec.rds"))
 
+# With EEC as ONLY concentration
+gly_eec_pars <- gen_conc_range_par_set(conc_range = RFxSum %>% 
+                                         filter(Chemical == "Glyphosate") %>% 
+                                         slice(1) %>% 
+                                         pull(eec),
+                                       nsims = num_sims,
+                                       f.Knq = phiNq_gly_baxrohr.no30,
+                                       f.fnq = fNq.gly.fx.uncertainty, 
+                                       f.munq = ons.muNq.gly,  
+                                       f.pimq = piM.ghaf_gly.exp_unc,
+                                       f.picq = piC.ghaf_gly.exp_unc)
+
+#Save data frame of simulation parameter set
+saveRDS(gly_eec_pars, file = paste0("Agrochemical_Review/Sims/Range/Parameter_Sets/", 
+                                    "glyphosate_eec_pars.rds"))
+
 #With peak observed as peak concentration 
 gly_conc_range_pars2 <- gen_conc_range_par_set(conc_range = get_conc_range(RFxSum %>% 
                                                                             filter(Chemical == "Glyphosate") %>% 
@@ -197,6 +245,22 @@ mal_conc_range_pars <- gen_conc_range_par_set(conc_range = get_conc_range(RFxSum
 saveRDS(mal_conc_range_pars, file = paste0("Agrochemical_Review/Sims/Range/Parameter_Sets/", 
                                              "malathion_net_parameters_eec.rds"))
 
+# With EEC as ONLY concentration
+mal_eec_pars <- gen_conc_range_par_set(conc_range = RFxSum %>% 
+                                         filter(Chemical == "Malathion") %>% 
+                                         slice(1) %>% 
+                                         pull(eec),
+                                       nsims = num_sims,
+                                       f.fnq = fNq_mal_tch91_uncertainty, 
+                                       f.munq = muNq_mal_tch91_uncertainty,  
+                                       f.pimq = piM.tch91_mal_unc,
+                                       f.picq = piC.tch92_mal_unc,
+                                       f.mupq = muPq_mal_mac_rohr_unpub_uncertainty)
+
+#Save data frame of simulation parameter set
+saveRDS(mal_eec_pars, file = paste0("Agrochemical_Review/Sims/Range/Parameter_Sets/", 
+                                    "malathion_eec_pars.rds"))
+
 #With EEC as peak concentration 
 mal_conc_range_pars2 <- gen_conc_range_par_set(conc_range = get_conc_range(RFxSum %>% 
                                                                             filter(Chemical == "Malathion") %>% 
@@ -229,6 +293,22 @@ prof_conc_range_pars <- gen_conc_range_par_set(conc_range = get_conc_range(RFxSu
 #Save data frame of simulation parameter set
 saveRDS(prof_conc_range_pars, file = paste0("Agrochemical_Review/Sims/Range/Parameter_Sets/", 
                                              "profenofos_net_parameters_eec.rds"))
+
+# With EEC as ONLY concentration
+prof_eec_pars <- gen_conc_range_par_set(conc_range = RFxSum %>% 
+                                          filter(Chemical == "Profenofos") %>% 
+                                          slice(1) %>% 
+                                          pull(eec),
+                                        nsims = num_sims,
+                                        f.fnq = fNq_moh_prof_moh12_uncertainty, 
+                                        f.munq = muNq_prof_mohamed_uncertainty,  
+                                        f.pimq = piM_pr_Hash11_uncertainty,
+                                        f.picq = piC_pr_Hash11_uncertainty,
+                                        f.mupq = muPq_profenofos_Bajet12_uncertainty)
+
+#Save data frame of simulation parameter set
+saveRDS(prof_eec_pars, file = paste0("Agrochemical_Review/Sims/Range/Parameter_Sets/", 
+                                     "profenofos_eec_pars.rds"))
 
 # With peak observed as peak concentration
 prof_conc_range_pars2 <- gen_conc_range_par_set(conc_range = get_conc_range(RFxSum %>% 
