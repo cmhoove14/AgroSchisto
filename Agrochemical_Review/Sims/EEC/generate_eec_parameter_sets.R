@@ -9,14 +9,25 @@ source("Agrochemical_Review/Models/initial_parameters.R")
 
 pars_df <- as.data.frame(as.list(fit_pars))
 
-#Get csv file containing summary of all response functions
-RFxSum <- read_csv("Agrochemical_Review/Response_Fxs/Summary/Response_Fx_Summary.csv")
+#Get EEC values from EPA models
+ins_eecs <- read_csv("Agrochemical_Review/Sims/Data/Insecticides_EECs.csv") %>% 
+  dplyr::filter(X1 == "Peak EEC in a reservoir (MS) (ug/L)") %>% 
+  gather("Chemical", "EPA_EEC_ppb", Carbaryl:Terbufos) %>% 
+  dplyr::select(-X1)
+  
+hrb_eecs <- read_csv("Agrochemical_Review/Sims/Data/Herbicides_EECs.csv") %>% 
+  dplyr::filter(X1 == "Peak EEC in a reservoir (MS) (ug/L)") %>% 
+  gather("Chemical", "EPA_EEC_ppb", `2,4-D`:Trifluralin) %>% 
+  dplyr::select(-X1)
 
-RFxSum <- RFxSum %>% 
+#Get csv file containing summary of all response functions and add EPA EEC vals
+RFxSum <- read_csv("Agrochemical_Review/Response_Fxs/Summary/Response_Fx_Summary.csv") %>% 
+  left_join(bind_rows(ins_eecs, hrb_eecs), by = "Chemical") %>% 
   arrange(Study) %>% 
   group_by(Study) %>% 
   mutate(ID = row_number(),
-         Study_ID_Unique = paste0(Study, "_", ID)) %>% ungroup()
+         Study_ID_Unique = paste0(Study, "_", ID),
+         eec_use = if_else(is.na(EPA_EEC_ppb), eec, as.numeric(EPA_EEC_ppb))) %>% ungroup()
 
 #Source all .R scripts that contain derivation of response functions
 RFx_files <- paste0("Agrochemical_Review/Response_Fxs/", 
@@ -54,7 +65,7 @@ num_sims = 1000
 set.seed(43093)
 
 for(i in 1:nrow(RFxSum_Sub)){
-  gen_eec_par_set(eec = RFxSum_Sub$eec[i], 
+  gen_eec_par_set(eec = RFxSum_Sub$eec_use[i], 
                   nsims = num_sims, 
                   rfx = RFxSum_Sub$rfx[i], 
                   par = RFxSum_Sub$parameter[i],

@@ -1,0 +1,94 @@
+,"2,4-D",Atrazine,Butachlor,Butralin,Fluazifop-p-butyl,Glyphosate,Paraquat,Pendimethalin,Trifluralin
+Chemical Traits (model input),,,,,,,,,
+Koca (mL/g),39.3,100,700,46391,3394,1424,1000000,17491,15800
+Water Column Metabolism Halflifea (d),7.7,stableb,1.105b,4.5,0.1,9.9,10,4,13
+Benthic Metabolism Halflifea (d),18.2,80,stableb,6.2,0.1,74.5,stable,16,5.5
+Aqueous Photolysis Halflifea (d),38,2.6,stableb,stableb,6,69,stable,21,0.4
+Hydrolysis Halflifec (d),39,30,stableb,stableb,30,35,32,30,stablea
+Soil Halflifec (d),34,146,56,22,1,96,620,90,181
+Foliar Halflifea(d),2.2,-,-,-,-,10.6,-,12,4
+Molecular Weighta (g/mol),221.04,215.68,311.9,295.33,383.36,169.1,186.25,281.31,335.28
+Vapor Pressurea(torr),6.75E+01,2.93E+02,1800.148,5775.475,900.074,9.83E+01,75.00617,2.51E+04,7.13E+04
+Solubilitya (mg/L),24300,35,20,0.308,0.93,10500,620000,0.33,0.221
+Henry's Constantd (dimensionless),3.77E-07,1.83E-07,2.14E-06,9.46E-05,1.55E-06,1.67E-17,1.32E-11,5.93E-05,8.67E-03
+Air Diffusion Coefficientd (cm2/day),4993.92,4752,3741.12,3948.48,3589.92,6255.36,4898.88,4121.28,3888
+Heat of Henryd (J/mol),45727,81477.2,66512,62355,45727,49884,45727,62355,62355
+Applications (model input),,,,,,,,,
+Pre- or Post-Emergentf,pre,pre,pre,pre,post,pre,pre,pre,post
+Number of Applicationsf,1,1,1,1,1,2,3,1,1
+Timing of Applicationf (Days Since Emergence),-12,-12,-12,-12,10,"""-19, -12""","""-12, -13, -14""",-12,10
+Application ratef (kg/ha),1.06,2.24,2,3.36,0.53,1.12,1.12,2.13,1.12
+Application Methodf (cm),depth 0,depth 0,depth 0,depth 0,depth 0,depth 0,depth 0,depth 0,depth 6.35
+Model Outputs,,,,,,,,,
+Peak EEC in a pond (IL) (ug/L),62.3,152,93.9,212,11.2,145,139,173,0.539
+Peak EEC in a pond (MS) (ug/L),108,250,170,320,13.4,195,136,232,0.539
+Peak EEC in a pond (NC) (ug/L),20.5,47.6,34.2,72.6,1.07,44.2,85.2,55.8,0.539
+Peak EEC in a pond (OH) (ug/L),48.7,114,73.4,166,7.65,104,109,128,0.539
+Peak EEC in a pond (PA) (ug/L),38.4,71.7,38.5,69.9,0.429,55.9,127,88,0.539
+Peak EEC in a reservoir (IL) (ug/L),149,359,224,522,25.9,346,332,431,0.394
+Peak EEC in a reservoir (MS) (ug/L),257,589,406,766,31.2,464,327,555,0.394
+Peak EEC in a reservoir (NC) (ug/L),48.3,112,81.6,172,2.5,105,205,132,0.394
+Peak EEC in a reservoir (OH) (ug/L),116,271,176,408,17,247,267,311,0.394
+Peak EEC in a reservoir (PA) (ug/L),91,170,90,162,0.691,129,302,212,0.394
+,,,,,,,,,
+aPestiside Properties DataBase (University of Herfordshire),,,,,,,,,
+bTOXNET,,,,,,,,,
+cPesticide Action Network Pesticide Database,,,,,,,,,
+"dHENRY WIN, EPI Suite",,,,,,,,,
+eOn-line Tools for Site Assessment Calculation (EPA),,,,,,,,,
+fCommercial Product Labels,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+"Air Diffusion Coefficient, calculated",,,,,,,,,
+Boiling points,,,,,,,,,
+Heat of Henry,,,,,,,,,
+Pesticide Traits,,,,,,,,,
+,,,,,,,,,
+Metrological data,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+References for missing values,,,,,,,,,
+alachlor aquatic half life,,,,,,,,,
+atraznine aquatic half-life,,,,,,,,,
+clomazone aquatic half-life,,,,,,,,,
+dicamba Koc,,,,,,,,,
+dimethenamid Koc,,,,,,,,,
+"dimethenamid aquatic half life, dimethenamid-P",,,,,,,,,
+"dimethenamid benthic half life, dimethenamid-P",,,,,,,,,
+MCPA Koc,,,,,,,,,
+Metribuzin Koc,,,,,,,,,
+Oxyfluorofen Koc,,,,,,,,,
+Oxyfluorofen aquatic half-life,,,,,,,,,
+Oxyfluorofen benthic half-life,,,,,,,,,
+Acephate aquatic half-life,,,,,,,,,
+Acephate benthic half-life,,,,,,,,,
+Aldicarb aquatic half-life,,,,,,,,,
+Azinphos-methyl aquatic half-life,,,,,,,,,
+Azinphos-methyl benthic half-life,,,,,,,,,
+Carbofuran Koc,,,,,,,,,
+Dimethoate Koc,,,,,,,,,
+Oxamyl aquatic half-life,,,,,,,,,
+Phorate aquatic half-life,,,,,,,,,
+Phorate benthic half-life,,,,,,,,,
+Terbufos aquatic half-life,,,,,,,,,
+Terbufos benthic half-life,,,,,,,,,
+,,,,,,,,,
+Imidacloprid Koc,,,,,,,,,

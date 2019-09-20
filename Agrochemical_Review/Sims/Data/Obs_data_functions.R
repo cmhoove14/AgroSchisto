@@ -7,7 +7,7 @@ get_nawqa_dat <- function(chem_name){
     filter(grepl(chem_name, LONGNAME, ignore.case = T)) %>% 
     mutate(mug_perL = if_else(grepl("micrograms per liter", LONGNAME), 1, 0),
            CONCENTRATION = if_else(mug_perL == 1, CONCENTRATION, CONCENTRATION/1000)) %>% 
-    select(CONSTIT, LONGNAME, CONCENTRATION, REMARK, SITE_TYPE, SAMPLE_DATE)
+    dplyr::select(CONSTIT, LONGNAME, CONCENTRATION, REMARK, SITE_TYPE, SAMPLE_DATE)
   
   return(dat)
 }
@@ -61,9 +61,7 @@ get_msqa2013_dat <- function(chem_name){
 
 #Function to return max value in midwest summer 2013 data for particular chemical
 get_msqa2013_max <- function(chem_name){
-    dat <- msqa2013_fin %>% 
-      filter(grepl(chem_name, PARM_NM, ignore.case = T)) %>% 
-      pull(RESULT_CEN)
+    dat <- msqa2013_fin[grepl(chem_name, msqa2013_fin$PARM_NM, ignore.case = T),][["RESULT_CEN"]]
   
   if(length(dat) == 0){
     return(NA)
@@ -95,17 +93,14 @@ get_msqa2013_sum <- function(chem_name, all_obs = FALSE){
 
 #Function to get dataframe of observations from CA SURF
 get_CA_SURF_dat <- function(chem_name){
-  dat <- ca_surf_clean %>% 
-    filter(grepl(chem_name, CHEMICAL, ignore.case = T))
+  dat <- ca_surf_clean[grepl(chem_name, ca_surf_clean$CHEMICAL, ignore.case = T),]
   
   return(dat)
 }
 
 #Function to return max value in CA Surf data for particular chemical
 get_CA_SURF_max <- function(chem_name){
-    dat <- ca_surf_clean %>% 
-      filter(grepl(chem_name, CHEMICAL, ignore.case = T)) %>% 
-      pull(CONC_PPB)
+    dat <- ca_surf_clean[grepl(chem_name, ca_surf_clean$CHEMICAL, ignore.case = T),][["CONC_PPB"]]
   
   if(length(dat) == 0){
     return(NA)

@@ -1,0 +1,39 @@
+,Carbaryl,Chlorpyrifos,Deltamethrin,Diazinon,Endosulfan,Esfenvalerate,Fenitrothion,Lambda cyhalothrin,Malathion,Permethrin,Profenofos,Terbufos
+Chemical Traits (model input),,,,,,,,,,,,
+Koca (mL/g),300,5509,10240000,609,11500,251717,2000,283707,1800,100000,2016,500
+Water Column Metabolism Halflifea (d),3.1,5,17,4.3,5b,30,1.1,0.24,0.4,23,9b,0.06b
+Benthic Metabolism Halflifea (d),5.8,36.5,65,10.4,430b,56,1.57,15.1,0.4,40,3b,14.4b
+Aqueous Photolysis Halflifea (d),10,29.6,3b,50,11.29,2,3.5,40,98,1,stable,4.5
+Hydrolysis Halflifec (d),12,2118,stableb,138,36.5b,stableb,183,stableb,6,3597,43,6.5
+Soil Halflifec (d),6,30.5,13,40,27,44,79.05b,25,3,30,2,8
+Foliar Halflifea (d),5.4,3.3,6.5,2.4,3.7,2,8,2.6,2.4,6.7,1.6,-
+Molecular Weighta (g/mol),201.22,350.58,505.2,304.35,406.93,419.91,277.23,449.85,330.36,391.3,373.63,288.4
+Vapor Pressurea (torr),3.12E+02,1.07E+04,0.093007649,8.98E+04,6225.512,8775.721,5070.417,1.5,2.33E+04,52.5043178,18976.561,2.60E+05
+Solubilitya (mg/L),9.1,1.05,0.0002,60,0.32,0.001,19,0.005,148,0.2,28,4.5
+Henry's Constantd (dimensionless),1.28E-07,1.03E-04,2.48E-06,3.57E-06,3.69E-06,4.85E-06,7.59E-06,5.54E-04,3.43E-08,1.18E-05,1.43E-06,1.14E-04
+Air Diffusion Coefficiente (cm2/day),4898.88,4268.16,3296.16,4078.08,3922.56,3222.72,4648.32,3270.24,4216.32,3481.92,4108.32,4250.88
+Heat of Henryd (J/mol),58198,52128.78,45727,74826,37413,45727,54041,49884,54041,49884,54041,54041
+Applications (model input),,,,,,,,,,,,
+Pre- or Post-Emergentf,post,post,post,post,post,post,post,post,post,post,post,pre
+Number of Applicationsf,4,1,3,5,1,5,1,4,2,4,2,1
+Timing of Applicationf (days since emergence),"30, 44, 58, 72",30,"30, 35, 40","30, 37, 44, 51, 58",30,"30, 33, 36, 39, 42",30,"30, 34, 38, 42","30, 35","30, 33, 36, 39","30, 35",-12
+Application ratef (kg/ha),2.24,1.12,0.015,2.24,1.68,0.056,0.40,0.034,0.67,0.224,1.12,1.46
+Application Methodf (cm),above crop,above crop,above crop,above crop,above crop,above crop,above crop,above crop,above crop,above crop,above crop,depth 2.54
+PWC Model Outputs,,,,,,,,,,,,
+Peak EEC in a pond (IL) (ug/L),13.5,4.39,0.00327,66.6,6.44,0.436,1.91,0.167,2.56,2.03,4.15,0.729
+Peak EEC in a pond (MS) (ug/L),58,7.62,0.00601,63.3,10.8,0.588,3.26,0.329,4.77,3.15,6.88,0.729
+Peak EEC in a pond (NC) (ug/L),38.5,2.48,0.00242,66.7,3.52,0.383,1.23,0.146,1.76,1.43,2.73,0.729
+Peak EEC in a pond (OH) (ug/L),26,3.54,0.00317,63.8,4.9,0.387,1.47,0.168,1.93,1.7,3.08,0.729
+Peak EEC in a pond (PA) (ug/L),21,2.69,0.00478,22.2,4.54,0.506,1.35,0.235,1.38,2.26,2.24,0.729
+Peak EEC in a reservoir (IL) (ug/L),29.2,10.1,0.00731,156,15,1.01,4.52,0.386,5.36,4.82,8.33,0.532
+Peak EEC in a reservoir (MS) (ug/L),136,17.6,0.0142,148,24.9,1.37,7.68,0.756,10.8,7.4,15.1,0.532
+Peak EEC in a reservoir (NC) (ug/L),88.1,5.21,0.00565,157,7.53,0.9,2.95,0.342,3.62,3.37,5.34,0.532
+Peak EEC in a reservoir (OH) (ug/L),58.7,8.2,0.00721,150,11.7,0.882,3.52,0.389,4.34,3.95,5.82,0.532
+Peak EEC in a reservoir (PA) (ug/L),46.5,6.23,0.0111,53.1,10.6,1.17,3.17,0.534,3,5.24,4.36,0.532
+,,,,,,,,,,,,
+aPestiside Properties DataBase (University of Herfordshire),,,,,,,,,,,,
+bTOXNET,,,,,,,,,,,,
+cPesticide Action Network Pesticide Database,,,,,,,,,,,,
+"dHENRY WIN, EPI Suite",,,,,,,,,,,,
+eOn-line Tools for Site Assessment Calculation (EPA),,,,,,,,,,,,
+fCommercial Product Labels,,,,,,,,,,,,

@@ -12,7 +12,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 
 require(deSolve)
 require(rootSolve)
@@ -24,13 +24,10 @@ require(ggplot2)
 require(furrr)
 require(tidyverse)
 
-extrafont::loadfonts()
 source("../Sims/ggplot_theme.R")
 ```
 
-# Setup  
-
-## Model Fit  
+# Model    
 Data, process, and plots of the model fitting procedure can be found in `Models/model_fit.Rmd`. Checks to see that the dynamics of the model respond in a reasonable way can be found in the `model_checks.Rmd` document in this folder. Functions to simulate the model through time are found in `Models/models.R` with some small helper functions found in `Models/model_helper_functions.R`. Initial parameters were pulled from previous publications (see e.g. [Halstead et al](https://www.nature.com/articles/s41467-018-03189-w) and [Arakala et al](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0006794)) and fit parameters are used in subsequent simulations. 
 
 ```{r models_setup, message=FALSE, warning=FALSE}
@@ -49,7 +46,7 @@ The $R_0$ function was derived from the dynamic model using the next generation 
 source("../Models/r0_functions.R")
 ```
 
-## Response Functions  
+# Response Functions  
 All studies with experiments deriving a quantitative relationship between an agrochemical and a model parameter were included in subsequent analyses. Experiments are summarized in `Response_Fxs/Summary/Response_Fx_Summary.csv` while the `Response_Fxs` contains all code used to fit dose response functions, `Response_Fxs/Data` contains the source data extracted from studies identified in the literature review, and `Response_Fxs/Plots` contains plots displaying the resulting fits of dose-response fucntions to the underlying data and simulated points generated from sampling from the dose response function.  
 
 ```{r response_function_setup, message=FALSE, warning = FALSE, echo = FALSE}
@@ -84,11 +81,13 @@ RFxSum %>% group_by(Chemical, Pathway) %>% summarise(n = n()) %>%
 
 A total of `r nrow(RFxSum)` quantitative relationsips between agrochemicals and components of the schistosomiasis transmission cycle were identified from `r length(unique(RFxSum$study_long))` studies. From these, a total of `r sum(RFxSum$dose_response)` response functions were fit, while `r nrow(RFxSum) - sum(RFxSum$dose_response)` contained insufficient data to fit a dose response curve. Most response functions (`r sum(RFxSum$dose_response[which(RFxSum$Pathway == "top-down")])`) were in the "top-down" category, `r sum(RFxSum$dose_response[which(RFxSum$Pathway == "direct snail")])` were in the direct snail category, `r sum(RFxSum$dose_response[which(RFxSum$Pathway == "direct larvae")])` were in the direct schistosome larvae or eggs category, and `r sum(RFxSum$dose_response[which(RFxSum$Pathway == "bottom-up")])` were in the "bottom-up" category.
 
-# Analyses at relevant environmental concentrations  
-Many ways to identify concentrations of each agrochemical that are relevant from an ecological risk perspective. Contained in the summary data frame are estimates of the peak EEC that were identified in a literature review specific to each chemcial, but these estimates come from a variety of publications including EPA reports, journal articles, risk assessment documents, etc. The USGS National Water Quality Assessment (NAWQA) project provides a couple sources of observed pesticide concentration data from streams in the U.S. There's a [national database](https://www.sciencebase.gov/catalog/item/5af49c2ae4b0da30c1b44e2b) of pesticide monitoring in a variety of surface water sources across the contiguous US, [a more targeted database](https://www.sciencebase.gov/catalog/item/5928a5dce4b016f7a93f8d7b) of weekly pesticide concentrations in the midwest in the summer of 2013, and [a database from California from the dept of pesticide regulation](https://www.cdpr.ca.gov/docs/emon/surfwtr/surfdata.htm). 
+# Environmentally relevant concentrations   
+Many ways to identify concentrations of each agrochemical that are relevant from an ecological risk perspective. Peak estimated environmental concentrations (EECs) were derived using EPA software for application scenarios similar to what may be expected in areas of sub-Saharan Africa. The USGS National Water Quality Assessment (NAWQA) project also provides a couple sources of observed pesticide concentration data from streams in the U.S. There's a [national database](https://www.sciencebase.gov/catalog/item/5af49c2ae4b0da30c1b44e2b) of pesticide monitoring in a variety of surface water sources across the contiguous US, [a more targeted database](https://www.sciencebase.gov/catalog/item/5928a5dce4b016f7a93f8d7b) of weekly pesticide concentrations in the midwest in the summer of 2013, and [a database from California from the dept of pesticide regulation](https://www.cdpr.ca.gov/docs/emon/surfwtr/surfdata.htm).  
 
-```{r obs_pest_dat, message=FALSE, warning = FALSE, echo = FALSE, cache = TRUE}
+## Compare three observed agrochemical concentration datasets  
+```{r obs_range, message=FALSE, warning = FALSE, echo = FALSE}
 source("../Sims/Data/Obs_data_functions.R")
+#Observed datasets
 msqa2013_fin <- readRDS("../Sims/Data/midwest_pesticides_2013.rds")
 pestdat <- readRDS("../Sims/Data/NAWQA_pesticides.rds")
 ca_surf_clean <- readRDS("../Sims/Data/CA_SURF_clean.rds")
@@ -101,403 +100,7 @@ ca_surf_clean <- readRDS("../Sims/Data/CA_SURF_clean.rds")
               peak_CONC_PPB = max(CONC_PPB),
               LOQ_PPB = max(LOQ_PPB),
               CONC_PPB = mean(CONC_PPB))
-#Add estimates of peak concentrations for each chem found in each dataset
-RFxSum <- RFxSum %>% 
-  mutate(nawqa_peak = map_dbl(Chemical, get_nawqa_max),
-         msqa2013_peak = map_dbl(Chemical, get_msqa2013_max)/1000,
-         ca_surf_peak = map_dbl(Chemical, get_CA_SURF_max),
-         peak_obs = pmax(nawqa_peak, msqa2013_peak, ca_surf_peak, na.rm = T))
 
-#Look at relationship between observed values and peak EECs found in literature
-RFxSum %>% group_by(Chemical) %>% 
-  summarise(n_rfx = n(),
-            eec = first(eec),
-            nawqa_peak = first(nawqa_peak),
-            msqa_peak = first(msqa2013_peak),
-            ca_surf_peak = first(ca_surf_peak),
-            peak_observed = max(c(nawqa_peak, msqa_peak, ca_surf_peak), na.rm = T)) %>% 
-  knitr::kable(caption = "Comparison of literature-derived peak EEC values with peak observed values in NAWQA and SURF databases")
-
-#Store EECs for key chemicals as objects
-atr_eec <- RFxSum %>% filter(Chemical == "Atrazine") %>%  slice(1) %>% pull(eec)
-chlor_eec <- RFxSum %>% filter(Chemical == "Chlorpyrifos") %>%  slice(1) %>% pull(eec)
-gly_eec <- RFxSum %>% filter(Chemical == "Glyphosate") %>%  slice(1) %>% pull(eec)
-mal_eec <- RFxSum %>% filter(Chemical == "Malathion") %>%  slice(1) %>% pull(eec)
-prof_eec <- RFxSum %>% filter(Chemical == "Profenofos") %>%  slice(1) %>% pull(eec)
-
-#Store peak observed concentrations for key chemicals as objects
-atr_peak_obs <- RFxSum %>% filter(Chemical == "Atrazine") %>%  slice(1) %>% pull(peak_obs)
-chlor_peak_obs <- RFxSum %>% filter(Chemical == "Chlorpyrifos") %>%  slice(1) %>% pull(peak_obs)
-gly_peak_obs <- RFxSum %>% filter(Chemical == "Glyphosate") %>%  slice(1) %>% pull(peak_obs)
-mal_peak_obs <- RFxSum %>% filter(Chemical == "Malathion") %>%  slice(1) %>% pull(peak_obs)
-prof_peak_obs <- RFxSum %>% filter(Chemical == "Profenofos") %>%  slice(1) %>% pull(peak_obs)
-
-```
-
-Looks clear that for most chemicals, the peak EEC from the literature, often derived from modeling software, is higher than the peak observed in the NAWQA and SURF datasets. This makes sense as these observations are weekly at best in terms of their temporal resolution and observations are unlikely to coincide with times when peak surface water contamination occurs, e.g. right after a heavy runoff event. The summer 2013 weekly sampling is also extremely valuable as we can use it to force a model that simulates transmission through time under the influence of agrochemical pollution. More on that later
-
-```{r obs_pest_viz, message=FALSE, warning = FALSE, echo = FALSE, eval = FALSE}
-#Vector of chemicals that have response functions and are found in observed datasets
-msqa2013_obs_chems <- RFxSum %>% 
-  filter(!is.na(msqa2013_peak)) %>% 
-  pull(Chemical) %>% unique()
-
-nawqa_obs_chems <- RFxSum %>% 
-  filter(!is.na(nawqa_peak)) %>% 
-  pull(Chemical) %>% unique()
-
-#plot summer 2013 time series of chemicals with response functions 
-msqa2013_fin %>% 
-  filter(grepl(paste(msqa2013_obs_chems, collapse = "|"), PARM_NM)) %>% 
-  mutate(logp1_conc_mugL = log(1+RESULT_CEN/1000)) %>% 
-  ggplot(aes(x = SAMPLE_DATE, y = logp1_conc_mugL, col = PARM_NM)) +
-    geom_line() +
-    theme_classic() +
-    theme(legend.position = "bottom") +
-    ggtitle("Agrochemical concentrations in NAWQA MSQA database, summer 2013", 
-            subtitle = "Only chemicals with response functions shown")
-
-```
-
-First look at all response functions that have a significant effect at their EEC  
-
-## Agrochemical effects at EECs   
-Sample parameter sets for each response function at its EEC are generated in `Sims/EEC/generate_eec_parameter_sets.R` and stored in the `Sims/EEC/Parameter_Sets` folder. These parameter sets are generated from 1000 random draws of the transmission parameters generated from the fitting procedure and from the response functions themselves. These parameter sets are then used to estimate the agrochemical effect on $R_0$ at each chemical's EEC and all response functions resulting in an estimate outside of the IQR of the baseline model (with only uncertainty in transmission parameters) are shown in the forestplot below.
-
-```{r source_par_set_generation, cache = T}
-source("../Sims/EEC/generate_eec_parameter_sets.R")
-source("../Sims/EEC/generate_peak_obs_parameter_sets.R")
-```
-
-
-```{r forestplot_eec, message = FALSE, echo = FALSE, cache=TRUE}
-#Create labels field for complex axis labels of forestplot
-  max_study_string <- max(str_length(RFxSum$study_long))
-  max_chem_string <- max(str_length(RFxSum$Chemical))
-  max_species_string <- max(str_length(RFxSum$Species))
-  
-  RFxSum <- RFxSum %>% 
-    mutate(study_long2 = if_else(dose_response == 1,
-                                 study_long,
-                                 str_c(study_long, "*")),
-           labels = str_c(str_pad(study_long2, 
-                                  max_study_string+1, "right"),
-                          str_pad(Chemical, 
-                                  max_chem_string+1, "left"),
-                          str_pad(Species, 
-                                  max_species_string+3, "left")))
-  
-#Load all parameter sets into one dataframe
-all_eec_pars <- 
-  do.call(rbind,
-          lapply(paste0("../Sims/EEC/Parameter_Sets/",
-                       list.files(path = "../Sims/EEC/Parameter_Sets/")[grepl("_eec_",
-                                                                              list.files(path = "../Sims/EEC/Parameter_Sets/"))]), 
-                 readRDS))
-
-#Apply r0 function to all parameter sets
-  r0s <- pmap_df(all_eec_pars %>% dplyr::select(-Study_ID_Unique), r0.Ag.pars)
-  
-#bind parameters and results together
-  all_eec_sims <- cbind(all_eec_pars, r0s) %>% 
-    left_join(RFxSum)
-  
-#Separate baseline sims from all other sims
-  baseline_eec_sims <- all_eec_sims %>% filter(Study_ID_Unique == "baseline_eec_parameters")
-  
-#Baseline summary statistics  
-  base_r0_median <- median(baseline_eec_sims$R0)
-  base_r0_q25 <- quantile(baseline_eec_sims$R0, 0.25)
-  base_r0_q75 <- quantile(baseline_eec_sims$R0, 0.75)
-
-  base_r0_q025 <- quantile(baseline_eec_sims$R0, 0.025)
-  base_r0_q975 <- quantile(baseline_eec_sims$R0, 0.975)
-
-#All other sims  
-  eec_sims <- all_eec_sims %>% filter(Study_ID_Unique != "baseline_eec_parameters")
-
-#Ggplot classic forestplot figure  #######
-gg_forest_df <-  eec_sims %>% 
-    group_by(Study_ID_Unique) %>% 
-    summarise(med_R0 = median(R0),
-              R0_25 = quantile(R0, 0.25),
-              R0_75 = quantile(R0, 0.75),
-              Pathway = first(Pathway),
-              Class = first(Class),
-              parameter = first(parameter),
-              label = first(labels)) %>% 
-    filter(round(med_R0, 2) >= round(base_r0_median, 2) | med_R0 <= round(base_r0_median, 2)) %>% 
-    arrange(Class, med_R0) %>% 
-    mutate(order = row_number())
-  
-gg_forest <- gg_forest_df %>%
-    ggplot(aes(y = as.factor(order), 
-               x = med_R0, xmin = R0_25, xmax = R0_75, 
-               col = parameter)) + 
-      theme_classic() +
-      theme(axis.title.y = element_blank(),
-            axis.text.y = element_text(hjust = 0, family = "mono",
-                                       size = 9),
-            axis.ticks.y = element_blank(),
-            axis.text.x = element_text(size = 12),
-            axis.title.x = element_text(size = 14),
-            legend.position = c(0.8, 0.25),
-            legend.background = element_rect(color = "black",
-                                             size=0.5, linetype="solid")) +
-      geom_rect(xmin = base_r0_q25, xmax = base_r0_q75,
-                ymin = -Inf, ymax = Inf, 
-                alpha = 0.1, fill = "grey80", col = "grey80") +
-      geom_vline(xintercept = base_r0_median) +
-      geom_point() +
-      geom_errorbarh(height = 0.2) +
-      scale_color_manual(name = "Parameter affected",
-                         values = c("mupq" = "#00468BFF",
-                                    "munq" = "#ED0000FF",
-                                    "Knq" = "#42B540FF",
-                                    "psiq" = "#0099B4FF",
-                                    "picq" = "#925E9FFF",
-                                    "pimq" = "#FDAF91FF",
-                                    "fnq" = "#AD002AFF",
-                                    "thetaq" = "#ADB6B6FF",
-                                    "vq" = "#1B1919FF"),
-                         labels = c(expression(Snail~reproduction~(italic(f[N]))),
-                                    expression(Snail~carrying~capacity~(italic(K[N]))),
-                                    expression(Snail~mortality~(italic(mu[N]))),
-                                    expression(Predator~mortality~(italic(mu[P]))),
-                                    expression(Cercarial~survival~(italic(pi[C]))),
-                                    expression(Miracidial~survival~(italic(pi[M]))),
-                                    expression(Predator~consumption~(italic(psi))),
-                                    expression(Snail~cercarial~shedding~(italic(theta))),
-                                    expression(Schistosome~egg~viability~(italic(v))))) +
-      scale_y_discrete(breaks = as.factor(gg_forest_df$order), 
-                       labels = gg_forest_df$label) +
-      facet_grid(Class~., scales = "free", space = "free") +
-      labs(x = expression(paste(italic(R[0]), 
-                                "(", italic(EEC[c]), ")", 
-                                sep = "")))
-  
-ggsave("../Plots/Forestplot_sig_effects_eec.jpg",
-       width = 11.5, height = 8, units = "in", dpi = 300)
-```
-
-![Forestplot of agrochemical effects with median effect outside of baseline $R_0$ estimates at peak EEC](../Plots/Forestplot_sig_effects_eec.jpg)
-
-## Agrochemical effects at peak observed concentrations   
-Sample parameter sets for each response function at the peak observed concentration are generated in `Sims/EEC/generate_peak_obs_parameter_sets.R` and stored in the `Sims/EEC/Parameter_Sets` folder. These parameter sets are generated from 1000 random draws of the transmission parameters generated from the fitting procedure and from the response functions themselves. These parameter sets are then used to estimate the agrochemical effect on $R_0$ at each chemical's EEC and all response functions resulting in an estimate outside of the IQR of the baseline model (with only uncertainty in transmission parameters) are shown in the forestplot below.
-
-```{r forestplot_peak_conc, message = FALSE, echo = FALSE, cache=TRUE, warning = FALSE}
-#Create labels field for complex axis labels of forestplot
-  max_study_string <- max(str_length(RFxSum$study_long))
-  max_chem_string <- max(str_length(RFxSum$Chemical))
-  max_species_string <- max(str_length(RFxSum$Species))
-  
-#Load all parameter sets into one dataframe
-all_peak_conc_pars <- 
-  do.call(rbind,
-          lapply(paste0("../Sims/EEC/Parameter_Sets/",
-                       list.files(path = "../Sims/EEC/Parameter_Sets/")[grepl("_peak_conc_",
-                                                                              list.files(path = "../Sims/EEC/Parameter_Sets/"))]), 
-                 readRDS))
-
-#Apply r0 function to all parameter sets
-  r0s <- pmap_df(all_peak_conc_pars %>% dplyr::select(-Study_ID_Unique), r0.Ag.pars)
-  
-#bind parameters and results together
-  peak_conc_sims <- cbind(all_peak_conc_pars, r0s) %>% 
-    left_join(RFxSum)
-
-#Baseline summary statistics already derived in eec sims above  
-
-#Ggplot classic forestplot figure  #######
-gg_forest_peak_conc_df <-  peak_conc_sims %>% 
-    group_by(Study_ID_Unique) %>% 
-    summarise(med_R0 = median(R0),
-              R0_25 = quantile(R0, 0.25),
-              R0_75 = quantile(R0, 0.75),
-              Pathway = first(Pathway),
-              Class = first(Class),
-              Parameter = first(parameter),
-              label = first(labels)) %>% 
-    filter(med_R0 >= base_r0_q75 | med_R0 <= base_r0_q25) %>% 
-    arrange(Class, med_R0) %>% 
-    mutate(order = row_number())
-  
-gg_forest_peak_conc <- gg_forest_peak_conc_df %>%
-    ggplot(aes(y = as.factor(order), 
-               x = med_R0, xmin = R0_25, xmax = R0_75, 
-               col = Parameter)) + 
-      theme_classic() +
-      theme(axis.title.y = element_blank(),
-            axis.text.y = element_text(hjust = 0, family = "mono",
-                                       size = 9),
-            axis.ticks.y = element_blank(),
-            axis.text.x = element_text(size = 12),
-            axis.title.x = element_text(size = 14),
-            legend.position = c(0.8, 0.25),
-            legend.background = element_rect(color = "black",
-                                             size=0.5, linetype="solid")) +
-      geom_rect(xmin = base_r0_q25, xmax = base_r0_q75,
-                ymin = -Inf, ymax = Inf, 
-                alpha = 0.2, fill = "grey90", col = "grey90") +
-      geom_vline(xintercept = base_r0_median) +
-      geom_point() +
-      geom_errorbarh(height = 0.2) +
-      scale_color_manual(name = "Parameter affected",
-                         values = c("mupq" = "#00468BFF",
-                                    "munq" = "#ED0000FF",
-                                    "Knq" = "#42B540FF",
-                                    "psiq" = "#0099B4FF",
-                                    "picq" = "#925E9FFF",
-                                    "pimq" = "#FDAF91FF",
-                                    "fnq" = "#AD002AFF",
-                                    "thetaq" = "#ADB6B6FF",
-                                    "vq" = "#1B1919FF"),
-                         labels = c(expression(Snail~reproduction~(italic(f[N]))),
-                                    expression(Snail~carrying~capacity~(italic(K[N]))),
-                                    expression(Snail~mortality~(italic(mu[N]))),
-                                    expression(Predator~mortality~(italic(mu[P]))),
-                                    expression(Cercarial~survival~(italic(pi[C]))),
-                                    expression(Miracidial~survival~(italic(pi[M]))),
-                                    expression(Predator~consumption~(italic(psi))),
-                                    expression(Snail~cercarial~shedding~(italic(theta))),
-                                    expression(Schistosome~egg~viability~(italic(v))))) +
-      scale_y_discrete(breaks = as.factor(gg_forest_peak_conc_df$order), 
-                       labels = gg_forest_peak_conc_df$label) +
-      facet_grid(Class~., scales = "free", space = "free") +
-      labs(x = expression(paste(italic(R[0]), 
-                                "(", italic(POC[c]), ")", 
-                                sep = "")))
-
-ggsave("../Plots/Forestplot_sig_effects_peak_conc.jpg",
-       plot = gg_forest_peak_conc,
-       width = 11.5, height = 8, units = "in", dpi = 300)
-
-```
-
-![Forestplot of agrochemical effects with median effect outside of IQR of baseline $R_0$ estimates at peak observed concentration](../Plots/Forestplot_sig_effects_peak_conc.jpg)
-
-```{r all_peak_obs_forestplot, warning = FALSE}
-gg_forest_peak_conc_df_all <-  peak_conc_sims %>% 
-    group_by(Study_ID_Unique) %>% 
-    summarise(med_R0 = median(R0),
-              R0_25 = quantile(R0, 0.25),
-              R0_75 = quantile(R0, 0.75),
-              Pathway = first(Pathway),
-              Class = first(Class),
-              Parameter = first(parameter),
-              label = first(labels)) %>% 
-    arrange(Class, med_R0) %>% 
-    mutate(order = row_number())
-  
-gg_forest_peak_conc_all <- gg_forest_peak_conc_df_all %>%
-    ggplot(aes(y = as.factor(order), 
-               x = med_R0, xmin = R0_25, xmax = R0_75, 
-               col = Parameter)) + 
-      theme_classic() +
-      theme(#text = element_text(family = "Times New Roman"),
-            axis.title.y = element_blank(),
-            axis.text.y = element_text(hjust = 0, family = "mono",
-                                       size = 9),
-            axis.ticks.y = element_blank(),
-            axis.text.x = element_text(size = 12),
-            axis.title.x = element_text(size = 14),
-            legend.position = c(0.8, 0.25),
-            legend.background = element_rect(fill="grey90", color = "black",
-                                             size=0.5, linetype="solid")) +
-      geom_rect(xmin = base_r0_q25, xmax = base_r0_q75,
-                ymin = 0, ymax = nrow(peak_conc_sims), 
-                alpha = 0.2, fill = "grey80", col = "grey80") +
-      geom_vline(xintercept = base_r0_median) +
-      geom_point() +
-      geom_errorbarh(height = 0.2) +
-      scale_color_manual(name = "Parameter affected",
-                         values = c("mupq" = "#00468BFF",
-                                    "munq" = "#ED0000FF",
-                                    "Knq" = "#42B540FF",
-                                    "psiq" = "#0099B4FF",
-                                    "picq" = "#925E9FFF",
-                                    "pimq" = "#FDAF91FF",
-                                    "fnq" = "#AD002AFF",
-                                    "thetaq" = "#ADB6B6FF",
-                                    "vq" = "#1B1919FF"),
-                         labels = c(expression(Snail~reproduction~(italic(f[N]))),
-                                    expression(Snail~carrying~capacity~(italic(K[N]))),
-                                    expression(Snail~mortality~(italic(mu[N]))),
-                                    expression(Predator~mortality~(italic(mu[P]))),
-                                    expression(Cercarial~survival~(italic(pi[C]))),
-                                    expression(Miracidial~survival~(italic(pi[M]))),
-                                    expression(Predator~consumption~(italic(psi))),
-                                    expression(Snail~cercarial~shedding~(italic(theta))),
-                                    expression(Schistosome~egg~viability~(italic(v))))) +
-      scale_y_discrete(breaks = as.factor(gg_forest_peak_conc_df_all$order), 
-                       labels = gg_forest_peak_conc_df_all$label) +
-      facet_grid(Class~., scales = "free", space = "free") +
-      labs(x = expression(paste(italic(R[0]), 
-                                "(", italic(POC[c]), ")", 
-                                sep = "")))
-
-ggsave("../Plots/Forestplot_all_effects_peak_conc.jpg",
-       plot = gg_forest_peak_conc_all,
-       width = 12, height = 15, units = "in", dpi = 300)
-
-```
-
-
-## Summary agrochemical effects at eecs  
-For chemicals with dose-response functions for every hypothesized parameter affected, estimate net effect on $R_0$ at peak eec  
-
-```{r eec_net_r0s, cache=T}
-#Get parameter sets and estimate R0 for 1000 par sets at eec
-atr_eec_pars <- readRDS("../Sims/Range/Parameter_Sets/atrazine_eec_pars.rds")
-chlor_eec_pars <- readRDS("../Sims/Range/Parameter_Sets/chlorpyrifos_eec_pars.rds")
-gly_eec_pars <- readRDS("../Sims/Range/Parameter_Sets/glyphosate_eec_pars.rds")
-mal_eec_pars <- readRDS("../Sims/Range/Parameter_Sets/malathion_eec_pars.rds")
-prof_eec_pars <- readRDS("../Sims/Range/Parameter_Sets/profenofos_eec_pars.rds")
-
-#Function to summarize R_0(q) for eec par sets
-sum_eec_r0_effect <- function(eec_par_set){
-#Apply r0 function to all parameter sets
-  r0s <- pmap_df(eec_par_set %>% dplyr::select(-c(logp1_conc, conc)), r0.Ag.pars)
-  
-  r0_med <- median(r0s$R0)
-  r0_25 <- quantile(r0s$R0, 0.25)
-  r0_75 <- quantile(r0s$R0, 0.75)
-
-  return(round(c(r0_25, r0_med, r0_75), 2))
-}
-
-base_effects <- c(base_r0_q25, base_r0_median, base_r0_q75)
-
-sum_eec_effects <- do.call(rbind, lapply(list(atr_eec_pars,
-                                              chlor_eec_pars,
-                                              gly_eec_pars,
-                                              mal_eec_pars,
-                                              prof_eec_pars),
-                                         sum_eec_r0_effect))
-
-sum_eec_effects <- rbind(base_effects, sum_eec_effects)
-
-row.names(sum_eec_effects) = c("Baseline",
-                               "Atrazine", 
-                               "Chlorpyrifos",
-                               "Glyphosate",
-                               "Malathion",
-                               "Profenofos")
-sum_eec_effects %>% 
-  knitr::kable(row.names = T,
-               col.names = c("25th percentile",
-                             "median",
-                             "75th percentile"),
-               caption = "Summary estimates of agrochemical effects on R0 for each chemical")
-```
-
-
-# Analyses across a range of reasonable environmental concentrations (from 0-2 * Peak)  
-For chemicals with multiple response functions and multiple parameters affected, estimate the net effect of the agrochemical across a broad range of environmentally relevant concentrations.  
-
-## Distribution of observed concentrations  
-### Compare three observed agrochemical concentration datasets  
-```{r obs_range, message=FALSE, warning = FALSE, echo = FALSE}
 #Get observed values for each chemical from NAWQA databases
 full_chems = c("Atrazine", "Chlorpyrifos", "Glyphosate", "Malathion", "Profenofos")
 
@@ -573,22 +176,26 @@ all_obs_full_chems <- ca_surf_obs_full_chems %>%
 
 
 all_obs_full_chems %>% 
-  mutate(Concentration = log(Concentration)) %>% 
+  #mutate(Concentration = log(Concentration)) %>% 
   ggplot(aes(x = Chemical, y = Concentration, fill = Dataset)) +
     geom_boxplot(varwidth = TRUE) +
     coord_flip() +
-    theme_classic() +
+    theme_ms() +
+    scale_y_continuous(trans = "log",
+                       breaks = c(0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000),
+                       labels = c("0.0001", "0.001", "0.01", "0.1", "1", "10", "100", "1000"),
+                       limits = c(1e-7, 1000)) +    
     labs(title = "Distributions of observed agrochemical concentrations",
          subtitle = "Only values above detection limit shown \nBox size scaled by sample size",
-         y = "Log Agrochemical concentration")
-    
+         y = "Log Agrochemical concentration (ppb)")
+
 
 ```
 
 Seems like CA SURF database has the best data in terms of sample size and coverage across all of these chemicals. NAWQA lacks Glyphosate data, Profenofos was only detected once above its detection limit.
 
 ### CA SURF data  
-```{r boxplot_CA_SURF_obs_fig}
+```{r boxplot_CA_SURF_obs_fig, eval=FALSE, include=FALSE}
 # Boxplot of observed agrochemical values in CA SURF database
 ca_surf_obs_boxplot <- ca_surf_obs_full_chems %>% 
   filter(CONC_PPB > LOQ_PPB & SAMP_DATE >= as.Date("2000-01-01")) %>% 
@@ -623,7 +230,7 @@ ca_surf_obs_boxplot
 ```
 
 ### MSQA Data  
-```{r boxplot_MSQA_obs_fig}
+```{r boxplot_MSQA_obs_fig, eval=FALSE, include=FALSE}
 # Boxplot of observed agrochemical values in MSQA database
 obs_boxplot <- msqa2013_obs_full_chems %>% 
   mutate(chem = case_when(grepl("Atrazine", PARM_NM) ~ "Atrazine",
@@ -657,76 +264,471 @@ obs_boxplot
 
 ```
 
-### All Observed Data  
-#### Normalized to peak observed  
-```{r boxplot_all_obs_fig}
-# Boxplot of observed agrochemical values in MSQA database
-obs_boxplot_all <- all_obs_full_chems %>% 
-  mutate(conc_rel_peak = case_when(Chemical == "Atrazine" ~ Concentration / atr_peak_obs,
-                                   Chemical == "Chlorpyrifos" ~ Concentration / chlor_peak_obs,
-                                   Chemical == "Glyphosate" ~ Concentration / gly_peak_obs,
-                                   Chemical == "Malathion" ~ Concentration / mal_peak_obs,
-                                   Chemical == "Profenofos" ~ Concentration / prof_peak_obs)) %>% 
-  ggplot(aes(x = Chemical, y = conc_rel_peak, fill = Chemical)) +
-    geom_boxplot(varwidth = TRUE) +
-    scale_y_continuous(trans = "log", 
-                       breaks = c(0.00001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1),
-                       limits = c(0.00001,1.1)) +
-    coord_flip() +
-    scale_fill_manual(values = c("Atrazine" = "#FDAF91FF",
-                                 "Chlorpyrifos" = "#ED000099",
-                                 "Glyphosate" = "#42B54099",
-                                 "Malathion" = "#925E9F99",
-                                 "Profenofos" = "#0099B499")) +
-    ylab(expression(paste("Agrochemical Concentration (", italic(q[c]),
-                          ") Normalized to ", italic(POC[c])))) +
-    ggtitle("Distribution of key agrochemicals observed across all observed datasets",
-            subtitle = "Normalized to peak observed concentration") +
-    theme_classic()
+## Peak expected environmental concentration (EEC) and peak observed concentration (POC)  
+```{r obs_pest_dat, message=FALSE, warning = FALSE, echo = FALSE, cache = TRUE}
+  
+#PWC modeled EEC datasets  
+ins_eecs <- read_csv("../Sims/Data/Insecticides_EECs.csv") %>% 
+  dplyr::filter(X1 == "Peak EEC in a reservoir (MS) (ug/L)") %>% 
+  gather("Chemical", "EPA_EEC_ppb", Carbaryl:Terbufos) %>% 
+  dplyr::select(-X1)
+  
+hrb_eecs <- read_csv("../Sims/Data/Herbicides_EECs.csv") %>% 
+  dplyr::filter(X1 == "Peak EEC in a reservoir (MS) (ug/L)") %>% 
+  gather("Chemical", "EPA_EEC_ppb", `2,4-D`:Trifluralin) %>% 
+  dplyr::select(-X1)
 
-obs_boxplot_all
+#Add estimates of peak EEC and peak observed concentrations for each chem found in each dataset
+RFxSum <- RFxSum %>%  
+  left_join(bind_rows(ins_eecs, hrb_eecs), by = "Chemical") %>% 
+  mutate(nawqa_peak = map_dbl(Chemical, get_nawqa_max),
+         msqa2013_peak = map_dbl(Chemical, get_msqa2013_max)/1000,
+         ca_surf_peak = map_dbl(Chemical, get_CA_SURF_max),
+         peak_obs = pmax(nawqa_peak, msqa2013_peak, ca_surf_peak, na.rm = T),
+         eec_use = if_else(is.na(EPA_EEC_ppb), eec, as.numeric(EPA_EEC_ppb)),
+         peak_eec_poc = pmax(peak_obs, as.numeric(eec_use)))
 
-```
+#Look at relationship between observed values and peak EECs from EPA software
+RFxSum %>% group_by(Chemical) %>% 
+  summarise(n_rfx = n(),
+            eec = first(eec_use),
+            nawqa_peak = first(nawqa_peak),
+            msqa_peak = first(msqa2013_peak),
+            ca_surf_peak = first(ca_surf_peak),
+            peak_observed = max(c(nawqa_peak, msqa_peak, ca_surf_peak), na.rm = T)) %>% 
+  knitr::kable(caption = "Comparison of PWC peak EEC values with peak observed values in NAWQA and SURF databases")
 
-#### Normalized to peak EEC  
-```{r boxplot_all_obs_eec_fig}
-# Boxplot of observed agrochemical values in MSQA database
-obs_boxplot_all_eec <- all_obs_full_chems %>% 
-  mutate(conc_rel_peak = case_when(Chemical == "Atrazine" ~ Concentration / atr_eec,
-                                   Chemical == "Chlorpyrifos" ~ Concentration / chlor_eec,
-                                   Chemical == "Glyphosate" ~ Concentration / gly_eec,
-                                   Chemical == "Malathion" ~ Concentration / mal_eec,
-                                   Chemical == "Profenofos" ~ Concentration / prof_eec)) %>% 
-  ggplot(aes(x = Chemical, y = conc_rel_peak, fill = Chemical)) +
-    geom_boxplot(varwidth = TRUE) +
-    scale_y_continuous(trans = "log", 
-                       breaks = c(0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 2),
-                       limits = c(0.000001, 2),
-                       labels = c("0.0001", "0.001", "0.01", "0.1", "1", "10", "100", "200")) +
-    coord_flip() +
-    scale_fill_manual(values = c("Atrazine" = "#FDAF91FF",
-                                 "Chlorpyrifos" = "#ED000099",
-                                 "Glyphosate" = "#42B54099",
-                                 "Malathion" = "#925E9F99",
-                                 "Profenofos" = "#0099B499")) +
-    ylab(expression(paste("Agrochemical Concentration (", q[c],
-                          ") Normalized to ", POC[c]))) +
-    ggtitle("Distribution of key agrochemicals observed across all observed datasets",
-            subtitle = "Normalized to peak EEC") +
-    theme_classic()
+#Store EECs for key chemicals as objects
+atr_eec <- RFxSum %>% filter(Chemical == "Atrazine") %>%  slice(1) %>% pull(eec_use)
+chlor_eec <- RFxSum %>% filter(Chemical == "Chlorpyrifos") %>%  slice(1) %>% pull(eec_use)
+gly_eec <- RFxSum %>% filter(Chemical == "Glyphosate") %>%  slice(1) %>% pull(eec_use)
+mal_eec <- RFxSum %>% filter(Chemical == "Malathion") %>%  slice(1) %>% pull(eec_use)
+prof_eec <- RFxSum %>% filter(Chemical == "Profenofos") %>%  slice(1) %>% pull(eec_use)
 
-obs_boxplot_all_eec
+#Store peak observed concentrations for key chemicals as objects
+atr_peak_obs <- RFxSum %>% filter(Chemical == "Atrazine") %>%  slice(1) %>% pull(peak_obs)
+chlor_peak_obs <- RFxSum %>% filter(Chemical == "Chlorpyrifos") %>%  slice(1) %>% pull(peak_obs)
+gly_peak_obs <- RFxSum %>% filter(Chemical == "Glyphosate") %>%  slice(1) %>% pull(peak_obs)
+mal_peak_obs <- RFxSum %>% filter(Chemical == "Malathion") %>%  slice(1) %>% pull(peak_obs)
+prof_peak_obs <- RFxSum %>% filter(Chemical == "Profenofos") %>%  slice(1) %>% pull(peak_obs)
+
+#Vector of chemicals that have response functions and are found in observed datasets
+msqa2013_obs_chems <- RFxSum %>% 
+  filter(!is.na(msqa2013_peak)) %>% 
+  pull(Chemical) %>% unique()
+
+nawqa_obs_chems <- RFxSum %>% 
+  filter(!is.na(nawqa_peak)) %>% 
+  pull(Chemical) %>% unique()
 
 ```
 
-## Effects on $R_0$ over relevant concentrations  
+Looks clear that for most chemicals, the EPA peak EEC is higher than the peak observed in the NAWQA and SURF datasets. This makes sense as these observations are weekly at best in terms of their temporal resolution and observations are unlikely to coincide with times when peak surface water contamination occurs, e.g. right after a heavy runoff event. See [here](https://doi.org/10.1016/j.watres.2019.03.038) for a more in depth discussion of this.
 
-```{r gen_range_par_sets, cache = T}
-source("../Sims/Range/generate_conc_range_parameter_sets.R")
+## Time series of concentrations generated by PWC software  
+```{r pwc_time_series, message=FALSE, warning = FALSE, echo = FALSE, cache = TRUE}
+atr_pwc_ts <- read_csv("../Sims/Data/Agrochem_Time_Series/atrazine/atrazine_MScornSTD_Reservoir_Parent_daily.csv",
+                       skip = 5,
+                       col_names = c("Depth",
+                                     "daily_avg_surface",
+                                     "daily_avg_benthic",
+                                     "daily_peak_surface")) %>% 
+  mutate_all(function(x) x*1000000) %>%  # Convert kg/m^3 to ppb
+  dplyr::select(-Depth) %>%              # Get rid of depth column
+  mutate(day = row_number(),             # add time variable 
+         chem = "Atrazine")              # Add chem name variable     
+
+chlor_pwc_ts <- read_csv("../Sims/Data/Agrochem_Time_Series/chlorpyrifos/chlorpyrifos_MScornSTD_Reservoir_Parent_daily.csv",
+                       skip = 5,
+                       col_names = c("Depth",
+                                     "daily_avg_surface",
+                                     "daily_avg_benthic",
+                                     "daily_peak_surface")) %>% 
+  mutate_all(function(x) x*1000000) %>%  # Convert kg/m^3 to ppb
+  dplyr::select(-Depth) %>%              # Get rid of depth column
+  mutate(day = row_number(),             # add time variable 
+         chem = "Chlorpyrifos")           # Add chem name variable     
+
+
+gly_pwc_ts <- read_csv("../Sims/Data/Agrochem_Time_Series/glyphosate/glyphosate_MScornSTD_Reservoir_Parent_daily.csv",
+                       skip = 5,
+                       col_names = c("Depth",
+                                     "daily_avg_surface",
+                                     "daily_avg_benthic",
+                                     "daily_peak_surface")) %>% 
+  mutate_all(function(x) x*1000000) %>%  # Convert kg/m^3 to ppb
+  dplyr::select(-Depth) %>%              # Get rid of depth column
+  mutate(day = row_number(),             # add time variable 
+         chem = "Glyphosate")           # Add chem name variable     
+
+
+mal_pwc_ts <- read_csv("../Sims/Data/Agrochem_Time_Series/malathion/malathion_MScornSTD_Reservoir_Parent_daily.csv",
+                       skip = 5,
+                       col_names = c("Depth",
+                                     "daily_avg_surface",
+                                     "daily_avg_benthic",
+                                     "daily_peak_surface")) %>% 
+  mutate_all(function(x) x*1000000) %>%  # Convert kg/m^3 to ppb
+  dplyr::select(-Depth) %>%              # Get rid of depth column
+  mutate(day = row_number(),             # add time variable 
+         chem = "Malathion")           # Add chem name variable     
+
+
+prof_pwc_ts <- read_csv("../Sims/Data/Agrochem_Time_Series/profenofos/profenofos_MScornSTD_Reservoir_Parent_daily.csv",
+                       skip = 5,
+                       col_names = c("Depth",
+                                     "daily_avg_surface",
+                                     "daily_avg_benthic",
+                                     "daily_peak_surface")) %>% 
+  mutate_all(function(x) x*1000000) %>%  # Convert kg/m^3 to ppb
+  dplyr::select(-Depth) %>%              # Get rid of depth column
+  mutate(day = row_number(),             # add time variable 
+         chem = "Profenofos")           # Add chem name variable     
+
+all_pwc_ts <- bind_rows(atr_pwc_ts,
+                        chlor_pwc_ts,
+                        gly_pwc_ts,
+                        mal_pwc_ts,
+                        prof_pwc_ts) %>% 
+  mutate(year = day/365)
+
+all_pwc_ts %>% 
+  ggplot(aes(x = year, y = daily_peak_surface)) +
+    geom_line() +
+    theme_classic() +
+    labs(x = "Year", y = "Daily peak concentration (ppb)") +
+    facet_wrap(~chem, nrow = 5, scales = "free_y")
+
+
 ```
 
 
-### EEC as peak concentration
+# Analyses at relevant environmental concentrations  
+
+## Individual ("component") response function effects on $R_0(q)$   
+Sample parameter sets for each response function at its peak EEC and peak observed concentration are generated in `Sims/EEC/generate_eec_parameter_sets.R` and `Sims/EEC/generate_peak_obs_parameter_sets.R` and stored in the `Sims/EEC/Parameter_Sets` folder. These parameter sets are generated from 1000 random draws of the transmission parameters generated from the fitting procedure and from the response functions themselves. These parameter sets are then used to estimate the agrochemical effect on $R_0$ at each chemical's EEC and all response functions resulting in an estimate outside of the IQR of the baseline model (with only uncertainty in transmission parameters) are shown in the forestplot below.
+
+### Forestplot of effects at peak EEC  
+```{r forestplot_eec_process, include=FALSE, warning = FALSE, message = FALSE, cache=TRUE}
+#Create labels field for complex axis labels of forestplot
+  max_study_string <- max(str_length(RFxSum$study_long))
+  max_chem_string <- max(str_length(RFxSum$Chemical))
+  max_species_string <- max(str_length(RFxSum$Species))
+  
+  RFxSum <- RFxSum %>% 
+    mutate(study_long2 = if_else(dose_response == 1,
+                                 study_long,
+                                 str_c(study_long, "*")),
+           labels = str_c(str_pad(study_long2, 
+                                  max_study_string+1, "right"),
+                          str_pad(Chemical, 
+                                  max_chem_string+1, "left"),
+                          str_pad(Species, 
+                                  max_species_string+3, "left")))
+  
+#Load all parameter sets into one dataframe
+all_eec_pars <- 
+  do.call(rbind,
+          lapply(paste0("../Sims/EEC/Parameter_Sets/",
+                       list.files(path = "../Sims/EEC/Parameter_Sets/")[grepl("_eec_",
+                                                                              list.files(path = "../Sims/EEC/Parameter_Sets/"))]), 
+                 readRDS))
+
+#Apply r0 function to all parameter sets
+  eec_r0s <- pmap_df(all_eec_pars %>% dplyr::select(-Study_ID_Unique), r0.Ag.pars)
+  
+#bind parameters and results together
+  all_eec_sims <- cbind(all_eec_pars, eec_r0s) %>% 
+    left_join(RFxSum)
+  
+#Separate baseline sims from all other sims
+  baseline_eec_sims <- all_eec_sims %>% filter(Study_ID_Unique == "baseline_eec_parameters")
+  
+#Baseline summary statistics  
+  base_r0_median <- median(baseline_eec_sims$R0)
+  base_r0_q25 <- quantile(baseline_eec_sims$R0, 0.25)
+  base_r0_q75 <- quantile(baseline_eec_sims$R0, 0.75)
+
+  base_r0_q025 <- quantile(baseline_eec_sims$R0, 0.025)
+  base_r0_q975 <- quantile(baseline_eec_sims$R0, 0.975)
+
+#All other sims  
+  eec_sims <- all_eec_sims %>% filter(Study_ID_Unique != "baseline_eec_parameters")
+
+# Dataframe of summary results 
+gg_forest_df <- eec_sims %>% 
+    group_by(Study_ID_Unique) %>% 
+    summarise(med_R0 = median(R0),
+              R0_25 = quantile(R0, 0.25),
+              R0_75 = quantile(R0, 0.75),
+              Pathway = first(Pathway),
+              Class = first(Class),
+              Parameter = first(parameter),
+              label = first(labels)) %>% 
+    arrange(Class, med_R0) %>% 
+    mutate(order = row_number())
+
+```
+
+```{r forestplot_eec, include=FALSE, warning = FALSE, message = FALSE, cache=TRUE}
+gg_forest_eec <- gg_forest_df %>%
+  mutate(sig = case_when(med_R0 > base_r0_median*1.05 ~ 1,
+                         med_R0 < base_r0_median*0.95 ~ 1,
+                         med_R0 < base_r0_median*1.05 & med_R0 > base_r0_median*0.95 ~ 0)) %>% 
+  filter(sig == 1) %>% 
+    ggplot(aes(y = as.factor(order), 
+               x = med_R0, xmin = R0_25, xmax = R0_75, 
+               col = Parameter)) + 
+      theme_ms() +
+      theme(axis.title.y = element_blank(),
+            axis.text.y = element_text(hjust = 0, family = "mono",
+                                       size = 9),
+            axis.ticks.y = element_blank(),
+            axis.text.x = element_text(size = 12),
+            axis.title.x = element_text(size = 14),
+            strip.text = element_text(size = 13),
+            legend.position = c(0.8, 0.15),
+            legend.text = element_text(size = 8),
+            legend.title = element_text(size = 9),
+            legend.background = element_rect(color = "black",
+                                             size=0.5, 
+                                             linetype="solid",
+                                             fill = "white")) +
+      geom_rect(xmin = base_r0_q25, xmax = base_r0_q75,
+                ymin = -Inf, ymax = Inf, 
+                alpha = 0.2, fill = "grey90", col = "grey90") +
+      geom_vline(xintercept = base_r0_median) +
+      geom_point() +
+      geom_errorbarh(height = 0.2) +
+      scale_color_manual(name = "Parameter affected",
+                         values = c("mupq" = "#00468BFF",
+                                    "munq" = "#ED0000FF",
+                                    "Knq" = "#42B540FF",
+                                    "psiq" = "#0099B4FF",
+                                    "picq" = "#925E9FFF",
+                                    "pimq" = "#FDAF91FF",
+                                    "fnq" = "#AD002AFF",
+                                    "thetaq" = "#ADB6B6FF",
+                                    "vq" = "#1B1919FF"),
+                         labels = c(expression(Snail~reproduction~(italic(f[N]))),
+                                    expression(Snail~carrying~capacity~(italic(K[N]))),
+                                    expression(Snail~mortality~(italic(mu[N]))),
+                                    expression(Predator~mortality~(italic(mu[P]))),
+                                    expression(Cercarial~survival~(italic(pi[C]))),
+                                    expression(Miracidial~survival~(italic(pi[M]))),
+                                    expression(Predator~consumption~(italic(psi))),
+                                    expression(Snail~cercarial~shedding~(italic(theta))),
+                                    expression(Schistosome~egg~viability~(italic(v))))) +
+      scale_y_discrete(breaks = as.factor(gg_forest_df$order), 
+                       labels = gg_forest_df$label) +
+      facet_grid(Class~., scales = "free", space = "free") +
+      labs(x = expression(paste(italic(R[0]), 
+                                "(", italic(EEC[c]), ")", 
+                                sep = "")))
+
+ggsave("../Plots/Forestplot_sig_effects_eec.jpg",
+       plot = gg_forest_eec,
+       width = 11.5, height = 8, units = "in", dpi = 300)
+
+
+```
+
+![Forestplot of agrochemical effects with median effects different from baseline at EEC](../Plots/Forestplot_sig_effects_eec.jpg)
+
+
+```{r forestplot_poc_process, include=FALSE, warning = FALSE, message = FALSE, cache=TRUE}
+#Load all parameter sets into one dataframe
+all_peak_conc_pars <- 
+  do.call(rbind,
+          lapply(paste0("../Sims/EEC/Parameter_Sets/",
+                       list.files(path = "../Sims/EEC/Parameter_Sets/")[grepl("_peak_conc_",
+                                                                              list.files(path = "../Sims/EEC/Parameter_Sets/"))]), 
+                 readRDS))
+
+#Apply r0 function to all parameter sets
+  poc_r0s <- pmap_df(all_peak_conc_pars %>% dplyr::select(-Study_ID_Unique), r0.Ag.pars)
+  
+#bind parameters and results together
+  peak_conc_sims <- cbind(all_peak_conc_pars, poc_r0s) %>% 
+    left_join(RFxSum)
+
+#Baseline summary statistics already derived in eec sims above  
+
+# Dataframe of summary results 
+gg_forest_peak_conc_df <- peak_conc_sims %>% 
+    group_by(Study_ID_Unique) %>% 
+    summarise(med_R0 = median(R0),
+              R0_25 = quantile(R0, 0.25),
+              R0_75 = quantile(R0, 0.75),
+              Pathway = first(Pathway),
+              Class = first(Class),
+              Parameter = first(parameter),
+              label = first(labels)) %>% 
+    arrange(Class, med_R0) %>% 
+    mutate(order = row_number())
+
+```
+
+```{r forestplot_poc_eec, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# Combine two data frames generated in processing above and ggplot  
+#Filter to show only results that are greater/less than baseline median value
+forest_comb_df <- bind_rows(eec_sims %>% 
+                              group_by(Study_ID_Unique) %>% 
+                              summarise(med_R0 = median(R0),
+                                        R0_25 = quantile(R0, 0.25),
+                                        R0_75 = quantile(R0, 0.75),
+                                        Pathway = first(Pathway),
+                                        Class = first(Class),
+                                        Parameter = first(parameter),
+                                        label = first(labels),
+                                        q_c = "EEC"),
+                            peak_conc_sims %>% 
+                              group_by(Study_ID_Unique) %>% 
+                              summarise(med_R0 = median(R0),
+                                        R0_25 = quantile(R0, 0.25),
+                                        R0_75 = quantile(R0, 0.75),
+                                        Pathway = first(Pathway),
+                                        Class = first(Class),
+                                        Parameter = first(parameter),
+                                        label = first(labels),
+                                        q_c = "POC"))
+
+gg_forest_comb_conc <- forest_comb_df %>%
+    ggplot(aes(y = as.factor(order), 
+               x = med_R0, xmin = R0_25, xmax = R0_75, 
+               col = Parameter,
+               pch = q_c)) + 
+      theme_ms() +
+      theme(axis.title.y = element_blank(),
+            axis.text.y = element_text(hjust = 0, family = "mono",
+                                       size = 9),
+            axis.ticks.y = element_blank(),
+            axis.text.x = element_text(size = 12),
+            axis.title.x = element_text(size = 14),
+            legend.position = c(0.75, 0.2),
+            legend.background = element_rect(color = "black",
+                                             size=0.5, linetype="solid")) +
+      geom_rect(xmin = base_r0_q25, xmax = base_r0_q75,
+                ymin = -Inf, ymax = Inf, 
+                alpha = 0.2, fill = "grey90", col = "grey90") +
+      geom_vline(xintercept = base_r0_median) +
+      geom_point() +
+      geom_errorbarh(height = 0.2) +
+      scale_color_manual(name = "Parameter affected",
+                         values = c("mupq" = "#00468BFF",
+                                    "munq" = "#ED0000FF",
+                                    "Knq" = "#42B540FF",
+                                    "psiq" = "#0099B4FF",
+                                    "picq" = "#925E9FFF",
+                                    "pimq" = "#FDAF91FF",
+                                    "fnq" = "#AD002AFF",
+                                    "thetaq" = "#ADB6B6FF",
+                                    "vq" = "#1B1919FF"),
+                         labels = c(expression(Snail~reproduction~(italic(f[N]))),
+                                    expression(Snail~carrying~capacity~(italic(K[N]))),
+                                    expression(Snail~mortality~(italic(mu[N]))),
+                                    expression(Predator~mortality~(italic(mu[P]))),
+                                    expression(Cercarial~survival~(italic(pi[C]))),
+                                    expression(Miracidial~survival~(italic(pi[M]))),
+                                    expression(Predator~consumption~(italic(psi))),
+                                    expression(Snail~cercarial~shedding~(italic(theta))),
+                                    expression(Schistosome~egg~viability~(italic(v))))) +
+      facet_grid(Class~., scales = "free", space = "free") +
+      labs(x = expression(paste(italic(R[0]), 
+                                "(", italic(q[c]), ")", 
+                                sep = "")))
+
+# ggsave("../Plots/Forestplot_sig_effects_poc_eec.jpg",plot = gg_forest_comb_conc,width = 11.5, height = 8, units = "in", dpi = 300)
+
+```
+
+
+
+## Net (combined) effects of agrochemicals on $R_0$  
+For chemicals with multiple response functions and multiple parameters affected, estimate the net effect of the agrochemical across a broad range of environmentally relevant concentrations. Parameter sets generated in `Sims/Range/generate_conc_range_parameter_sets.R` and stored in the `Sims/Range/Parameter_Sets` folder
+
+### Net agrochemical effects at EECs and POCs  
+For chemicals with dose-response functions for every hypothesized parameter affected, estimate net effect on $R_0$ at peak eec  
+
+```{r eec_net_r0s, cache=T}
+#Get parameter sets and estimate R0 for 1000 par sets at eec
+atr_eec_pars <- readRDS("../Sims/Range/Parameter_Sets/atrazine_eec_pars.rds")
+chlor_eec_pars <- readRDS("../Sims/Range/Parameter_Sets/chlorpyrifos_eec_pars.rds")
+gly_eec_pars <- readRDS("../Sims/Range/Parameter_Sets/glyphosate_eec_pars.rds")
+mal_eec_pars <- readRDS("../Sims/Range/Parameter_Sets/malathion_eec_pars.rds")
+prof_eec_pars <- readRDS("../Sims/Range/Parameter_Sets/profenofos_eec_pars.rds")
+
+#Function to summarize R_0(q) for eec par sets
+sum_eec_r0_effect <- function(eec_par_set){
+#Apply r0 function to all parameter sets
+  r0s <- pmap_df(eec_par_set %>% dplyr::select(-c(logp1_conc, conc)), r0.Ag.pars)
+  
+  r0_med <- median(r0s$R0)
+  r0_25 <- quantile(r0s$R0, 0.25)
+  r0_75 <- quantile(r0s$R0, 0.75)
+
+  return(round(c(r0_25, r0_med, r0_75), 2))
+}
+
+base_effects <- c(base_r0_q25, base_r0_median, base_r0_q75)
+
+sum_eec_effects <- do.call(rbind, lapply(list(atr_eec_pars,
+                                              chlor_eec_pars,
+                                              gly_eec_pars,
+                                              mal_eec_pars,
+                                              prof_eec_pars),
+                                         sum_eec_r0_effect))
+
+sum_eec_effects <- rbind(base_effects, sum_eec_effects)
+
+row.names(sum_eec_effects) = c("Baseline",
+                               "Atrazine", 
+                               "Chlorpyrifos",
+                               "Glyphosate",
+                               "Malathion",
+                               "Profenofos")
+sum_eec_effects %>% 
+  knitr::kable(row.names = T,
+               col.names = c("25th percentile",
+                             "median",
+                             "75th percentile"),
+               caption = "Summary estimates of agrochemical effects on R0 for each chemical at its EEC")
+```
+
+```{r poc_net_r0s, cache=T}
+#Get parameter sets and estimate R0 for 1000 par sets at eec
+atr_poc_pars <- readRDS("../Sims/Range/Parameter_Sets/atrazine_poc_pars.rds")
+chlor_poc_pars <- readRDS("../Sims/Range/Parameter_Sets/chlorpyrifos_poc_pars.rds")
+gly_poc_pars <- readRDS("../Sims/Range/Parameter_Sets/glyphosate_poc_pars.rds")
+mal_poc_pars <- readRDS("../Sims/Range/Parameter_Sets/malathion_poc_pars.rds")
+prof_poc_pars <- readRDS("../Sims/Range/Parameter_Sets/profenofos_poc_pars.rds")
+
+base_effects <- c(base_r0_q25, base_r0_median, base_r0_q75)
+
+sum_poc_effects <- do.call(rbind, lapply(list(atr_poc_pars,
+                                              chlor_poc_pars,
+                                              gly_poc_pars,
+                                              mal_poc_pars,
+                                              prof_poc_pars),
+                                         sum_eec_r0_effect))
+
+sum_poc_effects <- rbind(base_effects, sum_poc_effects)
+
+row.names(sum_poc_effects) = c("Baseline",
+                               "Atrazine", 
+                               "Chlorpyrifos",
+                               "Glyphosate",
+                               "Malathion",
+                               "Profenofos")
+sum_poc_effects %>% 
+  knitr::kable(row.names = T,
+               col.names = c("25th percentile",
+                             "median",
+                             "75th percentile"),
+               caption = "Summary estimates of agrochemical effects on R0 for each chemical at its POC")
+```
+
+### Net agrochemical effects across a range of environmentally relevant concentrations  
 ```{r r0_range_eec, cache=TRUE}
 #Get parameter sets and estimate R0 across concentration range tested
 atr_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/atrazine_net_parameters_eec.rds")
@@ -780,535 +782,58 @@ prof_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/profenofos_net_par
         geom_line(size = 0.75) +
         geom_ribbon(alpha = 0.25, size = 0.01) +
         geom_hline(yintercept = base_r0_median, lty = 2) +
-        labs(y = expression(paste(R[0], "(", q[c], ")")),
+        labs(y = expression(paste(italic(R[0]), "(", italic(q[c]), ")")),
              x = expression(Agrochemical~Concentration~(italic(q[c]))~Normalized~to~italic(EEC[c]))) + 
         scale_x_continuous(trans = "log",
                            breaks = c(0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 2),
                            labels = c("0.00001", "0.0001", ".001", "0.01", "0.1", "1", "2"),
                            limits = c(0.00001, 2)) +
+        ylim(c(0,4)) +
         scale_color_manual(values = c("Atrazine" = "#FDAF91FF",
-                                      "Chlorpyrifos" = "#ED000099",
+                                      "Chlorpyrifos" = "#925E9F99",
                                       "Glyphosate" = "#42B54099",
-                                      "Malathion" = "#925E9F99",
+                                      "Malathion" = "#ED000099",
                                       "Profenofos" = "#0099B499")) +
         scale_fill_manual(values = c("Atrazine" = "#FDAF91FF",
-                                      "Chlorpyrifos" = "#ED000099",
+                                      "Chlorpyrifos" = "#925E9F99",
                                       "Glyphosate" = "#42B54099",
-                                      "Malathion" = "#925E9F99",
+                                      "Malathion" = "#ED000099",
                                       "Profenofos" = "#0099B499")) +
-        theme_classic() +
-        theme(legend.position = c(0.1, 0.8),
+        theme_ms() +
+        geom_vline(xintercept = atr_peak_obs/atr_eec, col = "#FDAF91FF", lty = 2, lwd = 1.2) +
+        geom_vline(xintercept = chlor_peak_obs/chlor_eec, col = "#925E9F99", lty = 2, lwd = 1.2) +
+        geom_vline(xintercept = gly_peak_obs/gly_eec, col = "#42B54099", lty = 2, lwd = 1.2) +
+        geom_vline(xintercept = mal_peak_obs/mal_eec, col = "#ED000099", lty = 2, lwd = 1.2) +
+        geom_vline(xintercept = prof_peak_obs/prof_eec, col = "#0099B499", lty = 2, lwd = 1.2) +
+        theme(legend.position = c(0.15, 0.85),
+              legend.text = element_text(size = 8),
+              legend.title = element_text(size = 9),
               legend.background = element_rect(color = "black",
                                                size=0.5, 
-                                               linetype="solid"))
+                                               linetype="solid",
+                                               fill = "white"))
       
-    range_plot
+    ggsave("../Plots/range_plot_2xEEC.jpg", range_plot, width = 8, height = 6, dpi = 300, units = "in")
     
-    ggsave("../Plots/range_plot_2xEEC.jpg", range_plot,
-           width = 8, height = 6, dpi = 300, units = "in")
-    ```
-
-### Peak observed concentration as peak concentration  
-```{r r0_range_peak_obs, cache=TRUE}
-#Get parameter sets and estimate R0 across concentration range tested
-atr_peak_obs_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/atrazine_net_parameters_peak_obs.rds")
-chlor_peak_obs_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/chlorpyrifos_net_parameters_peak_obs.rds")
-gly_peak_obs_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/glyphosate_net_parameters_peak_obs.rds")
-mal_peak_obs_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/malathion_net_parameters_peak_obs.rds")
-prof_peak_obs_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/profenofos_net_parameters_peak_obs.rds")
-
-#Apply r0 function to all parameter sets
-  atr_peak_obs_r0s <- pmap_df(atr_peak_obs_conc_range_pars %>% dplyr::select(-c(logp1_conc, conc)), r0.Ag.pars)
-    atr_peak_obs_conc_range_fin <- cbind(atr_peak_obs_conc_range_pars, atr_r0s) %>% 
-      mutate(Chemical = "Atrazine",
-             rel_conc = conc/atr_peak_obs)
-  
-  chlor_peak_obs_r0s <- pmap_df(chlor_peak_obs_conc_range_pars %>% dplyr::select(-c(logp1_conc, conc)), r0.Ag.pars)
-    chlor_peak_obs_conc_range_fin <- cbind(chlor_peak_obs_conc_range_pars, chlor_r0s) %>% 
-      mutate(Chemical = "Chlorpyrifos",
-             rel_conc = conc/chlor_peak_obs)
-
-  gly_peak_obs_r0s <- pmap_df(gly_peak_obs_conc_range_pars %>% dplyr::select(-c(logp1_conc, conc)), r0.Ag.pars)
-    gly_peak_obs_conc_range_fin <- cbind(gly_peak_obs_conc_range_pars, gly_r0s) %>% 
-      mutate(Chemical = "Glyphosate",
-             rel_conc = conc/gly_peak_obs)
-
-  mal_peak_obs_r0s <- pmap_df(mal_peak_obs_conc_range_pars %>% dplyr::select(-c(logp1_conc, conc)), r0.Ag.pars)
-    mal_peak_obs_conc_range_fin <- cbind(mal_peak_obs_conc_range_pars, mal_r0s) %>% 
-      mutate(Chemical = "Malathion",
-             rel_conc = conc/mal_peak_obs)
-
-  prof_peak_obs_r0s <- pmap_df(prof_peak_obs_conc_range_pars %>% dplyr::select(-c(logp1_conc, conc)), r0.Ag.pars)
-    prof_peak_obs_conc_range_fin <- cbind(prof_peak_obs_conc_range_pars, prof_r0s) %>% 
-      mutate(Chemical = "Profenofos",
-             rel_conc = conc/prof_peak_obs)
-
-  #Put them all together and plot  
-    range_plot_peak_obs <- bind_rows(atr_peak_obs_conc_range_fin,
-                                     chlor_peak_obs_conc_range_fin,
-                                     gly_peak_obs_conc_range_fin,
-                                     mal_peak_obs_conc_range_fin,
-                                     prof_peak_obs_conc_range_fin) %>% 
-      group_by(Chemical, rel_conc) %>% 
-      summarise(med_r0 = median(R0),
-                r0_25 = quantile(R0, 0.25),
-                r0_75 = quantile(R0, 0.75)) %>% 
-      mutate(r0_smooth = rollmean(med_r0, k = 10, align = "left", fill = c(NA,NA,NA)),
-             r025_smooth = rollmean(r0_25, k = 10, align = "left", fill = c(NA,NA,NA)),
-             r075_smooth = rollmean(r0_75, k = 10, align = "left", fill = c(NA,NA,NA))) %>% 
-      ggplot(aes(x = rel_conc, 
-                 y = r0_smooth, ymin = r025_smooth, ymax = r075_smooth, 
-                 col = Chemical, fill = Chemical)) +
-        geom_line(size = 0.75) +
-        geom_ribbon(alpha = 0.25, size = 0.01) +
-        geom_hline(yintercept = base_r0_median, lty = 2) +
-        labs(y = expression(italic(R[0](q[c]))),
-             x = expression(Agrochemical~Concentration~(italic(q[c]))~Normalized~to~italic(POC[c]))) + 
-        #ggtitle(expression(paste("Combined effects of key agrochemicals on estimates of ", R[0], "(q)"))) +
-        scale_x_continuous(trans = "log",
-                           breaks = c(0.00001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1),
-                           labels = c("0.00001", "0.0001", ".001", "0.01", "0.1", "1"),
-                           limits = c(0.00001,1.1)) +
-        scale_color_manual(values = c("Atrazine" = "#FDAF91FF",
-                                      "Chlorpyrifos" = "#ED000099",
-                                      "Glyphosate" = "#42B54099",
-                                      "Malathion" = "#925E9F99",
-                                      "Profenofos" = "#0099B499")) +
-        scale_fill_manual(values = c("Atrazine" = "#FDAF91FF",
-                                     "Chlorpyrifos" = "#ED000099",
-                                     "Glyphosate" = "#42B54099",
-                                     "Malathion" = "#925E9F99",
-                                     "Profenofos" = "#0099B499")) +
-      theme_classic() +
-      theme(legend.position = c(0.1, 0.8),
-            legend.background = element_rect(color = "black",
-                                             size=0.5, 
-                                             linetype="solid"))
-    
-    range_plot_peak_obs
-    
-    ggsave("../Plots/r0_range_plot_POC.jpg", range_plot_peak_obs,
-           width = 8, height = 6, dpi = 300, units = "in")
 ```
 
-## Final Figures  
-
-```{r range_fin_fig}
-#Put plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/)
-range_plot <- ggplotGrob(range_plot + 
-                           theme(axis.title.x = element_blank(),
-                                 axis.text.x = element_blank(),
-                                 legend.position = c(0.2, 0.8),
-                                 legend.background = element_rect(fill="grey90", 
-                                                                  color = "black",
-                                                                  size=0.5, 
-                                                                  linetype="solid")))
-range_box <- ggplotGrob(obs_boxplot_all_eec + 
-                          theme(axis.title.y = element_blank(),
-                                axis.text.y = element_blank(),
-                                axis.ticks.y = element_blank(),
-                                axis.line.y = element_blank(),
-                                plot.title = element_blank(),
-                                plot.subtitle = element_blank(),
-                                legend.position = "none"))
-# stack the two plots
-range_fig <- rbind(range_plot, range_box, size="first") 
-# use the largest widths
-range_fig$widths <- unit.pmax(range_plot$widths, range_box$widths) 
-#Adjust the heights
-panels <- range_fig$layout$t[grep("panel", range_fig$layout$name)]
-range_fig$heights[panels[1]] <- unit(5, "null") 
-range_fig$heights[panels[2]] <- unit(1,"null") 
-
-#save the plot
-jpeg("../Plots/r0_range_plot.jpg", 
-     height = 6, width = 8.5, units = "in", res = 300)
-
-#Print the plot
-grid.draw(range_fig)  
-
-dev.off()
-```
-
-![Effect of agrochemicals with sufficient information on $R_0$ estimates over a range of feasible environmental concentrations and distribution of observed agrochemical concentrations from all observed datasets](../Plots/r0_range_plot.jpg)
-
-
-```{r range_fin_fig2}
-#Put plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/)
-range_plot_peak_obs <- ggplotGrob(range_plot_peak_obs + 
-                           theme(axis.title.x = element_blank(),
-                                 axis.text.x = element_blank(),
-                                 legend.position = c(0.2, 0.8),
-                                 legend.background = element_rect(fill="grey90", 
-                                                                  color = "black",
-                                                                  size=0.5, 
-                                                                  linetype="solid")))
-obs_boxplot_all <- ggplotGrob(obs_boxplot_all + 
-                          theme(axis.title.y = element_blank(),
-                                axis.text.y = element_blank(),
-                                axis.ticks.y = element_blank(),
-                                axis.line.y = element_blank(),
-                                plot.title = element_blank(),
-                                plot.subtitle = element_blank(),
-                                legend.position = "none"))
-# stack the two plots
-range_fig2 <- rbind(range_plot_peak_obs, obs_boxplot_all, size="first") 
-# use the largest widths
-range_fig2$widths <- unit.pmax(range_plot_peak_obs$widths, obs_boxplot_all$widths) 
-#Adjust the heights
-panels <- range_fig2$layout$t[grep("panel", range_fig2$layout$name)]
-range_fig2$heights[panels[1]] <- unit(5, "null") 
-range_fig2$heights[panels[2]] <- unit(1,"null") 
-
-#save the plot
-jpeg("../Plots/r0_range_plot_obs_conc.jpg", 
-     height = 6, width = 8.5, units = "in", res = 300)
-
-#Print the plot
-grid.draw(range_fig2)  
-
-dev.off()
-
-```
-
-![Effect of agrochemicals with sufficient information on $R_0$ estimates over a range of feasible environmental concentrations up to max observed concentration observed in NAWQA, CA SURF and MSQA 2013 databases and distribution of observed agrochemical concentrations above detection limit from same 3 datasets](../Plots/r0_range_plot_obs_conc.jpg)
+![Net agrochemical effects on $R_0(q)$ across a range of relevant environmental concentrations](../Plots/range_plot_2xEEC.jpg)
 
 # Analyses of agrochemical effects on DALYs averted in a routine annual MDA campaign  
 Next approach is to assess the impact of a routine MDA campaign on reducing disability associated with S. haematobium infection in an agrochemical-free setting vs. one in which agrochemical pollution is present. Also want to consider a predator-free vs predator setting  
 
-## Agrochemical time series  
-First step is to get time series of agrochemical concentrations that will be used to force the agrochemically influenced model. Want to find sites from observed databases that have consistent readings that are above the detection limit so that we're confident in the actual values and can also consider a worst case scenario
-
-#### Atrazine  
-```{r atr_agrochem_ts, message=FALSE, warning = FALSE, echo = FALSE}
-#Identify most heavily polluted atrazine sites in MSQA sampling
-msqa2013_obs_full_chems %>% 
-  filter(PARM_NM == "Atrazine, wf") %>% 
-  group_by(SHORT_NAME) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(RESULT_CEN[which(REMARK_CEN != "<")]),
-            mean_conc = mean(RESULT_CEN[which(REMARK_CEN != "<")])/1000,
-            med_conc = median(RESULT_CEN[which(REMARK_CEN != "<")])/1000,
-            max_conc = max(RESULT_CEN[which(REMARK_CEN != "<")])/1000) %>% 
-  arrange(-n_obs_above_det, -max_conc) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Atrazine concentration sites in MSQA 2013 pesticide monitoring")
-
-#Identify most heavily polluted atrazine sites in all NAwqa sampling
-pestdat %>% 
-  mutate(samp_year = year(SAMPLE_DATE)) %>% 
-  filter(CONSTIT == "Atrazine") %>% 
-  group_by(SITE_QW_NAME, samp_year) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(CONCENTRATION[which(REMARK != "<")]),
-            mean_conc = mean(CONCENTRATION[which(REMARK != "<")]),
-            med_conc = median(CONCENTRATION[which(REMARK != "<")]),
-            max_conc = max(CONCENTRATION[which(REMARK != "<")])) %>% 
-  ungroup() %>% 
-  arrange(-max_conc, -n_obs_above_det) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Atrazine concentration sites in full NAWQA database")
-
-#Identify most heavily polluted atrazine sites in CA SURF sampling
-ca_surf_obs_full_chems %>% 
-  mutate(SAMP_YEAR = year(SAMP_DATE)) %>% 
-  filter(CHEMICAL == "atrazine") %>% 
-  group_by(SITE_CODE, SAMP_YEAR) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            mean_conc = mean(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            med_conc = median(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            max_conc = max(CONC_PPB[which(CONC_PPB > LOQ_PPB)])) %>% 
-  ungroup() %>% 
-  arrange(-max_conc) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Atrazine concentration sites in CA_SURF pesticide monitoring")
-
-```
-
-Looks like the MSQA Summer 2013 and NAWQA databases contain sites that could produce a good time series of atrazine concentration. CA SURF data is mostly older, has few observations above detection limit, and has lower concentrations than other datasets
-
-```{r atr_force_functions}
-#Interpolate time series of atrazine concentration for top site in midwest summer 2013 database
-atr_mw2013_site <- msqa2013_obs_full_chems %>% 
-  filter(PARM_NM == "Atrazine, wf" & SHORT_NAME == "IL_Galum") %>% 
-  mutate(chem = "Atrazine",
-         Concentration = RESULT_CEN/1000)
-
-atr_mw2013_site
-
-atr_mw2013_ts <- data.frame(chem = "Atrazine",
-                     samp_date = seq.Date(as.Date("2013-01-01"), as.Date("2013-12-31"), "day")) %>% 
-  mutate(day = yday(samp_date),
-         week = week(samp_date)) %>% 
-  left_join(atr_mw2013_site, by = c("chem" = "chem", "samp_date" = "SAMPLE_DATE")) %>% 
-  mutate(Conc_interp = replace_na(na.approx(Concentration, na.rm = FALSE), 0))
-
-atr_mw2013_force <- approxfun(atr_mw2013_ts$Conc_interp, rule = 2)
-
-#Interpolate time series of atrazine concentration for top site in NAWQA database
-atr_nawqa_site <- pestdat %>% 
-  filter(CONSTIT == "Atrazine" & SITE_QW_NAME == "Maple Creek near Nickerson, NE" & year(SAMPLE_DATE) == 2004)
-
-atr_nawqa_ts <- data.frame(chem = "Atrazine",
-                           samp_date = seq.Date(as.Date("2004-01-01"), as.Date("2004-12-31"), "day")) %>% 
-  mutate(day = yday(samp_date),
-         week = week(samp_date)) %>% 
-  left_join(atr_nawqa_site, by = c("chem" = "CONSTIT", "samp_date" = "SAMPLE_DATE")) %>% 
-  mutate(Conc_interp = replace_na(na.approx(CONCENTRATION, na.rm = FALSE), 0))
-
-atr_nawqa_force <- approxfun(atr_nawqa_ts$Conc_interp, rule = 2)
-
-#Plot to compare two time series from forcing functions
-data.frame(obs_day = rep(c(1:365),2),
-           Atr_est = c(map_dbl(c(1:365), atr_mw2013_force), map_dbl(c(1:365), atr_nawqa_force)),
-           dataset = c(rep("MW2013", 365), rep("NAWQA", 365))) %>% 
-  ggplot(aes(x = obs_day, y = Atr_est, col = dataset)) +
-    theme_classic() +
-    geom_line(size = 1.2) +
-    labs(title = "Atrazine time series from top sites in NAWQA",
-         y = "Atrazine (ppb)",
-         x = "Day of year")
-```
-
-Not much difference in these two time series, we'll go with MSQA 2013 since it's a bit more contemporaneous, has better temporal resolution, and has a higher peak concentration, representing a worst case scenario
-
-#### Chlorpyrifos  
-```{r chlor_agrochem_ts, message=FALSE, warning = FALSE, echo = FALSE}
-#Identify most heavily polluted Chlorpyrifos sites in all MSQA sampling
-msqa2013_obs_full_chems %>% 
-  filter(PARM_NM == "Chlorpyrifos, wf") %>% 
-  group_by(SHORT_NAME) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(RESULT_CEN[which(REMARK_CEN != "<")]),
-            mean_conc = mean(RESULT_CEN[which(REMARK_CEN != "<")])/1000,
-            med_conc = median(RESULT_CEN[which(REMARK_CEN != "<")])/1000,
-            max_conc = max(RESULT_CEN[which(REMARK_CEN != "<")])/1000) %>% 
-  arrange(-n_obs_above_det, -max_conc) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Chlorpyrifos concentration sites in midwest summer 2013 pesticide monitoring")
-
-#Identify most heavily polluted Chlorpyrifos sites in all NAwqa sampling
-pestdat %>% 
-  mutate(samp_year = year(SAMPLE_DATE)) %>% 
-  filter(CONSTIT == "Chlorpyrifos") %>% 
-  group_by(SITE_QW_NAME, samp_year) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(CONCENTRATION[which(REMARK != "<")]),
-            mean_conc = mean(CONCENTRATION[which(REMARK != "<")]),
-            med_conc = median(CONCENTRATION[which(REMARK != "<")]),
-            max_conc = max(CONCENTRATION[which(REMARK != "<")])) %>% 
-  ungroup() %>% 
-  arrange(-max_conc, -n_obs_above_det) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Chlorpyrifos concentration sites in full NAWQA database")
-
-#Identify most heavily polluted Chlorpyrifos sites in CA SURF sampling
-ca_surf_obs_full_chems %>% 
-  mutate(SAMP_YEAR = year(SAMP_DATE)) %>% 
-  filter(CHEMICAL == "chlorpyrifos") %>% 
-  group_by(SITE_CODE, SAMP_YEAR) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            mean_conc = mean(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            med_conc = median(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            max_conc = max(CONC_PPB[which(CONC_PPB > LOQ_PPB)])) %>% 
-  ungroup() %>% 
-  arrange(-max_conc) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Chlorpyrifos concentration sites in CA_SURF pesticide monitoring")
-```
-
-Most of these high single detections of chlorpyrifos in the CA SURF dataset (the only dataset with significant Chlorpyrifos detections) come from the same agency in Sacramento in the same year, but 9 observations with a pretty high peak from site 50_72 in 2015 represents a usable time series 
-
-```{r chlor_ts}
-#Interpolate time series of chlorpyrifos concentration for top site in observed databases
-chlor_ca_surf_site <- ca_surf_obs_full_chems %>% 
-  filter(CHEMICAL == "chlorpyrifos" & SITE_CODE == "50_72" & year(SAMP_DATE) == 2015) %>% 
-  arrange(SAMP_DATE)
-
-chlor_ca_surf_site
-
-chlor_ca_surf_ts <- data.frame(chem = "chlorpyrifos",
-                               samp_date = seq.Date(as.Date("2015-01-01"), as.Date("2015-12-31"), "day")) %>% 
-  mutate(day = yday(samp_date),
-         week = week(samp_date)) %>% 
-  left_join(chlor_ca_surf_site, by = c("chem" = "CHEMICAL", "samp_date" = "SAMP_DATE")) %>% 
-  mutate(Conc_interp = replace_na(na.approx(CONC_PPB, na.rm = FALSE), 0))
-
-```
-
-#### Glyphosate  
-```{r gly_agrochem_ts, message=FALSE, warning = FALSE, echo = FALSE}
-# Identify most heavily polluted glyphosate sites in MSQA 2013 dataset
-msqa2013_obs_full_chems %>% 
-  filter(PARM_NM == "Glyphosate, wf") %>% 
-  group_by(SHORT_NAME) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(RESULT_CEN[which(REMARK_CEN != "<")]),
-            mean_conc = mean(RESULT_CEN[which(REMARK_CEN != "<")])/1000,
-            med_conc = median(RESULT_CEN[which(REMARK_CEN != "<")])/1000,
-            max_conc = max(RESULT_CEN[which(REMARK_CEN != "<")])/1000) %>% 
-  arrange( -max_conc, -n_obs_above_det) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Glyphosate concentration sites in midwest summer 2013 pesticide monitoring")
-
-#Identify most heavily polluted Glyphosate sites in CA SURF sampling
-ca_surf_obs_full_chems %>% 
-  mutate(SAMP_YEAR = year(SAMP_DATE)) %>% 
-  filter(CHEMICAL == "glyphosate") %>% 
-  group_by(SITE_CODE, SAMP_YEAR) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            mean_conc = mean(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            med_conc = median(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            max_conc = max(CONC_PPB[which(CONC_PPB > LOQ_PPB)])) %>% 
-  ungroup() %>% 
-  arrange(-max_conc) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Glyphosate concentration sites in CA_SURF pesticide monitoring")
-
-```
-
-```{r gly_ts}
-#Interpolate time series of glyphosate concentration for top site in midwest summer 2013 database
-gly_ca_surf_site <- ca_surf_obs_full_chems %>% 
-  filter(CHEMICAL == "glyphosate" & SITE_CODE == "56_148")
-
-gly_ca_surf_site
-
-```
-
-So the site that had the highest detection of Glyphosate (1800ppb) actually took 5 samples on the same day, which makes this observation somewhat different from the others in that it's capturing sub-daily variability. We want a site with a reliable time series over a longer time period (months) so will look at other sites.
-
-```{r gly_ts2}
-gly_ca_surf_site2 <- ca_surf_obs_full_chems %>% 
-  filter(CHEMICAL == "glyphosate" & SITE_CODE == "54_34" & year(SAMP_DATE) == 2010) %>% 
-  arrange(SAMP_DATE)
-
-gly_ca_surf_site2
-
-gly_ca_surf_ts <- data.frame(chem = "glyphosate",
-                             samp_date = seq.Date(as.Date("2010-01-01"), as.Date("2010-12-31"), "day")) %>% 
-  mutate(day = yday(samp_date),
-         week = week(samp_date)) %>% 
-  left_join(gly_ca_surf_site2, by = c("chem" = "CHEMICAL", "samp_date" = "SAMP_DATE")) %>% 
-  mutate(Conc_interp = replace_na(na.approx(CONC_PPB, na.rm = FALSE), 0))
-
-```
-
-#### Malathion  
-```{r mal_agrochem_ts, message=FALSE, warning = FALSE, echo = FALSE}
-#Identify most heavily polluted sites in MSQA 2013 database
-msqa2013_obs_full_chems %>% 
-  filter(PARM_NM == "Malathion, wf") %>% 
-  group_by(SHORT_NAME) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(RESULT_CEN[which(REMARK_CEN != "<")]),
-            mean_conc = mean(RESULT_CEN[which(REMARK_CEN != "<")]),
-            med_conc = median(RESULT_CEN[which(REMARK_CEN != "<")]),
-            max_conc = max(RESULT_CEN[which(REMARK_CEN != "<")])) %>% 
-  arrange(-n_obs_above_det, -max_conc) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Malathion concentration sites in midwest summer 2013 pesticide monitoring")
-
-#Identify most heavily polluted Malathion sites in all NAwqa sampling
-pestdat %>% 
-  mutate(samp_year = year(SAMPLE_DATE)) %>% 
-  filter(CONSTIT == "Malathion") %>% 
-  group_by(SITE_QW_NAME, samp_year) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(CONCENTRATION[which(REMARK != "<")]),
-            mean_conc = mean(CONCENTRATION[which(REMARK != "<")]),
-            med_conc = median(CONCENTRATION[which(REMARK != "<")]),
-            max_conc = max(CONCENTRATION[which(REMARK != "<")])) %>% 
-  ungroup() %>% 
-  arrange(-max_conc, -n_obs_above_det) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Nalathion concentration sites in full NAWQA database")
-
-#Identify most heavily polluted Malathion sites in CA SURF sampling
-ca_surf_obs_full_chems %>% 
-  mutate(SAMP_YEAR = year(SAMP_DATE)) %>% 
-  filter(CHEMICAL == "malathion") %>% 
-  group_by(SITE_CODE, SAMP_YEAR) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            mean_conc = mean(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            med_conc = median(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            max_conc = max(CONC_PPB[which(CONC_PPB > LOQ_PPB)])) %>% 
-  ungroup() %>% 
-  arrange(-max_conc) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Malathion concentration sites in CA_SURF pesticide monitoring")
-
-```
-
-```{r mal_ts}
-#Interpolate time series of chlorpyrifos concentration for top site in NAWQA database
-mal_ca_surf_site <- ca_surf_obs_full_chems %>% 
-  filter(CHEMICAL == "malathion" & SITE_CODE == "27_10" & year(SAMP_DATE) == 2008) %>% 
-  group_by(CHEMICAL, SITE_CODE, SAMP_DATE) %>% 
-  summarise(max_conc_day = max(CONC_PPB),
-            LOQ_PPB = first(LOQ_PPB)) %>% 
-  arrange(SAMP_DATE)
-
-mal_ca_surf_site
-
-mal_ca_surf_ts <- data.frame(chem = "malathion",
-                               samp_date = seq.Date(as.Date("2008-01-01"), as.Date("2008-12-30"), "day")) %>% 
-  mutate(day = yday(samp_date),
-         week = week(samp_date)) %>% 
-  left_join(mal_ca_surf_site, by = c("chem" = "CHEMICAL", "samp_date" = "SAMP_DATE")) %>% 
-  mutate(Conc_interp = replace_na(na.approx(max_conc_day, na.rm = FALSE), 0))
-
-```
-
-#### Profenofos  
-```{r prof_agrochem_ts, message=FALSE, warning = FALSE, echo = FALSE}
-#Identify most heavily polluted Malathion sites in CA SURF sampling
-msqa2013_obs_full_chems %>% 
-  filter(PARM_NM == "Profenofos") %>% 
-  group_by(SHORT_NAME) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(RESULT_CEN[which(REMARK_CEN != "<")]),
-            mean_conc = mean(RESULT_CEN[which(REMARK_CEN != "<")]),
-            med_conc = median(RESULT_CEN[which(REMARK_CEN != "<")]),
-            max_conc = max(RESULT_CEN[which(REMARK_CEN != "<")])) %>% 
-  arrange(-n_obs_above_det, -max_conc) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Profenofos concentration sites in midwest summer 2013 pesticide monitoring")
-
-#Identify most heavily polluted Profenofos sites in all NAwqa sampling
-pestdat %>% 
-  mutate(samp_year = year(SAMPLE_DATE)) %>% 
-  filter(CONSTIT == "Profenofos") %>% 
-  group_by(SITE_QW_NAME, samp_year) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(CONCENTRATION[which(REMARK != "<")]),
-            mean_conc = mean(CONCENTRATION[which(REMARK != "<")]),
-            med_conc = median(CONCENTRATION[which(REMARK != "<")]),
-            max_conc = max(CONCENTRATION[which(REMARK != "<")])) %>% 
-  ungroup() %>% 
-  arrange(-max_conc, -n_obs_above_det) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Profonofos concentration sites in full NAWQA database")
-
-#Identify most heavily polluted Malathion sites in CA SURF sampling
-ca_surf_obs_full_chems %>% 
-  mutate(SAMP_YEAR = year(SAMP_DATE)) %>% 
-  filter(CHEMICAL == "profenofos") %>% 
-  group_by(SITE_CODE, SAMP_YEAR) %>% 
-  summarise(n_obs = n(),
-            n_obs_above_det = length(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            mean_conc = mean(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            med_conc = median(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
-            max_conc = max(CONC_PPB[which(CONC_PPB > LOQ_PPB)])) %>% 
-  ungroup() %>% 
-  arrange(-max_conc) %>% slice(1:10) %>% 
-  knitr::kable(caption = "Top 10 Profonofos concentration sites in CA_SURF pesticide monitoring")
-
-```
-Only one site with a single observation above the detection limit (and just barely), so we'll ignore profenofos in simulations through time
-
 ## Simulations through time with MDA and agrochemical pollution  
-To demonstrate how agrochemical pollution may affect ongoing/routine interventions, want to display model dynamics through time under different agrochemical pollution, MDA, and predator settings
+To demonstrate how agrochemical pollution may affect ongoing/routine interventions, want to display model dynamics through time under different agrochemical pollution, MDA, and predator settings  
 
 ### Setup  
 ```{r sim_setup}
 #Clear everything except for agrochemical time series for simulations
-rm(list = setdiff(ls(), c("fit_pars",
-                          "atr_mw2013_ts", "atr_peak_obs",
-                          "chlor_ca_surf_ts", "chlor_peak_obs",
-                          "gly_ca_surf_ts", "gly_peak_obs",
-                          "mal_ca_surf_ts", "mal_peak_obs")))
+rm(list = setdiff(ls(), c("fit_pars", "theme_ms",
+                          "atr_pwc_ts", "atr_peak_obs", "atr_eec",
+                          "chlor_pwc_ts", "chlor_peak_obs", "chlor_eec",
+                          "gly_pwc_ts", "gly_peak_obs", "gly_eec",
+                          "mal_pwc_ts", "mal_peak_obs", "mal_eec",
+                          "prof_pwc_ts", "prof_peak_obs", "prof_eec")))
 
 source("../Models/model_helper_functions.R")
 source("../Models/models.R")
@@ -1319,7 +844,7 @@ load("../Models/fit_pars.Rdata")
 load("../Response_Fxs/Summary/all_response_fxs.RData")
 
 #Parameters
-nsims = 30
+nsims = 1000
   #create nsims duplicate rows of base parameters
   par_set <- as.data.frame(as.list(fit_pars)) %>% slice(rep(1:n(), each = nsims))
   
@@ -1363,52 +888,7 @@ t_sim <- c(1:((years+1)*365))
   test_force = approxfun(as.data.frame(list(times = t_sim,
                                              q = rep(0, length(t_sim)))),
                           rule = 2)
-  
-#Functions to return annual and biannual forcing functions for agrochemical time series
-#Generate annual forcing function  
-  gen_annual_force_fx <- function(agrochem_ts, norm_start = FALSE){
-    if(norm_start){ #Option to normalize starting date of agrochemical time series within the year
-      #Get values from time series where concentration is greater than 0
-      g0 <- agrochem_ts[min(which(agrochem_ts > 0)):max(which(agrochem_ts > 0))]
-      
-      #Generate annual time series where pollution always starts 90 days into the year
-      ts_annual <- c(rep(0,90), g0, rep(0,365-(length(g0)+90)))
-    } else {
-      ts_annual <- agrochem_ts
-    }
-    
-    #Generate forcing function that replicates agrochemical pollution over [years]
-    force_fx <- approxfun(as.data.frame(list(times = t_sim,
-                                             q = c(rep(0, 365), # 1 year simulated without agrochemical influence
-                                                   rep(ts_annual, years)))),
-                          rule = 2)
-    
-    return(force_fx)
-  }
-  
-#Generate biannual forcing function
-  gen_biannual_force_fx <- function(agrochem_ts){
-    #Get values from time series where concentration is greater than 0
-    g0 <- agrochem_ts[min(which(agrochem_ts > 0)):max(which(agrochem_ts > 0))]
-    
-    #Generate biannual time series where pollution always starts 90 days into the year
-    #And two peaks are always separated by 60 days
-    if((2*length(g0)+60+90)>365){
-      stop("Time series too long to produce biannual time series")
-    } else{
-      ts_annual <- c(rep(0,90), g0, rep(0,60), g0, rep(0,365-(2*length(g0)+60+90)))
-      
-      #Generate forcing function that replicates agrochemical pollution over [years]
-      force_fx <- approxfun(as.data.frame(list(times = t_sim,
-                                               q = c(rep(0, 365), # 1 year simulated without agrochemical influence
-                                                     rep(ts_annual, years)))),
-                            rule = 2)
-      
-      return(force_fx)
-    }
-  }
 
-    
 ```
 
 ```{r test_speed, eval = FALSE}
@@ -1509,58 +989,44 @@ stopCluster(cl)
 #### Forcing Functions  
 ```{r gen_force_fx}
 #Forcing functions
-# Atrazine Annual forcing function
-atr_annual_force <- gen_annual_force_fx(atr_mw2013_ts$Conc_interp)
+# Atrazine forcing function
+atr_force <- approxfun(as.data.frame(list(times = t_sim,
+                                          q = c(rep(0, 365), atr_pwc_ts$daily_peak_surface[(nrow(atr_pwc_ts)+366-length(t_sim)):nrow(atr_pwc_ts)]))),
+                       rule = 2)
 
-# Atrazine Biannual forcing function
-#atr_biannual_force <- gen_biannual_force_fx(atr_mw2013_ts$Conc_interp)
+# Chlorpyrifos forcing function
+chlor_force <- approxfun(as.data.frame(list(times = t_sim,
+                                            q = c(rep(0, 365), chlor_pwc_ts$daily_peak_surface[(nrow(chlor_pwc_ts)+366-length(t_sim)):nrow(chlor_pwc_ts)]))),
+                         rule = 2)
 
-# Chlorpyrifos Annual forcing function
-chlor_annual_force <- gen_annual_force_fx(chlor_ca_surf_ts$Conc_interp)
+# Glyphosate forcing function
+gly_force <- approxfun(as.data.frame(list(times = t_sim,
+                                          q = c(rep(0, 365), gly_pwc_ts$daily_peak_surface[(nrow(gly_pwc_ts)+366-length(t_sim)):nrow(gly_pwc_ts)]))),
+                       rule = 2)
 
-# Chlorpyrifos Biannual forcing function
-#chlor_biannual_force <- gen_biannual_force_fx(chlor_ca_surf_ts$Conc_interp)
+# Malathion forcing function
+mal_force <- approxfun(as.data.frame(list(times = t_sim,
+                                          q = c(rep(0, 365), mal_pwc_ts$daily_peak_surface[(nrow(mal_pwc_ts)+366-length(t_sim)):nrow(mal_pwc_ts)]))),
+                       rule = 2)
+# Profenofos forcing function 
+prof_force <- approxfun(as.data.frame(list(times = t_sim,
+                                           q = c(rep(0, 365), prof_pwc_ts$daily_peak_surface[(nrow(prof_pwc_ts)+366-length(t_sim)):nrow(prof_pwc_ts)]))),
+                        rule = 2)
 
-# Glyphosate Annual forcing function
-gly_annual_force <- gen_annual_force_fx(gly_ca_surf_ts$Conc_interp)
-
-# Glyphosate Biannual forcing function
-#gly_biannual_force <- gen_biannual_force_fx(gly_ca_surf_ts$Conc_interp)
-
-# Malathion Annual forcing function
-mal_annual_force <- gen_annual_force_fx(mal_ca_surf_ts$Conc_interp)
-
-# Malathion Biannual forcing function
-#mal_biannual_force <- gen_biannual_force_fx(mal_ca_surf_ts$Conc_interp[204:365])
-
-agrochem_time_series <- data.frame(time = t_sim,
-           atrazine = sapply(t_sim, atr_annual_force) / atr_peak_obs,
-           glyphosate = sapply(t_sim, gly_annual_force) / gly_peak_obs,
-           malathion = sapply(t_sim, mal_annual_force) / mal_peak_obs,
-           chlorpyrifos = sapply(t_sim, chlor_annual_force) / chlor_peak_obs) %>% 
-  gather("Chem", "Concentration", atrazine: chlorpyrifos)
-
-agrochem_time_series %>% 
-  ggplot(aes(x = time, y = Concentration, col = Chem)) +
-    geom_line() +
-    theme_classic() +
-    labs(x = "time (days)",
-         y = "Agrochemical concentration normalized to POC",
-         title = "Agrochemical time series used in 10-year simulations")
 ```
 
 ### All DALYs Sims  
 ```{r all_sims_through_time, message = F, cache = T}
 require(parallel)
-cl <- makeCluster(detectCores() - 1)
+cl <- makeCluster(detectCores())
 clusterExport(cl, ls())
-clusterEvalQ(cl, lapply(c("deSolve", "dplyr", "rootSolve", "purrr", "tictoc"), 
+clusterEvalQ(cl, lapply(c("deSolve", "dplyr", "rootSolve", "purrr"), 
                         library, character.only = T))
 
 #Atrazine simulations ######
 #Sim atrazine through time with annual forcing function
 atr_annual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years = years,
-                                  force_fx = atr_annual_force, 
+                                  force_fx = atr_force, 
                                   f.Knq = phiNq_atr_baxrohr.no30, 
                                   f.fnq = nil1, 
                                   f.munq = ons.muNq.atr,  
@@ -1571,22 +1037,10 @@ atr_annual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years = y
                                   f.mupq = nil0, 
                                   f.psiq = nil1)
 
-#Sim atrazine through time with biannual forcing function 
-#atr_biannual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years = years,
-#                                    force_fx = atr_biannual_force, 
-#                                    f.Knq = phiNq_atr_baxrohr.no30, 
-#                                    f.fnq = nil1, 
-#                                    f.munq = ons.muNq.atr,  
-#                                    f.vq = halstead_meso18_atr_mans_v_uncertainty, 
-#                                    f.pimq = nil1, 
-#                                    f.thetaq = nil1, 
-#                                    f.picq = piC.atr.rohr08.lin, 
-#                                    f.mupq = nil0, f.psiq = nil1)
-
 #Chlorpyrifos simulations #########
 #Annual application
 chlor_annual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years = years,
-                                    force_fx = chlor_annual_force, 
+                                    force_fx = chlor_force, 
                                     f.Knq = nil1, 
                                     f.fnq = fNq_chlor_ibr92_uncertainty, 
                                     f.munq = muNq_ch_hash11_uncertainty,  
@@ -1597,23 +1051,10 @@ chlor_annual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years =
                                     f.mupq = muPq_chlor_mac_rohr_unpub_uncertainty, 
                                     f.psiq = nil1)
 
-#Biannual application
-#chlor_biannual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years = years,
-#                                      force_fx = chlor_biannual_force, 
-#                                      f.Knq = nil1, 
-#                                      f.fnq = fNq_chlor_ibr92_uncertainty, 
-#                                      f.munq = muNq_ch_hash11_uncertainty,  
-#                                      f.vq = halstead_meso18_chlor_mans_v_uncertainty, 
-#                                      f.pimq = piM_ch_Hash11_uncertainty, 
-#                                      f.thetaq = nil1, 
-#                                      f.picq = piC_ch_Hash11_uncertainty, 
-#                                      f.mupq = muPq_chlor_mac_rohr_unpub_uncertainty, 
-#                                      f.psiq = nil1)
-
 #Glyphosate simulations #########
 #Annual application
 gly_annual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years = years,
-                                  force_fx = gly_annual_force, 
+                                  force_fx = gly_force, 
                                   f.Knq = phiNq_gly_baxrohr.no30, 
                                   f.fnq = fNq.gly.fx.uncertainty, 
                                   f.munq = ons.muNq.gly,  
@@ -1624,23 +1065,10 @@ gly_annual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years = y
                                   f.mupq = nil0, 
                                   f.psiq = nil1)
 
-#Biannual application
-#gly_biannual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years = years,
-#                                    force_fx = gly_biannual_force, 
-#                                    f.Knq = phiNq_gly_baxrohr.no30, 
-#                                    f.fnq = fNq.gly.fx.uncertainty, 
-#                                    f.munq = ons.muNq.gly,  
-#                                    f.vq = nil1, 
-#                                    f.pimq = piM.ghaf_gly.exp_unc, 
-#                                    f.thetaq = nil1, 
-#                                    f.picq = piC.ghaf_gly.exp_unc, 
-#                                    f.mupq = nil0, 
-#                                    f.psiq = nil1)
-
 #Malathion simulations ##########
 #Annual application
 mal_annual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years = years,
-                                  force_fx = mal_annual_force, 
+                                  force_fx = mal_force, 
                                   f.Knq = nil1, 
                                   f.fnq = fNq_mal_tch91_uncertainty, 
                                   f.munq = muNq_mal_tch91_uncertainty,  
@@ -1651,18 +1079,19 @@ mal_annual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years = y
                                   f.mupq = muPq_mal_mac_rohr_unpub_uncertainty, 
                                   f.psiq = nil1)
 
-#Biannual application
-#mal_biannual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years = years,
-#                                    force_fx = mal_biannual_force, 
-#                                    f.Knq = nil1, 
-#                                    f.fnq = fNq_mal_tch91_uncertainty, 
-#                                    f.munq = muNq_mal_tch91_uncertainty,  
-#                                    f.vq = nil1, 
-#                                    f.pimq = piM.tch91_mal_unc, 
-#                                    f.thetaq = nil1, 
-#                                    f.picq = piC.tch92_mal_unc, 
-#                                    f.mupq = muPq_mal_mac_rohr_unpub_uncertainty, 
-#                                    f.psiq = nil1)
+#Profenofos simulations ##########
+#Annual application
+prof_annual_simulation <- parApply(cl, par_set, 1, FUN = sim_scenarios, years = years,
+                                   force_fx = prof_force, 
+                                   f.Knq = nil1, 
+                                   f.fnq = fNq_moh_prof_moh12_uncertainty, 
+                                   f.munq = muNq_prof_mohamed_uncertainty,  
+                                   f.vq = nil1, 
+                                   f.pimq = piM_pr_Hash11_uncertainty, 
+                                   f.thetaq = nil1, 
+                                   f.picq = piC_pr_Hash11_uncertainty, 
+                                   f.mupq = muPq_profenofos_Bajet12_uncertainty, 
+                                   f.psiq = nil1)
 
 stopCluster(cl)  
 
@@ -1670,15 +1099,12 @@ stopCluster(cl)
 
 #### Dataframes of DALYs accumulated for each sim  
 ```{r sim_dalys_dfs, cache=T}
-rm(list = setdiff(ls(), c("fit_pars", "agrochem_time_series",
-                          "atr_mw2013_ts", "atr_annual_force",
-                          "atr_annual_simulation", #"atr_biannual_simulation",
-                          "chlor_ca_surf_ts", "chlor_annual_force",
-                          "chlor_annual_simulation", #"chlor_biannual_simulation",
-                          "gly_ca_surf_ts", "gly_annual_force",
-                          "gly_annual_simulation", #"gly_biannual_simulation",
-                          "mal_ca_surf_ts", "mal_annual_force", #"mal_biannual_simulation",
-                          "mal_annual_simulation")))
+rm(list = setdiff(ls(), c("fit_pars", "agrochem_time_series", "theme_ms", "years",
+                          "atr_pwc_ts", "atr_force", "atr_annual_simulation", 
+                          "chlor_pwc_ts", "chlor_force", "chlor_annual_simulation", 
+                          "gly_pwc_ts", "gly_force", "gly_annual_simulation", 
+                          "mal_pwc_ts", "mal_force", "mal_annual_simulation",
+                          "prof_pwc_ts", "prof_force", "prof_annual_simulation")))
 
 source("../Models/agrochem_sim_functions.R")
 
@@ -1688,22 +1114,13 @@ comp_dalys_atr_annual <- comp_dalys_across_sims(atr_annual_simulation) %>%
          Pred_attributable = Agro_Preds - Preds_only,
          MDA_attributable = Agro_MDA - MDA_only,
          MDA_Preds_attributable = Agro_Preds_MDA - MDA_Preds,
-      #Attributable DALYs per 1000 people for comparison to other conditions   
-         Agro_att_p1000 = (Agro_attributable/fit_pars["H"])*1000,
-         Pred_att_p1000 = (Pred_attributable/fit_pars["H"])*1000,
-         MDA_att_p1000 = (MDA_attributable/fit_pars["H"])*1000,
-         MDA_Preds_att_p1000 = (MDA_Preds_attributable/fit_pars["H"])/1000,
+      #Attributable DALYs per 100000 people per year for comparison to other conditions   
+         Agro_att_p100k = (Agro_attributable/fit_pars["H"]/years)*100000,
+         Pred_att_p100k = (Pred_attributable/fit_pars["H"]/years)*100000,
+         MDA_att_p100k = (MDA_attributable/fit_pars["H"]/years)*100000,
+         MDA_Preds_att_p100k = (MDA_Preds_attributable/fit_pars["H"]/years)*100000,
          Chemical = "Atrazine",
          Application = "Annual")
-
-# Atrazine biannual simulations
-#comp_dalys_atr_biannual <- comp_dalys_across_sims(atr_biannual_simulation) %>% 
-#  mutate(Agro_attributable = Agro_only - Nothing,
-#         Pred_attributable = Agro_Preds - Preds_only,
-#         MDA_attributable = Agro_MDA - MDA_only,
-#         MDA_Preds_attributable = Agro_Preds_MDA - MDA_Preds,
-#         Chemical = "Atrazine",
-#         Application = "Biannual")
 
 # Chlorpyrifos annual simulations
 comp_dalys_chlor_annual <- comp_dalys_across_sims(chlor_annual_simulation) %>% 
@@ -1711,22 +1128,13 @@ comp_dalys_chlor_annual <- comp_dalys_across_sims(chlor_annual_simulation) %>%
          Pred_attributable = Agro_Preds - Preds_only,
          MDA_attributable = Agro_MDA - MDA_only,
          MDA_Preds_attributable = Agro_Preds_MDA - MDA_Preds,
-      #Attributable DALYs per 1000 people for comparison to other conditions   
-         Agro_att_p1000 = (Agro_attributable/fit_pars["H"])*1000,
-         Pred_att_p1000 = (Pred_attributable/fit_pars["H"])*1000,
-         MDA_att_p1000 = (MDA_attributable/fit_pars["H"])*1000,
-         MDA_Preds_att_p1000 = (MDA_Preds_attributable/fit_pars["H"])/1000,
+      #Attributable DALYs per 100000 people per year for comparison to other conditions   
+         Agro_att_p100k = (Agro_attributable/fit_pars["H"]/years)*100000,
+         Pred_att_p100k = (Pred_attributable/fit_pars["H"]/years)*100000,
+         MDA_att_p100k = (MDA_attributable/fit_pars["H"]/years)*100000,
+         MDA_Preds_att_p100k = (MDA_Preds_attributable/fit_pars["H"]/years)*100000,
          Chemical = "Chlorpyrifos",
          Application = "Annual")
-
-# Chlorpyrifos biannual simulations  
-#comp_dalys_chlor_biannual <- comp_dalys_across_sims(chlor_biannual_simulation) %>% 
-#  mutate(Agro_attributable = Agro_only - Nothing,
-#         Pred_attributable = Agro_Preds - Preds_only,
-#         MDA_attributable = Agro_MDA - MDA_only,
-#         MDA_Preds_attributable = Agro_Preds_MDA - MDA_Preds,
-#         Chemical = "Chlorpyrifos",
-#         Application = "Biannual")
 
 # Glyphosate annual simulations  
 comp_dalys_gly_annual <- comp_dalys_across_sims(gly_annual_simulation) %>% 
@@ -1734,22 +1142,13 @@ comp_dalys_gly_annual <- comp_dalys_across_sims(gly_annual_simulation) %>%
          Pred_attributable = Agro_Preds - Preds_only,
          MDA_attributable = Agro_MDA - MDA_only,
          MDA_Preds_attributable = Agro_Preds_MDA - MDA_Preds,
-      #Attributable DALYs per 1000 people for comparison to other conditions   
-         Agro_att_p1000 = (Agro_attributable/fit_pars["H"])*1000,
-         Pred_att_p1000 = (Pred_attributable/fit_pars["H"])*1000,
-         MDA_att_p1000 = (MDA_attributable/fit_pars["H"])*1000,
-         MDA_Preds_att_p1000 = (MDA_Preds_attributable/fit_pars["H"])/1000,
+      #Attributable DALYs per 100000 people per year for comparison to other conditions   
+         Agro_att_p100k = (Agro_attributable/fit_pars["H"]/years)*100000,
+         Pred_att_p100k = (Pred_attributable/fit_pars["H"]/years)*100000,
+         MDA_att_p100k = (MDA_attributable/fit_pars["H"]/years)*100000,
+         MDA_Preds_att_p100k = (MDA_Preds_attributable/fit_pars["H"]/years)*100000,
          Chemical = "Glyphosate",
          Application = "Annual")
-
-# Glyphosate biannual simulations
-#comp_dalys_gly_biannual <- comp_dalys_across_sims(gly_biannual_simulation) %>% 
-#  mutate(Agro_attributable = Agro_only - Nothing,
-#         Pred_attributable = Agro_Preds - Preds_only,
-#         MDA_attributable = Agro_MDA - MDA_only,
-#         MDA_Preds_attributable = Agro_Preds_MDA - MDA_Preds,
-#         Chemical = "Glyphosate",
-#         Application = "Biannual")
 
 # Malathion annual simulations 
 comp_dalys_mal_annual <- comp_dalys_across_sims(mal_annual_simulation) %>% 
@@ -1757,38 +1156,41 @@ comp_dalys_mal_annual <- comp_dalys_across_sims(mal_annual_simulation) %>%
          Pred_attributable = Agro_Preds - Preds_only,
          MDA_attributable = Agro_MDA - MDA_only,
          MDA_Preds_attributable = Agro_Preds_MDA - MDA_Preds,
-      #Attributable DALYs per 1000 people for comparison to other conditions   
-         Agro_att_p1000 = (Agro_attributable/fit_pars["H"])*1000,
-         Pred_att_p1000 = (Pred_attributable/fit_pars["H"])*1000,
-         MDA_att_p1000 = (MDA_attributable/fit_pars["H"])*1000,
-         MDA_Preds_att_p1000 = (MDA_Preds_attributable/fit_pars["H"])/1000,
+      #Attributable DALYs per 100000 people per year for comparison to other conditions   
+         Agro_att_p100k = (Agro_attributable/fit_pars["H"]/years)*100000,
+         Pred_att_p100k = (Pred_attributable/fit_pars["H"]/years)*100000,
+         MDA_att_p100k = (MDA_attributable/fit_pars["H"]/years)*100000,
+         MDA_Preds_att_p100k = (MDA_Preds_attributable/fit_pars["H"]/years)*100000,
          Chemical = "Malathion",
          Application = "Annual")
 
-# Malathion biannual simulations  
-#comp_dalys_mal_biannual <- comp_dalys_across_sims(mal_biannual_simulation) %>% 
-#  mutate(Agro_attributable = Agro_only - Nothing,
-#         Pred_attributable = Agro_Preds - Preds_only,
-#         MDA_attributable = Agro_MDA - MDA_only,
-#         MDA_Preds_attributable = Agro_Preds_MDA - MDA_Preds,
-#         Chemical = "Malathion",
-#         Application = "Biannual")
+# Profenofos annual simulations 
+comp_dalys_prof_annual <- comp_dalys_across_sims(prof_annual_simulation) %>% 
+  mutate(Agro_attributable = Agro_only - Nothing,
+         Pred_attributable = Agro_Preds - Preds_only,
+         MDA_attributable = Agro_MDA - MDA_only,
+         MDA_Preds_attributable = Agro_Preds_MDA - MDA_Preds,
+      #Attributable DALYs per 100000 people per year for comparison to other conditions   
+         Agro_att_p100k = (Agro_attributable/fit_pars["H"]/years)*100000,
+         Pred_att_p100k = (Pred_attributable/fit_pars["H"]/years)*100000,
+         MDA_att_p100k = (MDA_attributable/fit_pars["H"]/years)*100000,
+         MDA_Preds_att_p100k = (MDA_Preds_attributable/fit_pars["H"]/years)*100000,
+         Chemical = "Profenofos",
+         Application = "Annual")
 
 ```
 
 #### Dataframes of simulations through time for each sim  
 ```{r sim_time_series, cache = T}
 atr_annual_ts <- comp_ts_across_sims(atr_annual_simulation)
-#atr_biannual_ts <- comp_ts_across_sims(atr_biannual_simulation)
 
 chlor_annual_ts <- comp_ts_across_sims(chlor_annual_simulation)
-#chlor_biannual_ts <- comp_ts_across_sims(chlor_biannual_simulation)
 
 gly_annual_ts <- comp_ts_across_sims(gly_annual_simulation)
-#gly_biannual_ts <- comp_ts_across_sims(gly_biannual_simulation)
 
 mal_annual_ts <- comp_ts_across_sims(mal_annual_simulation)
-#mal_biannual_ts <- comp_ts_across_sims(mal_biannual_simulation)
+
+prof_annual_ts <- comp_ts_across_sims(prof_annual_simulation)
 ```
 
 
@@ -1871,7 +1273,8 @@ comp_dalys_mal_annual_bp
 comp_dalys_all_annual <- comp_dalys_atr_annual %>% 
   bind_rows(comp_dalys_chlor_annual) %>% 
   bind_rows(comp_dalys_gly_annual) %>% 
-  bind_rows(comp_dalys_mal_annual)
+  bind_rows(comp_dalys_mal_annual) %>% 
+  bind_rows(comp_dalys_prof_annual)
 
 comp_dalys_all_annual_bp <- comp_dalys_all_annual %>% 
   gather("Scenario", "DALYs", Nothing:Agro_Preds_MDA) %>% 
@@ -1900,9 +1303,9 @@ comp_dalys_all_annual_bp <- comp_dalys_all_annual %>%
                                  "lightblue", "darkblue",
                                  "violet", "purple")) +
     labs(x = "Agrochemical") +
-    theme_classic() 
+    theme_ms() 
 
-comp_dalys_all_annual_bp
+#comp_dalys_all_annual_bp
 
 #save the plot
 jpeg("../Plots/comp_dalys_scenarios.jpg", 
@@ -1919,7 +1322,6 @@ dev.off()
 ```{r comp_dalys_quant_sum}
 comp_dalys_all_annual %>% 
   gather("Scenario", "DALYs", Nothing:Agro_Preds_MDA) %>% 
-  filter(Application == "Annual") %>% 
   group_by(Scenario, Chemical) %>% 
   summarise(DALYs_med = median(DALYs),
             DALYs_1q = quantile(DALYs, .25),
@@ -1927,27 +1329,30 @@ comp_dalys_all_annual %>%
   arrange(Chemical) %>% 
   knitr::kable(caption = "Summary of DALYs accumulated over ten year simulations of different scenarios")
 
-added_dalys <- 
-  comp_dalys_all_annual %>% filter(Application == "Annual") %>% 
-  mutate(agro_only_effect = Agro_only - Nothing,
-         agro_mda_effect = Agro_MDA - MDA_only,
-         agro_pred_effect = Agro_Preds - Preds_only,
-         agro_mda_pred_effect = Agro_Preds_MDA - MDA_Preds) %>% 
-  gather("Agro_effect", "Added_DALYs", agro_only_effect:agro_mda_pred_effect) %>%
-  group_by(Chemical) %>% 
+comp_dalys_all_annual %>% 
+  gather("Agro_effect", "Added_DALYs", Agro_att_p100k:MDA_Preds_att_p100k) %>%
+  group_by(Chemical, Agro_effect) %>% 
   summarise(agro_effect_med = median(Added_DALYs),
             agro_effect_1q = quantile(Added_DALYs, .25),
-            agro_effect_3q = quantile(Added_DALYs, .75))
+            agro_effect_3q = quantile(Added_DALYs, .75)) %>% 
+  mutate(att_DALYs = paste0(round(agro_effect_med, 2), " (",
+                           round(agro_effect_1q, 2), " - ",
+                           round(agro_effect_3q, 2), ")")) %>% 
+  spread(Agro_effect, att_DALYs) %>% 
+  dplyr::select(Chemical, Agro_att_p100k, MDA_att_p100k, MDA_Preds_att_p100k) %>% 
+  group_by(Chemical) %>% 
+  summarise_each(funs(na.omit)) %>% 
+  knitr::kable(caption = "DALYs per 100,000 per year attributable to agrochemical pollution across different intervention scenarios for 5 important agrochemicals")
 ```
-
-Across multiple intervention scenarios, atrazine is estimated to cause an additional `r round(added_dalys %>% filter(Chemical == "Atrazine") %>% pull(agro_effect_med), 2)` (IQR: `r round(added_dalys %>% filter(Chemical == "Atrazine") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Atrazine") %>% pull(agro_effect_3q), 2)`) DALYs accumulated and chlorpyrifos an additional `r round(added_dalys %>% filter(Chemical == "Chlorpyrifos") %>% pull(agro_effect_med), 2)` (`r round(added_dalys %>% filter(Chemical == "Chlorpyrifos") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Chlorpyrifos") %>% pull(agro_effect_3q), 2)`) DALYs accumulated. Malathion is estimated to have no effect on intervention efforts at its peak EEC, `r round(added_dalys %>% filter(Chemical == "Malathion") %>% pull(agro_effect_med), 2)` (`r round(added_dalys %>% filter(Chemical == "Malathion") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Malathion") %>% pull(agro_effect_3q), 2)`)  additional DALYs. Glyphosate may actually aid intervention efforts due to its high reproductive toxicity to intermediate host snails, leading to a reduction in DALYs accumulated of `r round(added_dalys %>% filter(Chemical == "Glyphosate") %>% pull(agro_effect_med), 2)` (`r round(added_dalys %>% filter(Chemical == "Glyphosate") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Glyphosate") %>% pull(agro_effect_3q), 2)`).
-
+```{r, eval = FALSE, include = FALSE}
+#Across multiple intervention scenarios, atrazine is estimated to cause an additional `r round(added_dalys %>% filter(Chemical == "Atrazine") %>% pull(agro_effect_med), 2)` (IQR: `r round(added_dalys %>% filter(Chemical == "Atrazine") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Atrazine") %>% pull(agro_effect_3q), 2)`) DALYs accumulated, chlorpyrifos an additional `r round(added_dalys %>% filter(Chemical == "Chlorpyrifos") %>% pull(agro_effect_med), 2)` (`r round(added_dalys %>% filter(Chemical == "Chlorpyrifos") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Chlorpyrifos") %>% pull(agro_effect_3q), 2)`) DALYs accumulated, and profenofos an additional `r round(added_dalys %>% filter(Chemical == "Profenofos") %>% pull(agro_effect_med), 2)` (`r round(added_dalys %>% filter(Chemical == "Profenofos") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Profenofos") %>% pull(agro_effect_3q), 2)`) DALYs accumulated. Malathion is estimated to have no effect on intervention efforts at its peak EEC, `r round(added_dalys %>% filter(Chemical == "Malathion") %>% pull(agro_effect_med), 2)` (`r round(added_dalys %>% filter(Chemical == "Malathion") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Malathion") %>% pull(agro_effect_3q), 2)`)  additional DALYs. Glyphosate may actually aid intervention efforts due to its high reproductive toxicity to intermediate host snails, leading to a reduction in DALYs accumulated of `r round(added_dalys %>% filter(Chemical == "Glyphosate") %>% pull(agro_effect_med), 2)` (`r round(added_dalys %>% filter(Chemical == "Glyphosate") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Glyphosate") %>% pull(agro_effect_3q), 2)`).
+```
 ### Plots comparing time series  
 #### Atrazine  
 ```{r atr_ts_plot}
 #Get atrazine concentration through time #########
 atr_conc_ts <- data.frame(day = unique(atr_annual_ts$time),
-                          atrazine = sapply(atr_annual_ts$time, atr_annual_force))
+                          atrazine = sapply(atr_annual_ts$time, atr_force))
 
 #Do some cleaning to atr time series data for plotting W
 atr_annual_ts_W <- atr_annual_ts %>% 
@@ -1976,8 +1381,8 @@ atr_dynamics <- ggplot() +
               aes(ymin = -Inf,
                   ymax = Inf,
                   xmin = day, xmax = day +1,
-                  fill = atrazine),
-              alpha = 0.03) +
+                  fill = atrazine/max(atrazine)),
+              alpha = 0.7) +
     scale_fill_gradient(low = "white", high = "#FDAF91FF") +
     geom_line(data = atr_annual_ts_W, 
               aes(x = time, 
@@ -1991,10 +1396,15 @@ atr_dynamics <- ggplot() +
          x = "Time (years)") +
     scale_x_continuous(breaks = 365*c(0:11),
                        labels = c(-1:10)) +
-    scale_y_continuous(breaks = c(10,30,50,70)) +
-    theme_classic()
+    scale_y_continuous(breaks = c(10,30,50,70,90),
+                       limits = c(0,90)) +
+    theme_ms() +
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank())
   
 #atr_dynamics
+ggsave("../Plots/atrazine_ts_plots2.jpg", atr_dynamics,
+       width = 8, height = 6, dpi = 300, units = "in")
 
 #Show compariosn of DALYs accumulated in different intervention scenarios #########
 comp_dalys_atr <- comp_dalys_atr_annual %>% 
@@ -2027,91 +1437,46 @@ comp_dalys_atr <- comp_dalys_atr_annual %>%
     scale_fill_manual(values = c("red", "darkred",
                                  "green", "darkgreen",
                                  "violet", "purple")) +
-    scale_y_continuous(position = "right") +
+    scale_y_continuous(position = "right",
+                       breaks = c(0,10,20,30),
+                       limits = c(0,35)) +
     scale_x_discrete(labels = c(" ", " ", " ")) +
-    theme_classic() +
+    theme_ms() +
     labs(x = "",
          y = "10 year DALYs lost") +
     theme(axis.ticks.x = element_blank(),
           legend.title = element_text(size = 9),
-          legend.text = element_text(size = 7),
-          legend.position = c(0.3, 0.25),
-          legend.background = element_rect(fill="grey90", 
-                                         color = "black",
-                                         size=0.5, 
-                                         linetype="solid"))
+          legend.text = element_text(size = 8),
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          legend.position = c(0.07, 0.3))
 
 #comp_dalys_atr
 
 
 #Put time series plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/) ##########
 atr_dynamics_plot <- ggplotGrob(atr_dynamics + 
-                                  theme(legend.position = "none"))
+                                  theme(legend.position = "none") +
+                                  annotate("text", x = 0.1, y = 87, size = 8,
+                                           label = expression(bold(A))))
 
 #Put DALYs plot and legend together ############
-atr_dalys_plot <- ggplotGrob(comp_dalys_atr)
-
-#Print plot of all panels put together and save ############
-#grid.arrange(atr_dynamics_plot, atr_dalys_plot, 
-#             layout_matrix = rbind(c(1,1,1,2,2)),
-#             top = "Atrazine")  
+atr_dalys_plot <- ggplotGrob(comp_dalys_atr +
+                               annotate("text", x = 3, y = 35, size = 8,
+                                        label = expression(bold(B))))
 
 #Save the plot
 atr_grob <- arrangeGrob(atr_dynamics_plot, atr_dalys_plot, 
-                        layout_matrix = rbind(c(1,1,1,2,2)),
-                        top = "Atrazine")
+                        layout_matrix = rbind(c(1,1,1,2,2)))
 
-ggsave("../Plots/atrazine_ts_plots2.jpg", atr_grob,
-       width = 8, height = 6, dpi = 300, units = "in")
+
 ```
 
 #### Chlorpyrifos  
 ```{r chlor_ts_plot}
-#Get atrazine concentration through time #########
+#Get chlorpyrifos concentration through time #########
 chlor_conc_ts <- data.frame(day = unique(chlor_annual_ts$time),
-                            chlorpyrifos = sapply(chlor_annual_ts$time, chlor_annual_force))
-
-chlor_annual_ts_P <- chlor_annual_ts %>% 
-  filter(Variable == "P" & 
-           sim_run == 1 & 
-           sim_type %in% c("Nothing", "Agro_only", 
-                           "MDA_only", "Agro_MDA",
-                           "Agro_Preds_MDA", "MDA_Preds")) %>% 
-  mutate(Scenario = factor(sim_type, 
-                           levels = c("Nothing",
-                                      "Agro_only",
-                                      "MDA_only",
-                                      "Agro_MDA",
-                                      "MDA_Preds",
-                                      "Agro_Preds_MDA"),
-                           labels = c("No Intervention",
-                                      "Agrochemical",
-                                      "MDA, No Predators",
-                                      "MDA, No Predators, Agrochemical",
-                                      "MDA, Predators",
-                                      "MDA, Predators, Agrochemical")))
-  ggplot() +
-    geom_rect(data = chlor_conc_ts,
-              aes(ymin = -Inf,
-                  ymax = Inf,
-                  xmin = day, xmax = day +1,
-                  fill = chlorpyrifos),
-              alpha = 0.03) +
-    scale_fill_gradient(low = "white", high = "#ED000099") +
-    geom_line(data = chlor_annual_ts_P, 
-              aes(x = time, 
-                  y = Value, 
-                  col = Scenario), 
-              size = 1) +
-    scale_color_manual(values = c("red", "darkred",
-                                  "green", "darkgreen",
-                                  "violet", "purple")) +
-    labs(y = expression(Predator~Population~(italic(P))),
-         x = "Time (years)") +
-    scale_x_continuous(breaks = 365*c(0:11),
-                       labels = c(-1:10)) +
-    #(breaks = c(10,30,50,70)) +
-    theme_classic()
+                            chlorpyrifos = sapply(chlor_annual_ts$time, chlor_force))
 
 #Do some cleaning to chlor time series data for plotting W
 chlor_annual_ts_W <- chlor_annual_ts %>% 
@@ -2140,9 +1505,9 @@ chlor_dynamics <- ggplot() +
               aes(ymin = -Inf,
                   ymax = Inf,
                   xmin = day, xmax = day +1,
-                  fill = chlorpyrifos),
-              alpha = 0.03) +
-    scale_fill_gradient(low = "white", high = "#ED000099") +
+                  fill = chlorpyrifos/max(chlorpyrifos)),
+              alpha = 0.7) +
+    scale_fill_gradient(low = "white", high = "#925E9F99") +
     geom_line(data = chlor_annual_ts_W, 
               aes(x = time, 
                   y = Value, 
@@ -2155,11 +1520,15 @@ chlor_dynamics <- ggplot() +
          x = "Time (years)") +
     scale_x_continuous(breaks = 365*c(0:11),
                        labels = c(-1:10)) +
-    scale_y_continuous(breaks = c(10,30,50,70)) +
-    theme_classic()
+    scale_y_continuous(breaks = c(10,30,50,70,90),
+                       limits = c(0,90)) +
+    theme_ms() +
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank())
+    
+ggsave("../Plots/chlorpyrifos_ts_plots2.jpg", chlor_dynamics,
+       width = 8, height = 6, dpi = 300, units = "in")
   
-chlor_dynamics
-
 #Show compariosn of DALYs accumulated in different intervention scenarios #########
 comp_dalys_chlor <- comp_dalys_chlor_annual %>% 
   gather("Scenario", "DALYs", Nothing:Agro_Preds_MDA) %>% 
@@ -2191,23 +1560,28 @@ comp_dalys_chlor <- comp_dalys_chlor_annual %>%
     scale_fill_manual(values = c("red", "darkred",
                                  "green", "darkgreen",
                                  "violet", "purple")) +
-    scale_y_continuous(position = "right") +
+    scale_y_continuous(position = "right",
+                       breaks = c(0,10,20,30),
+                       limits = c(0,35)) +
     scale_x_discrete(labels = c(" ", " ", " ")) +
-    theme_classic() +
+    theme_ms() +
     labs(x = "",
          y = "10 year DALYs lost") +
     theme(axis.ticks.x = element_blank(),
-          legend.position = "none")
-
-comp_dalys_chlor
-
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank())
 
 #Put time series plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/) ##########
 chlor_dynamics_plot <- ggplotGrob(chlor_dynamics + 
-                                  theme(legend.position = "none"))
+                                    theme(legend.position = "none") + 
+                                    annotate("text", x = 0.1, y = 87, size = 8,
+                                             label = expression(bold(C))))
 
 #Put DALYs plot and legend together ############
-chlor_dalys_plot <- ggplotGrob(comp_dalys_chlor)
+chlor_dalys_plot <- ggplotGrob(comp_dalys_chlor + 
+                                  theme(legend.position = "none") +
+                               annotate("text", x = 3, y = 35, size = 8,
+                                        label = expression(bold(D))))
 
 #Print plot of all panels put together and save ############
 #grid.arrange(chlor_dynamics_plot, chlor_dalys_plot, 
@@ -2216,22 +1590,262 @@ chlor_dalys_plot <- ggplotGrob(comp_dalys_chlor)
 
 #Save the plot
 chlor_grob <- arrangeGrob(chlor_dynamics_plot, chlor_dalys_plot, 
-                        layout_matrix = rbind(c(1,1,1,2,2)),
-                        top = "Chlorpyrifos")
+                        layout_matrix = rbind(c(1,1,1,2,2)))
 
-ggsave("../Plots/chlorpyrifos_ts_plots2.jpg", chlor_grob,
-       width = 8, height = 6, dpi = 300, units = "in")
 ```
+
+#### Glyphosate  
+```{r gly_ts_plot}
+#Get glyphosate concentration through time #########
+gly_conc_ts <- data.frame(day = unique(gly_annual_ts$time),
+                          glyphosate = sapply(gly_annual_ts$time, gly_force))
+
+#Do some cleaning to gly time series data for plotting W
+gly_annual_ts_W <- gly_annual_ts %>% 
+  filter(Variable == "W" & 
+           sim_run == 1 & 
+           sim_type %in% c("Nothing", "Agro_only", 
+                           "MDA_only", "Agro_MDA",
+                           "Agro_Preds_MDA", "MDA_Preds")) %>% 
+  mutate(Scenario = factor(sim_type, 
+                           levels = c("Nothing",
+                                      "Agro_only",
+                                      "MDA_only",
+                                      "Agro_MDA",
+                                      "MDA_Preds",
+                                      "Agro_Preds_MDA"),
+                           labels = c("No Intervention",
+                                      "Agrochemical",
+                                      "MDA, No Predators",
+                                      "MDA, No Predators, Agrochemical",
+                                      "MDA, Predators",
+                                      "MDA, Predators, Agrochemical")))
+
+#Show dynamics of mean worm burden through time ############
+gly_dynamics <- ggplot() +
+    geom_rect(data = gly_conc_ts,
+              aes(ymin = -Inf,
+                  ymax = Inf,
+                  xmin = day, xmax = day +1,
+                  fill = glyphosate/max(glyphosate)),
+              alpha = 0.7) +
+    scale_fill_gradient(low = "white", high = "#42B54099") +
+    geom_line(data = gly_annual_ts_W, 
+              aes(x = time, 
+                  y = Value, 
+                  col = Scenario), 
+              size = 1) +
+    scale_color_manual(values = c("red", "darkred",
+                                  "green", "darkgreen",
+                                  "violet", "purple")) +
+    labs(y = expression(Mean~worm~burden~(italic(W))),
+         x = "Time (years)") +
+    scale_x_continuous(breaks = 365*c(0:11),
+                       labels = c(-1:10)) +
+    scale_y_continuous(breaks = c(10,30,50,70,90),
+                       limits = c(0,90)) +
+    theme_ms() +
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank())
+  
+ggsave("../Plots/glyphosate_ts_plots2.jpg", gly_dynamics,
+       width = 8, height = 6, dpi = 300, units = "in")
+
+
+#Show compariosn of DALYs accumulated in different intervention scenarios #########
+comp_dalys_gly <- comp_dalys_gly_annual %>% 
+  gather("Scenario", "DALYs", Nothing:MDA_Preds_attributable) %>% 
+  filter(Application == "Annual" & 
+           Scenario %in% c("Nothing", "Agro_only",
+                           "MDA_only", "Agro_MDA",
+                           "MDA_Preds", "Agro_Preds_MDA")) %>% 
+  mutate(scenario_type = case_when(Scenario == "Nothing" ~ "base",
+                                   Scenario == "Agro_only" ~ "base",
+                                   Scenario == "MDA_only" ~ "MDA",
+                                   Scenario == "Agro_MDA" ~ "MDA",
+                                   Scenario == "MDA_Preds" ~ "MDA_preds",
+                                   Scenario == "Agro_Preds_MDA" ~ "MDA_preds"),
+         Scenario = factor(Scenario, 
+                           levels = c("Nothing",
+                                      "Agro_only",
+                                      "MDA_only",
+                                      "Agro_MDA",
+                                      "MDA_Preds",
+                                      "Agro_Preds_MDA"),
+                           labels = c("No Intervention",
+                                      "Agrochemical",
+                                      "MDA, No Predators",
+                                      "MDA, No Predators, \nAgrochemical",
+                                      "MDA, Predators",
+                                      "MDA, Predators, \nAgrochemical"))) %>% 
+  ggplot(aes(x = scenario_type, y = DALYs, fill = Scenario)) +
+    geom_boxplot() +
+    scale_fill_manual(values = c("red", "darkred",
+                                 "green", "darkgreen",
+                                 "violet", "purple")) +
+    scale_y_continuous(position = "right",
+                       breaks = c(0,10,20,30),
+                       limits = c(0,35)) +
+    scale_x_discrete(labels = c(" ", " ", " ")) +
+    theme_ms() +
+    labs(x = "",
+         y = "10 year DALYs lost") +
+    theme(axis.ticks.x = element_blank(),
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank())
+
+#Put time series plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/) ##########
+gly_dynamics_plot <- ggplotGrob(gly_dynamics + 
+                                  theme(legend.position = "none") + 
+                                    annotate("text", x = 0.1, y = 87, size = 8,
+                                             label = expression(bold(E))))
+
+#Put DALYs plot and legend together ############
+gly_dalys_plot <- ggplotGrob(comp_dalys_gly + 
+                                  theme(legend.position = "none") +
+                               annotate("text", x = 3, y = 35, size = 8,
+                                        label = expression(bold(F))))
+
+#Print plot of all panels put together and save ############
+
+#Save the plot
+gly_grob <- arrangeGrob(gly_dynamics_plot, gly_dalys_plot, 
+                        layout_matrix = rbind(c(1,1,1,2,2)))
+
+```
+
+#### Profenofos  
+```{r prof_ts_plot}
+#Get profenofos concentration through time #########
+prof_conc_ts <- data.frame(day = unique(prof_annual_ts$time),
+                          profenofos = sapply(prof_annual_ts$time, prof_force))
+
+#Do some cleaning to prof time series data for plotting W
+prof_annual_ts_W <- prof_annual_ts %>% 
+  filter(Variable == "W" & 
+           sim_run == 1 & 
+           sim_type %in% c("Nothing", "Agro_only", 
+                           "MDA_only", "Agro_MDA",
+                           "Agro_Preds_MDA", "MDA_Preds")) %>% 
+  mutate(Scenario = factor(sim_type, 
+                           levels = c("Nothing",
+                                      "Agro_only",
+                                      "MDA_only",
+                                      "Agro_MDA",
+                                      "MDA_Preds",
+                                      "Agro_Preds_MDA"),
+                           labels = c("No Intervention",
+                                      "Agrochemical",
+                                      "MDA, No Predators",
+                                      "MDA, No Predators, Agrochemical",
+                                      "MDA, Predators",
+                                      "MDA, Predators, Agrochemical")))
+
+#Show dynamics of mean worm burden through time ############
+prof_dynamics <- ggplot() +
+    geom_rect(data = prof_conc_ts,
+              aes(ymin = -Inf,
+                  ymax = Inf,
+                  xmin = day, xmax = day +1,
+                  fill = profenofos/max(profenofos)),
+              alpha = 0.7) +
+    scale_fill_gradient(low = "white", high = "#0099B499") +
+    geom_line(data = prof_annual_ts_W, 
+              aes(x = time, 
+                  y = Value, 
+                  col = Scenario), 
+              size = 1) +
+    scale_color_manual(values = c("red", "darkred",
+                                  "green", "darkgreen",
+                                  "violet", "purple")) +
+    labs(y = expression(Mean~worm~burden~(italic(W))),
+         x = "Time (years)") +
+    scale_x_continuous(breaks = 365*c(0:11),
+                       labels = c(-1:10)) +
+    scale_y_continuous(breaks = c(10,30,50,70,90),
+                       limits = c(0,90)) +
+    theme_ms() +
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank())
+  
+ggsave("../Plots/profenofos_ts_plots2.jpg", prof_dynamics,
+       width = 8, height = 6, dpi = 300, units = "in")
+
+#Show compariosn of DALYs accumulated in different intervention scenarios #########
+comp_dalys_prof <- comp_dalys_prof_annual %>% 
+  gather("Scenario", "DALYs", Nothing:MDA_Preds_attributable) %>% 
+  filter(Application == "Annual" & 
+           Scenario %in% c("Nothing", "Agro_only",
+                           "MDA_only", "Agro_MDA",
+                           "MDA_Preds", "Agro_Preds_MDA")) %>% 
+  mutate(scenario_type = case_when(Scenario == "Nothing" ~ "base",
+                                   Scenario == "Agro_only" ~ "base",
+                                   Scenario == "MDA_only" ~ "MDA",
+                                   Scenario == "Agro_MDA" ~ "MDA",
+                                   Scenario == "MDA_Preds" ~ "MDA_preds",
+                                   Scenario == "Agro_Preds_MDA" ~ "MDA_preds"),
+         Scenario = factor(Scenario, 
+                           levels = c("Nothing",
+                                      "Agro_only",
+                                      "MDA_only",
+                                      "Agro_MDA",
+                                      "MDA_Preds",
+                                      "Agro_Preds_MDA"),
+                           labels = c("No Intervention",
+                                      "Agrochemical",
+                                      "MDA, No Predators",
+                                      "MDA, No Predators, \nAgrochemical",
+                                      "MDA, Predators",
+                                      "MDA, Predators, \nAgrochemical"))) %>% 
+  ggplot(aes(x = scenario_type, y = DALYs, fill = Scenario)) +
+    geom_boxplot() +
+    scale_fill_manual(values = c("red", "darkred",
+                                 "green", "darkgreen",
+                                 "violet", "purple")) +
+    scale_y_continuous(position = "right",
+                       breaks = c(0,10,20,30),
+                       limits = c(0,35)) +
+    scale_x_discrete(labels = c(" ", " ", " ")) +
+    theme_ms() +
+    labs(x = "",
+         y = "10 year DALYs lost") +
+    theme(axis.ticks.x = element_blank(),
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank())
+
+#Put time series plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/) ##########
+prof_dynamics_plot <- ggplotGrob(prof_dynamics + 
+                                  theme(legend.position = "none") + 
+                                    annotate("text", x = 0.1, y = 87, size = 8,
+                                             label = expression(bold(G))))
+
+#Put DALYs plot and legend together ############
+prof_dalys_plot <- ggplotGrob(comp_dalys_prof + 
+                                  theme(legend.position = "none") +
+                               annotate("text", x = 3, y = 35, size = 8,
+                                        label = expression(bold(H))))
+
+#Print plot of all panels put together and save ############
+
+#Save the plot
+prof_grob <- arrangeGrob(prof_dynamics_plot, prof_dalys_plot, 
+                        layout_matrix = rbind(c(1,1,1,2,2)))
+
+
+```
+
 
 #### All together  
 ```{r all_ts plot}
 all_grob <- arrangeGrob(atr_grob, chlor_grob, 
-                        nrow = 1, ncol = 2)
+                        gly_grob, prof_grob,
+                        nrow = 4, ncol = 1)
 
 ggsave("../Plots/all_ts_plots2.jpg", all_grob,
-       width = 8, height = 8, dpi = 300, units = "in")
+       width = 8, height = 11.5, dpi = 300, units = "in")
 ```
 
+## Comparable DALYs estiamtes
 ```{r senegal_other_dalys}
 sen_dalys2017 <- read_csv("IHME_Senegal2017_DALYs.csv")
 
@@ -2249,5 +1863,317 @@ sen_dalys2017_risk_factors %>%
     geom_errorbar() +
     theme_classic() +
     theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1))
+```
+
+```{r scrap, eval=FALSE, include=FALSE}
+## Agrochemical time series  
+#First step is to get time series of agrochemical concentrations that will be used to force the agrochemically influenced model. Want to find sites from observed databases that have consistent readings that are above the detection limit so that we're confident in the actual values and can also consider a worst case scenario
+
+#### Atrazine  
+#Identify most heavily polluted atrazine sites in MSQA sampling
+msqa2013_obs_full_chems %>% 
+  filter(PARM_NM == "Atrazine, wf") %>% 
+  group_by(SHORT_NAME) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(RESULT_CEN[which(REMARK_CEN != "<")]),
+            mean_conc = mean(RESULT_CEN[which(REMARK_CEN != "<")])/1000,
+            med_conc = median(RESULT_CEN[which(REMARK_CEN != "<")])/1000,
+            max_conc = max(RESULT_CEN[which(REMARK_CEN != "<")])/1000) %>% 
+  arrange(-n_obs_above_det, -max_conc) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Atrazine concentration sites in MSQA 2013 pesticide monitoring")
+
+#Identify most heavily polluted atrazine sites in all NAwqa sampling
+pestdat %>% 
+  mutate(samp_year = year(SAMPLE_DATE)) %>% 
+  filter(CONSTIT == "Atrazine") %>% 
+  group_by(SITE_QW_NAME, samp_year) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(CONCENTRATION[which(REMARK != "<")]),
+            mean_conc = mean(CONCENTRATION[which(REMARK != "<")]),
+            med_conc = median(CONCENTRATION[which(REMARK != "<")]),
+            max_conc = max(CONCENTRATION[which(REMARK != "<")])) %>% 
+  ungroup() %>% 
+  arrange(-max_conc, -n_obs_above_det) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Atrazine concentration sites in full NAWQA database")
+
+#Identify most heavily polluted atrazine sites in CA SURF sampling
+ca_surf_obs_full_chems %>% 
+  mutate(SAMP_YEAR = year(SAMP_DATE)) %>% 
+  filter(CHEMICAL == "atrazine") %>% 
+  group_by(SITE_CODE, SAMP_YEAR) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            mean_conc = mean(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            med_conc = median(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            max_conc = max(CONC_PPB[which(CONC_PPB > LOQ_PPB)])) %>% 
+  ungroup() %>% 
+  arrange(-max_conc) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Atrazine concentration sites in CA_SURF pesticide monitoring")
+
+#Looks like the MSQA Summer 2013 and NAWQA databases contain sites that could produce a good time series of atrazine concentration. CA SURF data is mostly older, has few observations above detection limit, and has lower concentrations than other datasets
+
+#Interpolate time series of atrazine concentration for top site in midwest summer 2013 database
+atr_mw2013_site <- msqa2013_obs_full_chems %>% 
+  filter(PARM_NM == "Atrazine, wf" & SHORT_NAME == "IL_Galum") %>% 
+  mutate(chem = "Atrazine",
+         Concentration = RESULT_CEN/1000)
+
+atr_mw2013_site
+
+atr_mw2013_ts <- data.frame(chem = "Atrazine",
+                     samp_date = seq.Date(as.Date("2013-01-01"), as.Date("2013-12-31"), "day")) %>% 
+  mutate(day = yday(samp_date),
+         week = week(samp_date)) %>% 
+  left_join(atr_mw2013_site, by = c("chem" = "chem", "samp_date" = "SAMPLE_DATE")) %>% 
+  mutate(Conc_interp = replace_na(na.approx(Concentration, na.rm = FALSE), 0))
+
+atr_mw2013_force <- approxfun(atr_mw2013_ts$Conc_interp, rule = 2)
+
+#Interpolate time series of atrazine concentration for top site in NAWQA database
+atr_nawqa_site <- pestdat %>% 
+  filter(CONSTIT == "Atrazine" & SITE_QW_NAME == "Maple Creek near Nickerson, NE" & year(SAMPLE_DATE) == 2004)
+
+atr_nawqa_ts <- data.frame(chem = "Atrazine",
+                           samp_date = seq.Date(as.Date("2004-01-01"), as.Date("2004-12-31"), "day")) %>% 
+  mutate(day = yday(samp_date),
+         week = week(samp_date)) %>% 
+  left_join(atr_nawqa_site, by = c("chem" = "CONSTIT", "samp_date" = "SAMPLE_DATE")) %>% 
+  mutate(Conc_interp = replace_na(na.approx(CONCENTRATION, na.rm = FALSE), 0))
+
+atr_nawqa_force <- approxfun(atr_nawqa_ts$Conc_interp, rule = 2)
+
+#Plot to compare two time series from forcing functions
+data.frame(obs_day = rep(c(1:365),2),
+           Atr_est = c(map_dbl(c(1:365), atr_mw2013_force), map_dbl(c(1:365), atr_nawqa_force)),
+           dataset = c(rep("MW2013", 365), rep("NAWQA", 365))) %>% 
+  ggplot(aes(x = obs_day, y = Atr_est, col = dataset)) +
+    theme_classic() +
+    geom_line(size = 1.2) +
+    labs(title = "Atrazine time series from top sites in NAWQA",
+         y = "Atrazine (ppb)",
+         x = "Day of year")
+
+
+#Not much difference in these two time series, we'll go with MSQA 2013 since it's a bit more contemporaneous, has better temporal resolution, and has a higher peak concentration, representing a worst case scenario
+
+#### Chlorpyrifos  
+#Identify most heavily polluted Chlorpyrifos sites in all MSQA sampling
+msqa2013_obs_full_chems %>% 
+  filter(PARM_NM == "Chlorpyrifos, wf") %>% 
+  group_by(SHORT_NAME) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(RESULT_CEN[which(REMARK_CEN != "<")]),
+            mean_conc = mean(RESULT_CEN[which(REMARK_CEN != "<")])/1000,
+            med_conc = median(RESULT_CEN[which(REMARK_CEN != "<")])/1000,
+            max_conc = max(RESULT_CEN[which(REMARK_CEN != "<")])/1000) %>% 
+  arrange(-n_obs_above_det, -max_conc) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Chlorpyrifos concentration sites in midwest summer 2013 pesticide monitoring")
+
+#Identify most heavily polluted Chlorpyrifos sites in all NAwqa sampling
+pestdat %>% 
+  mutate(samp_year = year(SAMPLE_DATE)) %>% 
+  filter(CONSTIT == "Chlorpyrifos") %>% 
+  group_by(SITE_QW_NAME, samp_year) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(CONCENTRATION[which(REMARK != "<")]),
+            mean_conc = mean(CONCENTRATION[which(REMARK != "<")]),
+            med_conc = median(CONCENTRATION[which(REMARK != "<")]),
+            max_conc = max(CONCENTRATION[which(REMARK != "<")])) %>% 
+  ungroup() %>% 
+  arrange(-max_conc, -n_obs_above_det) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Chlorpyrifos concentration sites in full NAWQA database")
+
+#Identify most heavily polluted Chlorpyrifos sites in CA SURF sampling
+ca_surf_obs_full_chems %>% 
+  mutate(SAMP_YEAR = year(SAMP_DATE)) %>% 
+  filter(CHEMICAL == "chlorpyrifos") %>% 
+  group_by(SITE_CODE, SAMP_YEAR) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            mean_conc = mean(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            med_conc = median(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            max_conc = max(CONC_PPB[which(CONC_PPB > LOQ_PPB)])) %>% 
+  ungroup() %>% 
+  arrange(-max_conc) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Chlorpyrifos concentration sites in CA_SURF pesticide monitoring")
+
+
+#Most of these high single detections of chlorpyrifos in the CA SURF dataset (the only dataset with significant Chlorpyrifos detections) come from the same agency in Sacramento in the same year, but 9 observations with a pretty high peak from site 50_72 in 2015 represents a usable time series 
+
+#Interpolate time series of chlorpyrifos concentration for top site in observed databases
+chlor_ca_surf_site <- ca_surf_obs_full_chems %>% 
+  filter(CHEMICAL == "chlorpyrifos" & SITE_CODE == "50_72" & year(SAMP_DATE) == 2015) %>% 
+  arrange(SAMP_DATE)
+
+chlor_ca_surf_site
+
+chlor_ca_surf_ts <- data.frame(chem = "chlorpyrifos",
+                               samp_date = seq.Date(as.Date("2015-01-01"), as.Date("2015-12-31"), "day")) %>% 
+  mutate(day = yday(samp_date),
+         week = week(samp_date)) %>% 
+  left_join(chlor_ca_surf_site, by = c("chem" = "CHEMICAL", "samp_date" = "SAMP_DATE")) %>% 
+  mutate(Conc_interp = replace_na(na.approx(CONC_PPB, na.rm = FALSE), 0))
+
+
+
+#### Glyphosate  
+# Identify most heavily polluted glyphosate sites in MSQA 2013 dataset
+msqa2013_obs_full_chems %>% 
+  filter(PARM_NM == "Glyphosate, wf") %>% 
+  group_by(SHORT_NAME) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(RESULT_CEN[which(REMARK_CEN != "<")]),
+            mean_conc = mean(RESULT_CEN[which(REMARK_CEN != "<")])/1000,
+            med_conc = median(RESULT_CEN[which(REMARK_CEN != "<")])/1000,
+            max_conc = max(RESULT_CEN[which(REMARK_CEN != "<")])/1000) %>% 
+  arrange( -max_conc, -n_obs_above_det) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Glyphosate concentration sites in midwest summer 2013 pesticide monitoring")
+
+#Identify most heavily polluted Glyphosate sites in CA SURF sampling
+ca_surf_obs_full_chems %>% 
+  mutate(SAMP_YEAR = year(SAMP_DATE)) %>% 
+  filter(CHEMICAL == "glyphosate") %>% 
+  group_by(SITE_CODE, SAMP_YEAR) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            mean_conc = mean(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            med_conc = median(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            max_conc = max(CONC_PPB[which(CONC_PPB > LOQ_PPB)])) %>% 
+  ungroup() %>% 
+  arrange(-max_conc) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Glyphosate concentration sites in CA_SURF pesticide monitoring")
+
+
+
+#Interpolate time series of glyphosate concentration for top site in midwest summer 2013 database
+gly_ca_surf_site <- ca_surf_obs_full_chems %>% 
+  filter(CHEMICAL == "glyphosate" & SITE_CODE == "56_148")
+
+gly_ca_surf_site
+
+
+
+#So the site that had the highest detection of Glyphosate (1800ppb) actually took 5 samples on the same day, which makes this observation somewhat different from the others in that it's capturing sub-daily variability. We want a site with a reliable time series over a longer time period (months) so will look at other sites.
+
+gly_ca_surf_site2 <- ca_surf_obs_full_chems %>% 
+  filter(CHEMICAL == "glyphosate" & SITE_CODE == "54_34" & year(SAMP_DATE) == 2010) %>% 
+  arrange(SAMP_DATE)
+
+gly_ca_surf_site2
+
+gly_ca_surf_ts <- data.frame(chem = "glyphosate",
+                             samp_date = seq.Date(as.Date("2010-01-01"), as.Date("2010-12-31"), "day")) %>% 
+  mutate(day = yday(samp_date),
+         week = week(samp_date)) %>% 
+  left_join(gly_ca_surf_site2, by = c("chem" = "CHEMICAL", "samp_date" = "SAMP_DATE")) %>% 
+  mutate(Conc_interp = replace_na(na.approx(CONC_PPB, na.rm = FALSE), 0))
+
+
+
+#### Malathion  
+#Identify most heavily polluted sites in MSQA 2013 database
+msqa2013_obs_full_chems %>% 
+  filter(PARM_NM == "Malathion, wf") %>% 
+  group_by(SHORT_NAME) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(RESULT_CEN[which(REMARK_CEN != "<")]),
+            mean_conc = mean(RESULT_CEN[which(REMARK_CEN != "<")]),
+            med_conc = median(RESULT_CEN[which(REMARK_CEN != "<")]),
+            max_conc = max(RESULT_CEN[which(REMARK_CEN != "<")])) %>% 
+  arrange(-n_obs_above_det, -max_conc) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Malathion concentration sites in midwest summer 2013 pesticide monitoring")
+
+#Identify most heavily polluted Malathion sites in all NAwqa sampling
+pestdat %>% 
+  mutate(samp_year = year(SAMPLE_DATE)) %>% 
+  filter(CONSTIT == "Malathion") %>% 
+  group_by(SITE_QW_NAME, samp_year) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(CONCENTRATION[which(REMARK != "<")]),
+            mean_conc = mean(CONCENTRATION[which(REMARK != "<")]),
+            med_conc = median(CONCENTRATION[which(REMARK != "<")]),
+            max_conc = max(CONCENTRATION[which(REMARK != "<")])) %>% 
+  ungroup() %>% 
+  arrange(-max_conc, -n_obs_above_det) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Nalathion concentration sites in full NAWQA database")
+
+#Identify most heavily polluted Malathion sites in CA SURF sampling
+ca_surf_obs_full_chems %>% 
+  mutate(SAMP_YEAR = year(SAMP_DATE)) %>% 
+  filter(CHEMICAL == "malathion") %>% 
+  group_by(SITE_CODE, SAMP_YEAR) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            mean_conc = mean(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            med_conc = median(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            max_conc = max(CONC_PPB[which(CONC_PPB > LOQ_PPB)])) %>% 
+  ungroup() %>% 
+  arrange(-max_conc) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Malathion concentration sites in CA_SURF pesticide monitoring")
+
+
+
+#Interpolate time series of chlorpyrifos concentration for top site in NAWQA database
+mal_ca_surf_site <- ca_surf_obs_full_chems %>% 
+  filter(CHEMICAL == "malathion" & SITE_CODE == "27_10" & year(SAMP_DATE) == 2008) %>% 
+  group_by(CHEMICAL, SITE_CODE, SAMP_DATE) %>% 
+  summarise(max_conc_day = max(CONC_PPB),
+            LOQ_PPB = first(LOQ_PPB)) %>% 
+  arrange(SAMP_DATE)
+
+mal_ca_surf_site
+
+mal_ca_surf_ts <- data.frame(chem = "malathion",
+                               samp_date = seq.Date(as.Date("2008-01-01"), as.Date("2008-12-30"), "day")) %>% 
+  mutate(day = yday(samp_date),
+         week = week(samp_date)) %>% 
+  left_join(mal_ca_surf_site, by = c("chem" = "CHEMICAL", "samp_date" = "SAMP_DATE")) %>% 
+  mutate(Conc_interp = replace_na(na.approx(max_conc_day, na.rm = FALSE), 0))
+
+
+
+#### Profenofos  
+#Identify most heavily polluted Malathion sites in CA SURF sampling
+msqa2013_obs_full_chems %>% 
+  filter(PARM_NM == "Profenofos") %>% 
+  group_by(SHORT_NAME) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(RESULT_CEN[which(REMARK_CEN != "<")]),
+            mean_conc = mean(RESULT_CEN[which(REMARK_CEN != "<")]),
+            med_conc = median(RESULT_CEN[which(REMARK_CEN != "<")]),
+            max_conc = max(RESULT_CEN[which(REMARK_CEN != "<")])) %>% 
+  arrange(-n_obs_above_det, -max_conc) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Profenofos concentration sites in midwest summer 2013 pesticide monitoring")
+
+#Identify most heavily polluted Profenofos sites in all NAwqa sampling
+pestdat %>% 
+  mutate(samp_year = year(SAMPLE_DATE)) %>% 
+  filter(CONSTIT == "Profenofos") %>% 
+  group_by(SITE_QW_NAME, samp_year) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(CONCENTRATION[which(REMARK != "<")]),
+            mean_conc = mean(CONCENTRATION[which(REMARK != "<")]),
+            med_conc = median(CONCENTRATION[which(REMARK != "<")]),
+            max_conc = max(CONCENTRATION[which(REMARK != "<")])) %>% 
+  ungroup() %>% 
+  arrange(-max_conc, -n_obs_above_det) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Profonofos concentration sites in full NAWQA database")
+
+#Identify most heavily polluted Malathion sites in CA SURF sampling
+ca_surf_obs_full_chems %>% 
+  mutate(SAMP_YEAR = year(SAMP_DATE)) %>% 
+  filter(CHEMICAL == "profenofos") %>% 
+  group_by(SITE_CODE, SAMP_YEAR) %>% 
+  summarise(n_obs = n(),
+            n_obs_above_det = length(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            mean_conc = mean(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            med_conc = median(CONC_PPB[which(CONC_PPB > LOQ_PPB)]),
+            max_conc = max(CONC_PPB[which(CONC_PPB > LOQ_PPB)])) %>% 
+  ungroup() %>% 
+  arrange(-max_conc) %>% slice(1:10) %>% 
+  knitr::kable(caption = "Top 10 Profonofos concentration sites in CA_SURF pesticide monitoring")
+
+#Only one site with a single observation above the detection limit (and just barely), so we'll ignore profenofos in simulations through time
+
 ```
 
