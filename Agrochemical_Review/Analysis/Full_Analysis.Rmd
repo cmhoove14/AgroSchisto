@@ -180,7 +180,7 @@ all_obs_full_chems %>%
   ggplot(aes(x = Chemical, y = Concentration, fill = Dataset)) +
     geom_boxplot(varwidth = TRUE) +
     coord_flip() +
-    theme_ms() +
+    theme_classic() +
     scale_y_continuous(trans = "log",
                        breaks = c(0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000),
                        labels = c("0.0001", "0.001", "0.01", "0.1", "1", "10", "100", "1000"),
@@ -189,7 +189,8 @@ all_obs_full_chems %>%
          subtitle = "Only values above detection limit shown \nBox size scaled by sample size",
          y = "Log Agrochemical concentration (ppb)")
 
-
+ggsave("../Plots/obs_chems_distributions.jpg",
+       width = 8, height = 6, dpi = 300, units = "in")
 ```
 
 Seems like CA SURF database has the best data in terms of sample size and coverage across all of these chemicals. NAWQA lacks Glyphosate data, Profenofos was only detected once above its detection limit.
@@ -522,7 +523,7 @@ gg_forest_eec <- gg_forest_df %>%
       scale_y_discrete(breaks = as.factor(gg_forest_df$order), 
                        labels = gg_forest_df$label) +
       facet_grid(Class~., scales = "free", space = "free") +
-      labs(x = expression(paste(italic(R[0]), 
+      labs(x = expression(paste(italic(R['0jc']), 
                                 "(", italic(EEC[c]), ")", 
                                 sep = "")))
 
@@ -641,8 +642,6 @@ gg_forest_comb_conc <- forest_comb_df %>%
 # ggsave("../Plots/Forestplot_sig_effects_poc_eec.jpg",plot = gg_forest_comb_conc,width = 11.5, height = 8, units = "in", dpi = 300)
 
 ```
-
-
 
 ## Net (combined) effects of agrochemicals on $R_0$  
 For chemicals with multiple response functions and multiple parameters affected, estimate the net effect of the agrochemical across a broad range of environmentally relevant concentrations. Parameter sets generated in `Sims/Range/generate_conc_range_parameter_sets.R` and stored in the `Sims/Range/Parameter_Sets` folder
@@ -782,7 +781,7 @@ prof_conc_range_pars <- readRDS("../Sims/Range/Parameter_Sets/profenofos_net_par
         geom_line(size = 0.75) +
         geom_ribbon(alpha = 0.25, size = 0.01) +
         geom_hline(yintercept = base_r0_median, lty = 2) +
-        labs(y = expression(paste(italic(R[0]), "(", italic(q[c]), ")")),
+        labs(y = expression(paste(italic(R['0c']), "(", italic(q[c]), ")")),
              x = expression(Agrochemical~Concentration~(italic(q[c]))~Normalized~to~italic(EEC[c]))) + 
         scale_x_continuous(trans = "log",
                            breaks = c(0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 2),
@@ -1016,9 +1015,9 @@ prof_force <- approxfun(as.data.frame(list(times = t_sim,
 ```
 
 ### All DALYs Sims  
-```{r all_sims_through_time, message = F, cache = T}
+```{r all_sims_through_time, message = F, cache = T, cache.lazy = FALSE}
 require(parallel)
-cl <- makeCluster(detectCores())
+cl <- makeCluster(detectCores()-1)
 clusterExport(cl, ls())
 clusterEvalQ(cl, lapply(c("deSolve", "dplyr", "rootSolve", "purrr"), 
                         library, character.only = T))
@@ -1099,7 +1098,7 @@ stopCluster(cl)
 
 #### Dataframes of DALYs accumulated for each sim  
 ```{r sim_dalys_dfs, cache=T}
-rm(list = setdiff(ls(), c("fit_pars", "agrochem_time_series", "theme_ms", "years",
+rm(list = setdiff(ls(), c("fit_pars", "agrochem_time_series", "theme_ms", "years", "area",
                           "atr_pwc_ts", "atr_force", "atr_annual_simulation", 
                           "chlor_pwc_ts", "chlor_force", "chlor_annual_simulation", 
                           "gly_pwc_ts", "gly_force", "gly_annual_simulation", 
@@ -1182,15 +1181,20 @@ comp_dalys_prof_annual <- comp_dalys_across_sims(prof_annual_simulation) %>%
 
 #### Dataframes of simulations through time for each sim  
 ```{r sim_time_series, cache = T}
-atr_annual_ts <- comp_ts_across_sims(atr_annual_simulation)
+atr_annual_ts <- get_ts_from_sim(atr_annual_simulation, 1)
+  #comp_ts_across_sims(atr_annual_simulation)
 
-chlor_annual_ts <- comp_ts_across_sims(chlor_annual_simulation)
+chlor_annual_ts <- get_ts_from_sim(chlor_annual_simulation, 1)
+  #comp_ts_across_sims(chlor_annual_simulation)
 
-gly_annual_ts <- comp_ts_across_sims(gly_annual_simulation)
+gly_annual_ts <- get_ts_from_sim(gly_annual_simulation,1)
+  #comp_ts_across_sims(gly_annual_simulation)
 
-mal_annual_ts <- comp_ts_across_sims(mal_annual_simulation)
+mal_annual_ts <- get_ts_from_sim(mal_annual_simulation, 1)
+  #comp_ts_across_sims(mal_annual_simulation)
 
-prof_annual_ts <- comp_ts_across_sims(prof_annual_simulation)
+prof_annual_ts <- get_ts_from_sim(prof_annual_simulation,1)
+  #comp_ts_across_sims(prof_annual_simulation)
 ```
 
 
@@ -1209,7 +1213,7 @@ comp_dalys_atr_annual_bp <- comp_dalys_atr_annual %>%
             axis.title = element_text(size = 14), #increase axis title size
             title = element_text(size = 14))
 
-comp_dalys_atr_annual_bp
+#comp_dalys_atr_annual_bp
 
 ```
 #### Chlorpyrifos  
@@ -1226,7 +1230,7 @@ comp_dalys_chlor_annual_bp <- comp_dalys_chlor_annual %>%
             axis.title = element_text(size = 14), #increase axis title size
             title = element_text(size = 14))
 
-comp_dalys_chlor_annual_bp
+#comp_dalys_chlor_annual_bp
 
 ```
 
@@ -1245,7 +1249,7 @@ comp_dalys_gly_annual_bp <- comp_dalys_gly_annual %>%
             axis.title = element_text(size = 14), #increase axis title size
             title = element_text(size = 14))
 
-comp_dalys_gly_annual_bp
+#comp_dalys_gly_annual_bp
 
 ```
 
@@ -1264,7 +1268,7 @@ comp_dalys_mal_annual_bp <- comp_dalys_mal_annual %>%
             axis.title = element_text(size = 14), #increase axis title size
             title = element_text(size = 14))
 
-comp_dalys_mal_annual_bp
+#comp_dalys_mal_annual_bp
 
 ```
 
@@ -1275,6 +1279,8 @@ comp_dalys_all_annual <- comp_dalys_atr_annual %>%
   bind_rows(comp_dalys_gly_annual) %>% 
   bind_rows(comp_dalys_mal_annual) %>% 
   bind_rows(comp_dalys_prof_annual)
+
+saveRDS(comp_dalys_all_annual, "comp_dalys_all_annual.rds")
 
 comp_dalys_all_annual_bp <- comp_dalys_all_annual %>% 
   gather("Scenario", "DALYs", Nothing:Agro_Preds_MDA) %>% 
@@ -1299,7 +1305,7 @@ comp_dalys_all_annual_bp <- comp_dalys_all_annual %>%
   ggplot(aes(x = Chemical, y = DALYs, fill = Scenario)) +
     geom_boxplot() +
     scale_fill_manual(values = c("red", "darkred",
-                                 "green", "darkgreen",
+                                 "cyan2", "darkblue",
                                  "lightblue", "darkblue",
                                  "violet", "purple")) +
     labs(x = "Agrochemical") +
@@ -1344,15 +1350,23 @@ comp_dalys_all_annual %>%
   summarise_each(funs(na.omit)) %>% 
   knitr::kable(caption = "DALYs per 100,000 per year attributable to agrochemical pollution across different intervention scenarios for 5 important agrochemicals")
 ```
+
 ```{r, eval = FALSE, include = FALSE}
 #Across multiple intervention scenarios, atrazine is estimated to cause an additional `r round(added_dalys %>% filter(Chemical == "Atrazine") %>% pull(agro_effect_med), 2)` (IQR: `r round(added_dalys %>% filter(Chemical == "Atrazine") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Atrazine") %>% pull(agro_effect_3q), 2)`) DALYs accumulated, chlorpyrifos an additional `r round(added_dalys %>% filter(Chemical == "Chlorpyrifos") %>% pull(agro_effect_med), 2)` (`r round(added_dalys %>% filter(Chemical == "Chlorpyrifos") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Chlorpyrifos") %>% pull(agro_effect_3q), 2)`) DALYs accumulated, and profenofos an additional `r round(added_dalys %>% filter(Chemical == "Profenofos") %>% pull(agro_effect_med), 2)` (`r round(added_dalys %>% filter(Chemical == "Profenofos") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Profenofos") %>% pull(agro_effect_3q), 2)`) DALYs accumulated. Malathion is estimated to have no effect on intervention efforts at its peak EEC, `r round(added_dalys %>% filter(Chemical == "Malathion") %>% pull(agro_effect_med), 2)` (`r round(added_dalys %>% filter(Chemical == "Malathion") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Malathion") %>% pull(agro_effect_3q), 2)`)  additional DALYs. Glyphosate may actually aid intervention efforts due to its high reproductive toxicity to intermediate host snails, leading to a reduction in DALYs accumulated of `r round(added_dalys %>% filter(Chemical == "Glyphosate") %>% pull(agro_effect_med), 2)` (`r round(added_dalys %>% filter(Chemical == "Glyphosate") %>% pull(agro_effect_1q), 2)` - `r round(added_dalys %>% filter(Chemical == "Glyphosate") %>% pull(agro_effect_3q), 2)`).
 ```
 ### Plots comparing time series  
 #### Atrazine  
+##### Worm burden through time  
 ```{r atr_ts_plot}
 #Get atrazine concentration through time #########
 atr_conc_ts <- data.frame(day = unique(atr_annual_ts$time),
                           atrazine = sapply(atr_annual_ts$time, atr_force))
+
+first_atr <- min(atr_conc_ts %>% 
+  filter(atrazine > 0) %>% 
+  pull(day))
+
+first_atr
 
 #Do some cleaning to atr time series data for plotting W
 atr_annual_ts_W <- atr_annual_ts %>% 
@@ -1390,10 +1404,11 @@ atr_dynamics <- ggplot() +
                   col = Scenario), 
               size = 1) +
     scale_color_manual(values = c("red", "darkred",
-                                  "green", "darkgreen",
+                                  "cyan2", "darkblue",
                                   "violet", "purple")) +
-    labs(y = expression(Mean~worm~burden~(italic(W))),
-         x = "Time (years)") +
+    labs(y = "",
+         x = "Time (years)",
+         title = "Atrazine") +
     scale_x_continuous(breaks = 365*c(0:11),
                        labels = c(-1:10)) +
     scale_y_continuous(breaks = c(10,30,50,70,90),
@@ -1406,8 +1421,60 @@ atr_dynamics <- ggplot() +
 ggsave("../Plots/atrazine_ts_plots2.jpg", atr_dynamics,
        width = 8, height = 6, dpi = 300, units = "in")
 
+```
+##### Snail population through time  
+```{r atr_ts_snails}
+#Do some cleaning to atr time series data for plotting snail dynamics  
+atr_annual_ts_snails <- atr_annual_ts %>% 
+  filter(Variable %in% c("S", "E", "I") & 
+           sim_run == 1 & 
+           sim_type %in% c("Agro_Preds_MDA", "MDA_Preds")) %>% 
+  spread(Variable, Value) %>% 
+  mutate(N = S+E+I,
+         Scenario = factor(sim_type, 
+                           levels = c("MDA_Preds",
+                                      "Agro_Preds_MDA"),
+                           labels = c("MDA, Predators",
+                                      "MDA, Predators, Agrochemical")))
+
+#Remove sampling variability from response function from plot
+atr_annual_ts_snails$N[which(atr_annual_ts_snails$time < first_atr & 
+                               atr_annual_ts_snails$Scenario == "MDA, Predators, Agrochemical")] <- 
+  atr_annual_ts_snails$N[which(atr_annual_ts_snails$time < first_atr & 
+                               atr_annual_ts_snails$Scenario == "MDA, Predators")]
+
+#Show dynamics of mean worm burden through time ############
+atr_snail_dynamics <- ggplot() +
+    geom_rect(data = atr_conc_ts,
+              aes(ymin = -Inf,
+                  ymax = Inf,
+                  xmin = day, xmax = day +1,
+                  fill = atrazine/max(atrazine)),
+              alpha = 0.7) +
+    scale_fill_gradient(low = "white", high = "#FDAF91FF") +
+    geom_line(data = atr_annual_ts_snails, 
+              aes(x = time, 
+                  y = N/area, 
+                  col = Scenario), 
+              size = 1) +
+    scale_color_manual(values = c("violet", "purple")) +
+    labs(y = expression("Total Snail Density"),
+         x = "Time (years)") +
+    scale_x_continuous(breaks = 365*c(0:11),
+                       labels = c(-1:10)) +
+    theme_ms() +
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          legend.position = "none")
+  
+ggsave("../Plots/atrazine_ts_snail_dynamics.jpg", atr_snail_dynamics,
+       width = 8, height = 6, dpi = 300, units = "in")
+```
+
+##### DALYs accumulation  
+```{r atr_dalys_box}
 #Show compariosn of DALYs accumulated in different intervention scenarios #########
-comp_dalys_atr <- comp_dalys_atr_annual %>% 
+comp_dalys_atr_df <- comp_dalys_atr_annual %>% 
   gather("Scenario", "DALYs", Nothing:MDA_Preds_attributable) %>% 
   filter(Application == "Annual" & 
            Scenario %in% c("Nothing", "Agro_only",
@@ -1431,29 +1498,30 @@ comp_dalys_atr <- comp_dalys_atr_annual %>%
                                       "MDA, No Predators",
                                       "MDA, No Predators, \nAgrochemical",
                                       "MDA, Predators",
-                                      "MDA, Predators, \nAgrochemical"))) %>% 
-  ggplot(aes(x = scenario_type, y = DALYs, fill = Scenario)) +
+                                      "MDA, Predators, \nAgrochemical")))
+comp_dalys_atr <- comp_dalys_atr_df %>% 
+  ggplot(aes(x = scenario_type, y = (DALYs/fit_pars["H"]/years)*100000, fill = Scenario)) +
     geom_boxplot() +
     scale_fill_manual(values = c("red", "darkred",
-                                 "green", "darkgreen",
+                                 "cyan2", "darkblue",
                                  "violet", "purple")) +
-    scale_y_continuous(position = "right",
-                       breaks = c(0,10,20,30),
-                       limits = c(0,35)) +
+    scale_y_continuous(position = "right",  limits = c(0,1250)) +
     scale_x_discrete(labels = c(" ", " ", " ")) +
     theme_ms() +
     labs(x = "",
-         y = "10 year DALYs lost") +
+         y = "",
+         title = " ") +
     theme(axis.ticks.x = element_blank(),
           legend.title = element_text(size = 9),
-          legend.text = element_text(size = 8),
+          legend.text = element_text(size = 7.5),
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
-          legend.position = c(0.07, 0.3))
+          legend.position = c(0.28, 0.3))
 
-#comp_dalys_atr
+```
 
-
+##### Merge Grobs   
+```{r atr_grobs}
 #Put time series plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/) ##########
 atr_dynamics_plot <- ggplotGrob(atr_dynamics + 
                                   theme(legend.position = "none") +
@@ -1462,17 +1530,17 @@ atr_dynamics_plot <- ggplotGrob(atr_dynamics +
 
 #Put DALYs plot and legend together ############
 atr_dalys_plot <- ggplotGrob(comp_dalys_atr +
-                               annotate("text", x = 3, y = 35, size = 8,
+                               annotate("text", x = 3.2, y = 1200, size = 8,
                                         label = expression(bold(B))))
 
 #Save the plot
 atr_grob <- arrangeGrob(atr_dynamics_plot, atr_dalys_plot, 
                         layout_matrix = rbind(c(1,1,1,2,2)))
 
-
 ```
 
 #### Chlorpyrifos  
+##### Worm burden through time  
 ```{r chlor_ts_plot}
 #Get chlorpyrifos concentration through time #########
 chlor_conc_ts <- data.frame(day = unique(chlor_annual_ts$time),
@@ -1514,10 +1582,11 @@ chlor_dynamics <- ggplot() +
                   col = Scenario), 
               size = 1) +
     scale_color_manual(values = c("red", "darkred",
-                                  "green", "darkgreen",
+                                  "cyan2", "darkblue",
                                   "violet", "purple")) +
-    labs(y = expression(Mean~worm~burden~(italic(W))),
-         x = "Time (years)") +
+    labs(y = "",
+         x = "Time (years)",
+         title = "Chlorpyrifos") +
     scale_x_continuous(breaks = 365*c(0:11),
                        labels = c(-1:10)) +
     scale_y_continuous(breaks = c(10,30,50,70,90),
@@ -1528,9 +1597,59 @@ chlor_dynamics <- ggplot() +
     
 ggsave("../Plots/chlorpyrifos_ts_plots2.jpg", chlor_dynamics,
        width = 8, height = 6, dpi = 300, units = "in")
+```
+
+##### Snail and predator dynamics through time  
+```{r chlor_snails_tx}
+#Do some cleaning to chlor time series data for plotting snail dynamics  
+chlor_annual_ts_snails <- chlor_annual_ts %>% 
+  filter(Variable %in% c("S", "E", "I", "P") & 
+           sim_run == 1 & 
+           sim_type %in% c("Agro_Preds_MDA", "MDA_Preds")) %>% 
+  spread(Variable, Value) %>% 
+  mutate(N = S+E+I,
+         Scenario = factor(sim_type, 
+                           levels = c("MDA_Preds",
+                                      "Agro_Preds_MDA"),
+                           labels = c("MDA, Predators",
+                                      "MDA, Predators, Agrochemical"))) %>% 
+  dplyr::select(-E, -I, -S) %>% 
+  gather("Variable", "Value", N:P)
+
+#Show dynamics of snail dnsity and predator density through time ############
+chlor_snail_dynamics <- ggplot() +
+    geom_rect(data = chlor_conc_ts,
+              aes(ymin = -Inf,
+                  ymax = Inf,
+                  xmin = day, xmax = day +1,
+                  fill = chlorpyrifos/max(chlorpyrifos)),
+              alpha = 0.7) +
+    scale_fill_gradient(low = "white", high = "#925E9F99") +
+    geom_line(data = chlor_annual_ts_snails, 
+              aes(x = time, 
+                  y = Value/area,
+                  col = Scenario),size = 1) +
+    scale_color_manual(values = c("violet", "purple")) +
+    labs(y = "Density",
+         x = "Time (years)",
+         lty = "Infection\nClass") +
+    facet_grid(Variable~., scales = "free_y") +
+    scale_x_continuous(breaks = 365*c(0:11),
+                       labels = c(-1:10)) +
+    theme_ms() +
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          legend.position = "none")
   
+ggsave("../Plots/chlorpyrifos_ts_snail_dynamics.jpg", chlor_snail_dynamics,
+       width = 8, height = 6, dpi = 300, units = "in")
+
+```
+
+##### DALYs accumulation through time  
+```{r chlor_dalys_box}
 #Show compariosn of DALYs accumulated in different intervention scenarios #########
-comp_dalys_chlor <- comp_dalys_chlor_annual %>% 
+comp_dalys_chlor_df <- comp_dalys_chlor_annual %>% 
   gather("Scenario", "DALYs", Nothing:Agro_Preds_MDA) %>% 
   filter(Application == "Annual" & 
            Scenario %in% c("Nothing", "Agro_only",
@@ -1554,23 +1673,27 @@ comp_dalys_chlor <- comp_dalys_chlor_annual %>%
                                       "MDA, No Predators",
                                       "MDA, No Predators, \nAgrochemical",
                                       "MDA, Predators",
-                                      "MDA, Predators, \nAgrochemical"))) %>% 
-  ggplot(aes(x = scenario_type, y = DALYs, fill = Scenario)) +
+                                      "MDA, Predators, \nAgrochemical")))
+
+comp_dalys_chlor <- comp_dalys_chlor_df %>% 
+  ggplot(aes(x = scenario_type, y = (DALYs/fit_pars["H"]/years)*100000, fill = Scenario)) +
     geom_boxplot() +
     scale_fill_manual(values = c("red", "darkred",
-                                 "green", "darkgreen",
+                                 "cyan2", "darkblue",
                                  "violet", "purple")) +
-    scale_y_continuous(position = "right",
-                       breaks = c(0,10,20,30),
-                       limits = c(0,35)) +
+    scale_y_continuous(position = "right", limits = c(0,1250)) +
     scale_x_discrete(labels = c(" ", " ", " ")) +
     theme_ms() +
     labs(x = "",
-         y = "10 year DALYs lost") +
+         y = "",
+         title = " ") +
     theme(axis.ticks.x = element_blank(),
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank())
+```
 
+##### Merge Grobs  
+```{r chlor_grobs}
 #Put time series plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/) ##########
 chlor_dynamics_plot <- ggplotGrob(chlor_dynamics + 
                                     theme(legend.position = "none") + 
@@ -1580,7 +1703,7 @@ chlor_dynamics_plot <- ggplotGrob(chlor_dynamics +
 #Put DALYs plot and legend together ############
 chlor_dalys_plot <- ggplotGrob(comp_dalys_chlor + 
                                   theme(legend.position = "none") +
-                               annotate("text", x = 3, y = 35, size = 8,
+                               annotate("text", x = 3.2, y = 1200, size = 8,
                                         label = expression(bold(D))))
 
 #Print plot of all panels put together and save ############
@@ -1595,10 +1718,17 @@ chlor_grob <- arrangeGrob(chlor_dynamics_plot, chlor_dalys_plot,
 ```
 
 #### Glyphosate  
+##### Worm burden dynamics through time  
 ```{r gly_ts_plot}
 #Get glyphosate concentration through time #########
 gly_conc_ts <- data.frame(day = unique(gly_annual_ts$time),
                           glyphosate = sapply(gly_annual_ts$time, gly_force))
+
+first_gly <- min(gly_conc_ts %>% 
+  filter(glyphosate > 1) %>% 
+  pull(day))
+
+first_gly
 
 #Do some cleaning to gly time series data for plotting W
 gly_annual_ts_W <- gly_annual_ts %>% 
@@ -1636,10 +1766,11 @@ gly_dynamics <- ggplot() +
                   col = Scenario), 
               size = 1) +
     scale_color_manual(values = c("red", "darkred",
-                                  "green", "darkgreen",
+                                  "cyan2", "darkblue",
                                   "violet", "purple")) +
-    labs(y = expression(Mean~worm~burden~(italic(W))),
-         x = "Time (years)") +
+    labs(y = "",
+         x = "Time (years)",
+         title = "Glyphosate") +
     scale_x_continuous(breaks = 365*c(0:11),
                        labels = c(-1:10)) +
     scale_y_continuous(breaks = c(10,30,50,70,90),
@@ -1650,10 +1781,63 @@ gly_dynamics <- ggplot() +
   
 ggsave("../Plots/glyphosate_ts_plots2.jpg", gly_dynamics,
        width = 8, height = 6, dpi = 300, units = "in")
+```
 
+##### Snail population dynamics through time  
+```{r gly_snail_ts}
+#Do some cleaning to glyphosate time series data for plotting snail dynamics  
+gly_annual_ts_snails <- gly_annual_ts %>% 
+  filter(Variable %in% c("S", "E", "I") & 
+           sim_run == 1 & 
+           sim_type %in% c("Agro_Preds_MDA", "MDA_Preds")) %>% 
+  spread(Variable, Value) %>% 
+  mutate(N = S+E+I,
+         Scenario = factor(sim_type, 
+                           levels = c("MDA_Preds",
+                                      "Agro_Preds_MDA"),
+                           labels = c("MDA, Predators",
+                                      "MDA, Predators, Agrochemical")))
 
+#Remove sampling variability from response function from plot
+gly_annual_ts_snails$N[which(gly_annual_ts_snails$time < first_gly & 
+                               gly_annual_ts_snails$Scenario == "MDA, Predators, Agrochemical")] <- 
+  gly_annual_ts_snails$N[which(gly_annual_ts_snails$time < first_gly & 
+                               gly_annual_ts_snails$Scenario == "MDA, Predators")]
+
+#Show dynamics of mean worm burden through time ############
+gly_snail_dynamics <- ggplot() +
+    geom_rect(data = gly_conc_ts,
+              aes(ymin = -Inf,
+                  ymax = Inf,
+                  xmin = day, xmax = day +1,
+                  fill = glyphosate/max(glyphosate)),
+              alpha = 0.7) +
+    scale_fill_gradient(low = "white", high = "#42B54099") +
+    geom_line(data = gly_annual_ts_snails, 
+              aes(x = time, 
+                  y = N/area, 
+                  col = Scenario), 
+              size = 1) +
+    scale_color_manual(values = c("violet", "purple")) +
+    labs(y = expression("Total Snail Density"),
+         x = "Time (years)",
+         lty = "Infection\nClass") +
+    scale_x_continuous(breaks = 365*c(0:11),
+                       labels = c(-1:10)) +
+    theme_ms() +
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          legend.position = "none")
+  
+ggsave("../Plots/glyphosae_ts_snail_dynamics.jpg", gly_snail_dynamics,
+       width = 8, height = 6, dpi = 300, units = "in")
+
+```
+
+##### Dalys accumulation through time  
+```{r gly_DALYs}
 #Show compariosn of DALYs accumulated in different intervention scenarios #########
-comp_dalys_gly <- comp_dalys_gly_annual %>% 
+comp_dalys_gly_df <- comp_dalys_gly_annual %>% 
   gather("Scenario", "DALYs", Nothing:MDA_Preds_attributable) %>% 
   filter(Application == "Annual" & 
            Scenario %in% c("Nothing", "Agro_only",
@@ -1677,23 +1861,27 @@ comp_dalys_gly <- comp_dalys_gly_annual %>%
                                       "MDA, No Predators",
                                       "MDA, No Predators, \nAgrochemical",
                                       "MDA, Predators",
-                                      "MDA, Predators, \nAgrochemical"))) %>% 
-  ggplot(aes(x = scenario_type, y = DALYs, fill = Scenario)) +
+                                      "MDA, Predators, \nAgrochemical"))) 
+comp_dalys_gly <- comp_dalys_gly_df %>% 
+  ggplot(aes(x = scenario_type, y = (DALYs/fit_pars["H"]/years)*100000, fill = Scenario)) +
     geom_boxplot() +
     scale_fill_manual(values = c("red", "darkred",
-                                 "green", "darkgreen",
+                                 "cyan2", "darkblue",
                                  "violet", "purple")) +
-    scale_y_continuous(position = "right",
-                       breaks = c(0,10,20,30),
-                       limits = c(0,35)) +
+    scale_y_continuous(position = "right", limits = c(0,1250)) +
     scale_x_discrete(labels = c(" ", " ", " ")) +
     theme_ms() +
     labs(x = "",
-         y = "10 year DALYs lost") +
+         y = "",
+         title = " ") +
     theme(axis.ticks.x = element_blank(),
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank())
 
+```
+
+##### Merge Grobs  
+```{r gly_ts_grobs}
 #Put time series plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/) ##########
 gly_dynamics_plot <- ggplotGrob(gly_dynamics + 
                                   theme(legend.position = "none") + 
@@ -1703,7 +1891,7 @@ gly_dynamics_plot <- ggplotGrob(gly_dynamics +
 #Put DALYs plot and legend together ############
 gly_dalys_plot <- ggplotGrob(comp_dalys_gly + 
                                   theme(legend.position = "none") +
-                               annotate("text", x = 3, y = 35, size = 8,
+                               annotate("text", x = 3.2, y = 1200, size = 8,
                                         label = expression(bold(F))))
 
 #Print plot of all panels put together and save ############
@@ -1715,6 +1903,7 @@ gly_grob <- arrangeGrob(gly_dynamics_plot, gly_dalys_plot,
 ```
 
 #### Profenofos  
+##### Worm burden dynamics through time  
 ```{r prof_ts_plot}
 #Get profenofos concentration through time #########
 prof_conc_ts <- data.frame(day = unique(prof_annual_ts$time),
@@ -1756,10 +1945,11 @@ prof_dynamics <- ggplot() +
                   col = Scenario), 
               size = 1) +
     scale_color_manual(values = c("red", "darkred",
-                                  "green", "darkgreen",
+                                  "cyan2", "darkblue",
                                   "violet", "purple")) +
-    labs(y = expression(Mean~worm~burden~(italic(W))),
-         x = "Time (years)") +
+    labs(y = "",
+         x = "Time (years)",
+         title = "Profenofos") +
     scale_x_continuous(breaks = 365*c(0:11),
                        labels = c(-1:10)) +
     scale_y_continuous(breaks = c(10,30,50,70,90),
@@ -1770,9 +1960,60 @@ prof_dynamics <- ggplot() +
   
 ggsave("../Plots/profenofos_ts_plots2.jpg", prof_dynamics,
        width = 8, height = 6, dpi = 300, units = "in")
+```
 
+##### Snail and Predator dynamics through time  
+```{r prof_snail_pred_ts}
+#Do some cleaning to prof time series data for plotting snail dynamics  
+prof_annual_ts_snails <- prof_annual_ts %>% 
+  filter(Variable %in% c("S", "E", "I", "P") & 
+           sim_run == 1 & 
+           sim_type %in% c("Agro_Preds_MDA", "MDA_Preds")) %>% 
+  spread(Variable, Value) %>% 
+  mutate(N = S+E+I,
+         Scenario = factor(sim_type, 
+                           levels = c("MDA_Preds",
+                                      "Agro_Preds_MDA"),
+                           labels = c("MDA, Predators",
+                                      "MDA, Predators, Agrochemical"))) %>% 
+  dplyr::select(-E, -I, -S) %>% 
+  gather("Variable", "Value", N:P)
+
+#Show dynamics of mean worm burden through time ############
+prof_snail_dynamics <- ggplot() +
+    geom_rect(data = prof_conc_ts,
+              aes(ymin = -Inf,
+                  ymax = Inf,
+                  xmin = day, xmax = day +1,
+                  fill = profenofos/max(profenofos)),
+              alpha = 0.7) +
+    scale_fill_gradient(low = "white", high = "#0099B499") +
+    geom_line(data = prof_annual_ts_snails, 
+              aes(x = time, 
+                  y = Value/area, 
+                  col = Scenario), 
+              size = 1) +
+    scale_color_manual(values = c("violet", "purple")) +
+    labs(y = "Density",
+         x = "Time (years)",
+         lty = "Infection\nClass") +
+    facet_grid(Variable~., scales = "free_y") +
+    scale_x_continuous(breaks = 365*c(0:11),
+                       labels = c(-1:10)) +
+    theme_ms() +
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          legend.position = "none")
+  
+ggsave("../Plots/pofenofos_ts_snail_dynamics.jpg", prof_snail_dynamics,
+       width = 8, height = 6, dpi = 300, units = "in")
+
+```
+
+##### DALYs accumulation through time  
+```{r prof_DALYs}
 #Show compariosn of DALYs accumulated in different intervention scenarios #########
-comp_dalys_prof <- comp_dalys_prof_annual %>% 
+comp_dalys_prof_df <- comp_dalys_prof_annual %>% 
   gather("Scenario", "DALYs", Nothing:MDA_Preds_attributable) %>% 
   filter(Application == "Annual" & 
            Scenario %in% c("Nothing", "Agro_only",
@@ -1796,23 +2037,27 @@ comp_dalys_prof <- comp_dalys_prof_annual %>%
                                       "MDA, No Predators",
                                       "MDA, No Predators, \nAgrochemical",
                                       "MDA, Predators",
-                                      "MDA, Predators, \nAgrochemical"))) %>% 
-  ggplot(aes(x = scenario_type, y = DALYs, fill = Scenario)) +
+                                      "MDA, Predators, \nAgrochemical")))
+comp_dalys_prof <- comp_dalys_prof_df %>% 
+  ggplot(aes(x = scenario_type, y = (DALYs/fit_pars["H"]/years)*100000, fill = Scenario)) +
     geom_boxplot() +
     scale_fill_manual(values = c("red", "darkred",
-                                 "green", "darkgreen",
+                                 "cyan2", "darkblue",
                                  "violet", "purple")) +
-    scale_y_continuous(position = "right",
-                       breaks = c(0,10,20,30),
-                       limits = c(0,35)) +
+    scale_y_continuous(position = "right", limits = c(0,1250)) +
     scale_x_discrete(labels = c(" ", " ", " ")) +
     theme_ms() +
     labs(x = "",
-         y = "10 year DALYs lost") +
+         y = "",
+         title = " ") +
     theme(axis.ticks.x = element_blank(),
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank())
 
+```
+
+##### Merge Grobs  
+```{r prof_grobs}
 #Put time series plots together (code adapted from http://felixfan.github.io/stacking-plots-same-x/) ##########
 prof_dynamics_plot <- ggplotGrob(prof_dynamics + 
                                   theme(legend.position = "none") + 
@@ -1822,7 +2067,7 @@ prof_dynamics_plot <- ggplotGrob(prof_dynamics +
 #Put DALYs plot and legend together ############
 prof_dalys_plot <- ggplotGrob(comp_dalys_prof + 
                                   theme(legend.position = "none") +
-                               annotate("text", x = 3, y = 35, size = 8,
+                               annotate("text", x = 3.2, y = 1200, size = 8,
                                         label = expression(bold(H))))
 
 #Print plot of all panels put together and save ############
@@ -1839,13 +2084,15 @@ prof_grob <- arrangeGrob(prof_dynamics_plot, prof_dalys_plot,
 ```{r all_ts plot}
 all_grob <- arrangeGrob(atr_grob, chlor_grob, 
                         gly_grob, prof_grob,
-                        nrow = 4, ncol = 1)
+                        nrow = 4, ncol = 1,
+                        left = "Mean parasite burden (W)",
+                        right = "Annual DALYs lost per 100,000 people")
 
 ggsave("../Plots/all_ts_plots2.jpg", all_grob,
        width = 8, height = 11.5, dpi = 300, units = "in")
 ```
 
-## Comparable DALYs estiamtes
+### Comparison to other conditions in GBD 2017  
 ```{r senegal_other_dalys}
 sen_dalys2017 <- read_csv("IHME_Senegal2017_DALYs.csv")
 
@@ -1857,15 +2104,61 @@ sen_dalys2017_risk_factors <- sen_dalys2017 %>%
             upper = sum(`Upper bound`))
 
 sen_dalys2017_risk_factors %>% 
-  filter(Value < max(comp_dalys_all_annual$MDA_Preds_att_p100k)) %>% 
+  filter(Value < max(comp_dalys_all_annual$MDA_Preds_att_p100k) & 
+           Value > 5) %>% 
   ggplot(aes(x = `Risk factor`, y = Value, ymin = lower, ymax = upper)) + 
     geom_point() +
-    geom_errorbar() +
+    geom_errorbar(width = 0.2) +
     theme_classic() +
-    theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1))
+    theme(axis.text.x = element_text(size = 8, angle = 35, hjust = 1))
+
+chem_risk_factors <- comp_dalys_all_annual %>% 
+  gather("Scenario", "DALYs_p100k", Agro_att_p100k:MDA_Preds_att_p100k) %>% 
+  group_by(Scenario, Chemical) %>% 
+  filter(Scenario != "Pred_att_p100k") %>% 
+  summarise(Value = median(DALYs_p100k),
+            lower = quantile(DALYs_p100k, 0.025),
+            upper = quantile(DALYs_p100k, 0.975)) %>% 
+  mutate(`Risk factor` = case_when(Scenario == "Agro_att_p100k" ~ paste(Chemical, " pollution only"),
+                                      Scenario == "MDA_att_p100k" ~ paste(Chemical, " pollution + MDA"),
+                                      Scenario == "MDA_Preds_att_p100k" ~ paste(Chemical, " pollution + MDA + Preds"))) %>% 
+  ungroup() %>% 
+  dplyr::select(`Risk factor`, Value, lower, upper) %>% 
+  filter(Value > 1)
+
+rbind(sen_dalys2017_risk_factors %>% 
+        filter(Value < max(comp_dalys_all_annual$MDA_Preds_att_p100k) & 
+                 Value > 5) %>% 
+        mutate(Chem = "No"),
+      chem_risk_factors %>% 
+        mutate(Chem = "Yes")) %>% 
+  ggplot(aes(x = `Risk factor`, y = Value, ymin = lower, ymax = upper, col = Chem)) + 
+    geom_point() +
+    #scale_color_discrete(values = c("black", "red")) +
+    geom_errorbar(width = 0.2) +
+    theme_classic() +
+    theme(axis.text.x = element_text(size = 8, angle = 70, hjust = 1),
+          legend.position = "None",
+          axis.title.x = element_blank()) +
+    ylim(c(0,300)) +
+    labs(y = "DALYs lost per 100,000 per year",
+         title = "Comparable risk factors in GBD 2017 study")
+
+ggsave("../Plots/GBD_2017_comparable_risk_factors.jpg",
+       width = 8, height = 6, dpi = 300, units = "in")
 ```
 
+# Scrap  
 ```{r scrap, eval=FALSE, include=FALSE}
+
+  mutate(`Risk Factor` = factor(`Risk Factor`, 
+                                levels = c(chem_risk_factors %>% 
+                                             arrange(Value) %>% 
+                                             pull(`Risk factor`),
+                                           sen_dalys2017_risk_factors %>% 
+                                             arrange(Value) %>% 
+                                             pull(`Risk Factor`)))) %>% 
+
 ## Agrochemical time series  
 #First step is to get time series of agrochemical concentrations that will be used to force the agrochemically influenced model. Want to find sites from observed databases that have consistent readings that are above the detection limit so that we're confident in the actual values and can also consider a worst case scenario
 

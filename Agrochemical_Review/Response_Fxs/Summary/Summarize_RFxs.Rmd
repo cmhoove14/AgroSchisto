@@ -12,8 +12,9 @@ require(tidyverse)
 ```{r rfx_sum, echo=FALSE}
 RFxSum <- read_csv("Response_Fx_Summary.csv")
 
-table(RFxSum$Pathway)
-table(RFxSum$System)
+table(RFxSum %>% filter(dose_response == 1) %>% pull(Pathway),
+      RFxSum %>% filter(dose_response == 1) %>% pull(Class))
+table(RFxSum %>% filter(dose_response == 1) %>% pull(System))
 
 RFxSum %>% #filter(System != "Other") %>% 
   group_by(Chemical, Pathway) %>% 
